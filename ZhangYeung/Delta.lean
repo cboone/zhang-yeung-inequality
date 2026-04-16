@@ -13,6 +13,12 @@ is the central quantity of the Zhang-Yeung conditional information inequality [Z
 
 - `ZhangYeung.delta`: the quantity `Δ(Z, U | X, Y)`.
 
+## Main statements
+
+- `ZhangYeung.delta_def`: definitional unfolding.
+- `ZhangYeung.delta_comm_cond`: the two conditioning arguments commute.
+- `ZhangYeung.delta_self`: the case `X = Y`.
+
 ## Implementation notes
 
 The four codomains `S₁ S₂ S₃ S₄` of the random variables live under a shared finite-alphabet specialization `[Fintype Sᵢ]` + `[MeasurableSingletonClass Sᵢ]`. That specialization discharges PFR's discrete/countable side conditions uniformly (via `Fintype → Finite → Countable`) and supplies the `FiniteRange` obligations PFR's commutativity and entropy-expansion lemmas impose on the measured and conditioning variables. The `variable` block is staged: the definition and the purely algebraic lemmas only need `[MeasurableSpace Sᵢ]`; lemmas downstream of PFR's discrete API are collected after a later `variable` block introducing the `Fintype`/`MeasurableSingletonClass` instances.
@@ -42,5 +48,20 @@ noncomputable def delta
     (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄)
     (μ : Measure Ω := by volume_tac) : ℝ :=
   I[Z : U ; μ] - I[Z : U | X ; μ] - I[Z : U | Y ; μ]
+
+/-- Definitional unfolding of `delta`. -/
+lemma delta_def (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
+    delta Z U X Y μ
+      = I[Z : U ; μ] - I[Z : U | X ; μ] - I[Z : U | Y ; μ] := rfl
+
+/-- Swapping the two conditioning arguments leaves `delta` unchanged; addition is commutative. -/
+lemma delta_comm_cond (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
+    delta Z U X Y μ = delta Z U Y X μ := by
+  simp only [delta_def]; ring
+
+/-- The case `X = Y`: `Δ(Z, U | X, X) = I(Z; U) - 2·I(Z; U | X)`. This is the *literal* repeated-conditioner case; bridging `Δ(Z, U | X, X₁)` where `X₁` is merely a copy of `X` requires a separate transport lemma for `condMutualInfo` (under the copy construction's `IdentDistrib` hypotheses), which is out of scope for this module. -/
+lemma delta_self (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (μ : Measure Ω) :
+    delta Z U X X μ = I[Z : U ; μ] - 2 * I[Z : U | X ; μ] := by
+  simp only [delta_def]; ring
 
 end ZhangYeung
