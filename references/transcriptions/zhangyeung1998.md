@@ -12,7 +12,11 @@ transcription_scope: full
 
 ## Abstract
 
-Given $n$ discrete random variables $\Omega = \{X_1, \ldots, X_n\}$, associated with any subset $\alpha \subseteq \{1, 2, \ldots, n\}$ there is a joint entropy $H(X_\alpha)$ where $X_\alpha = \{X_i : i \in \alpha\}$. This can be viewed as a function defined on $2^{\{1, 2, \ldots, n\}}$ taking values in $[0, +\infty)$. The paper asks whether the nonnegativity, monotonicity, and submodularity properties implied by Shannon's basic inequalities fully characterize the entropy function. Equivalently, if $\Gamma_n$ denotes the cone of set functions with those three properties and $\Gamma_n^*$ denotes the set of entropy functions of $n$ discrete random variables, is $\mathrm{cl}(\Gamma_n^*) = \Gamma_n$ for every $n$? The answer was known to be yes for $n = 2$ and $3$. The paper proves a new four-variable information inequality showing that $\mathrm{cl}(\Gamma_n^*)$ is strictly smaller than $\Gamma_n$ whenever $n > 3$. This new inequality gives a nontrivial outer bound to $\mathrm{cl}(\Gamma_4^*)$, and the paper also gives an inner bound for $\mathrm{cl}(\Gamma_4^*)$. The inequality is further extended to any number of random variables.
+Given $n$ discrete random variables $\Omega = \{X_1, \ldots, X_n\}$, associated with any subset $\alpha$ of $\{1, 2, \ldots, n\}$, there is a joint entropy $H(X_\alpha)$ where $X_\alpha = \{X_i : i \in \alpha\}$. This can be viewed as a function defined on $2^{\{1, 2, \ldots, n\}}$, taking values in $[0, +\infty)$. The nonnegativity of the joint entropies implies that this function is nonnegative; the nonnegativity of the conditional joint entropies implies that this function is nondecreasing; and the nonnegativity of the conditional mutual informations implies that this function has the property
+
+$$H(\alpha) + H(\beta) \geq H(\alpha \cup \beta) + H(\alpha \cap \beta).$$
+
+These properties are the so-called basic information inequalities of Shannon's information measures. The paper asks whether these properties fully characterize the entropy function. To make this question precise, the entropy function is viewed as a $(2^n - 1)$-dimensional vector whose coordinates are indexed by the nonempty subsets of the ground set. Let $\Gamma_n$ be the cone of all such vectors satisfying the three properties above, and let $\Gamma_n^*$ be the set of all $(2^n - 1)$-dimensional vectors corresponding to entropy functions of sets of $n$ discrete random variables. The question is whether $\mathrm{cl}(\Gamma_n^*) = \Gamma_n$ for every $n$. The answer is yes for $n = 2$ and $3$, as proved in earlier work. The main discovery of the paper is a new information-theoretic inequality involving four discrete random variables which gives a negative answer to this fundamental problem in information theory: $\mathrm{cl}(\Gamma_n^*)$ is strictly smaller than $\Gamma_n$ whenever $n > 3$. While this new inequality gives a nontrivial outer bound to the cone $\mathrm{cl}(\Gamma_4^*)$, an inner bound for $\mathrm{cl}(\Gamma_4^*)$ is also given. The inequality is also extended to any number of random variables.
 
 Index terms: entropy, inequality, information measure, mutual information.
 
@@ -476,23 +480,51 @@ $$G'[1, 2] = G'[1, 3] = G'[2, 3] = 0.$$
 
    Case 1.1: one of the remaining weight-two atoms vanishes, say $G'[1,4] = 0$. Since no $F^5$ move is available, one of $G'[1,2,4]$, $G'[1,3,4]$, or $G'[2,3,4]$ is also zero. The paper then dispatches the branches as follows.
 
-   If $G'[1,2,4] = 0$, subtract $a F^4_{1,3}$ with
+   If $G'[1,2,4] = 0$, then Condition 2 gives
+
+$$G'[1,3,4] + G'[1,2,3,4] \geq 0,$$
+
+   because both $G'[1,4]$ and $G'[1,2,4]$ are zero. Subtract $a F^4_{1,3}$ with
 
 $$a = \min\{G'[2,4], G'[1,2,3], G'[1,3,4]\};$$
 
-   if the resulting function still has negative weight-four atom, subtract $b F^7_1$ with $b = -G''[1,2,3,4]$.
+   this is legal and yields a seminonnegative function $G''$. If $G''[1,2,3] = 0$ or $G''[1,3,4] = 0$, then $G''[1,2,3,4] \geq 0$ and the function is already nonnegative. Otherwise $G''[2,4] = 0$, which implies
 
-   If $G'[2,3,4] = 0$, subtract $a F^4_{1,2}$ with
+$$G''[2,3,4] + G''[1,2,3,4] \geq 0.$$
+
+   Let $b := -G''[1,2,3,4]$. If $b > 0$, then subtracting $b F^7_1$ is legal and produces a function that is nonnegative at all atoms.
+
+   If $G'[2,3,4] = 0$, then
+
+$$G'[1,2,3] + G'[1,2,3,4] \geq 0,$$
+
+   because both $G'[2,3]$ and $G'[2,3,4]$ are zero. Subtract $a F^4_{1,2}$ with
 
 $$a = \min\{G'[3,4], G'[1,2,3], G'[1,2,4]\};$$
 
-   if needed, follow by a second $F^4_{1,3}$ move and then a final $F^7_1$ move. In all subbranches the output is nonnegative.
+   This yields a seminonnegative function $G''$. If $G''[1,2,3] = 0$, then $G''[1,2,3,4] \geq 0$. If $G''[1,2,4] = 0$, this reduces to the previous subcase. Otherwise $G''[3,4] = 0$, and then
+
+$$G''[1,2,3,4] + G''[1,3,4] \geq 0.$$
+
+   Now subtract $a' F^4_{1,3}$ with
+
+$$a' = \min\{G''[2,4], G''[1,2,3], G''[1,3,4]\}.$$
+
+   This produces a seminonnegative function $G'''$. If $G'''[1,2,3] = 0$ or $G'''[1,3,4] = 0$, then $G'''[1,2,3,4] \geq 0$. Otherwise $G'''[2,4] = 0$, in which case
+
+$$G'''[1,2,4] + G'''[1,2,3,4] \geq 0,$$
+
+$$G'''[1,2,3] + G'''[1,2,3,4] \geq 0,$$
+
+$$G'''[1,3,4] + G'''[1,2,3,4] \geq 0.$$
+
+   Let $b := -G'''[1,2,3,4]$. If $b > 0$, then subtracting $b F^7_1$ is legal and yields a function nonnegative at all atoms.
 
    Case 1.2: the extra zero is the weight-three atom $G'[1,2,3] = 0$. Then
 
 $$G'[1,3,4] + G'[1,2,3,4] \geq 0, \qquad G'[1,2,4] + G'[1,2,3,4] \geq 0, \qquad G'[2,3,4] + G'[1,2,3,4] \geq 0,$$
 
-   so a single $F^7_1$ move of size $-G'[1,2,3,4]$ yields a nonnegative function.
+   and the paper draws the corresponding atom chart for this case. Let $a := -G'[1,2,3,4]$. If $a > 0$, then subtracting $a F^7_1$ is a legal operation and results in a nonnegative function. Otherwise the function is already nonnegative.
 
    Case 2: two disjoint weight-two atoms vanish, without loss of generality
 
@@ -502,13 +534,37 @@ $$G'[1,2] = G'[3,4] = 0.$$
 
 $$a = \min\{G'[2,3], G'[1,3,4], G'[1,2,4]\}.$$
 
-   The resulting function $G''$ has one of $G''[1,3,4]$, $G''[1,2,4]$, or $G''[2,3]$ equal to zero.
+   This is legal, and the resulting function $G''$ has one of $G''[1,3,4]$, $G''[1,2,4]$, or $G''[2,3]$ equal to zero.
 
-   If $G''[1,3,4] = 0$, a single $F^4_{2,4}$ move with parameter $\min\{G''[1,3], G''[1,2,4], G''[2,3,4]\}$ finishes.
+   If $G''[1,3,4] = 0$, then
 
-   If $G''[2,3] = 0$, the paper subtracts an $F^4_{2,4}$ move; if that still leaves the weight-four atom negative, the remaining three inequalities needed for Observation 2 hold, and a final $F^7_4$ move completes the reduction.
+$$G''[1,3] + G''[1,2,3,4] \geq 0.$$
 
-   If $G''[1,2,4] = 0$, then the weight-four atom is already nonnegative, so the function is done.
+   Apparently, subtracting $b F^4_{2,4}$ is legal, where
+
+$$b = \min\{G''[1,3], G''[1,2,4], G''[2,3,4]\},$$
+
+   and this results in a nonnegative function.
+
+   If $G''[2,3] = 0$, then
+
+$$G''[2,3,4] + G''[1,2,3,4] \geq 0.$$
+
+   Let
+
+$$a' = \min\{G''[1,3], G''[1,2,4], G''[2,3,4]\}.$$
+
+   Subtracting $a' F^4_{2,4}$ is legal. Let $G''' := G'' - a' F^4_{2,4}$. Then either $G'''[1,2,4] = 0$ or $G'''[1,3,4] = 0$. In both cases, the paper notes that one must have $G'''[1,2,3,4] \geq 0$, so the function is nonnegative. Otherwise $G'''[1,3] = 0$, which implies
+
+$$G'''[1,3,4] + G'''[1,2,3,4] \geq 0,$$
+
+$$G'''[1,2,4] + G'''[1,2,3,4] \geq 0,$$
+
+$$G'''[2,3,4] + G'''[1,2,3,4] \geq 0.$$
+
+   Then subtracting $F^7_4$ is legal and results in a nonnegative function.
+
+   If $G''[1,2,4] = 0$, then the paper concludes that $G''[1,2,3,4]$ must already be nonnegative. Hence $G''$ is a nonnegative function.
 
 In every branch, the process terminates at a nonnegative atom function, proving Theorem 6.
 
@@ -516,13 +572,25 @@ In every branch, the process terminates at a nonnegative atom function, proving 
 
 ## Concluding remarks (Section V)
 
-The key result of the paper is Theorem 3. It shows that the set of basic Shannon information inequalities does not fully characterize the entropy function in the sense of Theorem 4: the region $\Gamma_n$ is strictly larger than $\mathrm{cl}(\Gamma_n^*)$. The authors stress that this was surprising. They originally tried to prove the opposite statement, namely tightness of the Shannon outer bound in the four-variable case, by building explicit constructions of the sort used later in the proof of Theorem 6. Only after those construction attempts failed in one persistent case did they begin to suspect that the conjecture itself was false, which led to the discovery of the new inequality.
+The key result of the paper is Theorem 3. This discovery shows that the set of so-called basic information inequalities cannot fully characterize Shannon's entropy function in the sense of Theorem 4. That is, the region $\Gamma_n$ is strictly greater than the region $\mathrm{cl}(\Gamma_n^*)$. This is a surprising result because, based on intuition, one tends to believe that the opposite is true.
 
-They emphasize that fully characterizing $\mathrm{cl}(\Gamma_4^*)$ remains highly nontrivial. Even for $n = 4$, the paper obtains only an outer bound and an inner bound, and these differ. The projective-plane example shows the inner bound is not tight, but the methods of the paper are not strong enough to show that the outer bound is tight either.
+Actually, when the authors started to look into this problem, they first tried to prove
 
-The authors also note that the case $n = 4$ is the simplest genuinely new case, since it is the smallest value of $n$ for which $\mathrm{cl}(\Gamma_n^*)$ and $\Gamma_n$ differ. Although the paper focuses on this case, Theorem 5 extends the Zhang-Yeung inequality to any number of random variables.
+$$\mathrm{cl}(\Gamma_4^*) = \Gamma_4$$
 
-Finally, the paper highlights two forward-looking themes. First, the "missing terms" in Theorem 3 are made explicit using auxiliary random variables, in the hope that this may help uncover further information inequalities and improved inner bounds. Second, the meaning and potential applications of these new inequalities remain only partly understood. The paper specifically mentions distributed source coding, multiuser channel coding, multiuser source coding, probabilistic reasoning, and relational databases as promising directions.
+by finding all kinds of constructions for four random variables as in the proof of Theorem 6. Only after they failed to find a construction in one of many cases did they start to doubt the correctness of the conjecture. This led to the discovery of the new information inequality.
+
+The full characterization of the region $\mathrm{cl}(\Gamma_n^*)$ seems to be a highly nontrivial problem. Even in the case $n = 4$, the authors were unable to determine the region. They instead provided an inner bound, namely Theorem 6. The inner bound and the outer bound found in the paper differ. It has been shown by an example that the inner bound is not tight. Unfortunately, the construction method used in this example is not powerful enough to show that the outer bound is tight.
+
+The simplest case of the problem is the case $n = 4$ because this number is the smallest integer for which $\mathrm{cl}(\Gamma_n^*)$ and $\Gamma_n$ differ. Although the paper concentrates on this simplest case, it also proves Theorem 5, which is a generalization of Theorem 3 to any number of random variables.
+
+The paper also determines the missing terms in the inequalities in Theorem 3. They are expressed in terms of some auxiliary random variables. The authors do so in the hope that this may be helpful in further searching for new information inequalities, as well as in further searching for improved inner bounds.
+
+To get a better understanding of the behavior of the entropy function, it is important to fully characterize the function at least in the simplest case $n = 4$. That is, the simplest task in this research direction is to determine the region $\mathrm{cl}(\Gamma_4^*)$. Based on their experience, the authors do not believe the outer bound to be tight. That is, they believe that there may exist more linear unconditional information inequalities involving four random variables.
+
+The meaning of the new information inequalities provided by Theorems 3 and 5 is still not fully understood. Although the authors have used the region $\mathrm{cl}(\Gamma_n^*)$ to study the distributed source-coding problem, it is still of great interest to find more applications of the inequalities in other information-theoretical problems, especially in multiuser channel coding or source coding problems.
+
+The problems studied in the paper have close connection to other areas such as probabilistic reasoning, relational databases, and so on. To study the implication of the results in those areas is also of interest.
 
 ## Acknowledgment
 
