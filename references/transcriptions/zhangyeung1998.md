@@ -176,11 +176,43 @@ The paper reparametrizes an arbitrary function $F \in \mathcal{F}_n$ using atom 
 
 $$F[\alpha \mid \beta] := \sum_{\gamma \subseteq \alpha} (-1)^{1+|\gamma|} F(\gamma \cup \beta), \qquad (30)$$
 
-and then defines $F[\alpha] := F[\alpha \mid \alpha^c]$ (31). It defines the quantity
+and then defines $F[\alpha] := F[\alpha \mid \alpha^c]$ (31). For four variables, the paper next records the elemental inequalities in atom coordinates and rewrites Theorem 3 in those coordinates. It also defines the quantity
+
+For an entropy function of four random variables, the elemental inequalities become, for every permutation $\{i, j, k, l\} = \{1, 2, 3, 4\}$,
+
+$$F[i, j] \geq 0, \qquad F[i, j] + F[i, j, k] \geq 0, \qquad F[i, j] + F[i, j, k] + F[i, j, l] + F[i, j, k, l] \geq 0, \qquad F[i] \geq 0. \qquad (32\text{-}33)$$
+
+Equation (20) becomes
+
+$$\Delta(X_1, X_2 \mid X_3, X_4) = F[1, 2, 3, 4] - F[1, 2]. \qquad (35)$$
+
+Accordingly, for an arbitrary function $F$ the paper extends this to
+
+$$\Delta_F(i, j \mid k, l) := F[i, j, k, l] - F[i, j]. \qquad (36)$$
 
 $$S_F(i, j \mid k, l) := F[i, j] + F[i, j, k] + F[i, j, l] + F[k, l] \qquad (37)$$
 
-and the region
+and observes that, with $\varnothing$ denoting the empty set,
+
+$$S_F(i, j \mid k, l) = F[i, j \mid \varnothing] - \Delta_F(k, l \mid i, j) = F[i, j] + F[i, j, k] + F[i, j, l] + F[i, j, k, l] - \Delta_F(k, l \mid i, j). \qquad (38)$$
+
+In this coordinate system, Theorem 3 becomes
+
+$$S_F(1, 2 \mid 3, 4) + F[1, 3 \mid 4] + F[1, 4 \mid 3] + F[3, 4 \mid 1] \geq 0. \qquad (39)$$
+
+The two companion inequalities are
+
+$$S_F(1, 2 \mid 3, 4) + F[2, 3 \mid 4] + F[2, 4 \mid 3] + F[3, 4 \mid 2] \geq 0 \qquad (40)$$
+
+and
+
+$$2 S_F(1, 2 \mid 3, 4) + F[1, 3 \mid 4] + F[1, 4 \mid 3] + F[2, 3 \mid 4] + F[2, 4 \mid 3] + F[3, 4 \mid 1] + F[3, 4 \mid 2] \geq 0. \qquad (41)$$
+
+Equivalently, $S_F(1, 2 \mid 3, 4)$ is bounded below by the maximum of
+
+$$-\bigl(F[1, 3 \mid 4] + F[1, 4 \mid 3] + F[3, 4 \mid 1]\bigr), \qquad -\bigl(F[2, 3 \mid 4] + F[2, 4 \mid 3] + F[3, 4 \mid 2]\bigr).$$
+
+It then defines the region
 
 $$\hat{\Gamma}_4 := \{F \in \Gamma_4 : \text{for any permutation } \pi \text{ of } \{1, 2, 3, 4\}, S_F(\pi(1), \pi(2) \mid \pi(3), \pi(4)) \geq 0\}. \qquad (42)$$
 
@@ -192,7 +224,30 @@ $$\hat{\Gamma}_4 \subset \mathrm{cl}(\Gamma^*_4) \qquad (43)$$
 Equivalently, the set $\hat{\Gamma}_4$ is an inner bound of $\mathrm{cl}(\Gamma^*_4)$.
 :::
 
-The paper notes that $S_F$ may be negative for some $F \in \Gamma_4$ (p. 1445, the projective-plane example), so the inner bound is strict; combined with the outer bound $\tilde{\Gamma}_4$ from Theorem 3, this leaves the exact description of $\mathrm{cl}(\Gamma^*_4)$ open.
+The paper then gives a projective-plane construction (p. 1445) showing that $S_F$ may be negative even for an entropy function. For the resulting four random variables $X_1, X_2, X_3, X_4$, it computes
+
+$$I(X_1; X_2) = \log_2(13/12), \qquad H(X_3) = H(X_4) = \log_2 13,$$
+
+$$H(X_3, X_4) = \log_2 6 + \log_2 13,$$
+
+$$H(X_3 \mid X_1) = H(X_3 \mid X_2) = H(X_4 \mid X_1) = H(X_4 \mid X_2) = \log_2 4,$$
+
+$$H(X_3, X_4 \mid X_1) = H(X_3, X_4 \mid X_2) = \log_2 12.$$
+
+Therefore
+
+$$I(X_3; X_4) = \log_2 13 - \log_2 6, \qquad I(X_3; X_4 \mid X_1) = I(X_3; X_4 \mid X_2) = \log_2(4/3),$$
+
+and hence
+
+$$\begin{aligned}
+S_F(1, 2 \mid 3, 4)
+&= I(X_1; X_2) + I(X_3; X_4 \mid X_1) + I(X_3; X_4 \mid X_2) - I(X_3; X_4) \\
+&= \log_2(13/12) + 2 \log_2(4/3) - \log_2(13/6) \\
+&= -\log_2(9/8) < 0.
+\end{aligned}$$
+
+So the inner bound is strict; combined with the outer bound $\tilde{\Gamma}_4$ from Theorem 3, this leaves the exact description of $\mathrm{cl}(\Gamma^*_4)$ open.
 
 ## Lemmas
 
