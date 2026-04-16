@@ -19,6 +19,7 @@ is the central quantity of the Zhang-Yeung conditional information inequality [Z
 - `ZhangYeung.delta_comm_cond`: the two conditioning arguments commute.
 - `ZhangYeung.delta_comm_main`: the two measured arguments commute (uses `mutualInfo_comm` and `condMutualInfo_comm`).
 - `ZhangYeung.delta_self`: the case `X = Y`.
+- `ZhangYeung.delta_eq_entropy`: expansion into raw entropy terms.
 - `ZhangYeung.form21_iff`, `ZhangYeung.form22_iff`, `ZhangYeung.form23_iff`: iff-equivalences between the integer-scaled shape produced by a copy-lemma proof and the shape the paper states.
 - `ZhangYeung.form23_of_form21_form22`: the symmetric form (23) follows from (21) and (22) by averaging.
 
@@ -120,5 +121,16 @@ lemma delta_comm_main
     (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     delta Z U X Y μ = delta U Z X Y μ := by
   simp only [delta_def, mutualInfo_comm hZ hU, condMutualInfo_comm hZ hU]
+
+/-- Expand `delta` all the way down to raw entropy terms, using `mutualInfo_def` and `condMutualInfo_eq`. This is the bridge to any reasoning at the entropy layer directly (for example, evaluating `delta` on a concrete four-variable distribution when checking bounds or building counterexamples). -/
+lemma delta_eq_entropy
+    {Z : Ω → S₁} {U : Ω → S₂} {X : Ω → S₃} {Y : Ω → S₄}
+    (hZ : Measurable Z) (hU : Measurable U) (hX : Measurable X) (hY : Measurable Y)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    delta Z U X Y μ
+      = (H[Z ; μ] + H[U ; μ] - H[⟨Z, U⟩ ; μ])
+        - (H[Z | X ; μ] + H[U | X ; μ] - H[⟨Z, U⟩ | X ; μ])
+        - (H[Z | Y ; μ] + H[U | Y ; μ] - H[⟨Z, U⟩ | Y ; μ]) := by
+  rw [delta_def, mutualInfo_def, condMutualInfo_eq hZ hU hX, condMutualInfo_eq hZ hU hY]
 
 end ZhangYeung
