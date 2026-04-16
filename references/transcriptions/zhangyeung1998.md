@@ -24,8 +24,9 @@ The paper uses lightweight subset-indexed notation throughout. For $n \geq 1$ le
 | $\Gamma_n$ | Cone of functions satisfying the basic (Shannon) inequalities, viewed as a subset of $\mathbb{R}^{2^n - 1}$ | Shannon outer bound |
 | $\Gamma^*_n$ | Set of entropy functions of $n$-tuples of discrete RVs (the **constructible** functions) | Entropic region |
 | $\mathrm{cl}(\Gamma^*_n)$ | Closure of $\Gamma^*_n$ (the **asymptotically constructible** functions) | Almost-entropic region |
-| $h$ (Section II, eq. 30-31) | Atom-valued reparametrization of a function $f : 2^{\mathcal{N}_n} \to \mathbb{R}$ | -- |
-| $\mathcal{Z}(f)$ (Section II, eq. 42) | Paper-specific quantity controlling the inner bound of Theorem 6 | -- |
+| $F[\alpha \mid \beta]$ (Section II, eq. 30) | Atom-valued reparametrization of a function $F : 2^{\mathcal{N}_n} \to \mathbb{R}$ | -- |
+| $S_F$ (Section II, eq. 37) | Paper-specific quantity controlling the inner bound of Theorem 6 | -- |
+| $\hat{\Gamma}_4$ (Section II, eq. 42) | Inner bound of $\mathrm{cl}(\Gamma^*_4)$ defined via $S_F$ | -- |
 
 The paper freely switches logarithm base. Theorem 6's concrete construction uses base $3$ so that the three symmetric ternary RVs have entropy $1$. All inequalities in Theorems 3-5 are log-base-agnostic.
 
@@ -95,23 +96,19 @@ Theorem 2 is a *conditional* non-Shannon inequality: it only applies when two mu
 ::: {.theorem}
 **Theorem 3** ([@zhangyeung1998, Thm. 3], eq. 20-23). For any four discrete random variables $X, Y, Z, U$,
 
-$$2 \, I(Z; U) \leq I(X; Y) + I(X; Z, U) + 3 \, I(Z; U \mid X) + I(Z; U \mid Y). \qquad (21)$$
+$$\Delta(Z, U \mid X, Y) \leq \tfrac{1}{2} \bigl[I(X; Y) + I(X; Z, U) + I(Z; U \mid X) - I(Z; U \mid Y)\bigr]. \qquad (21)$$
 
 By swapping the roles of $X$ and $Y$, the symmetric inequality
 
-$$2 \, I(Z; U) \leq I(X; Y) + I(Y; Z, U) + 3 \, I(Z; U \mid Y) + I(Z; U \mid X) \qquad (22)$$
+$$\Delta(Z, U \mid X, Y) \leq \tfrac{1}{2} \bigl[I(X; Y) + I(Y; Z, U) - I(Z; U \mid X) + I(Z; U \mid Y)\bigr] \qquad (22)$$
 
 also holds. Averaging (21) and (22) gives the symmetric form
 
-$$2 \, I(Z; U) \leq I(X; Y) + \tfrac{1}{2}\bigl(I(X; Z, U) + I(Y; Z, U)\bigr) + 2\bigl(I(Z; U \mid X) + I(Z; U \mid Y)\bigr). \qquad (23)$$
+$$\Delta(Z, U \mid X, Y) \leq \tfrac{1}{2} \, I(X; Y) + \tfrac{1}{4}\bigl[I(X; Z, U) + I(Y; Z, U)\bigr]. \qquad (23)$$
 
-Equivalently, defining
+Where we define
 
-$$\Delta(Z, U \mid X, Y) := I(Z; U) - I(Z; U \mid X) - I(Z; U \mid Y), \qquad (20)$$
-
-the inequality (23) becomes
-
-$$\Delta(Z, U \mid X, Y) \leq \tfrac{1}{2} \, I(X; Y) + \tfrac{1}{4}\bigl(I(X; Z, U) + I(Y; Z, U)\bigr).$$
+$$\Delta(Z, U \mid X, Y) := I(Z; U) - I(Z; U \mid X) - I(Z; U \mid Y). \qquad (20)$$
 
 This inequality does **not** follow from the basic Shannon inequalities (Theorem 4).
 :::
@@ -126,7 +123,7 @@ $$\mathrm{cl}(\Gamma^*_n) \subsetneq \Gamma_n.$$
 
 The paper's proof sketch (p. 1442) observes that it suffices to prove the claim for $n = 4$: given a $4$-variable witness, embedding it on the first four coordinates of an $n$-tuple of random variables (with the remaining $n - 4$ set to a constant) produces an $n$-variable witness. The $n = 4$ witness is the explicit function $F : 2^{\mathcal{N}_4} \to [0, \infty)$ defined on p. 1443 (satisfying all 15 elemental Shannon inequalities but violating Theorem 3); concretely the roadmap's milestone M4 plans to reconstruct it as
 
-$$F(\alpha) := \begin{cases} 0 & \alpha = \varnothing, \\ 2a & |\alpha| = 1, \\ 4a & \alpha \in \bigl\{\{X, Y\}\bigr\}, \\ 3a & \alpha \in \bigl\{\{X, Z\}, \{Y, Z\}, \{Z, U\}\bigr\}, \\ 4a & |\alpha| \geq 3, \end{cases}$$
+$$F(\alpha) := \begin{cases} 0 & \alpha = \varnothing, \\ 2a & |\alpha| = 1, \\ 4a & \alpha \in \bigl\{\{X, Y\}\bigr\}, \\ 3a & \alpha \in \bigl\{\{X, Z\}, \{X, U\}, \{Y, Z\}, \{Y, U\}, \{Z, U\}\bigr\}, \\ 4a & |\alpha| \geq 3, \end{cases}$$
 
 for any $a > 0$, after identifying $\mathcal{N}_4$ with $\{X, Y, Z, U\}$.
 
@@ -135,95 +132,101 @@ for any $a > 0$, after identifying $\mathcal{N}_4$ with $\{X, Y, Z, U\}$.
 ::: {.theorem}
 **Theorem 5** ([@zhangyeung1998, Thm. 5]). For any $n \geq 2$ and any $n + 2$ discrete random variables $U, Z, X_1, \ldots, X_n$, and for any $i \in \{1, \ldots, n\}$,
 
-$$n \, I(U; Z) \leq \sum_{j = 1}^{n} I(U; Z \mid X_j) + n \, I(U; Z \mid X_i) + I(X_i; U, Z) + \sum_{j = 1}^{n} H(X_j) - H(X_1, \ldots, X_n). \qquad (27)$$
+$$n \, I(U; Z) - \sum_{j = 1}^{n} I(U; Z \mid X_j) - n \, I(U; Z \mid X_i) \leq I(X_i; U, Z) + \sum_{j = 1}^{n} H(X_j) - H(X_1 \cdots X_n). \qquad (27)$$
 
 Averaging (27) over $i \in \{1, \ldots, n\}$ yields the symmetric form
 
-$$n \, I(U; Z) \leq \sum_{j = 1}^{n} I(U; Z \mid X_j) + \sum_{j = 1}^{n} I(U; Z \mid X_j) + \tfrac{1}{n} \sum_{j = 1}^{n} I(X_j; U, Z) + \sum_{j = 1}^{n} H(X_j) - H(X_1, \ldots, X_n). \qquad (28)$$
+$$n \, I(U; Z) - 2 \sum_{j = 1}^{n} I(U; Z \mid X_j) \leq \tfrac{1}{n} \sum_{i = 1}^{n} I(X_i; U, Z) + \sum_{j = 1}^{n} H(X_j) - H(X_1 \cdots X_n). \qquad (28)$$
 
 The proof is the same as Theorem 3 combined with induction on $n$ (omitted in the paper).
 :::
 
-> **Transcription caveat.** The pdftotext extraction garbled the right-hand sides of (27) and (28). The form above is the statement referenced by the formalization roadmap (`docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md`, Section 4 and M5); verify against the source PDF before committing the Lean statement.
-
 ### Theorem 6 (inner bound of $\mathrm{cl}(\Gamma^*_4)$, Section II eq. 43)
 
-The paper reparametrizes $f : 2^{\mathcal{N}_n} \to \mathbb{R}$ using the atom chart $h_f$ defined for pairs $(\alpha, \beta)$ with $\alpha \neq \varnothing$ by
+The paper reparametrizes $F \in \Gamma_4$ using the atom chart $F[\alpha \mid \beta]$ defined for pairs $(\alpha, \beta)$ with $\alpha \neq \varnothing$ by
 
-$$h_f(\alpha, \beta) := \sum_{\sigma \subseteq \alpha^{\mathsf c}} (-1)^{|\sigma|} f(\alpha \cup \sigma \cup \beta) - (\text{terms not involving } \alpha), \qquad (30\text{-}31)$$
+$$F[\alpha \mid \beta] := \sum_{\gamma \subset \alpha} (-1)^{1+|\gamma|} F(\gamma \cup \beta), \qquad (30)$$
 
-and then defines
+and then defines $F[\alpha] := F[\alpha \mid \alpha^c]$ (31). It defines the quantity
 
-$$\mathcal{Z}(f) := \min_\sigma \bigl[\text{expression in } h_f \text{ at atoms determined by the permutation } \sigma \text{ of } \{X, Y, Z, U\}\bigr], \qquad (42)$$
+$$S_F(i, j \mid k, l) := F[i, j] + F[i, j, k] + F[i, j, l] + F[k, l] \qquad (37)$$
 
-where the minimum is over all permutations of the four-element index set.
+and the region
+
+$$\hat{\Gamma}_4 := \{F \in \Gamma_4 : \text{for any permutation } \pi \text{ of } \{1, 2, 3, 4\}, S_F(\pi(1), \pi(2) \mid \pi(3), \pi(4)) \geq 0\}. \qquad (42)$$
 
 ::: {.theorem}
-**Theorem 6** ([@zhangyeung1998, Thm. 6], eq. 43). Every function $f \in \Gamma_4$ with $\mathcal{Z}(f) \geq 0$ lies in $\mathrm{cl}(\Gamma^*_4)$. Equivalently, the set $\{f \in \Gamma_4 : \mathcal{Z}(f) \geq 0\}$ is an inner bound of $\mathrm{cl}(\Gamma^*_4)$.
+**Theorem 6** ([@zhangyeung1998, Thm. 6], eq. 43).
+
+$$\hat{\Gamma}_4 \subset \mathrm{cl}(\Gamma^*_4) \qquad (43)$$
+
+Equivalently, the set $\hat{\Gamma}_4$ is an inner bound of $\mathrm{cl}(\Gamma^*_4)$.
 :::
 
-The paper notes that $\mathcal{Z}(f)$ may be negative for some $f \in \Gamma_4$ (p. 1445, the projective-plane example), so the inner bound is strict; combined with Theorem 3's outer bound, this leaves the exact description of $\mathrm{cl}(\Gamma^*_4)$ open.
+The paper notes that $S_F$ may be negative for some $F \in \Gamma_4$ (p. 1445, the projective-plane example), so the inner bound is strict; combined with Theorem 3's outer bound, this leaves the exact description of $\mathrm{cl}(\Gamma^*_4)$ open.
 
-> **Transcription caveat.** The exact pair-of-subsets argument to $h_f$ and the minimum-over-permutations expression defining $\mathcal{Z}$ rely on equations whose bodies did not survive the pdftotext extraction. Verify against the source PDF (pp. 1443-1444) before formalizing Theorem 6.
+> **Transcription caveat.** The definitions of $S_F$ and $\hat{\Gamma}_4$ rely on equations whose bodies were poorly extracted by pdftotext. They have been verified against the source PDF (pp. 1443-1444), but if Theorem 6 is formalized, further verification may be needed.
 
 ## Lemmas
 
 ### Lemma 1 (atom-to-subset inversion, eq. 34)
 
 ::: {.lemma}
-**Lemma 1** ([@zhangyeung1998, Lem. 1]). For the atom reparametrization $h$,
+**Lemma 1** ([@zhangyeung1998, Lem. 1]). For the atom reparametrization $F[\alpha \mid \beta]$,
 
-$$h(\alpha, \beta) = \sum_{\sigma \subseteq \alpha^{\mathsf c}} (-1)^{|\sigma|} \bigl[f(\alpha \cup \sigma \cup \beta) - f(\sigma \cup \beta)\bigr],$$
+$$F[\alpha \mid \beta] = \sum_{\gamma \subset (\alpha \cup \beta)^c} F[\alpha \cup \gamma] \qquad (34)$$
 
-where $\alpha^{\mathsf c}$ denotes the complement of $\alpha$ in $\mathcal{N}_n$.
+where $A^c$ stands for the complement of the set $A$.
 :::
 
-> **Transcription caveat.** The right-hand side above is our best reconstruction of eq. (34) from the surrounding paper text; the two-column pdftotext output reduced it to the numeric label only. Verify against the source PDF.
+> **Transcription caveat.** The right-hand side above has been reconstructed from the source PDF (p. 1444).
 
 ### Lemma 2 (the copy lemma, eq. 44-45)
 
 This is the central proof artifact of the paper. In the modern literature, this construction (together with its extension to any number of "copies" over a shared marginal) is called the **copy lemma**.
 
 ::: {.lemma}
-**Lemma 2** ([@zhangyeung1998, Lem. 2]). Let $(X, Y, Z, U)$ be four jointly distributed discrete random variables on a probability space with joint distribution $\mu(x, y, z, u)$. Define the six-variable distribution
+**Lemma 2** ([@zhangyeung1998, Lem. 2]). Let $(X, Y, Z, U)$ be four jointly distributed discrete random variables on a probability space with joint distribution $p(x, y, z, u)$. Define the six-variable distribution
 
-$$p(x, y, z, u, x', y') := \frac{\mu(x, y, z, u) \cdot \mu(x', y', z, u)}{\mu(z, u)} \qquad (44)$$
+$$q(x, y, z, u, x_1, y_1) := \frac{p(x, y, z, u) \, p(x_1, y_1, z, u)}{p(z, u)} \qquad (44)$$
 
-wherever $\mu(z, u) > 0$ (and $0$ otherwise). Equivalently, $p$ is the law of $(X, Y, Z, U)$ augmented with independent copies $(X', Y')$ of $(X, Y)$ drawn from the conditional distribution $\mu(\cdot, \cdot \mid Z, U)$. Then:
+wherever $p(z, u) > 0$. Let $X_1, Y_1$ be two random variables jointly distributed with $X, Y, Z, U$ according to the joint distribution $q$. Equivalently, $q$ is the law of $(X, Y, Z, U)$ augmented with independent copies $(X_1, Y_1)$ of $(X, Y)$ drawn from the conditional distribution $p(\cdot, \cdot \mid Z, U)$. Then:
 
-1. **Identical marginals.** The $(X, Y, Z, U)$-marginal and the $(X', Y', Z, U)$-marginal of $p$ both equal $\mu$.
-2. **Conditional independence.** Under $p$, the pair $(X, Y)$ is conditionally independent of $(X', Y')$ given $(Z, U)$:
-$$I_p\bigl((X, Y); (X', Y') \mid (Z, U)\bigr) = 0.$$
-3. **Entropy identity** (eq. 45). The conditional joint entropy of all four named random variables under $p$ admits a decomposition in terms of mutual informations of the six random variables; this identity is what Section III uses to derive Theorem 3.
+1. **Identical marginals.** The $(X, Y, Z, U)$-marginal and the $(X_1, Y_1, Z, U)$-marginal of $q$ both equal $p$.
+2. **Conditional independence.** Under $q$, the pair $(X, Y)$ is conditionally independent of $(X_1, Y_1)$ given $(Z, U)$:
+$$I_q\bigl((X, Y); (X_1, Y_1) \mid (Z, U)\bigr) = 0.$$
+3. **Entropy identity** (eq. 45). The conditional mutual information of the original variables satisfies
+
+$$\Delta(Z, U \mid X, Y) = I(X; Y_1) - I(X; Y_1 \mid U) - I(X; Y_1 \mid Z) - I(Z; U \mid X, Y_1) \qquad (45)$$
 :::
 
-The construction is the two-step kernel composition $p = \mu \otimes \kappa$ where $\kappa$ is the Markov kernel from $(Z, U)$ to $(X', Y')$ induced by $\mu(\cdot, \cdot \mid Z, U)$; equivalently, $(X', Y')$ is a conditionally independent "copy" of $(X, Y)$ over the common $(Z, U)$ coordinates.
+The construction is the two-step kernel composition $q = p \otimes \kappa$ where $\kappa$ is the Markov kernel from $(Z, U)$ to $(X_1, Y_1)$ induced by $p(\cdot, \cdot \mid Z, U)$; equivalently, $(X_1, Y_1)$ is a conditionally independent "copy" of $(X, Y)$ over the common $(Z, U)$ coordinates.
 
-> **Transcription caveat.** Eq. (45) is the single most important equation in the paper for the formalization project, and its right-hand side did not survive the pdftotext extraction. Verify it line by line against the source PDF before transcribing into Lean.
+> **Transcription caveat.** Eq. (45) has been reconstructed line-by-line from the source PDF (p. 1445).
 
 ## Proof of Theorem 3 (Section III)
 
-The proof uses Lemma 2 to construct the six-variable joint distribution $p$ and then proves the companion bound
+The proof uses Lemma 2 to construct the six-variable joint distribution $q$ and then proves the companion bound
 
-$$I_p(X; Y') + I_p(X; Z, U) \geq I_p(X; Y) + \ldots$$
+$$I_q(X; Y_1) + I_q(X; Z, U) \geq I_q(X; Y) + \ldots$$
 
-and its symmetric swap. The data-processing inequality together with the identity $I(X; Y) = I(X; Y')$ (which follows from Lemma 2's marginal identity and the conditional-independence structure) then yields (21) and (22) after straightforward Shannon algebra. The proof is mechanical once Lemma 2 is in place.
+and its symmetric swap. The data-processing inequality together with the identity $I(X; Y) = I(X; Y_1)$ (which follows from Lemma 2's marginal identity and the conditional-independence structure) then yields (21) and (22) after straightforward Shannon algebra. The proof is mechanical once Lemma 2 is in place.
 
 The paper remarks at the end of Section III (p. 1446) that all "missing terms" in the bound can be made explicit using the six-variable joint; these terms are listed as corollaries but not given independent theorem status.
 
 ## Proof of Theorem 6 (Section IV)
 
-Section IV proves the inner bound via seven explicit probabilistic constructions, labeled $f_1, \ldots, f_7$. Each construction takes values on the atoms of $2^{\mathcal{N}_4}$; their chart is on p. 1447.
+Section IV proves the inner bound via seven explicit probabilistic constructions, labeled $F^1, \ldots, F^7$. Each construction takes values on the atoms of $2^{\mathcal{N}_4}$; their chart is on p. 1447.
 
-- **Construction 1** ($f_1$): indicator of a fixed atom. Used via Lemma 4 to show that nonnegative atom-valued functions are asymptotically constructible.
-- **Constructions 2-7** ($f_2, \ldots, f_7$): seven more elaborate atom assignments. $f_2$ is symmetric over the four coordinates; $f_3^Z$ (and its permutations) places mass on atoms involving a distinguished single coordinate; $f_4$-$f_7$ are further symmetry-broken constructions.
+- **Construction 1** ($F^1_\alpha$): indicator of a fixed atom. Used via Lemma 4 to show that nonnegative atom-valued functions are asymptotically constructible.
+- **Constructions 2-7** ($F^2, \ldots, F^7$): seven more elaborate atom assignments. $F^2$ is symmetric over the four coordinates; $F^3_i$ (and its permutations) places mass on atoms involving a distinguished single coordinate; $F^4$-$F^7$ are further symmetry-broken constructions.
 
 Supporting lemmas:
 
 - **Lemma 3** ([@zhangyeung1998, Lem. 3]). If $f, g \in \mathrm{cl}(\Gamma^*_n)$ and $\lambda \geq 0$, then $f + g \in \mathrm{cl}(\Gamma^*_n)$ and $\lambda f \in \mathrm{cl}(\Gamma^*_n)$. That is, $\mathrm{cl}(\Gamma^*_n)$ is a convex cone.
 - **Lemma 4** ([@zhangyeung1998, Lem. 4]). Nonnegative atom-valued functions are asymptotically constructible. (Proved via Construction 1 and Lemma 3.)
 
-The main argument is a case analysis (p. 1448-1451) showing that every function $f \in \Gamma_4$ with $\mathcal{Z}(f) \geq 0$ can be reduced via a sequence of **legal operations** (subtracting a nonnegative multiple of one of $f_2, \ldots, f_7$ while preserving seminonnegativity) to a nonnegative function, which is asymptotically constructible by Lemma 4. The case analysis splits on whether one of $f_2$ or $f_3^\bullet$ is forced to zero, then recursively refines.
+The main argument is a case analysis (p. 1448-1451) showing that every function $F \in \hat{\Gamma}_4$ can be reduced via a sequence of **legal operations** (subtracting a nonnegative multiple of one of $F^2, \ldots, F^7$ while preserving seminonnegativity) to a nonnegative function, which is asymptotically constructible by Lemma 4. The case analysis splits on whether one of $F^2$ or $F^3_i$ is forced to zero, then recursively refines.
 
 > **Transcription caveat.** The seven constructions are defined in the paper using atom charts that did not render cleanly in the pdftotext extraction. If Theorem 6 becomes a formalization target (currently **out of scope** per the roadmap's S2 decision), the construction definitions must be verified against the source PDF pp. 1446-1447.
 
@@ -261,11 +264,7 @@ The central formalization artifact is therefore **Lemma 2**, generalized away fr
 
 Each caveat below marks a place where the pdftotext extraction was insufficient and the source PDF needs to be consulted before the statement can be considered paper-faithful. In priority order:
 
-1. **Eq. (45) (Lemma 2's entropy identity).** Load-bearing for M2; verify before formalizing the copy lemma.
-2. **Eq. (21), (22), (23), (27), (28).** The Zhang-Yeung inequality and its $(n + 2)$-variable generalization. The forms above match the roadmap but should be verified against the PDF to rule out sign errors or coefficient drift.
-3. **Witness $F$ in Theorem 4.** The specific values of $F$ on $2^{\mathcal{N}_4}$ need verification; the paper's table on p. 1443 is the source.
-4. **Lemma 1 (eq. 34).** Only if Theorem 6 becomes in scope.
-5. **$\mathcal{Z}(f)$ definition and atom charts.** Only if Theorem 6 becomes in scope.
+1. **Constructions 1-7 (Theorem 6).** The seven constructions are defined using atom charts that did not render cleanly in the pdftotext extraction. They must be verified against the PDF (pp. 1446-1447) if Theorem 6 becomes in scope.
 
 ## References (from the paper)
 
