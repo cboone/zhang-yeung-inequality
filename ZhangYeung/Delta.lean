@@ -17,6 +17,7 @@ is the central quantity of the Zhang-Yeung conditional information inequality [Z
 
 - `ZhangYeung.delta_def`: definitional unfolding.
 - `ZhangYeung.delta_comm_cond`: the two conditioning arguments commute.
+- `ZhangYeung.delta_comm_main`: the two measured arguments commute (uses `mutualInfo_comm` and `condMutualInfo_comm`).
 - `ZhangYeung.delta_self`: the case `X = Y`.
 - `ZhangYeung.form21_iff`, `ZhangYeung.form22_iff`, `ZhangYeung.form23_iff`: iff-equivalences between the integer-scaled shape produced by a copy-lemma proof and the shape the paper states.
 - `ZhangYeung.form23_of_form21_form22`: the symmetric form (23) follows from (21) and (22) by averaging.
@@ -103,5 +104,21 @@ lemma form23_iff
       ↔ delta Z U X Y μ
           ≤ (1 / 2) * I[X : Y ; μ] + (1 / 4) * (I[X : ⟨Z, U⟩ ; μ] + I[Y : ⟨Z, U⟩ ; μ]) := by
   constructor <;> intro h <;> linarith
+
+/-! ### Lemmas requiring finite-alphabet structure
+
+The remaining lemmas rely on PFR's commutativity and entropy-expansion results, which are stated under discrete/countable hypotheses on the codomains of the measured random variables. Extending the shared `variable` block with `[Fintype Sᵢ]` and `[MeasurableSingletonClass Sᵢ]` supplies those hypotheses uniformly: `Fintype → Finite → Countable` closes the discrete side, and the same `Fintype` instances discharge PFR's `FiniteRange` obligations via the instance `{Ω G : Type*} (X : Ω → G) [Finite G] : FiniteRange X`. -/
+
+variable [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
+  [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
+
+omit [Fintype S₃] [Fintype S₄] [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄] in
+/-- Swapping the two measured arguments leaves `delta` unchanged, via `mutualInfo_comm` and `condMutualInfo_comm`. -/
+lemma delta_comm_main
+    {Z : Ω → S₁} {U : Ω → S₂} (hZ : Measurable Z) (hU : Measurable U)
+    (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
+    delta Z U X Y μ = delta U Z X Y μ := by
+  simp only [delta_def, mutualInfo_comm hZ hU, condMutualInfo_comm hZ hU]
 
 end ZhangYeung
