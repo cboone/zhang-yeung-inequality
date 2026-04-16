@@ -321,6 +321,16 @@ so the missing term in (21) is
 
 $$R(X, Y, Z, U, X_1, Y_1) = \tfrac{1}{2} \bigl[I(X; Z, U \mid X_1, Y_1) + I(X_1; Y_1 \mid X) + R_1 + R_2\bigr].$$
 
+The paper then points out that the explicit function
+
+$$F(\varnothing) = 0, \qquad F(X) = F(Y) = F(Z) = F(U) = 6a,$$
+
+$$F(X, Y) = 12a, \qquad F(X, Z) = F(Y, Z) = F(Y, U) = F(X, U) = 9a, \qquad F(Z, U) = 10a,$$
+
+$$F(X, Z, U) = F(Y, Z, U) = F(X, Y, Z) = F(X, Y, U) = F(X, Y, Z, U) = 12a.$$
+
+This function lies in $\tilde{\Gamma}_4$ and satisfies one of the new inequalities with equality. The authors ask whether it is asymptotically constructible; if it were, one might expect the outer bound to be tight, i.e. $\mathrm{cl}(\Gamma^*_4) = \tilde{\Gamma}_4$. They report that they were unable to prove this and therefore doubt that conjecture.
+
 ## Proof of Theorem 6 (Section IV)
 
 Section IV proves the inner bound via seven explicit probabilistic constructions. In the paper, these are defined from three independent ternary random variables $W_1, W_2, W_3$, each uniform on $\{0, 1, 2\}$, together with a constant random variable $W_0$; logarithms are taken in base $3$, so $H(W_i) = 1$ for $i = 1, 2, 3$.
@@ -338,7 +348,25 @@ Supporting lemmas:
 - **Lemma 3** ([@zhangyeung1998, Lem. 3]). If $f, g \in \mathrm{cl}(\Gamma^*_n)$ and $\lambda \geq 0$, then $f + g \in \mathrm{cl}(\Gamma^*_n)$ and $\lambda f \in \mathrm{cl}(\Gamma^*_n)$. That is, $\mathrm{cl}(\Gamma^*_n)$ is a convex cone.
 - **Lemma 4** ([@zhangyeung1998, Lem. 4]). Nonnegative atom-valued functions are asymptotically constructible. (Proved via Construction 1 and Lemma 3.)
 
-The main argument is a case analysis (p. 1448-1451) showing that every function $F \in \hat{\Gamma}_4$ can be reduced via a sequence of **legal operations** (subtracting a nonnegative multiple of one of the basic functions from Constructions 2-7 while preserving seminonnegativity) to a nonnegative function, which is asymptotically constructible by Lemma 4. The case analysis splits on whether one of $F^2$ or $F^3_i$ is forced to zero, then recursively refines.
+Before the case split, the paper rewrites membership in $\hat{\Gamma}_4$ as five families of atom inequalities. For any permutation $\{i, j, k, l\} = \{1, 2, 3, 4\}$, a function $F \in \hat{\Gamma}_4$ satisfies:
+
+1. $F[\alpha] \geq 0$ for every atom $\alpha$ of weight $1$.
+2. $F[i, j \mid \varnothing] = F[i, j] + F[i, j, k] + F[i, j, l] + F[i, j, k, l] \geq 0$.
+3. $F[i, j \mid k] = F[i, j] + F[i, j, l] \geq 0$.
+4. $S_F(i, j \mid k, l) = F[i, j] + F[i, j, k] + F[i, j, l] + F[k, l] \geq 0$.
+5. $F[i, j] \geq 0$.
+
+The paper calls a function **nonnegative** if all of its atom values are nonnegative, and **seminonnegative** if all atom values of weight at most $3$ are nonnegative. Lemma 4 is proved by the explicit decomposition
+
+$$J = \sum_{\alpha \neq \varnothing} J[\alpha] \, F^1_\alpha,$$
+
+valid for every nonnegative atom function $J$.
+
+The main argument is a case analysis (p. 1448-1451) showing that every function $F \in \hat{\Gamma}_4$ can be reduced via a sequence of **legal operations** (subtracting a nonnegative multiple of one of the basic functions from Constructions 2-7 while preserving the relevant inequalities) to a nonnegative function, which is asymptotically constructible by Lemma 4. The proof proceeds in three stages.
+
+1. **Normalize a weight-two atom with $F^2$.** Since $F^2$ satisfies Conditions 2-4 with equality, the paper subtracts $a F^2$, where $a$ is the minimum weight-two atom value, and thereby reduces to a function $F'$ with $F'[1, 2] = 0$.
+2. **Reach seminonnegativity with $F^3_i$.** If one of the relevant weight-three atoms is negative, subtracting a suitable multiple of one of the $F^3_i$ preserves the defining inequalities and yields a seminonnegative function $G$.
+3. **Eliminate the weight-four atom by case analysis.** For seminonnegative $G$, the remaining obstructions involve the six inequalities $\sum_{\{i,j\} \subset \alpha} G[\alpha] \geq 0$ in which the weight-four atom participates. The paper then uses repeated legal operations with $F^3_i$, $F^4_{i,j}$, and $F^7_i$, splitting into two master cases: either some $3$-subset forces three associated weight-two atoms to vanish, or two disjoint weight-two atoms vanish. Each branch eventually reduces to a nonnegative atom function.
 
 > **Transcription caveat.** The construction definitions on pp. 1446-1447 are now verified against the PDF. What remains summarized rather than transcribed line by line is the atom-chart bookkeeping and the full legal-operation case analysis on pp. 1447-1451.
 
