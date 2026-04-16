@@ -10,6 +10,12 @@ pdf: zhenzhang1998.pdf
 transcription_scope: full
 ---
 
+## Abstract
+
+Given $n$ discrete random variables $\Omega = \{X_1, \ldots, X_n\}$, associated with any subset $\alpha \subseteq \{1, 2, \ldots, n\}$ there is a joint entropy $H(X_\alpha)$ where $X_\alpha = \{X_i : i \in \alpha\}$. This can be viewed as a function defined on $2^{\{1, 2, \ldots, n\}}$ taking values in $[0, +\infty)$. The paper asks whether the nonnegativity, monotonicity, and submodularity properties implied by Shannon's basic inequalities fully characterize the entropy function. Equivalently, if $\Gamma_n$ denotes the cone of set functions with those three properties and $\Gamma_n^*$ denotes the set of entropy functions of $n$ discrete random variables, is $\mathrm{cl}(\Gamma_n^*) = \Gamma_n$ for every $n$? The answer was known to be yes for $n = 2$ and $3$. The paper proves a new four-variable information inequality showing that $\mathrm{cl}(\Gamma_n^*)$ is strictly smaller than $\Gamma_n$ whenever $n > 3$. This new inequality gives a nontrivial outer bound to $\mathrm{cl}(\Gamma_4^*)$, and the paper also gives an inner bound for $\mathrm{cl}(\Gamma_4^*)$. The inequality is further extended to any number of random variables.
+
+Index terms: entropy, inequality, information measure, mutual information.
+
 ## Notation
 
 The paper uses lightweight subset-indexed notation throughout. For $n \geq 1$ let $\mathcal{N}_n := \{1, 2, \ldots, n\}$ and let $\mathcal{X} = \{X_1, \ldots, X_n\}$ be an $n$-tuple of jointly distributed discrete random variables. For $\alpha \subseteq \mathcal{N}_n$ write $X_\alpha := \{X_i : i \in \alpha\}$ and $H(\alpha) := H(X_\alpha)$ (with $H(\varnothing) := 0$ by convention, since $X_\varnothing$ is a constant random variable).
@@ -31,9 +37,27 @@ The paper uses lightweight subset-indexed notation throughout. For $n \geq 1$ le
 
 The paper freely switches logarithm base. Theorem 6's concrete construction uses base $3$ so that the three symmetric ternary RVs have entropy $1$. All inequalities in Theorems 3-5 are log-base-agnostic.
 
+Section I begins by fixing the subset-indexed notation
+
+$$X_\alpha := \{X_i : i \in \alpha\}. \qquad (1)$$
+
+With $X_\varnothing$ taken to be a constant random variable, it writes
+
+$$I_\Omega(\alpha; \beta \mid \gamma) := I(X_\alpha; X_\beta \mid X_\gamma), \qquad (2)$$
+
+$$H_\Omega(\alpha) := H(X_\alpha). \qquad (3)$$
+
+Sometimes the paper suppresses the subscript $\Omega$. It then views the entropy function of $\Omega$ as the map
+
+$$H_\Omega : 2^{\mathcal{N}_n} \to [0, \infty), \qquad \alpha \mapsto H(X_\alpha), \qquad (6)$$
+
+and recalls that every basic Shannon information measure is a linear function of the joint entropies; in particular,
+
+$$I(\alpha; \beta \mid \gamma) = H(\alpha \cup \gamma) + H(\beta \cup \gamma) - H(\alpha \cup \beta \cup \gamma) - H(\gamma). \qquad (7)$$
+
 ## Scope
 
-The paper is the birthplace of the first non-Shannon-type information inequality. Its central contribution is Theorem 3, the **Zhang-Yeung inequality**, together with Theorem 4, which uses it to prove that the Shannon outer bound $\Gamma_n$ strictly contains the almost-entropic region $\mathrm{cl}(\Gamma^*_n)$ for every $n \geq 4$. This transcription covers every formal statement of the paper (propositions, theorems, and lemmas) together with the copy-lemma construction underlying the main proof. The seven explicit constructions driving Theorem 6's inner bound are now recorded explicitly from the source PDF; the 5-page case analysis that ties them together is still summarized rather than transcribed line by line.
+The paper is the birthplace of the first non-Shannon-type information inequality. Its central contribution is Theorem 3, the **Zhang-Yeung inequality**, together with Theorem 4, which uses it to prove that the Shannon outer bound $\Gamma_n$ strictly contains the almost-entropic region $\mathrm{cl}(\Gamma^*_n)$ for every $n \geq 4$. This transcription now covers the paper's abstract, formal statements, main prose sections, constructions, atom charts, proof skeletons, acknowledgment, and full bibliography. The only remaining compression is that some repetitive inequality checks inside the deepest symmetric branches of the Theorem 6 proof are described structurally rather than reproduced symbol-for-symbol.
 
 ## The Shannon outer bound and the entropic region
 
@@ -97,6 +121,48 @@ $$\mathrm{cl}(\Gamma^*_4) \neq \Gamma_4. \qquad (18)$$
 :::
 
 Theorem 2 is a *conditional* non-Shannon inequality: it only applies under the hypotheses $I(X; Y) = I(X; Y \mid Z) = 0$. The 1998 paper's central advance is removing this conditionality.
+
+### Conjecture 1 (eq. 19)
+
+::: {.conjecture}
+**Conjecture 1** ([@zhangyeung1998, Conj. 1]). For every $n \geq 4$,
+
+$$\mathrm{cl}(\Gamma_n^*) = \Gamma_n. \qquad (19)$$
+:::
+
+To give an affirmative answer to this problem is the stated goal of the paper. The paper is organized as follows: Section II states the main results and introduces the relevant definitions and notation; Sections III and IV prove the main theorems; Section V summarizes the findings and raises further problems.
+
+### Literature Survey (Section I closing prose)
+
+Before closing the introduction, the authors survey several earlier lines of work on the structure of Shannon's information measures.
+
+McGill [21] proposed a multiple mutual information for any number of random variables, generalizing Shannon's mutual information for two variables. Its properties were further studied by Kawabata and Yeung [6], Tsujishita [30], and Yeung [37].
+
+Hu [10] made an early attempt to establish an analogy between information theory and set theory. In modernized notation, his point is that one can formally match information-theoretic identities with set identities under a set-additive function $\mu$; for example,
+
+$$H(X) + H(Y) = H(X, Y) + I(X; Y)$$
+
+corresponds to
+
+$$\mu(X) + \mu(Y) = \mu(X \cup Y) + \mu(X \cap Y).$$
+
+Han [7], [9] pushed this further by emphasizing that every linear information expression can be rewritten as a linear combination of unconditional joint entropies, via repeated use of identities such as
+
+$$I(X; Y \mid Z) = H(X, Z) + H(Y, Z) - H(X, Y, Z) - H(Z).$$
+
+He proved that a linear combination of unconditional joint entropies is identically zero if and only if all coefficients are zero, and he gave necessary and sufficient conditions for certain classes of linear information expressions to be always nonnegative. Fujishige [5] independently observed that the entropy function is a polymatroid [33].
+
+Yeung [34] later developed Hu's set-theoretic viewpoint into the explicit $I$-measure formalism, in which Shannon's information measures define a signed measure on a suitable field. This framework justifies information diagrams and allows set-theoretic manipulations of information expressions. Kawabata and Yeung [6] studied the structure of the $I$-measure for Markov chains, and Yeung, Lee, and Ye [36] extended this to Markov random fields.
+
+Most directly relevant is Yeung [35], which defined the region of constructible entropy functions and showed that whether an information inequality always holds is characterized by that region. This yields a unified picture of unconstrained and constrained information inequalities implied by Shannon's basic inequalities, and motivates the question whether all valid information inequalities are already implied by those basic inequalities, equivalently whether $\mathrm{cl}(\Gamma_n^*) = \Gamma_n$. The convex-cone result from [39] makes Han's question equivalent to determining $\Gamma_n^*$. The same region also underlies the distributed source-coding application in [37].
+
+As a practical consequence of [35], Yeung and Yan [38] developed ITIP (the Information Theoretic Inequality Prover), which verifies linear information inequalities involving a fixed number of random variables whenever they are implied by the basic inequalities for that same number of variables.
+
+The introduction closes by linking these questions to probabilistic reasoning and database theory. Dawid [4] proposed four heuristic axioms for conditional independence. In the paper's information-theoretic phrasing, they are summarized by the implication
+
+$$I(X; Y, Z \mid U) = 0 \implies I(X; Y \mid U) = 0 \quad \text{and} \quad I(X; Z \mid Y, U) = 0.$$
+
+Pearl later conjectured that Dawid's axioms fully characterize conditional independence, but Studeny [25] refuted that conjecture; Matus and Studeny then analyzed the problem extensively in [13]-[29]. Yeung [35] showed that characterizing conditional-independence compatibility is a subproblem of determining $\Gamma_n^*$.
 
 ## Main results
 
@@ -343,6 +409,26 @@ Section IV proves the inner bound via seven explicit probabilistic constructions
 - **Construction 6** ($F^6_4$, and by symmetry $F^6_i$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_3$, and $X_4 = (W_1 + W_2 \pmod 3, W_1 + W_3 \pmod 3)$. Then $F^6_4[1, 2, 3] = 1$, every weight-two atom containing $4$ has value $1$, $F^6_4[1, 2, 3, 4] = -1$, and all other atoms have value $0$.
 - **Construction 7** ($F^7_4$, and by symmetry $F^7_i$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_1 + W_2 \pmod 3$, and $X_4 = (W_1, W_2)$. Then all atoms of weight at most $2$ have value $0$, every weight-three atom except $[1, 2, 3]$ has value $1$, $F^7_4[1, 2, 3] = 0$, and $F^7_4[1, 2, 3, 4] = -1$.
 
+The paper's atom chart on p. 1447 orders the atoms of weight at least $2$ as
+
+```text
+23
+12   123   13
+124  1234  134  14
+24   234   34
+```
+
+With that ordering, the chart values for Constructions 2-7 are:
+
+| Function | 23 | 12 | 123 | 13 | 124 | 1234 | 134 | 14 | 24 | 234 | 34 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| $F^2$ | 1 | 1 | -1 | 1 | -1 | 1 | -1 | 1 | 1 | -1 | 1 |
+| $F^3_4$ | 1 | 1 | -1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| $F^4_{3,4}$ | 0 | 1 | 0 | 0 | 0 | -1 | 1 | 0 | 0 | 1 | 0 |
+| $F^5$ | 0 | 0 | 1 | 0 | 1 | -2 | 1 | 0 | 0 | 1 | 0 |
+| $F^6_4$ | 0 | 0 | 1 | 0 | 0 | -1 | 0 | 1 | 1 | 0 | 1 |
+| $F^7_4$ | 0 | 0 | 0 | 0 | 1 | -1 | 1 | 0 | 0 | 1 | 0 |
+
 Supporting lemmas:
 
 - **Lemma 3** ([@zhangyeung1998, Lem. 3]). If $f, g \in \mathrm{cl}(\Gamma^*_n)$ and $\lambda \geq 0$, then $f + g \in \mathrm{cl}(\Gamma^*_n)$ and $\lambda f \in \mathrm{cl}(\Gamma^*_n)$. That is, $\mathrm{cl}(\Gamma^*_n)$ is a convex cone.
@@ -426,16 +512,21 @@ $$a = \min\{G'[2,3], G'[1,3,4], G'[1,2,4]\}.$$
 
 In every branch, the process terminates at a nonnegative atom function, proving Theorem 6.
 
-> **Transcription caveat.** The construction definitions on pp. 1446-1447 are now verified against the PDF. What remains summarized rather than transcribed line by line is the atom-chart bookkeeping and the full legal-operation case analysis on pp. 1447-1451.
+> **Transcription note.** The chart values and the branch structure of the Theorem 6 proof are now recorded from the source PDF. The only remaining compression is that repeated inequality verifications inside symmetric subcases are not all reproduced symbol-for-symbol.
 
 ## Concluding remarks (Section V)
 
-The authors remark that:
+The key result of the paper is Theorem 3. It shows that the set of basic Shannon information inequalities does not fully characterize the entropy function in the sense of Theorem 4: the region $\Gamma_n$ is strictly larger than $\mathrm{cl}(\Gamma_n^*)$. The authors stress that this was surprising. They originally tried to prove the opposite statement, namely tightness of the Shannon outer bound in the four-variable case, by building explicit constructions of the sort used later in the proof of Theorem 6. Only after those construction attempts failed in one persistent case did they begin to suspect that the conjecture itself was false, which led to the discovery of the new inequality.
 
-- Theorem 3 is the first unconditional non-Shannon inequality; its discovery originated from *failed* attempts to prove the opposite conjecture via the constructions of Theorem 6.
-- The exact region $\mathrm{cl}(\Gamma^*_4)$ remains open; the gap between Theorems 3 and 6 is strict.
-- "Missing terms" in (21)-(22) are determined explicitly by the six-variable joint of Lemma 2, in the hope that this may lead to further inequalities.
-- Open applications: multiuser channel coding, multiuser source coding, probabilistic reasoning, relational databases.
+They emphasize that fully characterizing $\mathrm{cl}(\Gamma_4^*)$ remains highly nontrivial. Even for $n = 4$, the paper obtains only an outer bound and an inner bound, and these differ. The projective-plane example shows the inner bound is not tight, but the methods of the paper are not strong enough to show that the outer bound is tight either.
+
+The authors also note that the case $n = 4$ is the simplest genuinely new case, since it is the smallest value of $n$ for which $\mathrm{cl}(\Gamma_n^*)$ and $\Gamma_n$ differ. Although the paper focuses on this case, Theorem 5 extends the Zhang-Yeung inequality to any number of random variables.
+
+Finally, the paper highlights two forward-looking themes. First, the "missing terms" in Theorem 3 are made explicit using auxiliary random variables, in the hope that this may help uncover further information inequalities and improved inner bounds. Second, the meaning and potential applications of these new inequalities remain only partly understood. The paper specifically mentions distributed source coding, multiuser channel coding, multiuser source coding, probabilistic reasoning, and relational databases as promising directions.
+
+## Acknowledgment
+
+The authors thank the two referees, noting that their detailed comments and suggestions greatly improved the readability of the paper.
 
 ## Formalization cross-references
 
@@ -460,15 +551,46 @@ The central formalization artifact is therefore **Lemma 2**, generalized away fr
 
 ## Open transcription items
 
-Each caveat below marks a place where the pdftotext extraction was insufficient and the source PDF needs to be consulted before the statement can be considered paper-faithful. In priority order:
+The prose, constructions, charts, acknowledgment, and bibliography are now transcribed. The only remaining gap is that some repetitive inequality checks inside the most detailed Theorem 6 subcases are condensed rather than copied symbol-for-symbol.
 
-1. **Theorem 6 atom charts and case analysis.** The construction definitions on pp. 1446-1447 are now verified, but the atom charts and the detailed legal-operation case split on pp. 1447-1451 are still summarized rather than transcribed line by line.
+## References (paper bibliography)
 
-## References (from the paper)
-
-Only the references actually used in the formalization roadmap are transcribed to BibTeX in `references/papers.bib`:
-
-- **[39]** Zhang and Yeung, *A Non-Shannon Type Conditional Inequality of Information Quantities*, IEEE TIT 43(6), 1997 (= `zhangyeung1997`). Source of Theorems 1 and 2.
-- **[35]** Yeung, *A Framework for Linear Information Inequalities*, IEEE TIT 43, 1997 (= `yeung1997framework`). Source of the regions $\Gamma_n$, $\Gamma^*_n$, and the elemental inequalities.
-
-The remaining bibliography entries (Campbell, Hu, McGill, Watanabe, Csiszár-Körner, Han, Fujishige, Yeung [34], Kawabata-Yeung, Matús̆, Studený, Pearl, etc.) are context for the historical narrative in Section I and are not needed for the formalization targets.
+- **[1]** N. M. Abramson, *Information Theory and Coding*. New York: McGraw-Hill, 1963.
+- **[2]** L. L. Campbell, "Entropy as a measure," *IEEE Trans. Inform. Theory*, vol. IT-11, pp. 112-114, Jan. 1965.
+- **[3]** I. Csiszár and J. Körner, *Information Theory: Coding Theorem for Discrete Memoryless Systems*. New York: Academic, and Budapest, Hungary: Akademiai Kiado, 1981.
+- **[4]** A. P. Dawid, "Conditional independence in statistical theory (with discussion)," *J. Roy. Statist. Soc., Ser. B*, vol. 41, pp. 1-31.
+- **[5]** S. Fujishige, "Polymatroidal dependence structure of a set of random variables," *Inform. Contr.*, vol. 39, pp. 55-72, 1978.
+- **[6]** T. Kawabata and R. W. Yeung, "The structure of the I-measure of a Markov chain," *IEEE Trans. Inform. Theory*, vol. 38, pp. 1146-1149, 1992.
+- **[7]** T. S. Han, "Linear dependence structure of the entropy space," *Inform. Contr.*, vol. 29, pp. 337-368.
+- **[8]** T. S. Han, "Nonnegative entropy measures of multivariate symmetric correlations," *Inform. Contr.*, vol. 36, pp. 133-156, 1978.
+- **[9]** T. S. Han, "A uniqueness of Shannon's information distance and related nonnegativity problems," *J. Comb., Inform. Syst. Sci.*, vol. 6, pp. 320-321, 1981.
+- **[10]** G.-d. Hu, "On the amount of information," *Teor. Veroyatnost. i Primenen.*, vol. 4, pp. 447-455, 1962, in Russian.
+- **[11]** F. Matus̆, private communication.
+- **[12]** F. J. MacWilliams and N. J. A. Sloane, *The Theory of Error Correcting Codes*. Amsterdam, The Netherlands: North-Holland, Elsevier Science B.V., 1977.
+- **[13]** M. Matus̆, "Abstract functional dependency structures," *Theor. Comput. Sci.*, vol. 81, pp. 117-126, 1991.
+- **[14]** M. Matus̆, "On equivalence of Markov properties over undirected graphs," *J. Appl. Probab.*, vol. 29, pp. 745-749, 1992.
+- **[15]** M. Matus̆, "Ascending and descending conditional independence relations," in *Trans. 11th Prague Conf. Information Theory, Statistical Decision Functions and Random Processes*, vol. B. Prague, Czechoslovakia: Academia, pp. 181-200, 1992.
+- **[16]** M. Matus̆, "Probabilistic conditional independence structures and matroid theory: Background," *Int. J. Gen. Syst.*, vol. 22, pp. 185-196.
+- **[17]** M. Matus̆, "Extreme convex set functions with many nonnegative differences," *Discr. Math.*, vol. 135, pp. 177-191, 1994.
+- **[18]** F. Matus̆, "Conditional independences among four random variables II," *Combin., Prob. Comput.*, vol. 4, pp. 407-417, 1995.
+- **[19]** F. Matus̆, "Conditional independence structures examined via minors," *Ann. Math. Artificial Intell.*, vol. 21, pp. 99-128, 1997.
+- **[20]** F. Matus̆ and M. Studený, "Conditional independences among four random variables I," *Combin., Prob. Comput.*, vol. 4, pp. 269-278, 1995.
+- **[21]** W. J. McGill, "Multivariate information transmission," in *Trans. Prof. Group Inform. Theory, 1954 Symp. Information Theory*, vol. PGIT-4, 1955, pp. 93-111.
+- **[22]** A. Papoulis, *Probability, Random Variables and Stochastic Processes*, 2nd ed. New York: McGraw-Hill, 1984.
+- **[23]** J. Pearl, *Probabilistic Reasoning in Intelligent Systems*. San Mateo, CA: Morgan Kaufman, 1988.
+- **[24]** *An Introduction to Information Theory*. New York: McGraw-Hill, 1961.
+- **[25]** M. Studený, "Attempts at axiomatic description of conditional independence," in *Proc. Workshop on Uncertainty Processing in Expert Systems*, supplement to *Kybernetika*, vol. 25, nos. 1-3, pp. 65-72, 1989.
+- **[26]** M. Studený, "Multiinformation and the problem of characterization of conditional independence relations," *Probl. Contr. Inform. Theory*, vol. 18, pp. 3-16, 1989.
+- **[27]** M. Studený, "Conditional independence relations have no finite complete characterization," in *Trans. 11th Prague Conf. Information Theory, Statistical Decision Functions and Random Processes*, vol. B. Prague, Czechoslovaka: Academia, pp. 377-396, 1992.
+- **[28]** M. Studený, "Structural semigraphoids," *Int. J. Gen. Syst.*, vol. 22, no. 2, pp. 207-217, 1994.
+- **[29]** M. Studený, "Descriptions of structures of stochastic independence by means of faces and imsets (in three parts)," *Int. J. Gen. Syst.*, vol. 23, pp. 123-137, pp. 201-219, pp. 323-341, 1994/1995.
+- **[30]** T. Tsujishita, "On triple mutual information," *Adv. Appl. Math.*, vol. 16, pp. 269-274, 1995.
+- **[31]** S. Watanabe, "A study of ergodicity and redundancy on intersymbol correlation of finite range," in *Trans. 1954 Symp. Inform. Theory* (Cambridge, MA, Sept. 15-17, 1954), p. 85.
+- **[32]** S. Watanabe, "Information theoretical analysis of multivariate correlation," *IBM J.*, pp. 66-81, 1960.
+- **[33]** D. J. A. Welsh, *Matroid Theory*. New York: Academic, 1976.
+- **[34]** R. W. Yeung, "A new outlook on Shannon's information measures," *IEEE Trans. Inform. Theory*, vol. 37, pp. 466-474, 1991.
+- **[35]** R. W. Yeung, "A framework for linear information inequalities," *IEEE Trans. Inform. Theory*, vol. 43, pp. 1924-1934, Nov. 1997.
+- **[36]** R. W. Yeung, T. T. Lee, and Z. Ye, "An information-theoretic characterization of Markov random fields and its applications," *IEEE Trans. Inform. Theory*, submitted for publication.
+- **[37]** R. W. Yeung and Z. Zhang, "Distributed source coding for satellite communication," *IEEE Trans. Inform. Theory*, submitted for publication.
+- **[38]** R. W. Yeung and Y.-O. Yan, "Information theoretic inequality prover." [Online] Available: `http://www.ie.cuhk.edu.hk/ITIP` or `http://it.ucsd.edu/~whyeung` (mirror site).
+- **[39]** Z. Zhang and R. W. Yeung, "A non-Shannon type conditional inequality of information quantities," *IEEE Trans. Inform. Theory*, vol. 43, pp. 1982-1985, Nov. 1997.
