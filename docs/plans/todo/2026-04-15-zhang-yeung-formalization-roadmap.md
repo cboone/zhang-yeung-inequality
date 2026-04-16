@@ -7,7 +7,7 @@
 
 **Resolved decisions:**
 - **Scope:** S2 + Theorem 5 (stretch). Theorems 3, 4 as core; Theorem 5 (n+2-variable generalization) as stretch.
-- **Dependency:** Start on PFR for entropy; progressively extract/reimplement just the needed subset into a local `ZhangYeung/Entropy/` module, then drop the PFR dep.
+- **Dependency:** Permanent PFR dependency for Shannon entropy primitives. Pinned rev in `lakefile.toml`; upgrades are deliberate, not scheduled.
 - **Blueprint:** No. Lean-only.
 - **Mathlib intent:** Copy lemma yes (designed for upstream). Rest of proof stays local.
 
@@ -71,7 +71,7 @@ The PFR project defines in `PFR/ForMathlib/Entropy/{Basic,MutualInfo,Kernel/*}.l
 - KL divergence, Ruzsa distance (not needed here).
 - Entropy operates on random variables as measurable functions on a probability space, scaling naturally to many variables.
 
-PFR contains no non-Shannon inequalities and no copy lemma. It brings substantial unneeded machinery (Ruzsa distance, tau functional, group-theoretic entropy, fibring lemma). Only the `ForMathlib/Entropy/` subtree (~4-6 files) is relevant.
+PFR contains no non-Shannon inequalities and no copy lemma. It brings substantial unneeded machinery (Ruzsa distance, tau functional, group-theoretic entropy, fibring lemma). Only the `ForMathlib/Entropy/` subtree is imported; the remainder is carried by the dependency but unused.
 
 ### 2.4 Mathlib PR status
 
@@ -105,18 +105,9 @@ ITIP, Xitip, oXitip, minitip, PSITIP are LP-based Shannon-type provers. PSITIP u
 
 The copy lemma needs to take a 4-variable joint, form a conditional distribution of (X, Y) given (Z, U), compose it to produce a 6-variable joint, and prove marginal/conditional-independence properties. This is most naturally done in a measure-space framework (PFR's approach, Mathlib's idiom).
 
-### Resolved strategy: bootstrap on PFR, extract progressively
+### Resolved strategy: permanent PFR dependency
 
-**Phase 1 (bootstrap):** Depend on PFR via `lakefile.toml` (pinned rev). Import only `PFR.ForMathlib.Entropy.{Basic,MutualInfo}` and kernel variants. Ignore Ruzsa distance, group theory, fibring lemma, etc.
-
-**Phase 2 (extraction):** As a parallel workstream, fork/copy with attribution (or reimplement from Mathlib primitives) just the definitions and lemmas actually used. Target: a local `ZhangYeung/Entropy/` module containing:
-- `H[X; mu]`, `H[X | Y; mu]`, `I[X : Y; mu]`, `I[X : Y | Z; mu]` definitions and notation.
-- Shannon inequalities: nonnegativity, chain rule, submodularity, data processing.
-- ~4-6 files, ~1500-2000 lines, well-isolated from PFR's Freiman-Ruzsa machinery.
-
-**Phase 3 (shed PFR):** Remove the PFR dep. Project depends only on Mathlib.
-
-**Optional bridge:** A lemma `entropyNat (toProbDist X mu) = H[X; mu]` connecting to `shannon-entropy`'s definitions.
+Depend on PFR via `lakefile.toml` at a pinned rev. Import only `PFR.ForMathlib.Entropy.{Basic,MutualInfo}` and kernel variants. Ignore Ruzsa distance, group theory, fibring lemma, etc. PFR stays as a permanent dependency; there is no plan to extract or replace it with a local entropy layer. Upgrades to the PFR pin are deliberate work scheduled alongside feature milestones.
 
 ## 4. Scope (resolved: S2 + Theorem 5 stretch)
 
@@ -133,9 +124,9 @@ The copy lemma needs to take a 4-variable joint, form a conditional distribution
 
 ## 5. File Layout
 
-```
+```text
 zhang-yeung-inequality/
-  lakefile.toml               # Lake manifest; pins PFR and defers mathlib resolution transitively (phase 1)
+  lakefile.toml               # Lake manifest; pins PFR and defers mathlib resolution transitively
   lean-toolchain              # matching Lean version
   ZhangYeung.lean             # top-level re-export
   ZhangYeung/
@@ -145,10 +136,6 @@ zhang-yeung-inequality/
     Theorem3.lean             # the main Zhang-Yeung inequality
     Theorem4.lean             # cl(Gamma*_n) != Gamma_n, explicit witness
     Theorem5.lean             # (stretch) n+2-variable generalization
-    Entropy/                  # (phase 2) extracted/reimplemented Shannon layer
-      Basic.lean              # H[X], H[X|Y]
-      MutualInfo.lean         # I[X:Y], I[X:Y|Z]
-      ShannonInequalities.lean  # nonnegativity, chain rule, submodularity, DPI
   test/                       # sanity tests
   .github/workflows/ci.yml    # CI: lake build + lint
 ```
@@ -157,11 +144,11 @@ zhang-yeung-inequality/
 
 ### Dependency graph
 
-```
+```text
 M0 (scaffolding)
  |
  v
-M1 (Delta lemmas) -----> M6 (entropy extraction, parallel)
+M1 (Delta lemmas)
  |
  v
 M2 (copy lemma)
@@ -175,20 +162,19 @@ M3 (Thm 3)   M4 (Thm 4, partially parallel -- see note)
 M5 (Thm 5, stretch)
  |
  v
-M7 (polish)
+M6 (polish)
 ```
 
 ### Parallelism analysis
 
 **M4 is partially independent of M3.** Theorem 4's counterexample proof has two halves: (a) proving F satisfies all basic Shannon inequalities (entirely independent of M2/M3, can begin after M1), and (b) proving F violates the Zhang-Yeung inequality (requires M3's theorem statement, but only as a *black box*: the proof is a direct arithmetic check against the inequality). In practice: the `shannonCone` definition and the 15-constraint verification can be written before M3 lands; the final `not (zhangYeungHolds F)` step plugs in M3's result.
 
-**M6 (entropy extraction) is fully independent** of the main proof chain M2-M5. It can begin as soon as M0 completes and run alongside everything else. The swap from PFR imports to local imports happens at the end; no milestone blocks on it.
-
 **M5 depends on M3** (uses the same proof structure plus induction), not on M4.
 
 **Concurrent worktree strategy:** Two worktrees can run productively:
+
 - **Worktree A (main proof):** M0 -> M1 -> M2 -> M3 -> M5
-- **Worktree B (infrastructure + counterexample):** M6 (entropy extraction) + M4 part (a) (Shannon cone definition and constraint verification), merging with Worktree A once M3 lands to close M4 part (b).
+- **Worktree B (counterexample):** M4 part (a) (Shannon cone definition and constraint verification), merging with Worktree A once M3 lands to close M4 part (b).
 
 ### M0: Project scaffolding
 
@@ -242,32 +228,22 @@ M7 (polish)
 - Same proof: one copy per X_j, induction on n.
 - **Checkpoint:** statement over `Fin n -> Omega -> S` with the correct bound.
 
-### M6: Entropy extraction (parallel)
-
-Fully independent of M2-M5. Begins after M0.
-
-- Identify which PFR definitions and lemmas are actually imported by M1-M5.
-- Fork/copy those files with attribution into `ZhangYeung/Entropy/`, or reimplement on Mathlib primitives.
-- Target: `Basic.lean` (H, condEntropy), `MutualInfo.lean` (I, condMutualInfo), `ShannonInequalities.lean` (the ~20 key lemmas).
-- Once this builds independently, remove PFR from `lakefile.lean`.
-- Optionally, prove bridge lemma connecting to `shannon-entropy`'s `entropyNat`.
-
-### M7: Polish and release
+### M6: Polish and release
 
 - README with theorem statement, install instructions, citation.
 - `write-math`/`write-lean-code`/`lint-and-fix` audit.
-- Tag v0.1 once M0-M4 land; v0.2 if M5+M6 complete.
+- Tag v0.1 once M0-M4 land; v0.2 once M5 lands.
 
 ## 7. Key Risks and Unknowns
 
 ### 7.1 PFR API churn (moderate)
-PFR is under active upstreaming. Function names and namespaces may change. **Mitigation:** pin the rev; document the pin; treat upgrades as deliberate work. M6 (extraction) is the long-term fix.
+PFR is under active upstreaming. Function names and namespaces may change. **Mitigation:** pin the rev; document the pin; treat upgrades as deliberate work scheduled alongside feature milestones.
 
 ### 7.2 Copy-lemma measurability bookkeeping (moderate-high)
 The conceptual content of Lemma 2 is elementary, but the Lean proof needs to discharge measurability/standard-Borel/sigma-finite side conditions at each step. Finite RVs make standard Borel trivial but do not make `Kernel.compProd` go through without work. **Mitigation:** specialize to `Fintype` initially; generalize later.
 
 ### 7.3 PFR build weight (moderate)
-PFR brings Ruzsa distance, tau functional, group-theoretic entropy, and more. Build times may be substantial. **Mitigation:** M6 (extraction) is the fix. Meanwhile, Mathlib cache from `lake exe cache get` should keep incremental builds fast.
+PFR brings Ruzsa distance, tau functional, group-theoretic entropy, and more. Build times may be substantial. **Mitigation:** Mathlib cache from `lake exe cache get` and the CI elan/lake caches keep incremental builds fast; PFR itself compiles once per dependency-rev bump.
 
 ### 7.4 Log-base conventions (low)
 The paper uses log base 2, base 3, and natural log interchangeably. Mathlib's `negMulLog` uses natural log. **Mitigation:** state all inequalities in log-base-agnostic form; base only matters in Theorem 4's explicit numerical check, where it cancels.
@@ -311,7 +287,6 @@ Ranked by leverage:
 - `ZhangYeung/Theorem3.lean`
 - `ZhangYeung/Theorem4.lean`
 - `ZhangYeung/Theorem5.lean` (stretch)
-- `ZhangYeung/Entropy/{Basic,MutualInfo,ShannonInequalities}.lean` (M6 extraction)
 
 **External (depend on, do not modify):**
 - `PFR/ForMathlib/Entropy/Basic.lean` (entropy, condEntropy, basic Shannon inequalities)
@@ -320,7 +295,3 @@ Ranked by leverage:
 - `Mathlib/Probability/Kernel/Composition/MeasureCompProd.lean` (mu otimes_m kappa)
 - `Mathlib/Probability/Independence/Conditional.lean` (CondIndepFun)
 - `Mathlib/Probability/IdentDistrib.lean` (IdentDistrib)
-
-## 11. Note on Stray Artifact
-
-During the research phase, a subagent created an extra file at `docs/plans/todo/2026-04-15-post-zhang-yeung-extension-survey.md`. Its content is summarized in section 9 above. Recommend deleting it (or moving to `docs/research/`) after plan approval.
