@@ -364,9 +364,67 @@ valid for every nonnegative atom function $J$.
 
 The main argument is a case analysis (p. 1448-1451) showing that every function $F \in \hat{\Gamma}_4$ can be reduced via a sequence of **legal operations** (subtracting a nonnegative multiple of one of the basic functions from Constructions 2-7 while preserving the relevant inequalities) to a nonnegative function, which is asymptotically constructible by Lemma 4. The proof proceeds in three stages.
 
-1. **Normalize a weight-two atom with $F^2$.** Since $F^2$ satisfies Conditions 2-4 with equality, the paper subtracts $a F^2$, where $a$ is the minimum weight-two atom value, and thereby reduces to a function $F'$ with $F'[1, 2] = 0$.
-2. **Reach seminonnegativity with $F^3_i$.** If one of the relevant weight-three atoms is negative, subtracting a suitable multiple of one of the $F^3_i$ preserves the defining inequalities and yields a seminonnegative function $G$.
-3. **Eliminate the weight-four atom by case analysis.** For seminonnegative $G$, the remaining obstructions involve the six inequalities $\sum_{\{i,j\} \subset \alpha} G[\alpha] \geq 0$ in which the weight-four atom participates. The paper then uses repeated legal operations with $F^3_i$, $F^4_{i,j}$, and $F^7_i$, splitting into two master cases: either some $3$-subset forces three associated weight-two atoms to vanish, or two disjoint weight-two atoms vanish. Each branch eventually reduces to a nonnegative atom function.
+1. **Normalize a weight-two atom with $F^2$.** Since $F^2$ satisfies Conditions 2-4 with equality, the paper subtracts $a F^2$, where $a := \min_{\{i,j\} \subset \{1,2,3,4\}} F[i, j]$, and thereby reduces to a function $F'$ with $F'[1, 2] = 0$.
+2. **Reach seminonnegativity with $F^3_i$.** If one of the relevant weight-three atoms is negative, for instance $F'[1, 3, 4] < 0$, the paper sets $a := -F'[1, 3, 4]$ and subtracts $a F^3_2$. Repeating symmetrically if needed yields a seminonnegative function $G$.
+3. **Eliminate the weight-four atom by a structured branch analysis.** For seminonnegative $G$, the remaining constraints are the six inequalities in which the weight-four atom $[1, 2, 3, 4]$ appears. The paper first records two reusable observations:
+
+   Observation 1: if $J$ is seminonnegative, $\{i, j, k, l\}$ is a permutation of $\{1, 2, 3, 4\}$, and $J[i, j, k] + J[1, 2, 3, 4] \geq 0$, then subtracting $a F^4_{i,j}$ is legal and keeps the function seminonnegative, where
+
+$$a = \min\{J[k, l], J[i, k, l], J[j, k, l]\}.$$
+
+   Observation 2: if, in addition,
+
+$$J[i, j, k] + J[1, 2, 3, 4] \geq 0, \qquad J[i, j, l] + J[1, 2, 3, 4] \geq 0, \qquad J[i, k, l] + J[1, 2, 3, 4] \geq 0,$$
+
+then subtracting $a F^7_i$ is legal and produces a nonnegative function, where
+
+$$a = \min\{J[i, k, l], J[i, j, l], J[i, j, k]\}.$$
+
+   Before invoking these observations, the paper repeatedly subtracts suitable multiples of $F^3_i$, $F^5$, and $F^6_i$ as long as seminonnegativity is preserved. When no such move remains, the proof splits into two master cases.
+
+   Case 1: some $3$-subset, without loss of generality $\{1, 2, 3\}$, has all three associated weight-two atoms zero:
+
+$$G'[1, 2] = G'[1, 3] = G'[2, 3] = 0.$$
+
+   Since no $F^6_4$ move is available, one of $G'[1,4]$, $G'[2,4]$, $G'[3,4]$, or $G'[1,2,3]$ must also be zero.
+
+   Case 1.1: one of the remaining weight-two atoms vanishes, say $G'[1,4] = 0$. Since no $F^5$ move is available, one of $G'[1,2,4]$, $G'[1,3,4]$, or $G'[2,3,4]$ is also zero. The paper then dispatches the branches as follows.
+
+   If $G'[1,2,4] = 0$, subtract $a F^4_{1,3}$ with
+
+$$a = \min\{G'[2,4], G'[1,2,3], G'[1,3,4]\};$$
+
+   if the resulting function still has negative weight-four atom, subtract $b F^7_1$ with $b = -G''[1,2,3,4]$.
+
+   If $G'[2,3,4] = 0$, subtract $a F^4_{1,2}$ with
+
+$$a = \min\{G'[3,4], G'[1,2,3], G'[1,2,4]\};$$
+
+   if needed, follow by a second $F^4_{1,3}$ move and then a final $F^7_1$ move. In all subbranches the output is nonnegative.
+
+   Case 1.2: the extra zero is the weight-three atom $G'[1,2,3] = 0$. Then
+
+$$G'[1,3,4] + G'[1,2,3,4] \geq 0, \qquad G'[1,2,4] + G'[1,2,3,4] \geq 0, \qquad G'[2,3,4] + G'[1,2,3,4] \geq 0,$$
+
+   so a single $F^7_1$ move of size $-G'[1,2,3,4]$ yields a nonnegative function.
+
+   Case 2: two disjoint weight-two atoms vanish, without loss of generality
+
+$$G'[1,2] = G'[3,4] = 0.$$
+
+   Since no $F^5$ move remains, one may further assume $G'[1,2,3] = 0$. The paper first subtracts $a F^4_{1,4}$ with
+
+$$a = \min\{G'[2,3], G'[1,3,4], G'[1,2,4]\}.$$
+
+   The resulting function $G''$ has one of $G''[1,3,4]$, $G''[1,2,4]$, or $G''[2,3]$ equal to zero.
+
+   If $G''[1,3,4] = 0$, a single $F^4_{2,4}$ move with parameter $\min\{G''[1,3], G''[1,2,4], G''[2,3,4]\}$ finishes.
+
+   If $G''[2,3] = 0$, the paper subtracts an $F^4_{2,4}$ move; if that still leaves the weight-four atom negative, the remaining three inequalities needed for Observation 2 hold, and a final $F^7_4$ move completes the reduction.
+
+   If $G''[1,2,4] = 0$, then the weight-four atom is already nonnegative, so the function is done.
+
+In every branch, the process terminates at a nonnegative atom function, proving Theorem 6.
 
 > **Transcription caveat.** The construction definitions on pp. 1446-1447 are now verified against the PDF. What remains summarized rather than transcribed line by line is the atom-chart bookkeeping and the full legal-operation case analysis on pp. 1447-1451.
 
