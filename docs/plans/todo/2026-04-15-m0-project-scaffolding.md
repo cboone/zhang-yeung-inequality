@@ -14,15 +14,15 @@ The project depends on PFR (`teorth/pfr`) for Shannon entropy definitions (`H[X]
 
 ## Steps
 
-### 1. Determine PFR compatibility with Lean 4.29.0
+### 1. Determine PFR compatibility with Lean 4.29.0 in the intended root-package layout
 
-- Clone or shallow-fetch PFR at `80daaf1` (latest master, Mar 20 2026)
-- Swap its `lean-toolchain` to `leanprover/lean4:v4.29.0`
+- Create a throwaway scratch package that matches this repo's planned dependency shape: a root package with a single direct dependency on `PFR` at `80daaf1`, plus a tiny module importing `PFR.ForMathlib.Entropy.Basic`
+- Set its `lean-toolchain` to `leanprover/lean4:v4.29.0`
 - Run `lake update && lake exe cache get && lake build`
-- If it builds: proceed with 4.29.0 and Mathlib 4.29.0 (matching `8a178386` rev from the user's other projects)
-- If it fails: fall back to 4.28.0-rc1 and PFR's native Mathlib rev
+- If it builds: proceed with 4.29.0 and let Lake resolve `mathlib` transitively through `PFR`
+- If it fails: fall back to `leanprover/lean4:v4.28.0-rc1` and still let Lake resolve `mathlib` transitively through `PFR`
 
-This is a throwaway test; nothing from it gets committed.
+This is a throwaway test; nothing from it gets committed. The point is to validate the exact dependency shape we plan to check in here, not PFR in isolation.
 
 ### 2. Create `lean-toolchain`
 
@@ -40,7 +40,7 @@ Follow the pattern from shannon-entropy and PFR. Key choices:
 - **Package name**: `ZhangYeung`
 - **Default target**: `ZhangYeung`
 - **Lint driver**: `batteries/runLinter`
-- **Dependencies**: `mathlib` (pinned by rev), `PFR` (pinned at `80daaf1`). Batteries comes transitively via Mathlib.
+- **Dependencies**: `PFR` pinned at `80daaf1`. Do not add a direct `mathlib` dependency; let Lake resolve it transitively through `PFR` so the root package matches the tested graph.
 - **Lean options**: `autoImplicit = false`, `relaxedAutoImplicit = false` (matching PFR's strictness)
 - No test driver yet (no test files in M0)
 
@@ -55,11 +55,6 @@ autoImplicit = false
 relaxedAutoImplicit = false
 
 [[require]]
-name = "mathlib"
-git = "https://github.com/leanprover-community/mathlib4"
-rev = "<determined by step 1>"
-
-[[require]]
 name = "PFR"
 git = "https://github.com/teorth/pfr"
 rev = "80daaf1"
@@ -68,7 +63,7 @@ rev = "80daaf1"
 name = "ZhangYeung"
 ```
 
-Note: PFR also depends on APAP and checkdecls, which Lake resolves transitively. We do not need to list them.
+Note: PFR also depends on APAP, checkdecls, and Mathlib, which Lake resolves transitively. We do not need to list them.
 
 ### 4. Create skeleton Lean files
 
@@ -148,7 +143,7 @@ Document project-specific conventions required by the write-lean-code skill:
 ### 9. Push and verify CI
 
 - Commit all scaffolding files
-- Push to `main`
+- Push the branch
 - Verify the GitHub Actions workflow passes
 
 ## Deliverable

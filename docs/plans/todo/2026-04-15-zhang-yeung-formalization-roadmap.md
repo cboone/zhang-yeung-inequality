@@ -107,7 +107,7 @@ The copy lemma needs to take a 4-variable joint, form a conditional distribution
 
 ### Resolved strategy: bootstrap on PFR, extract progressively
 
-**Phase 1 (bootstrap):** Depend on PFR via `lakefile.lean` (pinned rev). Import only `PFR.ForMathlib.Entropy.{Basic,MutualInfo}` and kernel variants. Ignore Ruzsa distance, group theory, fibring lemma, etc.
+**Phase 1 (bootstrap):** Depend on PFR via `lakefile.toml` (pinned rev). Import only `PFR.ForMathlib.Entropy.{Basic,MutualInfo}` and kernel variants. Ignore Ruzsa distance, group theory, fibring lemma, etc.
 
 **Phase 2 (extraction):** As a parallel workstream, fork/copy with attribution (or reimplement from Mathlib primitives) just the definitions and lemmas actually used. Target: a local `ZhangYeung/Entropy/` module containing:
 - `H[X; mu]`, `H[X | Y; mu]`, `I[X : Y; mu]`, `I[X : Y | Z; mu]` definitions and notation.
@@ -135,7 +135,7 @@ The copy lemma needs to take a 4-variable joint, form a conditional distribution
 
 ```
 zhang-yeung-inequality/
-  lakefile.lean               # Lake manifest; pins mathlib + pfr (phase 1)
+  lakefile.toml               # Lake manifest; pins PFR and defers mathlib resolution transitively (phase 1)
   lean-toolchain              # matching Lean version
   ZhangYeung.lean             # top-level re-export
   ZhangYeung/
@@ -150,7 +150,7 @@ zhang-yeung-inequality/
       MutualInfo.lean         # I[X:Y], I[X:Y|Z]
       ShannonInequalities.lean  # nonnegativity, chain rule, submodularity, DPI
   test/                       # sanity tests
-  .github/workflows/lean.yml  # CI: lake build
+  .github/workflows/ci.yml    # CI: lake build
 ```
 
 ## 6. Milestone-by-Milestone Plan
@@ -192,9 +192,9 @@ M7 (polish)
 
 ### M0: Project scaffolding
 
-- Initialize `lakefile.lean` with Mathlib 4 and PFR as deps (pin PFR at a specific rev).
-- `lean-toolchain` matched to PFR's pin.
-- `.github/workflows/lean.yml` running `lake build`.
+- Initialize `lakefile.toml` with PFR as a direct dep (pin PFR at a specific rev and defer Mathlib resolution transitively).
+- `lean-toolchain` set by the compatibility check in the root-package layout test.
+- `.github/workflows/ci.yml` running `lake build`.
 - Skeleton `ZhangYeung.lean` importing PFR entropy notation; verify it builds.
 - Apply `write-lean-code` skill guidance from the first commit.
 - **Deliverable:** green CI build importing PFR entropy notation.
