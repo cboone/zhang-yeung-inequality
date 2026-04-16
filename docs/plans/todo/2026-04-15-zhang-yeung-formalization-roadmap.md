@@ -64,14 +64,15 @@ A substantial Lean 4 formalization (~1,888 lines, 10 modules) of Shannon's 1948 
 
 ### 2.3 PFR project (`teorth/pfr`)
 
-The PFR project defines in `PFR/ForMathlib/Entropy/{Basic,MutualInfo,Kernel/*}.lean` (namespace `ProbabilityTheory`):
+The PFR project defines the relevant entropy API in `PFR/ForMathlib/Entropy/{Measure,Basic,Kernel/*}.lean` (namespace `ProbabilityTheory`):
 
+- `measureEntropy` / `measureMutualInfo` at the measure layer.
 - `entropy` (`H[X; mu]`), `condEntropy` (`H[X | Y]`), `mutualInfo` (`I[X : Y]`), `condMutualInfo` (`I[X : Y | Z]`).
 - All basic Shannon inequalities: nonnegativity, submodularity, chain rule, data processing, conditioning reduces entropy.
 - KL divergence, Ruzsa distance (not needed here).
 - Entropy operates on random variables as measurable functions on a probability space, scaling naturally to many variables.
 
-PFR contains no non-Shannon inequalities and no copy lemma. It brings substantial unneeded machinery (Ruzsa distance, tau functional, group-theoretic entropy, fibring lemma). Only the `ForMathlib/Entropy/` subtree (~4-6 files) is relevant.
+PFR contains no non-Shannon inequalities and no copy lemma. It brings substantial unneeded machinery (Ruzsa distance, tau functional, group-theoretic entropy, fibring lemma). Only the `ForMathlib/Entropy/` subtree (five core files, plus a handful of support patches) is relevant.
 
 ### 2.4 Mathlib PR status
 
@@ -111,8 +112,9 @@ The copy lemma needs to take a 4-variable joint, form a conditional distribution
 
 **Phase 2 (extraction):** As a parallel workstream, fork/copy with attribution (or reimplement from Mathlib primitives) just the definitions and lemmas actually used. Target: a local `ZhangYeung/Entropy/` module containing:
 - `H[X; mu]`, `H[X | Y; mu]`, `I[X : Y; mu]`, `I[X : Y | Z; mu]` definitions and notation.
-- Shannon inequalities: nonnegativity, chain rule, submodularity, data processing.
-- ~4-6 files, ~1500-2000 lines, well-isolated from PFR's Freiman-Ruzsa machinery.
+- The full three-layer structure: `Measure.lean`, `Kernel/Basic.lean`, `Kernel/MutualInfo.lean`, `Basic.lean`, `MutualInfo.lean`.
+- Any temporary `ForMathlib/` or `Mathlib/` support shims needed for `FiniteRange`, conditional-independence helpers, or still-unupstreamed kernel infrastructure.
+- Roughly 5 core files plus a small number of temporary support patches, well-isolated from PFR's Freiman-Ruzsa machinery.
 
 **Phase 3 (shed PFR):** Remove the PFR dep. Project depends only on Mathlib.
 
@@ -146,9 +148,17 @@ zhang-yeung-inequality/
     Theorem4.lean             # cl(Gamma*_n) != Gamma_n, explicit witness
     Theorem5.lean             # (stretch) n+2-variable generalization
     Entropy/                  # (phase 2) extracted/reimplemented Shannon layer
+      Measure.lean            # Hm[mu], Im[mu], FiniteSupport
+      Kernel/
+        Basic.lean            # Hk[kappa, mu], kernel support, chain rules, DPI
+        MutualInfo.lean       # Ik[kappa, mu], submodularity
       Basic.lean              # H[X], H[X|Y]
       MutualInfo.lean         # I[X:Y], I[X:Y|Z]
-      ShannonInequalities.lean  # nonnegativity, chain rule, submodularity, DPI
+    ForMathlib/
+      FiniteRange.lean        # if still not upstreamed
+      ConditionalIndependence.lean  # if still needed
+    Mathlib/
+      ...                     # temporary Mathlib patches copied from PFR
   test/                       # sanity tests
   .github/workflows/ci.yml    # CI: lake build + lint
 ```
@@ -247,9 +257,10 @@ M7 (polish)
 Fully independent of M2-M5. Begins after M0.
 
 - Identify which PFR definitions and lemmas are actually imported by M1-M5.
-- Fork/copy those files with attribution into `ZhangYeung/Entropy/`, or reimplement on Mathlib primitives.
-- Target: `Basic.lean` (H, condEntropy), `MutualInfo.lean` (I, condMutualInfo), `ShannonInequalities.lean` (the ~20 key lemmas).
-- Once this builds independently, remove PFR from `lakefile.lean`.
+- Audit the required support surface, including `FiniteRange`, `FiniteSupport`, `FiniteKernelSupport`, `AEFiniteKernelSupport`, and any missing `Mathlib` shims.
+- Fork/copy those files with attribution into `ZhangYeung/Entropy/`, or reimplement on Mathlib primitives while preserving the measure -> kernel -> random-variable layering.
+- Target: `Measure.lean`, `Kernel/Basic.lean`, `Kernel/MutualInfo.lean`, `Basic.lean`, `MutualInfo.lean`, plus a small number of temporary `ZhangYeung/ForMathlib/` and `ZhangYeung/Mathlib/` support files.
+- Once this builds independently, remove PFR from `lakefile.toml`.
 - Optionally, prove bridge lemma connecting to `shannon-entropy`'s `entropyNat`.
 
 ### M7: Polish and release
@@ -311,11 +322,16 @@ Ranked by leverage:
 - `ZhangYeung/Theorem3.lean`
 - `ZhangYeung/Theorem4.lean`
 - `ZhangYeung/Theorem5.lean` (stretch)
-- `ZhangYeung/Entropy/{Basic,MutualInfo,ShannonInequalities}.lean` (M6 extraction)
+- `ZhangYeung/Entropy/Measure.lean`
+- `ZhangYeung/Entropy/Kernel/{Basic,MutualInfo}.lean`
+- `ZhangYeung/Entropy/{Basic,MutualInfo}.lean` (M6 extraction)
+- `ZhangYeung/ForMathlib/*.lean` and `ZhangYeung/Mathlib/*.lean` (temporary M6 support files, as needed)
 
 **External (depend on, do not modify):**
-- `PFR/ForMathlib/Entropy/Basic.lean` (entropy, condEntropy, basic Shannon inequalities)
-- `PFR/ForMathlib/Entropy/MutualInfo.lean` (mutualInfo, condMutualInfo)
+- `PFR/ForMathlib/Entropy/Measure.lean` (measure entropy and finite-support infrastructure)
+- `PFR/ForMathlib/Entropy/Basic.lean` (RV-level entropy, condEntropy, mutualInfo, condMutualInfo)
+- `PFR/ForMathlib/Entropy/Kernel/Basic.lean` (kernel entropy)
+- `PFR/ForMathlib/Entropy/Kernel/MutualInfo.lean` (kernel mutual information)
 - `Mathlib/Probability/Kernel/CondDistrib.lean` (condDistrib)
 - `Mathlib/Probability/Kernel/Composition/MeasureCompProd.lean` (mu otimes_m kappa)
 - `Mathlib/Probability/Independence/Conditional.lean` (CondIndepFun)

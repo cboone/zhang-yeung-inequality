@@ -9,7 +9,7 @@ M6 is fully independent of the main proof chain (M1-M5) and runs in parallel. It
 ## Prerequisites
 
 - M0 complete: `lakefile.toml` with PFR dep, `lean-toolchain`, green build
-- M1-M3 at least drafted (to confirm API surface). In practice, the needed API surface is predictable from the paper's mathematical content, so extraction can begin optimistically and be refined once M1-M3 take shape.
+- M1-M3 are not prerequisites. The eventual proof-side imports may refine the retained API surface, but M6 proceeds independently from M0 onward and can adjust if later milestones reveal a missing lemma.
 
 ## PFR Entropy Architecture
 
@@ -100,10 +100,10 @@ Plus the measure-level (`measureEntropy`, `measureMutualInfo`) and kernel-level 
 
 ### Typeclasses and infrastructure
 
-- `FiniteRange` (PFR-local typeclass, not in Mathlib)
-- `IsZeroOrProbabilityMeasure` (should be in Mathlib; verify)
-- `AEFiniteKernelSupport`, `FiniteKernelSupport` (PFR-local)
-- `FiniteSupport` (for measures, PFR-local)
+- `FiniteRange` (PFR-local; audit in Step 1 and copy to `ZhangYeung/ForMathlib/FiniteRange.lean` unless the pinned Mathlib now provides an equivalent)
+- `IsZeroOrProbabilityMeasure` (audit in Step 1; if the pinned Mathlib still lacks it, vendor a minimal shim under `ZhangYeung/Mathlib/` before continuing)
+- `FiniteSupport` (measure-side support class defined in `Measure.lean`; extracted as part of Step 2)
+- `AEFiniteKernelSupport`, `FiniteKernelSupport` (kernel-support infrastructure from the kernel layer; audit in Step 1 and either keep in `Kernel/Basic.lean` or extract a tiny support file if that yields a cleaner dependency boundary)
 
 ## PFR Non-Entropy Dependencies
 
@@ -137,7 +137,7 @@ ZhangYeung/
   Entropy/
     Measure.lean              # measureEntropy, measureMutualInfo, FiniteSupport
     Kernel/
-      Basic.lean              # Kernel.entropy, chain rules, data processing
+      Basic.lean              # Kernel.entropy, kernel-support classes, chain rules, data processing
       MutualInfo.lean         # Kernel.mutualInfo, submodularity
     Basic.lean                # H[X], H[X|Y] definitions and proofs
     MutualInfo.lean           # I[X:Y], I[X:Y|Z] definitions and proofs
@@ -156,15 +156,16 @@ The split between `Basic.lean` and `MutualInfo.lean` at the RV level mirrors PFR
 
 ### Step 1: Audit PFR Mathlib patches against current Mathlib
 
-For each of the 10 PFR non-entropy dependencies listed above:
+For each of the 10 PFR non-entropy dependencies listed above, plus the support items listed under "Typeclasses and infrastructure":
 
 - Read the PFR file at the pinned rev (`80daaf1`)
 - Grep current Mathlib (at the rev pinned in `lakefile.toml`) for each definition and lemma
+- Record the defining file for each support class or helper lemma if it is not already one of the 10 imports above
 - Classify as: (a) fully upstreamed, (b) partially upstreamed, (c) not upstreamed
 - For (a): record the Mathlib import path
-- For (b)/(c): mark for copying or reimplementation
+- For (b)/(c): mark for copying or reimplementation, including the target local home (`Measure.lean`, `Kernel/Basic.lean`, `ZhangYeung/ForMathlib/*`, or `ZhangYeung/Mathlib/*`)
 
-**Output:** A table mapping each PFR patch file to its disposition.
+**Output:** A table mapping each PFR patch/support item to its disposition and planned local home.
 
 ### Step 2: Create `ZhangYeung/Entropy/Measure.lean`
 
@@ -200,6 +201,7 @@ Fork `PFR/ForMathlib/Entropy/Kernel/Basic.lean`. Strip:
 Keep:
 
 - `Kernel.entropy` definition and notation `Hk[kappa, mu]`
+- `FiniteKernelSupport` and `AEFiniteKernelSupport`, plus the finite-support transfer lemmas needed by later files
 - Basics: `entropy_zero_measure`, `entropy_zero_kernel`, `entropy_congr`, `entropy_nonneg`, `entropy_const`
 - Injective maps: `entropy_map_of_injective`, `entropy_map_swap`, `entropy_swapRight`
 - Chain rules: `entropy_compProd`, `chain_rule`, `chain_rule'`
@@ -274,8 +276,11 @@ Based on the audit from Step 1:
 - Strip to only the definitions and lemmas actually used by our entropy files
 - Add attribution headers citing PFR
 - Add `@[deprecated]` or TODO comments for items expected to arrive in Mathlib soon
+- If the audit shows `IsZeroOrProbabilityMeasure` or similar glue is still missing from Mathlib, vendor the smallest viable shim here rather than leaving the dependency implicit
 
 The most critical patch file is `FiniteRange.lean`. The `FiniteRange` typeclass is PFR's primary finiteness mechanism and appears in nearly every theorem signature. If it is not in Mathlib, we must copy it faithfully.
+
+The other infrastructure decision that must be made explicit is kernel support. If keeping `FiniteKernelSupport` and `AEFiniteKernelSupport` inside `Kernel/Basic.lean` creates awkward imports, split out a tiny helper module and record that choice in the Step 1 audit table; otherwise keep them co-located with the kernel entropy definitions.
 
 ### Step 8: Build and test
 
@@ -337,7 +342,8 @@ Step 11 (bridge) is independent and optional.
 - `lake build ZhangYeung` exits 0 with no PFR dependency in `lakefile.toml`
 - `lake lint` exits 0
 - All notation (`H[X ; mu]`, `H[X | Y ; mu]`, `I[X : Y ; mu]`, `I[X : Y | Z ; mu]`) works after `open ProbabilityTheory`
-- Grep confirms zero references to `PFR` in any `.lean` file
+- Grep confirms zero `import PFR` matches in project `.lean` files
+- Any remaining textual `PFR` mentions in `.lean` files are limited to attribution comments or docstrings, not live imports or code references
 - CI workflow passes
 
 ## Files created
