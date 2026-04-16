@@ -150,7 +150,7 @@ zhang-yeung-inequality/
       MutualInfo.lean         # I[X:Y], I[X:Y|Z]
       ShannonInequalities.lean  # nonnegativity, chain rule, submodularity, DPI
   test/                       # sanity tests
-  .github/workflows/ci.yml    # CI: lake build
+  .github/workflows/ci.yml    # CI: lake build + lint
 ```
 
 ## 6. Milestone-by-Milestone Plan
@@ -194,7 +194,7 @@ M7 (polish)
 
 - Initialize `lakefile.toml` with PFR as a direct dep (pin PFR at a specific rev and defer Mathlib resolution transitively).
 - `lean-toolchain` set by the compatibility check in the root-package layout test.
-- `.github/workflows/ci.yml` running `lake build`.
+- `.github/workflows/ci.yml` running `lake build` and `lake lint`.
 - Skeleton `ZhangYeung.lean` importing PFR entropy notation; verify it builds.
 - Apply `write-lean-code` skill guidance from the first commit.
 - **Deliverable:** green CI build importing PFR entropy notation.
