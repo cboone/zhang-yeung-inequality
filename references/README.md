@@ -16,13 +16,48 @@ Cite entries by their BibTeX key in Lean docstrings via the `[@key]` syntax expe
 
 ## Regenerating an extraction
 
-Each extraction file is suffixed with the tool that produced it. The math in IEEE papers of this vintage is set in Type 3 fonts with no `ToUnicode` map, so no layout-based extractor can recover the equation content: pdftotext, pymupdf, pdfminer, and pdfplumber all silently drop it. Rendering the pages and running classical OCR (Tesseract) recovers the equation shapes but transliterates symbols into visually similar Latin-1 glyphs. Only ML-based academic-paper extractors (marker) recover the math in machine-readable LaTeX. Keeping one file per tool makes the complementary failure modes visible.
+Each extraction file is suffixed with the tool that produced it. The math in IEEE papers of this vintage is set in Type 3 fonts with no `ToUnicode` map, so no layout-based extractor can recover the equation content: pdftotext, pymupdf, pdfminer, and pdfplumber all silently drop it. Rendering the pages and running classical OCR (Tesseract) recovers the equation shapes but transliterates symbols into visually similar Latin-1 glyphs. Only ML-based academic-paper extractors (Mathpix, marker) recover the math in machine-readable LaTeX. Keeping one file per tool makes the complementary failure modes visible.
+
+Mathpix is the current recommended extraction. Tools are listed below in the order they should be consulted.
+
+### Mathpix (recommended)
+
+```sh
+export MATHPIX_APP_ID=...  # from ~/.config/shell/zshrc.secrets
+export MATHPIX_APP_KEY=...
+bin/extract-mathpix references/papers/<source>.pdf /tmp/mathpix-out
+mv /tmp/mathpix-out/<source>.mathpix.md       references/extractions/<key>.mathpix.md
+mv /tmp/mathpix-out/<source>.mathpix.lines.json references/extractions/<key>.mathpix.lines.json
+```
+
+Mathpix is a paid API that produces Pandoc-flavoured Markdown with LaTeX math. The script requests `include_equation_tags: true`, `math_inline_delimiters: ["$", "$"]`, and `math_display_delimiters: ["$$", "$$"]`, so equations come wrapped in `\begin{equation*} ... \tag{N} \end{equation*}` and drop cleanly into the existing transcription format. Known systematic OCR errors on this paper: the calligraphic `\mathcal{N}_n` is occasionally misread as `\mathcal{V}_n`, and some subscripts lose their underscore (e.g. `X_{i_1}` → `X_{i 1}`). The raw Mathpix output is committed as `<key>.mathpix.md`; a hand-fixed copy is committed as `<key>.mathpix.processed.md` with the systematic errors corrected. Diff them to see the corrections.
+
+### Marker
+
+```sh
+uv run --with marker-pdf python -c '
+import sys
+from marker.converters.pdf import PdfConverter
+from marker.models import create_model_dict
+from marker.output import text_from_rendered
+converter = PdfConverter(artifact_dict=create_model_dict())
+rendered = converter(sys.argv[1])
+text, _, _ = text_from_rendered(rendered)
+sys.stdout.write(text)
+' references/papers/<source>.pdf > references/extractions/<key>.marker.md
+```
+
+Marker is an open-source ML-based academic-paper extractor (layout detection + OCR + equation recognition via the surya transformer backbone). Its output is Pandoc-flavoured Markdown with LaTeX math. For this PDF it recovers the core result (Theorem 3, eq. 21) and Lemma 2's eq. 45 as proper LaTeX. Compared to Mathpix: marker preserves equation numbers consistently and runs locally without an API subscription, but it silently drops inline math embedded in prose (sentences lose whole variables). Most useful as a cross-reference against Mathpix on equation-number alignment. On Apple Silicon, set `TORCH_DEVICE=cpu` to avoid [datalab-to/surya#490](https://github.com/datalab-to/surya/issues/490) (`torch.AcceleratorError` in `unpack_qkv_with_mask`, fixed by the open PR [#493](https://github.com/datalab-to/surya/pull/493)).
+
+### pdftotext
 
 ```sh
 pdftotext -layout references/papers/<source>.pdf references/extractions/<key>.pdftotext.txt
 ```
 
-`pdftotext -layout` normalises ligatures to ASCII (`deﬁned` → `defined`) and leaves `U+FFFD` replacement markers where glyphs fail to decode, which flags the gaps visually.
+`pdftotext -layout` normalises ligatures to ASCII (`deﬁned` → `defined`) and leaves `U+FFFD` replacement markers where glyphs fail to decode, which flags the gaps visually. Drops all equation content.
+
+### pymupdf
 
 ```sh
 uv run --with pymupdf python -c '
@@ -35,6 +70,8 @@ with open(sys.argv[2], "w") as f:
 ```
 
 `pymupdf` preserves ligatures as Unicode (`ﬁ`, `ﬂ`) and diacritics on author names, and emits no replacement markers, at the cost of silently dropping math glyphs entirely (so sentences lose variables instead of flagging them).
+
+### Tesseract (rendered pages)
 
 ```sh
 uv run --with pymupdf python -c '
@@ -55,24 +92,9 @@ done
 } > references/extractions/<key>.tesseract.txt
 ```
 
-Tesseract on rendered pages captures the equation shapes: Theorem 3, Lemma 2, and the basic inequality (8) come through as recognisable prose. The cost is that Greek letters and math operators are transliterated into visually similar Latin-1 and currency glyphs (`α` → `a`, `Γ` → `T` or `[`, `∈` → `€`, `≥` → `>`, `⊕` → `©`), so the output reads like a first-pass draft and should never be used verbatim. It is most useful as a cross-check against the human transcription.
+Tesseract on rendered pages captures the equation shapes: Theorem 3, Lemma 2, and the basic inequality (8) come through as recognisable prose. The cost is that Greek letters and math operators are transliterated into visually similar Latin-1 and currency glyphs (`α` → `a`, `Γ` → `T` or `[`, `∈` → `€`, `≥` → `>`, `⊕` → `©`), so the output reads like a first-pass draft and should never be used verbatim. It is most useful as a cross-check on the shapes rather than the glyphs.
 
-```sh
-uv run --with marker-pdf python -c '
-import sys
-from marker.converters.pdf import PdfConverter
-from marker.models import create_model_dict
-from marker.output import text_from_rendered
-converter = PdfConverter(artifact_dict=create_model_dict())
-rendered = converter(sys.argv[1])
-text, _, _ = text_from_rendered(rendered)
-sys.stdout.write(text)
-' references/papers/<source>.pdf > references/extractions/<key>.marker.md
-```
-
-Marker is an ML-based academic-paper extractor (layout detection + OCR + equation recognition) whose output is Pandoc-flavoured Markdown with LaTeX math. For this PDF it recovers the core result (Theorem 3, eq. 21) and Lemma 2's eq. 45 as proper LaTeX: `$\Delta(Z, U|X, Y) \le \tfrac{1}{2} [I(X; Y) + \dots]$` and so on. This is the only extraction suitable as a first-pass Pandoc-Markdown transcription rather than a cross-check. Known failure modes: inline math embedded in prose is sometimes dropped (sentences lose variables), and section numbering occasionally drifts. On Apple Silicon, set `TORCH_DEVICE=cpu` to avoid [datalab-to/surya#490](https://github.com/datalab-to/surya/issues/490) (`torch.AcceleratorError` in `unpack_qkv_with_mask`, fixed by the open PR [#493](https://github.com/datalab-to/surya/pull/493)); CPU runtime is roughly four minutes for a 13-page paper.
-
-Transcriptions flag layout-extractor gaps with `> **Transcription caveat.**` admonitions. These should be resolved against the source PDF, the tesseract extraction, or the marker extraction before the corresponding statement is formalised.
+Transcriptions flag layout-extractor gaps with `> **Transcription caveat.**` admonitions. These should be resolved against the source PDF or `.mathpix.processed.md` before the corresponding statement is formalised.
 
 ## Current entries
 
