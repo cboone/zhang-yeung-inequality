@@ -20,6 +20,16 @@ These properties are the so-called basic information inequalities of Shannon's i
 
 Index terms: entropy, inequality, information measure, mutual information.
 
+## Front Matter
+
+Manuscript received December 12, 1996; revised November 15, 1997. The work of Z. Zhang was supported in part by the National Science Foundation under Grant NCR-9502828. The work of R. W. Yeung was supported in part by the Research Grant Council of Hong Kong under Earmarked Grant CUHK 332/96E.
+
+Z. Zhang was with the Department of Electrical Engineering-Systems, Communication Sciences Institute, University of Southern California, Los Angeles, CA 90089-2565 USA (`zzhang@milly.usc.edu`).
+
+R. W. Yeung was with the Department of Information Engineering, the Chinese University of Hong Kong, Shatin, N.T., Hong Kong, China (`whyeung@ie.cuhk.edu.hk`).
+
+Publisher Item Identifier: `S 0018-9448(98)03630-X`.
+
 ## Notation
 
 The paper uses lightweight subset-indexed notation throughout. For $n \geq 1$ let $\mathcal{N}_n := \{1, 2, \ldots, n\}$ and let $\mathcal{X} = \{X_1, \ldots, X_n\}$ be an $n$-tuple of jointly distributed discrete random variables. For $\alpha \subseteq \mathcal{N}_n$ write $X_\alpha := \{X_i : i \in \alpha\}$ and $H(\alpha) := H(X_\alpha)$ (with $H(\varnothing) := 0$ by convention, since $X_\varnothing$ is a constant random variable).
@@ -58,6 +68,8 @@ $$H_\Omega : 2^{\mathcal{N}_n} \to [0, \infty), \qquad \alpha \mapsto H(X_\alpha
 and recalls that every basic Shannon information measure is a linear function of the joint entropies; in particular,
 
 $$I(\alpha; \beta \mid \gamma) = H(\alpha \cup \gamma) + H(\beta \cup \gamma) - H(\alpha \cup \beta \cup \gamma) - H(\gamma). \qquad (7)$$
+
+The introduction begins by considering jointly distributed discrete random variables $\Omega_n = \{X_i : i = 1, \ldots, n\}$. The basic Shannon information measures associated with these variables include all joint entropies, conditional entropies, mutual informations, and conditional mutual informations involving some of these random variables. The associated entropy function $H_\Omega$ can be viewed as a function on $2^{\mathcal{N}_n}$, and the stated goal of the paper is to study this function for all possible sets of $n$ discrete random variables.
 
 ## Scope
 
@@ -619,7 +631,7 @@ The central formalization artifact is therefore **Lemma 2**, generalized away fr
 
 ## Open transcription items
 
-The prose, constructions, charts, acknowledgment, and bibliography are now transcribed. The only remaining gap is that some repetitive inequality checks inside the most detailed Theorem 6 subcases are condensed rather than copied symbol-for-symbol.
+No known substantive content gaps remain. The prose, constructions, charts, acknowledgment, and bibliography are now transcribed. Some repetitive inequality checks inside the deepest Theorem 6 subcases are normalized and condensed slightly, but the mathematical content is preserved.
 
 ## References (paper bibliography)
 
