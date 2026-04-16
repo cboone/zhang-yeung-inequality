@@ -138,6 +138,7 @@ zhang-yeung-inequality/
   lakefile.toml               # Lake manifest; pins PFR and defers mathlib resolution transitively
   lean-toolchain              # matching Lean version
   ZhangYeung.lean             # top-level re-export
+  ZhangYeungTest.lean         # top-level re-export for Lean API tests
   ZhangYeung/
     Prelude.lean              # notation, import surface, namespace setup
     Delta.lean                # Delta(Z,U|X,Y), equational lemmas
@@ -146,7 +147,12 @@ zhang-yeung-inequality/
     Theorem3.lean             # the main Zhang-Yeung inequality
     Theorem4.lean             # cl(Gamma*_n) != Gamma_n, explicit witness
     Theorem5.lean             # (stretch) n+2-variable generalization
-  test/                       # sanity tests
+  ZhangYeungTest/
+    Delta.lean                # compile-time API regression tests for Delta
+    CopyLemma.lean            # copy-lemma API and usage tests
+    Theorem3.lean             # theorem-level smoke tests
+    Theorem4.lean             # witness arithmetic checks
+    Theorem5.lean             # small-n specialization checks
   .github/workflows/ci.yml    # CI: lake build + lint
 ```
 
@@ -194,15 +200,18 @@ M6 (polish)
 - Initialize `lakefile.toml` with PFR as a direct dep (pin PFR at a specific rev and defer Mathlib resolution transitively).
 - `lean-toolchain` set by the compatibility check in the root-package layout test.
 - `.github/workflows/ci.yml` running `lake build` and `lake lint`.
+- Ensure a sibling `ZhangYeungTest` library exists and is built by default. If the harness is still missing at M0 time, add it here before proceeding to proof milestones.
 - Skeleton `ZhangYeung.lean` importing PFR entropy notation; verify it builds.
 - Apply `write-lean-code` skill guidance from the first commit.
-- **Deliverable:** green CI build importing PFR entropy notation.
+- **Testing:** `lake build` must build both the proof library and the test library, with at least one smoke-test module already wired into `ZhangYeungTest/`.
+- **Deliverable:** green CI build importing PFR entropy notation and building the test harness.
 
 ### M1: Delta equational lemmas
 
 - `ZhangYeung/Prelude.lean`: `open ProbabilityTheory`, import entropy notation.
 - `ZhangYeung/Delta.lean`: define `delta` matching Delta(Z, U | X, Y) := I(Z; U) - I(Z; U | X) - I(Z; U | Y); prove equivalent reformulations (paper's equations 20-23).
-- **Checkpoint:** each equational form reduces to `ring_nf`/`linarith` over entropy terms.
+- `ZhangYeungTest/Delta.lean`: add compile-time API tests covering the exported `delta` lemmas and one downstream composition from forms (21) and (22) to the paper's scaled form (23).
+- **Checkpoint:** each equational form reduces to `ring_nf`/`linarith` over entropy terms, and the matching test module builds against the public API without opening the implementation file.
 
 ### M1.5: Theorem 2 (conditional warm-up)
 
@@ -222,7 +231,8 @@ M6 (polish)
 - **Supporting lemmas:** `IdentDistrib` for (X, Z, U) vs (X_1, Z, U) and symmetrically.
 - **Key Mathlib deps:** `Kernel.compProd`, `condDistrib`, `condExpKernel`. Measurability bookkeeping concentrates here.
 - **Design for Mathlib:** parametrize over any four RVs on Fintype (not specialized to the paper). Clean statement, no paper-specific notation.
-- **Checkpoint:** compiles with all measure-theoretic side conditions discharged.
+- **Testing:** `ZhangYeungTest/CopyLemma.lean` should restate the public theorem in example form and exercise the intended downstream APIs (`IdentDistrib`, conditional independence, and the projection laws) without reaching into proof internals.
+- **Checkpoint:** compiles with all measure-theoretic side conditions discharged, and the copy-lemma test module builds cleanly.
 
 ### M3: Theorem 3
 
@@ -230,7 +240,8 @@ M6 (polish)
 - Follow Section III. Two applications of Lemma 2 give `Delta(Z, U | X, Y) <= I(X; Y_1)` and `I(Z; U) - 2 I(Z; U | X) <= I(X; X_1)`. Combine: `2 I(Z; U) - 3 I(Z; U | X) - I(Z; U | Y) <= I(X; X_1, Y_1) + I(X_1; Y_1)`. Two distinct Shannon ingredients close the chase: (a) *marginal equality* `I(X_1; Y_1) = I(X; Y)` (the (X_1, Y_1, Z, U) marginal of q coincides with the (X, Y, Z, U) marginal of p, per eq. 44); (b) *data processing* `I(X; X_1, Y_1) <= I(X; Z, U)` via the Markov chain (X_1, Y_1) - (Z, U) - X under q.
 - All steps are Shannon-type; the non-Shannon character enters only through the copy lemma.
 - Prove (21) as the headline theorem, derive (22) by the X <-> Y swap, and (23) by averaging.
-- **Checkpoint:** `theorem zhangYeung ... : delta Z U X Y mu <= (1/2) * (I[X : Y; mu] + I[X : (Z, U); mu] + I[Z : U | X; mu] - I[Z : U | Y; mu])` with all hypotheses explicit; averaged corollary `delta Z U X Y mu <= (1/2) * I[X : Y; mu] + (1/4) * (I[X : (Z, U); mu] + I[Y : (Z, U); mu])` follows mechanically.
+- **Testing:** `ZhangYeungTest/Theorem3.lean` should include an independent-variable smoke test and a theorem-application test that derives the paper statement from the public theorem plus the M1 form-conversion lemmas.
+- **Checkpoint:** `theorem zhangYeung ... : delta Z U X Y mu <= (1/2) * (I[X : Y; mu] + I[X : (Z, U); mu] + I[Z : U | X; mu] - I[Z : U | Y; mu])` with all hypotheses explicit; averaged corollary `delta Z U X Y mu <= (1/2) * I[X : Y; mu] + (1/4) * (I[X : (Z, U); mu] + I[Y : (Z, U); mu])` follows mechanically, and the theorem test module builds.
 
 ### M4: Theorem 4
 
@@ -239,7 +250,8 @@ M6 (polish)
 - **Part (a), parallelizable:** Define the Shannon cone and prove F satisfies all 15 basic inequality constraints (`norm_num`/`linarith`).
 - **Part (b), requires M3:** Prove F violates the Zhang-Yeung inequality (direct arithmetic).
 - Conclude cl(Gamma*_4) strictly contained in Gamma_4; extend to n >= 4 via embedding.
-- **Checkpoint:** `theorem shannon_incomplete : exists F, shannonCone F /\ not (zhangYeungHolds F)`.
+- **Testing:** `ZhangYeungTest/Theorem4.lean` should replay the concrete witness arithmetic as proof scripts, separately covering the Shannon-side constraints and the strict Zhang-Yeung violation.
+- **Checkpoint:** `theorem shannon_incomplete : exists F, shannonCone F /\ not (zhangYeungHolds F)`, and the witness test module builds.
 
 ### M5: Theorem 5 (stretch)
 
@@ -247,12 +259,14 @@ M6 (polish)
 - For n+2 RVs U, Z, X_1, ..., X_n and any i in {1,...,n}:
   nI(U; Z) - sum_j I(U; Z | X_j) - nI(U; Z | X_i) <= I(X_i; U, Z) + sum_j H(X_j) - H(X_1, ..., X_n)
 - **Note:** the paper omits the proof ("it can be proved using exactly the same idea used in the proof of Theorem 3 and an inductive argument", p. 1443). M5 therefore requires reconstructing the argument: one auxiliary copy per X_j, induction on n, and reassembly via the same marginal-equality + data-processing combination as M3. Budget accordingly.
-- **Checkpoint:** statement over `Fin n -> Omega -> S` with the correct bound; averaged variant (eq. 28) as corollary.
+- **Testing:** `ZhangYeungTest/Theorem5.lean` should cover at least one small-`n` specialization and one API-level example showing the theorem rewrites to the expected bound in a concrete index regime.
+- **Checkpoint:** statement over `Fin n -> Omega -> S` with the correct bound; averaged variant (eq. 28) as corollary, and the small-`n` theorem tests build.
 
 ### M6: Polish and release
 
 - README with theorem statement, install instructions, citation.
 - `write-math`/`write-lean-code`/`lint-and-fix` audit.
+- Audit that every public module added in M1-M5 has a matching `ZhangYeungTest/` module, and make CI fail if `lake build` no longer includes the tests by default.
 - Tag v0.1 once M0-M4 land; v0.2 once M5 lands.
 
 ## 7. Key Risks and Unknowns
@@ -287,12 +301,18 @@ Mathlib's canonical `mutualInfo` namespace is in flux. **Mitigation:** design th
 
 ## 8. Verification Plan
 
-- **Sanity tests** (`test/`): instantiate on small examples with computable entropies.
-  - Three independent fair coins: verify `I[X_1 : X_2] = 0`, `H[X_1,X_2,X_3] = 3 log 2`.
-  - Zhang-Yeung applied to independent RVs: both sides = 0, giving 0 <= 0.
-  - Theorem 4's counterexample: verify the numerical constraints hold and the violation is strict.
-- **Paper cross-check**: confirm key intermediate identities (e.g., the six-variable expansion on p. 1446) match the published derivation.
-- **CI**: `lake build` with warnings-as-errors on `main` via GitHub Actions.
+- **Milestone rule:** every public module added or changed in M0-M5 must land with a matching `ZhangYeungTest/` module that imports only the public surface and proves API-level `example`s against it.
+- **Build gate:** `lake build` must build both `ZhangYeung` and `ZhangYeungTest` by default, and `lake lint` must pass on both libraries.
+- **API regression tests:** use `ZhangYeungTest/` to catch signature drift, missing re-exports, over-specialized hypotheses, and broken downstream proof scripts.
+- **Small-model checks where practical:** when a milestone has a natural concrete witness or arithmetic sanity check, add it to the matching test module instead of leaving it as prose.
+- **Paper cross-check:** confirm key intermediate identities (for example, the six-variable expansion on p. 1446) match the published derivation when the relevant milestone lands.
+- **Concrete targets by milestone:**
+  - M1: `ZhangYeungTest/Delta.lean` covering definition, symmetries, entropy expansion, form conversions, and `delta_le_mutualInfo`.
+  - M2: `ZhangYeungTest/CopyLemma.lean` covering theorem shape and intended downstream APIs.
+  - M3: `ZhangYeungTest/Theorem3.lean` covering the independent-variable smoke test and theorem application.
+  - M4: `ZhangYeungTest/Theorem4.lean` covering the witness arithmetic and strict violation.
+  - M5: `ZhangYeungTest/Theorem5.lean` covering a small-`n` specialization.
+- **CI:** GitHub Actions should keep using `lake build` and `lake lint`, with the confidence coming from the default targets including the tests.
 
 ## 9. Extensions (future work, post-release)
 
@@ -318,6 +338,8 @@ Ranked by leverage:
 - `ZhangYeung/Theorem3.lean`
 - `ZhangYeung/Theorem4.lean`
 - `ZhangYeung/Theorem5.lean` (stretch)
+- `ZhangYeungTest.lean`
+- `ZhangYeungTest/{Delta,CopyLemma,Theorem3,Theorem4,Theorem5}.lean`
 
 **External (depend on, do not modify):**
 

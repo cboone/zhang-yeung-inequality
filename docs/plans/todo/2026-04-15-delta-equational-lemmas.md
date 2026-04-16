@@ -9,7 +9,7 @@ depends_on: M0 (branch `chore/scaffold-project`)
 
 ## Context
 
-The Zhang-Yeung roadmap (§6) decomposes the formalization into milestones M0-M7. M0 scaffolds the Lake project and imports PFR's entropy API; M1 introduces the central quantity of the paper.
+The Zhang-Yeung roadmap (§6) decomposes the formalization into milestones M0-M6. M0 scaffolds the Lake project and imports PFR's entropy API; M1 introduces the central quantity of the paper.
 
 The **Zhang-Yeung delta** is
 
@@ -81,7 +81,9 @@ Pinned PFR provides `instance {Ω G : Type*} (X : Ω → G) [Finite G] : FiniteR
 
 ## Files
 
-**Create** `ZhangYeung/Delta.lean` (the whole milestone is in this one file).
+**Create** `ZhangYeung/Delta.lean` (the proof code for this milestone).
+
+**Create** `ZhangYeungTest.lean` and `ZhangYeungTest/Delta.lean` (the matching API-regression tests for this milestone).
 
 **Modify** `ZhangYeung.lean` to re-export the new module:
 
@@ -92,7 +94,9 @@ import ZhangYeung.Delta
 
 No changes to `ZhangYeung/Prelude.lean` (the M0 version is already sufficient: it imports `PFR.ForMathlib.Entropy.Basic` and opens `ProbabilityTheory`).
 
-No test suite exists in M0. The roadmap leaves test-suite creation for M7; we follow suit and rely on `lake build` for correctness in M1.
+M1 should also add a sibling test library `ZhangYeungTest` and a matching `ZhangYeungTest/Delta.lean` module. These tests are compile-time API checks: they restate each exported lemma as an `example` and include one composed downstream use that derives the paper's scaled form (23) from hypotheses in forms (21) and (22). Wire the test library into `lake build` so CI runs it automatically.
+
+**Modify** `lakefile.toml` so the default build includes both `ZhangYeung` and `ZhangYeungTest`.
 
 ## Design: the `delta` definition
 
@@ -272,7 +276,9 @@ From `condMutualInfo_nonneg` applied twice and the definition. Not strictly requ
 1. **Consider `delta_le_mutualInfo`.** If it falls out cleanly, add it; otherwise drop it to keep the milestone crisp.
 1. **Do not overclaim `delta_self`.** If downstream work really needs to rewrite `Δ(Z, U | X, X₁)` for a copy `X₁`, queue the required `condMutualInfo` transport lemma in M2 or M3 instead of stretching M1's literal `X = Y` lemma beyond what it proves.
 1. **Update `ZhangYeung.lean`** to `import ZhangYeung.Delta`.
-1. **Run `lake build ZhangYeung && lake lint`** to close the milestone.
+1. **Add `ZhangYeungTest/Delta.lean`** covering each exported lemma and one composed downstream use of `form23_of_form21_form22` plus `form23_iff`.
+1. **Wire the tests into `lake build`** by adding a `ZhangYeungTest` library target and making it a default build target.
+1. **Run `lake build && lake lint`** to close the milestone.
 
 Commit at each numbered step. Keep commits small and conventional-commit-styled (`feat:`, `chore:`).
 
@@ -292,13 +298,15 @@ Per the roadmap checkpoint: "each equational form reduces to `ring_nf`/`linarith
 
 - `lake build ZhangYeung.Delta` compiles with no warnings or `sorry`.
 - `lake build ZhangYeung` (full library) compiles, confirming `ZhangYeung.lean` re-exports cleanly.
+- `lake build ZhangYeungTest.Delta` compiles, confirming the test module only needs the public `ZhangYeung` API.
+- `lake build` succeeds with default targets, so CI now builds both the proof library and the test library automatically.
 - `lake lint` passes (batteries linter, called via `lake lint` target; see M0's `lakefile.toml`).
 - Spot-check each lemma's proof script is one of: `rfl`, `simp only [...]; ring`, `constructor <;> intro h <;> linarith [...]`, or a linear combination thereof. Anything longer signals over-engineering.
 - CI (`.github/workflows/ci.yml`) goes green on push.
 
 Out-of-scope for M1 (documented here so the next milestone can pick them up):
 
-- No test suite (deferred to M7, per roadmap).
+- No computable entropy examples yet; M1's coverage is compile-time API regression tests in `ZhangYeungTest/Delta.lean`.
 - No notation macro for `delta` (deferred pending M3 readability assessment).
 - No proof of any inequality form; all six `form*_iff` lemmas are `↔` between two forms of the same inequality, not a proof that either holds. The actual inequality is M3's responsibility.
 - No bridge to `shannon-entropy`'s `entropyNat` (roadmap §9, item 8).
@@ -307,5 +315,8 @@ Out-of-scope for M1 (documented here so the next milestone can pick them up):
 
 - `ZhangYeung/Delta.lean` (new, this milestone).
 - `ZhangYeung.lean` (modified, add one import line).
+- `ZhangYeungTest.lean` (new, test import surface).
+- `ZhangYeungTest/Delta.lean` (new, API-regression tests for `delta`).
+- `lakefile.toml` (modified, default build now includes the test library).
 - `ZhangYeung/Prelude.lean` (read-only; M0 has already set it up correctly).
 - `.lake/packages/PFR/PFR/ForMathlib/Entropy/Basic.lean` (read-only; the PFR API surface).
