@@ -72,12 +72,12 @@ All definitions live in `ProbabilityTheory` (file: `.lake/packages/PFR/PFR/ForMa
 - `condEntropy`, notation `H[X | Y ; μ]`.
 - `mutualInfo`, notation `I[X : Y ; μ]`; definition `mutualInfo_def : I[X : Y ; μ] = H[X ; μ] + H[Y ; μ] - H[⟨X, Y⟩ ; μ]` (`rfl`).
 - `condMutualInfo`, notation `I[X : Y | Z ; μ]` (no spaces around the bar).
-- `mutualInfo_comm`: `I[X : Y ; μ] = I[Y : X ; μ]`.
-- `condMutualInfo_comm`: `I[X : Y | Z ; μ] = I[Y : X | Z ; μ]`.
-- `condMutualInfo_eq`: `I[X : Y | Z ; μ] = H[X | Z ; μ] + H[Y | Z ; μ] - H[⟨X, Y⟩ | Z ; μ]` (requires `[Countable U]`, measurability, `[IsZeroOrProbabilityMeasure μ]`, `[FiniteRange Z]`).
+- `mutualInfo_comm`: `I[X : Y ; μ] = I[Y : X ; μ]` (requires measurability of `X, Y` and the usual discrete/countable codomain assumptions; for M1 these come from `Fintype` plus `MeasurableSingletonClass`).
+- `condMutualInfo_comm`: `I[X : Y | Z ; μ] = I[Y : X | Z ; μ]` (same discrete/countable requirements on the measured codomains, plus measurability of `X, Y`).
+- `condMutualInfo_eq`: `I[X : Y | Z ; μ] = H[X | Z ; μ] + H[Y | Z ; μ] - H[⟨X, Y⟩ | Z ; μ]` (requires measurability, `[IsZeroOrProbabilityMeasure μ]`, `[FiniteRange Z]`, and singleton-measurability/countability on the three codomains involved).
 - `mutualInfo_nonneg`, `condMutualInfo_nonneg`.
 
-All lemmas with a `FiniteRange` hypothesis apply to `Fintype`-valued random variables (either via a `Fintype -> FiniteRange` instance or by deriving `FiniteRange` directly). We specialize M1 to `Fintype` codomains to keep measurability/finite-range bookkeeping light; the roadmap's risk §7.2 explicitly sanctions this.
+Pinned PFR provides `instance {Ω G : Type*} (X : Ω → G) [Finite G] : FiniteRange X`, so every `Fintype`-valued random variable automatically satisfies the `FiniteRange` side conditions. For M1 we therefore specialize all four codomains to `Fintype` types and assume `MeasurableSingletonClass` on each codomain up front; this packages the discrete/countable hypotheses that PFR's commutativity and entropy-expansion lemmas actually use. The roadmap's risk §7.2 explicitly sanctions this finite-alphabet specialization.
 
 ## Files
 
@@ -101,8 +101,11 @@ No test suite exists in M0. The roadmap leaves test-suite creation for M7; we fo
 ```lean
 variable {Ω : Type*} [MeasurableSpace Ω]
 variable {S₁ S₂ S₃ S₄ : Type*}
+  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
+  [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
+  [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
 
 /-- The Zhang-Yeung delta quantity
 `Δ(Z, U | X, Y) := I(Z; U) - I(Z; U | X) - I(Z; U | Y)`.
@@ -117,6 +120,7 @@ Design notes:
 
 - **Variable order** `(Z, U, X, Y)` matches the paper's notation $\Delta(Z, U \mid X, Y)$. The first two arguments are the "measured" pair and the last two are the "conditioning" pair. This is asymmetric to the paper's visual grouping but natural once you read the definition.
 - **Four independent type variables** `S₁ S₂ S₃ S₄` rather than collapsing `U`'s codomain onto `X`'s: the paper treats the four RVs as potentially distinct, and forcing identification would complicate the M4 counterexample construction. PFR uses `S T U` for three types; we extend with subscripted `S₁..S₄` to avoid the name clash between `U` (RV) and `U` (its codomain).
+- **Finite-alphabet specialization at module scope**: the bare definition of `delta` would make sense for arbitrary measurable codomains, but the planned M1 lemmas immediately call PFR results such as `mutualInfo_comm`, `condMutualInfo_comm`, and `condMutualInfo_eq`, all of which live on the discrete/countable side of the API. Putting `[Fintype Sᵢ] [MeasurableSingletonClass Sᵢ]` in the shared `variable` block makes that specialization explicit instead of rediscovering it piecemeal later.
 - **`noncomputable def`** and **default measure** `(μ := by volume_tac)` mirror PFR's conventions for `mutualInfo` and `condMutualInfo`.
 - **Namespace** `ZhangYeung`: avoids polluting `ProbabilityTheory` until the copy lemma (M2) is ready for an upstream attempt. Inside the namespace, lemma names use the unprefixed form `delta_def`, `delta_comm_cond`, etc.; outside the namespace they are `ZhangYeung.delta_def`.
 
@@ -169,7 +173,7 @@ lemma delta_self (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (μ : Mea
     delta Z U X X μ = I[Z : U ; μ] - 2 * I[Z : U | X ; μ]
 ```
 
-The case `X = Y`. Proof: `simp [delta_def]; ring`. Role: M3's proof of Theorem 3 sums $\Delta(Z, U \mid X, Y)$ and $\Delta(Z, U \mid X, X_1)$, where $X_1$ is the copy of $X$; the second summand simplifies via this lemma in combination with the copy lemma's `IdentDistrib` facts.
+The case `X = Y`. Proof: `simp [delta_def]; ring`. Role: algebraic simplification for a *literal* repeated conditioning variable. It is **not** by itself the bridge from $\Delta(Z, U \mid X, X_1)$ to this shape when $X_1$ is merely a copy of $X$; M2 or M3 will need a separate transport lemma showing the relevant conditional mutual information terms agree under the copy construction's `IdentDistrib` or conditional-distribution hypotheses.
 
 ### Expansion into entropy
 
@@ -177,15 +181,14 @@ The case `X = Y`. Proof: `simp [delta_def]; ring`. Role: M3's proof of Theorem 3
 lemma delta_eq_entropy
     {Z : Ω → S₁} {U : Ω → S₂} {X : Ω → S₃} {Y : Ω → S₄}
     (hZ : Measurable Z) (hU : Measurable U) (hX : Measurable X) (hY : Measurable Y)
-    (μ : Measure Ω) [IsProbabilityMeasure μ]
-    [FiniteRange Z] [FiniteRange U] [FiniteRange X] [FiniteRange Y] :
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
     delta Z U X Y μ
       = (H[Z ; μ] + H[U ; μ] - H[⟨Z, U⟩ ; μ])
         - (H[Z | X ; μ] + H[U | X ; μ] - H[⟨Z, U⟩ | X ; μ])
         - (H[Z | Y ; μ] + H[U | Y ; μ] - H[⟨Z, U⟩ | Y ; μ])
 ```
 
-Unfolds `delta` all the way down to raw entropy terms. Proof: `rw [delta_def, mutualInfo_def, condMutualInfo_eq ..., condMutualInfo_eq ...]`. Role: bridge to any future proof that needs to reason at the entropy layer directly (notably the M4 counterexample, where we evaluate all terms on a specific four-RV distribution; the counterexample works at the set-function level so this lemma is the glue).
+Unfolds `delta` all the way down to raw entropy terms. Proof: `rw [delta_def, mutualInfo_def, condMutualInfo_eq hZ hU hX, condMutualInfo_eq hZ hU hY]`. Role: bridge to any future proof that needs to reason at the entropy layer directly (notably the M4 counterexample, where we evaluate all terms on a specific four-RV distribution; the counterexample works at the set-function level so this lemma is the glue). The `FiniteRange` obligations should now be discharged by the shared `Fintype` assumptions rather than repeated in the lemma statement.
 
 ### Form-(21) equivalence
 
@@ -261,12 +264,13 @@ From `condMutualInfo_nonneg` applied twice and the definition. Not strictly requ
 ## Sequencing inside M1
 
 1. **Bootstrap verification.** Merge `chore/scaffold-project` into `formalize/delta-equational-lemmas`; run `bin/bootstrap-worktree` and `lake build ZhangYeung`. Halt if Mathlib or PFR fails to fetch from cache.
-1. **Create `ZhangYeung/Delta.lean`** with module docstring, imports, `variable` block, and the `delta` definition. Build and confirm.
+1. **Create `ZhangYeung/Delta.lean`** with module docstring, imports, a shared `variable` block that fixes the finite-alphabet assumptions (`[Fintype Sᵢ] [MeasurableSingletonClass Sᵢ]`), and the `delta` definition. Build and confirm.
 1. **Land the trivial lemmas**: `delta_def`, `delta_comm_cond`, `delta_self`. Each is `rfl` or one-line algebra; failure here signals a deeper setup problem.
-1. **Land `delta_comm_main`.** First lemma that pulls in measurability and PFR's commutativity lemmas; resolves whether `Measurable` hypotheses need to be explicit or can be implicit via `variable`. The choice propagates to later lemmas.
-1. **Land the entropy-expansion lemma `delta_eq_entropy`.** First use of `condMutualInfo_eq`, which wants `[IsProbabilityMeasure μ]`, `[FiniteRange ...]`. Confirm that a `Fintype` codomain yields `FiniteRange` by instance search, or add the assumption to the `variable` block explicitly.
+1. **Land `delta_comm_main`.** First lemma that pulls in measurability and PFR's commutativity lemmas. The finite/discrete codomain assumptions are already fixed at module scope, so the only question left here is which measurability hypotheses should stay explicit on the lemma.
+1. **Land the entropy-expansion lemma `delta_eq_entropy`.** First use of `condMutualInfo_eq`, which wants measurability, `[IsProbabilityMeasure μ]`, and the discrete/countable codomain structure fixed above. If instance search does not close the product-side `FiniteRange` goals automatically, add the smallest local annotations needed rather than weakening the module-wide assumptions.
 1. **Land the form-equivalence lemmas `form21_iff`, `form22_iff`, `form23_iff`** and the bridging lemma `form23_of_form21_form22`. All are pure algebra via `linarith`; the only risk is that PFR's `⟨Z, U⟩` syntax for pair random variables requires a specific elaboration path (`Prod.mk ∘ (Z, U)` vs. `fun ω => (Z ω, U ω)`). Verify by successful compile.
 1. **Consider `delta_le_mutualInfo`.** If it falls out cleanly, add it; otherwise drop it to keep the milestone crisp.
+1. **Do not overclaim `delta_self`.** If downstream work really needs to rewrite `Δ(Z, U | X, X₁)` for a copy `X₁`, queue the required `condMutualInfo` transport lemma in M2 or M3 instead of stretching M1's literal `X = Y` lemma beyond what it proves.
 1. **Update `ZhangYeung.lean`** to `import ZhangYeung.Delta`.
 1. **Run `lake build ZhangYeung && lake lint`** to close the milestone.
 
@@ -274,9 +278,10 @@ Commit at each numbered step. Keep commits small and conventional-commit-styled 
 
 ## Open questions and known risks
 
-- **`FiniteRange` vs. `Fintype`.** PFR's lemmas require `[FiniteRange X]`. In practice, `X : Ω → S` with `[Fintype S]` should resolve via an existing instance, but if not, we add `[FiniteRange Z] [FiniteRange U] [FiniteRange X] [FiniteRange Y]` to the `variable` block and let the end-user supply them. Resolution: check `.lake/packages/PFR/PFR/ForMathlib/FiniteRange/Defs.lean` for an `instance : FiniteRange X` derived from `Fintype`; follow PFR's lead either way.
+- **Finite/discrete codomain assumptions.** Resolved against pinned PFR: `PFR.ForMathlib.FiniteRange.Defs` provides `instance {Ω G} (X : Ω → G) [Finite G] : FiniteRange X`, so `Fintype` codomains discharge the `FiniteRange` obligations. M1 should therefore state the stronger module-wide assumptions `[Fintype Sᵢ] [MeasurableSingletonClass Sᵢ]`, which also package the countability and singleton-measurability requirements of `mutualInfo_comm`, `condMutualInfo_comm`, and `condMutualInfo_eq`.
 - **`⟨Z, U⟩` syntax for the paired random variable.** Lean's anonymous-constructor heuristic may or may not elaborate `⟨Z, U⟩` as `fun ω => (Z ω, U ω)` in the context of `I[X : ⟨Z, U⟩ ; μ]`. PFR uses this notation throughout `Basic.lean`, so it works there; we just mirror their usage and rely on the same elaboration path. If ambiguity arises, fall back to `(fun ω => (Z ω, U ω))`.
-- **`Measurable` hypothesis hygiene.** PFR declares `Measurable` assumptions on random variables via explicit function arguments rather than through the `variable` block. Follow that style for consistency: pass measurability as a hypothesis on lemmas that need it (e.g. `delta_comm_main`, `delta_eq_entropy`), and omit it where `rfl` or `linarith` close the goal without it.
+- **Copy transport for repeated-conditioner arguments.** `delta_self` handles only the literal case `X = Y`. If M3 needs to simplify a copy-lemma term such as `Δ(Z, U | X, X₁)` where `X₁` is only identically distributed to `X`, the right bridge is a transport lemma for `condMutualInfo` under the copy construction's `IdentDistrib` or conditional-distribution facts. Record that need in M2 or M3 rather than pretending `delta_self` alone suffices.
+- **`Measurable` hypothesis hygiene.** PFR declares `Measurable` assumptions on random variables via explicit function arguments rather than through the `variable` block. Follow that style for consistency: keep the finite/discrete codomain assumptions in the shared `variable` block, but pass measurability as an explicit hypothesis on lemmas that need it (e.g. `delta_comm_main`, `delta_eq_entropy`) and omit it where `rfl` or `linarith` close the goal without it.
 - **Notation `Δ[...]`** is deferred as above; revisit after M3 if proofs become hard to scan without it.
 
 Reference: the `write-lean-code` skill is authoritative for naming and proof style; the `write-math` skill governs the module docstring and any prose inside comments; the `write-pandoc-markdown` skill governs this plan document.
