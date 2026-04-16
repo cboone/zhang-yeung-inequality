@@ -33,7 +33,7 @@ The paper freely switches logarithm base. Theorem 6's concrete construction uses
 
 ## Scope
 
-The paper is the birthplace of the first non-Shannon-type information inequality. Its central contribution is Theorem 3, the **Zhang-Yeung inequality**, together with Theorem 4, which uses it to prove that the Shannon outer bound $\Gamma_n$ strictly contains the almost-entropic region $\mathrm{cl}(\Gamma^*_n)$ for every $n \geq 4$. This transcription covers every formal statement of the paper (propositions, theorems, and lemmas) together with the copy-lemma construction underlying the main proof. The seven explicit constructions driving Theorem 6's inner bound are recorded at a structural level; the 5-page case analysis that ties them together is summarized but not transcribed line by line.
+The paper is the birthplace of the first non-Shannon-type information inequality. Its central contribution is Theorem 3, the **Zhang-Yeung inequality**, together with Theorem 4, which uses it to prove that the Shannon outer bound $\Gamma_n$ strictly contains the almost-entropic region $\mathrm{cl}(\Gamma^*_n)$ for every $n \geq 4$. This transcription covers every formal statement of the paper (propositions, theorems, and lemmas) together with the copy-lemma construction underlying the main proof. The seven explicit constructions driving Theorem 6's inner bound are now recorded explicitly from the source PDF; the 5-page case analysis that ties them together is still summarized rather than transcribed line by line.
 
 ## The Shannon outer bound and the entropic region
 
@@ -215,7 +215,7 @@ This is the central proof artifact of the paper. In the modern literature, this 
 
 $$q(x, y, z, u, x_1, y_1) := \frac{p(x, y, z, u) \, p(x_1, y_1, z, u)}{p(z, u)} \qquad (44)$$
 
-wherever $p(z, u) > 0$. Let $X_1, Y_1$ be two random variables jointly distributed with $X, Y, Z, U$ according to the joint distribution $q$. Equivalently, $q$ is the law of $(X, Y, Z, U)$ augmented with independent copies $(X_1, Y_1)$ of $(X, Y)$ drawn from the conditional distribution $p(\cdot, \cdot \mid Z, U)$. Then:
+wherever $p(z, u) > 0$. Let $X_1, Y_1$ be two random variables jointly distributed with $X, Y, Z, U$ according to the joint distribution $q$. Equivalently, conditioned on $(Z, U)$, the pairs $(X, Y)$ and $(X_1, Y_1)$ are i.i.d. with common conditional law $p(\cdot, \cdot \mid Z, U)$. Then:
 
 1. **Identical marginals.** The $(X, Y, Z, U)$-marginal and the $(X_1, Y_1, Z, U)$-marginal of $q$ both equal $p$.
 2. **Conditional independence.** Under $q$, the pair $(X, Y)$ is conditionally independent of $(X_1, Y_1)$ given $(Z, U)$:
@@ -244,11 +244,11 @@ $$\begin{aligned}
 &\leq I(X; Y_1) + I(X; X_1) \\
 &= I(X; X_1, Y_1) + I(X_1; Y_1) - I(X_1; Y_1 \mid X) \\
 &\leq I(X; X_1, Y_1) + I(X_1; Y_1) \\
-&\leq I(X; Z, U) + I(X; Y_1) \\
+&\leq I(X; Z, U) + I(X_1; Y_1) \\
 &= I(X; Z, U) + I(X; Y),
 \end{aligned}$$
 
-where the penultimate step is data processing and the last step uses the marginal identity $I(X; Y_1) = I(X; Y)$. Rearranging gives (21); swapping $X$ and $Y$ gives (22), and averaging yields (23).
+where the penultimate step is data processing and the last step uses the identical-marginal fact $I(X_1; Y_1) = I(X; Y)$. Rearranging gives (21); swapping $X$ and $Y$ gives (22), and averaging yields (23).
 
 The paper also makes the deficit in (21) explicit. Writing
 
@@ -268,19 +268,24 @@ $$R(X, Y, Z, U, X_1, Y_1) = \tfrac{1}{2} \bigl[I(X; Z, U \mid X_1, Y_1) + I(X_1;
 
 ## Proof of Theorem 6 (Section IV)
 
-Section IV proves the inner bound via seven explicit probabilistic constructions, labeled $F^1, \ldots, F^7$. Each construction takes values on the atoms of $2^{\mathcal{N}_4}$; their chart is on p. 1447.
+Section IV proves the inner bound via seven explicit probabilistic constructions. In the paper, these are defined from three independent ternary random variables $W_1, W_2, W_3$, each uniform on $\{0, 1, 2\}$, together with a constant random variable $W_0$; logarithms are taken in base $3$, so $H(W_i) = 1$ for $i = 1, 2, 3$.
 
-- **Construction 1** ($F^1_\alpha$): indicator of a fixed atom. Used via Lemma 4 to show that nonnegative atom-valued functions are asymptotically constructible.
-- **Constructions 2-7** ($F^2, \ldots, F^7$): seven more elaborate atom assignments. $F^2$ is symmetric over the four coordinates; $F^3_i$ (and its permutations) places mass on atoms involving a distinguished single coordinate; $F^4$-$F^7$ are further symmetry-broken constructions.
+- **Construction 1** ($F^1_\alpha$). For any nonempty subset $\alpha \subseteq \{1, 2, 3, 4\}$, set $X_i = W_1$ if $i \in \alpha$ and $X_i = W_0$ otherwise. Then $F^1_\alpha[\beta] = 0$ for every $\beta \neq \alpha$, while $F^1_\alpha[\alpha] = 1$. This is the single-atom indicator construction used in Lemma 4.
+- **Construction 2** ($F^2$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_3$, and $X_4 = W_1 + W_2 + W_3 \pmod 3$. Then the induced atom function is $0$ on all weight-one atoms, $1$ on all weight-two and weight-four atoms, and $-1$ on all weight-three atoms.
+- **Construction 3** ($F^3_4$, and by permutation $F^3_i$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_1 + W_2 \pmod 3$, and $X_4 = W_0$. Then $F^3_4[1, 2] = F^3_4[1, 3] = F^3_4[2, 3] = 1$, $F^3_4[1, 2, 3] = -1$, and all other atoms have value $0$. By symmetry, $F^3_i$ is obtained by making $X_i = W_0$.
+- **Construction 4** ($F^4_{3,4}$, and by symmetry $F^4_{i,j}$). Set $X_1 = W_1$, $X_2 = W_2$, and $X_3 = X_4 = W_1 + W_2 \pmod 3$. Then $F^4_{3,4}[1, 2] = 1$, $F^4_{3,4}[2, 3, 4] = F^4_{3,4}[1, 3, 4] = 1$, $F^4_{3,4}[1, 2, 3, 4] = -1$, and all other atoms have value $0$.
+- **Construction 5** ($F^5$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_1 + W_2 \pmod 3$, and $X_4 = W_1 - W_2 \pmod 3$. Then all weight-one and weight-two atoms have value $0$, all weight-three atoms have value $1$, and $F^5[1, 2, 3, 4] = -2$.
+- **Construction 6** ($F^6_4$, and by symmetry $F^6_i$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_3$, and $X_4 = (W_1 + W_2 \pmod 3, W_1 + W_3 \pmod 3)$. Then $F^6_4[1, 2, 3] = 1$, every weight-two atom containing $4$ has value $1$, $F^6_4[1, 2, 3, 4] = -1$, and all other atoms have value $0$.
+- **Construction 7** ($F^7_4$, and by symmetry $F^7_i$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_1 + W_2 \pmod 3$, and $X_4 = (W_1, W_2)$. Then all atoms of weight at most $2$ have value $0$, every weight-three atom except $[1, 2, 3]$ has value $1$, $F^7_4[1, 2, 3] = 0$, and $F^7_4[1, 2, 3, 4] = -1$.
 
 Supporting lemmas:
 
 - **Lemma 3** ([@zhangyeung1998, Lem. 3]). If $f, g \in \mathrm{cl}(\Gamma^*_n)$ and $\lambda \geq 0$, then $f + g \in \mathrm{cl}(\Gamma^*_n)$ and $\lambda f \in \mathrm{cl}(\Gamma^*_n)$. That is, $\mathrm{cl}(\Gamma^*_n)$ is a convex cone.
 - **Lemma 4** ([@zhangyeung1998, Lem. 4]). Nonnegative atom-valued functions are asymptotically constructible. (Proved via Construction 1 and Lemma 3.)
 
-The main argument is a case analysis (p. 1448-1451) showing that every function $F \in \hat{\Gamma}_4$ can be reduced via a sequence of **legal operations** (subtracting a nonnegative multiple of one of $F^2, \ldots, F^7$ while preserving seminonnegativity) to a nonnegative function, which is asymptotically constructible by Lemma 4. The case analysis splits on whether one of $F^2$ or $F^3_i$ is forced to zero, then recursively refines.
+The main argument is a case analysis (p. 1448-1451) showing that every function $F \in \hat{\Gamma}_4$ can be reduced via a sequence of **legal operations** (subtracting a nonnegative multiple of one of the basic functions from Constructions 2-7 while preserving seminonnegativity) to a nonnegative function, which is asymptotically constructible by Lemma 4. The case analysis splits on whether one of $F^2$ or $F^3_i$ is forced to zero, then recursively refines.
 
-> **Transcription caveat.** The seven constructions are defined in the paper using atom charts that did not render cleanly in the pdftotext extraction. If Theorem 6 becomes a formalization target (currently **out of scope** per the roadmap's S2 decision), the construction definitions must be verified against the source PDF pp. 1446-1447.
+> **Transcription caveat.** The construction definitions on pp. 1446-1447 are now verified against the PDF. What remains summarized rather than transcribed line by line is the atom-chart bookkeeping and the full legal-operation case analysis on pp. 1447-1451.
 
 ## Concluding remarks (Section V)
 
@@ -316,7 +321,7 @@ The central formalization artifact is therefore **Lemma 2**, generalized away fr
 
 Each caveat below marks a place where the pdftotext extraction was insufficient and the source PDF needs to be consulted before the statement can be considered paper-faithful. In priority order:
 
-1. **Constructions 1-7 (Theorem 6).** The seven constructions are defined using atom charts that did not render cleanly in the pdftotext extraction. They must be verified against the PDF (pp. 1446-1447) if Theorem 6 becomes in scope.
+1. **Theorem 6 atom charts and case analysis.** The construction definitions on pp. 1446-1447 are now verified, but the atom charts and the detailed legal-operation case split on pp. 1447-1451 are still summarized rather than transcribed line by line.
 
 ## References (from the paper)
 
