@@ -1,0 +1,1748 @@
+<PAGE 1 / 13>
+1440
+
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
+
+On Characterization of Entropy
+Function via Information Inequalities
+
+Zhen Zhang, Senior Member, IEEE, and Raymond W. Yeung, Senior Member, IEEE
+
+Abstract— Given n discrete random variables 2 = {X,,---,
+Xn}, associated with any subset a of {1, 2,---, n}, there is
+a joint entropy H(X.) where X, = {Xj:i € a}. This can
+be viewed as a function defined on 2{''?)»"} taking values in
+[0, oo). We call this function the entropy function of ©. The
+nonnegativity of the joint entropies implies that this function is
+nonnegative; the nonnegativity of the conditional joint entropies
+implies that this function is nondecreasing; and the nonnegativity
+of the conditional mutual informations implies that this function
+has the following property: for any two subsets a and ( of
+{1, 2, ---,n}
+
+Ho(a) + He(3) > He(a U 8) + He(an #).
+
+These properties are the so-called basic information inequalities
+of Shannon’s information measures. Do these properties fully
+characterize the entropy function? To make this question more
+precise, we view an entropy function as a 2” — 1-dimensional
+vector where the coordinates are indexed by the nonempty subsets
+of the ground set {1, 2,---,n}. Let T,, be the cone in R?’~!
+consisting of all vectors which have these three properties when
+they are viewed as functions defined on 2‘!'?:'"}, Let [* be
+the set of all 2” — 1-dimensional vectors which correspond to the
+entropy functions of some sets of n discrete random variables. The
+question can be restated as: is it true that for any n, T,, =T,,?
+Here [., stands for the closure of the set [*. The answer is “yes”
+when n = 2 and 3 as proved in our previous work. Based on
+intuition, one may tend to believe that the answer should be
+“yes” for any n. The main discovery of this paper is a new
+information-theoretic inequality involving four discrete random
+variables which gives a negative answer to this fundamental
+problem in information theory: T,, is strictly smaller than I’,
+whenever n > 3. While this new inequality gives a nontrivial
+outer bound to the cone Tj, an inner bound for I, is also
+given. The inequality is also extended to any number of random
+variables.
+
+Index Terms— Entropy, inequality, information measure, mu-
+tual information.
+
+I. INTRODUCTION
+
+ET Q, = {X;: i = 1,---, n} be n jointly distributed
+discrete random variables. The basic Shannon’s informa-
+tion measures associated with these random variables include
+
+Manuscript received December 12, 1996; revised November 15, 1997. The
+work of Z. Zhang was supported in part by the National Science Foundation
+under Grant NCR-9502828. The work of R. W. Yeung was supported in part
+by The Research Grant Council of Hong Kong under Earmarked Grant CUHK
+332/96E.
+
+Z. Zhang is with the Department of Electrical Engineering—Systems,
+Communication Sciences Institute, University of Southern California, Los
+Angeles, CA 90089-2565 USA (e-mail: zzhang @milly.usc.edu).
+
+R. W. Yeung is with the Department of Information Engineering, the
+Chinese University of Hong Kong, Shatin, N.T., Hong Kong, China (e-mail:
+whyeung @ie.cuhk.edu.hk).
+
+Publisher Item Identifier S 0018-9448(98)03630-X.
+
+all joint entropies, conditional entropies, mutual informations,
+and conditional mutual informations involving some of these
+random variables. For any subset a of N;, = {1, ---, n}, let
+
+Xq = {Xt € ah. (1)
+
+Let X4, where ¢ is the empty set, be a random variable taking
+a fixed value with probability 1. Let
+
+Lola, Bly) = [Xo; X |X) (2)
+be the conditional mutual information and let
+Ho(a) = A(X.) (3)
+
+be the joint entropy. Sometimes, we drop the subscript 2Q
+in these notations, when no confusion may occur. It is well
+known that Shannon’s information measures satisfy the fol-
+lowing inequalities.
+
+Proposition 1: For any three subsets a, 3, and y of Ny,
+any set of n jointly distributed discrete random variables
+Q = {X;,,i = 1,---, n}
+
+I(a, Bly) => 0. (4)
+
+We call these inequalities the basic inequalities of Shannon’s
+information measures, or simply the basic inequalities. By
+means of the chain rule for conditional mutual informations,
+we can see that these inequalities are implied by a subset of
+these inequalities of the form
+
+Te}, {a}ly) = 0. (5)
+
+That is, the subset of inequalities (4) in which the cardinalities
+of @ and 7 are both 1. This subset of basic information
+inequalities is referred to as elemental information inequalities
+[35].
+
+For any set of n jointly distributed discrete random variables
+Q = {X;,i = 1,---,n}, the associated joint entropies
+Ha(qa) can be viewed as a function defined on 2“
+
+Ho: 2% [0, 00). (6)
+
+The goal of this paper is to study this function for all possible
+sets Q. of n discrete random variables.
+
+All basic Shannon’s information measures can be expressed
+as linear functions of the joint entropies. Actually, we have
+(a, Bly) =H(a U7) + AB U4)
+
+— H(a@U BU 7)— Hy). (7)
+
+The basic inequalities can be interpreted as a set of inequalities
+for the entropy function as follows:
+
+0018-9448/98$10.00 © 1998 IEEE
+
+<PAGE 2 / 13>
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+
+Proposition 2: For any set of n jointly distributed discrete
+random variables Q = {X;,% = 1,---,n}, the entropy
+function H associated with these random variables has the
+following properties.
+
+¢ For any two subsets a and 3 of NV,
+H(aU B)+ H(an #) < Hla) + AP). (8)
+* a C # implies
+H(a) < H(A). (9)
+
+and
+
+H(@) =0. (10)
+
+Let F, be the set of all functions defined on 2“ taking
+values in [0, oo). Define
+
+Ty, 2 LF € Fai F(¢) =0; aC BS Fla) < F (9);
+
+Va, 862%, F(a) + F(8) > Fla t+ Flan p)}. A)
+
+Apparently, for any Q = {X;:¢=1, ---, n}, Hp ET hy. This
+means that the set [,, characterizes some of the properties
+of the entropy function. A natural question to ask is whether
+or not this set “fully” characterizes the entropy function. To
+make the question more precise, we have introduced in [39]
+the following definitions.
+
+Definition 1: A function F' € F,, is called constructible if
+and only if there exists a set of n jointly distributed discrete
+random variables 2 such that the joint entropy function He
+associated with these random variables satisfies Hp = F.
+Define
+
+I* = {F € F,,: F is constructible}. (12)
+
+In [39], we have seen that the structure of this set could be very
+complicated and we mentioned that the following concept is
+more manageable:
+
+Definition 2: A function F' € F,, is called asymptotically
+constructible if and only if there exist a sequence of sets
+of n discrete random variables Q* for k = 1, --- such that
+the joint entropy functions Hg» associated with Q satisfy
+limp-s6o Ao = F.
+
+Obviously, a function F’ is asymptotically constructible if
+and only if # € I%, the closure of the set I™.
+In [39], we proved the following results.
+
+Theorem 1:
+(13)
+and
+
+rs =Ts. (14)
+
+Up to this work, it was not known whether or not this result can
+be generalized. That is, we did not know whether for n > 3
+
+™*=T). (15)
+This is a fundamental problem in information theory. In [39],
+
+we proved a conditional inequality of Shannon’s information
+measures.
+
+1441
+
+Theorem 2: For any four discrete random variables Q4 =
+
+{X, Y, Z, US
+
+LX; Y)=I1(X; Y|Z) =0 (16)
+implies
+LX; Y|Z, U) < 1(Z; UX, Y) + 1(X; Y|UV). (17)
+We also proved in [39] that this result implies
+T*ATy. (18)
+
+Therefore, it lends some evidence for the following conjecture.
+Conjecture 1: For n > 4
+T* Py.
+
+To give an affirmative answer to this problem is the goal of
+the current paper.
+
+(19)
+
+The paper is organized as follows: in the next section,
+we State the main results and introduce some definitions and
+notations; Sections III and IV are devoted to the proofs of the
+results; in Section V, we summarize the findings of the paper
+and raise some problems for future study.
+
+Before closing this section, we would like to give a brief
+account of the works we found in the literature which are
+relevant to the subject matter of the current paper. As Shan-
+non’s information measures are the most important measures
+in information theory, researchers in this area have been
+investigating their structural properties since the 1950’s. The
+early works on this subject have been done along various
+directions by Campbell [2], Hu [10], McGill [21], Watanabe
+[31], [32].
+
+McGill [21] has proposed a multiple mutual information
+for any number of random variables, which is a generalization
+of Shannon’s mutual information for two random variables.
+Properties of the multiple mutual information have been in-
+vestigated in the subsequent works of Kawabata and Yeung
+[6], Tsujishita [30], and Yeung [37].
+
+The work of Hu [10] was the first attempt to establish an
+analogy between information theory and set theory. Toward
+this end, he defined the following formal substitution of
+symbols:
+
+H/I
+
+2
+
+2 Cr
+
+?
+
+|
+where j4 is any set-additive function. In the above substitution,
+on the left are symbols in information theory, while on the right
+are symbols in set theory. He showed that a linear information-
+theoretic identity holds for all distributions if and only if the
+corresponding set-theoretic identity obtained via the formal
+substitution of symbols holds for all additive function jz. For
+example, the information-theoretic identity
+
+A(X) + H(Y) = A(X, Y) + I(X;Y)
+
+Tiqtd
+
+corresponds to the set-theoretic identity
+
+MX) + WY) = WX UY) + ex OY).
+
+<PAGE 3 / 13>
+1442
+
+Hu’s work was originally published in Russian, and it was not
+widely known in the west until it was reported in Csiszar and
+Korner [3].
+
+Important progress has been made in the mid 1970’s and
+the early 1980’s, mainly by Han [7], [9]. Let us point out
+that any linear information expression can be expressed as a
+linear combination of unconditional joint entropies by repeated
+applications (if necessary) of the following identity:
+
+I(X; Y|Z) = H(X, Z) + H(Y, Z) - H(X, Y, Z)- H(2).
+
+In [7], Han proved the fundamental result that a linear com-
+bination of unconditional joint entropies is always equal to
+zero if and only if all the coefficients are zero. This result
+was also obtained independently by Csiszar and Korner [3].
+Han further established a necessary and sufficient condition
+for a symmetrical linear information expression to be always
+nonnegative, and a necessary and sufficient condition for a
+linear information expression involving three random variables
+to be always nonnegative [9]. In [9], he raised the important
+question of what linear combinations of unconditional joint
+entropies are always nonnegative. In his work, Han viewed
+a linear combination of unconditional joint entropies as a
+vector space, and he developed a lattice-theoretic description
+of Shannon’s information measures with which some notations
+can be greatly simplified. During this time, Fujishige [5] found
+that the entropy function is a polymatroid [33].
+
+In the 1990’s, Yeung [34] further developed Hu’s work into
+an explicit set-theoretic formulation of Shannon’s information
+measures. Specifically, he showed that Shannon’s information
+measures uniquely define a signed measure jz, called the J-
+measure, on a properly defined field. With this formulation,
+Shannon’s information measures can formally be viewed as
+a signed measure, and McGill’s multiple mutual information
+is naturally included. As a consequence, all set-theoretic tech-
+niques can now be used for the manipulation of information
+expressions. Furthermore, the use of information diagrams
+to represent the structure of Shannon’s information measures
+becomes justified. We note that information diagrams have
+previously been used informally to illustrate the structure of
+Shannon’s information measures [1], [22], [24]. Subsequently,
+Kawabata and Yeung [6] studied the structure of j:* when the
+random variables form a Markov chain. Recently, Yeung et
+al. [36] have extended the study in [6] to random variables
+forming a Markov random field.
+
+Recently, Yeung [35] defined the set I of all constructible
+entropy functions and observed that whether an information
+inequality (linear or nonlinear) always holds is completely
+characterized by I. This geometrical framework enables him
+to develop a unified description of all information inequali-
+ties (unconstrained or constrained) which are implied by the
+nonnegativity of Shannon’s information measures, called the
+basic inequalities. This gives a partial answer to the question
+raised by Han in [9], and it directly leads to the question of
+whether all information inequalities which always hold are
+implied by the basic inequalities for the same set of random
+variables, or equivalently, whether '% = I’, is true. In fact,
+the same question was raised in [26] and [34], although at
+that time I had not been defined and the intimate relation
+
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
+
+between I°* and information inequalities was not known. This
+question is the starting point of the work by the authors in
+[39] and in the current paper. With the result in [39] that r*
+is a convex cone, answering the question raised by Han in
+[9] is equivalent to determining [*. In a recent paper [37],
+we have used the region I¥ to study the so-called distributed
+source-coding problem.
+
+As a consequence of the work in [35], a software called
+ITIP (Information Theoretic Inequality Prover) [38] has been
+developed which can verify all linear information inequalities
+involving a definite number of random variables that are
+implied by the basic inequalities for the same set of random
+variables.
+
+Along another line, motivated by the study of the logic
+of integrity constraints from databases, researchers in the
+area of probabilistic reasoning have spent much effort in
+characterizing the compatibility of conditional independence
+relation among random variables. This effort was launched
+by a seminal paper by Dawid [4], in which he proposed four
+axioms as heuristical properties of conditional independence.
+In information-theoretic terms, these four axioms can be
+summarized by the following statement:
+
+I(X;Y, Z|U) =0 8 I(X; Y|U) =0
+and
+I(X; Z|Y, VU) =0.
+
+Subsequent work on this subject has been done by Pearl and
+his collaborators in the 1980’s, and their work is summarized
+in the book by Pearl [23]. Pearl conjectured that Dawid’s four
+axioms completely characterize the conditional independence
+structure of any joint distribution. This conjecture, however,
+was refuted by the work of Studeny [25]. Since then, Matus
+and Studeny have written a series of papers on this problem
+[13]-[29]. They have solved the problem for up to four random
+variables. It has been shown in [35] that the problem of
+characterizing the compatibility of conditional independence
+relations among random variables is a subproblem of the
+determination of [*.
+
+Il. STATEMENT OF MAIN RESULTS
+
+The key result of this paper is the following theorem:
+
+Theorem 3: For any four discrete random variables X, Y,
+Z, U, let
+
+A(Z, U|X, Y) = I(Z; VU) -—1(Z; U|X)-1(Z; U|Y). (20)
+Then the following inequality holds:
+A(Z, U|X, Y) < 5 [1(.X; Y)+1(X; ZU)
++1(Z; U|X) —I(Z; U|Y)]. (21)
+
+Note that the right-hand side of (21) is not symmetric in X
+and Y, whereas the left-hand side is. Therefore, we also have
+the following inequality:
+A(Z, U|X, Y) <5 (Xs Y) +1(¥; ZU)
+—1(Z; U|X) + I(Z; U|Y)]. (22)
+
+<PAGE 4 / 13>
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+
+Averaging inequalities (21) and (22) gives
+
+A(Z, UX, Y) < 5 1X; Y)+ ; [I(X; ZU) +1(Y; ZU)}.
+(23)
+This theorem will be proved in the next section.
+
+Let F' € F,. Define for three subsets a, /3, and y of Nj,
+Tr(a; Bly) = F(a 7) + F(BU7)-F(@U BU 7) -F (9).
+
+When ¥ is the empty set, we simply write [7(a; 3) in place
+of Ip(a; Bly). Let
+
+Arti, jk, =Ir its (9h) — Le ahs (i tHAD
+
+— Tet {HH HOD- (24)
+
+Define
+
+I, ={F €1 4: for any permutation 7 of {1, 2, 3, 4}
+Ar(x(1), 7(2)|7(3), (4)
+<5 Ur (n(3); (4) + Lee); 7(2)|7(3))
+— Ie(x(1); (2)|(4))
+
++ Ip(x(3); m(1)r(2))]}- (25)
+
+(Notice that, if we replace z(t) for ¢ = 1,2, 3,4 by
+Z, U, X,Y, respectively, then the inequality in (25) is just
+(21).) Theorem 3 says that
+
+Theorem 3 implies the following result.
+
+Theorem 4: For n > 4
+
+T* AT). (26)
+
+Proof: Apparently, we need to prove the theorem only
+for n = 4. This will imply the conclusion of the theorem for
+any n > 4. Define a function fF by letting
+
+F(o) =0
+P(X) =F(YY) = F(Z) = FU) = 2a > 0
+F(X, Y) =4a, F(X, U) = F(X, Z) = FY, V)
+=F(Y, Z) = F(Z, UV) = 3a
+F(X, Y, Z) =F(X, Y, VU) = F(X, ZU)
+=F(Y, Z, U) = F(X, Y, Z, UV) = 4a.
+Then Theorem 4 is proved by checking that # € [4 and
+FEV. O
+
+From Theorem 4, we have
+
+Ty x V4 Ty Ccr4.
+
+That is, the set ls is a nontrivial outer bound of the set Tr.
+Theorem 3 can be generalized to the following information
+
+inequalities for n + 2 random variables where n > 2.
+
+1443
+
+Theorem 5: For any set of n+ 2 discrete random variables
+U, Z, Xj: t = 1, 2,---, n and any 7 € {1, 2, ---, n}
+nl(U; Z) — S* MU; Z|X;) — nI(U; Z|X;)
+
+j=l
+
+< (Xi; UZ) + S° (Xj) — H(X1X2 +++ Xp). (27)
+j=l
+Furthermore, by averaging (27) over 2, we obtain
+nl(U; Z)-— 25> IU; Z|X;)
+
+j=l
+
+<
+
+Slr
+
+$0 I(Xi; UZ) +S H(X;) — H(X1X2 +++ Xp).
+w=1 j=l
+(28)
+
+The proof of this theorem is omitted because it can be proved
+using exactly the same idea used in the proof of Theorem 3
+and an inductive argument.
+
+So far, when we study the entropy function, it is viewed
+as a function defined on 2”. That is, we use the subsets of
+N;, as coordinates. H(a) is simply the joint entropy HCX,.).
+It is more convenient to use another coordinate system when
+we study the inner bound of the set [*. To introduce this
+new coordinate system, we employ the concept of atoms.
+The atoms are also indexed by the subsets of A, or the
+elements of 2". To motivate the definitions we are going
+to introduce, we first check the definitions of the conditional
+mutual informations of more than two random variables.
+Let X1,---, Xp, be nm discrete random variables, then the
+conditional mutual information of k random variables given
+Xo, [37] is defined as
+
+»
+
+(Xin; +++; Xix|Xa) = (-1) A(X, Ue).
+VC {tr +5 te}
+
+(29)
+Consider an arbitrary function F' in F,,. We define a function
+Fa|S] for any pair of subsets a, 3 of the ground set NV,
+where a is nonempty. The values of the original function are
+denoted by F(.), while for the values of the function F[a|/],
+we use [.] to replace (.) to indicate that these are different
+from the values of the original function.
+
+Flalal= S3 (yO u 8). (30)
+yCoa
+Flo] © Flala‘] (31)
+
+where a stands for the complement of @ with respect to
+the ground set {1, 2,---,n}. As we said, this concept is
+parallel to the concept of conditional mutual informations of
+more than two random variables. We have, for instance, when
+a = {1, 2, 3},n =5, F is the entropy function of five random
+variables X 1, ---, Xs
+
+We say F[a] is the value of the function F at the atom a. The
+atoms are also indexed by the subsets of \,. The weight of
+an atom is defined as the cardinality of its index set.
+
+<PAGE 5 / 13>
+1444
+
+The basic information inequalities can be restated under this
+new coordinate system as follows: Jf F’ is the entropy function
+of a set of n random variables Q = {X1, +++, Xn}, then for
+any subset a of Ny of cardinality of 2 and any subset [3 of
+
+n— a
+
+F[al] > 0 (32)
+and for any single element set a
+Fla] > 0. (33)
+
+This includes only a subset of the basic inequalities (called
+the elemental inequalities in [35]). But as we mentioned
+before, this subset of basic inequalities implies all other basic
+inequalities.
+
+We use some simplified notations: as an example, if @ =
+{1, 2, 3}, @ = {4, 5, 6}, we write F[1, 2, 3]4, 5, 6] in place
+of F[{1, 2, 3}|{4, 5, 6}]. A useful formula for the function
+F{.] is the following lemma.
+
+Lemma I:
+
+Flos] =
+
+»
+
+yC(aUsy)e
+
+Fla Uy] (34)
+
+where A® stands for the complement of the set A.
+
+For four random variables X,, X2, X3, Xa, if F is the en-
+tropy function of the four random variables, the basic in-
+equalities are as follows: let {¢, 7, k,2} be a permutation of
+
+{1, 2, 3, 4}
+Fi, j] 20
+Fli, j)+ Fi, j, k] >0
+Fli, j) + Fli, 3, k] + Fé, 7, + Fl, 9, k, >
+and
+Flt] >0.
+
+We have from (20)
+
+A(X, X2|X3, X4) = FI, 2, 3, 4] — FUL, 2]. (35)
+
+We use Ar(i, j|k, 2) in place of ACX;, X;j|X;, Xz) when
+F is the entropy function. By the same formula, Ay can be
+extended to any function F’ which may not be an entropy
+function, that is,
+
+Ar(i, jk, 2) = Fi, j,k, 0- FU, J. G6)
+
+The following is an interesting quantity useful in the study
+of TS:
+
+Spi, Jk, DS Flt, JE (i Gi, RIVET, J, +E TRU. BD)
+Let ¢ be the empty set, we have
+
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
+
+When F' is the entropy function of four discrete random
+variables X,, X2, X3, and X4
+
+Sr(1, 2|3, 4) =I0X1; X2) + 1(X3; X4|X1)
++ I(X3; X4|X2) — I(X3; X4).
+
+This quantity may be negative. This fact will be proved at the
+end of this section. The importance of this information quantity
+will be seen in Theorem 6 stated in this section. Theorem 3
+can be restated as follows.
+
+Theorem 3: For four random variables X,, X2, X3, Xa, if
+F is the entropy function, then
+
+Inequalities (22) and (23) are now
+
+Sr(1, 2|3, 4) + £2, 3|4] + F[2, 4]3] + F3, 4|2] > 0 (40)
+and
+2Sr(1, 2|3, 4) + FUL, 3/4] + FUL, 4]3] + F[2, 3]4]
++ F[2, 4/3] + F[3, 4/1) + FB, 4]2] > 0.
+(41)
+
+That is, although the quantity Si can be negative for some
+entropy functions F’, but it is bounded from below by the
+maximum of the following two quantities:
+
+— (FUL, 3/4] + FUL, 4|3] + £3, 4/1)
+— (F[2, 3]4] + F[2, 4|3] + FB, 4|2)).
+
+We notice that Fé, j|k] is the conditional mutual information
+of the two random variables X; and X; given X; which is
+always nonnegative.
+
+Define
+
+[4 ={F € 14: for any permutation 7 of {1, 2, 3, 4}
+
+Sr(n(1), m(2)/7(3), (4) = OF. (42)
+The last theorem of the paper is
+Theorem 6:
+fy chi. (43)
+
+Theorem 6 has been previously proven in [20]. The example
+in [22, Sec. V and Lemma 4.1] imply this result. But their
+proof is very abstract and [22, Lemma 4.1] is based on further
+references. To make this result more understandable, we give a
+direct proof of Theorem 6 in Section IV. This theorem provides
+an inner bound to the cone I¥.
+
+The following nontrivial example shows that this inner
+bound is not tight. In other words, this example shows that
+the information quantity Sy can be negative for some entropy
+functions F’.
+
+<PAGE 6 / 13>
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+
+A Counterexample for the Positivity of Sr: A projective
+plane (for p) is a collection of p? — p+ 1 subsets of {0, 1,
+2,+++, p? — p} of cardinality p such that the intersection
+of any pair of subsets from the collection has cardinality
+exactly 1 (see, for instance, [14, Appendix B]). For instance,
+012, 034, 056, 135, 146, 236, 245 is a projective plane for
+p = 3 on the ground set {0, 1, 2, 3, 4, 5, 6}.
+
+0123, 0456, 0789, Oabc, 147a, 158),
+169¢, 248¢, 259a, 267b, 349b, 357c, 368a
+
+is another example of a projective plane on the ground set
+{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c} for p = 4. We are going
+to construct four discrete random variables for which the
+function Sr is negative. In our construction, we use a pair
+of projective planes of the same size satisfying an additional
+property that, if we take one subset from each projective plane,
+the intersection of the two subsets taken always has cardinality
+at most 2. An example for such a pair is the previous projective
+plane for p = 4 and the following projective plane of the same
+cardinality and on the same ground set:
+
+0148, 025c, 037a, 069b, 1279, 156a, 13bc,
+2346, 457b, 49ac, 28ab, 3589, 678c.
+
+Let the ground set of the projective plane be P, let D =
+Uaep(a, a) be the diagonal of P x P. Any projective plane
+A has the property that
+
+Uses(Ax A-D)=PxP-D
+
+where the sets A x A—D are disjoint. Let the two projective
+planes we constructed above be A; for 2 =1, 2. For A € A,
+and B € Ag, if the intersection of the two sets has cardinality
+2, then AX A—D and Bx B—PD intersect at a set of cardinality
+2. Otherwise, they are disjoint.
+
+We define the following random variables X,, X2, X3, X4:
+let both X, and X» take values in ? and the pair X1, Xo
+has the uniform joint distribution over P x P — D. Let the
+first projective plane be A; = {Ai, ---, A13} and the second
+projective plane be Ay = {B\, ---, Big}. Let X3 take value
+ion A; x A; —D fort € {1, 2,---, 13}. Let X4 take
+value 2 on B; x B; —D for i € {1, 2,---, 13}. We have
+T(X1; Xz) = logs(13/12).
+
+H(X3) = H(X,) = logy 13
+H(X3X4) = logs 6 + log, 13.
+A(X3|X1) = ACX3|Xe2) = H(X4|X1)
+= H(Xa4|X2) = logs 4
+A(X3X4|X1) = H(X3X4|X2) = logs 12.
+
+Therefore,
+
+I(X3; X4) = logy 13 — log 6
+and
+I(X3; X4|X1) = [(X3; X4|X2) = logs(4/3).
+
+1445
+
+This gives that for these four random variables
+
+S(1, 2|3, 4) =I(X1; X2) + I(X3; X4|X1)
++ I(X3; X4|X2) — [(X3; X4)
+= log(13/12) + 2 x log,(4/3) — log, (13/6)
+= logy(52/27) — log,(13/6) = — log(9/8)
+<0.
+
+This example shows that the function Sy may be negative for
+some entropy functions F and that our inner bound is not tight.
+
+III. PROOF OF THEOREMS 3 AND 5
+
+Let X,Y, Z, U be four jointly distributed discrete ran-
+dom variables with distribution p(x, y, z, uw). We denote all
+marginals of this distribution by the same letter p. For instance,
+its marginal on z, wu is denoted by p(z, u). Define
+
+def p(x, Ys % u)p(a1, Ys %) u)
+
+44
+p(Z, u) a
+
+Ux, Yy %) Uy, T1; 41)
+
+Since both p(a, y, z, u) and p(x1, y1, 2, u) are absolutely
+continuous with respect to p(z, w), we can see that g is a dis-
+tribution of six random variables. Let X,, Y; be two random
+variables jointly distributed with X, Y, Z, U according to the
+joint distribution g.
+
+Actually, we can express A(Z, U|X, Y) in terms of the
+information quantities of the six random variables defined
+above.
+
+Lemma 2:
+
+A(Z, U|X, Y) =ICX; 1) — ICX3 MU) — 1CX3 %1 |Z)
+~ I(Z; U|X, Yi). (45)
+
+Proof:
+
+A(Z, UX, Y) =1(Z; U) — IZ; U|X) — 1(Z; UY)
+=I(Z; U) — I(Z; U|X) — 1(Z; U|Yi)
+=1(Z; U; X; M1) -—1(Z; U|XN)
+=I(X;¥,) — 1(X; ¥,|U) — 1(X; ¥i|Z)
+
++ I(X:Y{|ZU) - I(Z; U|XY,)
+=I(X;¥,) — 1(X; ¥,|U) - 1(X; ¥i|Z)
+—1(Z; U|XY;).
+
+The last step is due to the fact that [(X; ¥;|ZU) = 0. The
+lemma is proved. O
+
+Proof of Theorem 3: From Lemma 2, we have
+I(Z; U) - (2; U|X) - (2; UY) < 1X3 %1).
+Similarly, we can prove
+
+I(Z; U) — 21(Z; U|X) < I(X; X).
+
+<PAGE 7 / 13>
+1446
+
+By means of these two inequalities, Theorem 3 is proved in
+the following way:
+21(Z; U) — 31(Z; U|X) — I(Z; U|Y)
+
+< 1X3 %4) + IX; X1)
+
+= 1(X; XV) + 1X; X15 %)
+
+= 1X; 41M) + 10% M1) — 10% MX)
+
+< IX; X1%1) + 10%; V1)
+
+< I(X; ZU) + 1(X1; V1)
+
+= 1I(X; ZU) +1(X; Y).
+In the penultimate step, we used the data processing inequality
+
+and the fact that I(X;Y) = I(X1; Yi). The theorem is
+proved. O
+
+Using the six random variables X, Y, U, Z, X1, Yi, we can
+actually determine all the missing terms of the inequality in
+Theorem 3. This is done as follows: from Lemma 2
+
+A(Z, U|X, Y) =I(Z; U) — I(Z; U|X) — 1(Z; U|Y)
+=I1(X; Yi) —1(X; %1|U) — 1(X; ¥1|Z)
+~ I(Z; U|XY,).
+
+Let Ry = 1(X; 4|U) + 1X3 ¥1|Z) + 1(Z; U|XY1). This
+equality is restated as
+
+A(Z, U|X, Y) = 1(X; 11) - Ri.
+Similarly, we have
+A(Z, U|X, X1) =1(Z; U) — I(Z; U|X) — IZ; U|X1)
+=1(Z; U) — 21(Z; U|X)
+=1(X; X1) — I(X; X4|U) — 1(X; X1|Z)
+—1(Z; U|XX1).
+
+Let Ry = 1(X; X\|U) + 1(X; X41|Z) + 1(Z; U|XX1). This
+equality is restated as
+
+A(Z, U|X, X1) = 1(X; X11) — Re.
+Therefore,
+21(Z; U) — 31(Z; U|X) — 1(Z; U|Y)
+= 1(X;¥1)+1(X; X%1) -— Ri — Re
+= 1(X; X1%1) + IX; X13 V1) -— Ri — Re
+= I(X; ZU) — I(X; ZU|XiM%1) + 1(X1; V1)
+— 1(X1; Vi.X) — Ri — Re
+= 1(X; ZU) +1(X; Y) — IX; ZU|XiN)
+—1( Xi; Vi|X) — Ri — Re.
+This implies that the missing terms of the first inequality in
+Theorem 3 are
+R(X, Y, Z, U, 1, 11)
+5 U(X; ZU|X1%1) + 10%; Vi]X) + Bi + Ry]
+5 [1(X; X1|U) + 1X; Xi |Z) + 1(Z; U|XX1)
++ 1(X1; MYi|X) + 1X; ZU|XiY1)
++ 1X; ¥4|U) +X; Vi|Z) + 1(Z; UX).
+
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
+
+Apparently, the following function is in ive
+
+F(¢)=0, F(X)=F(Y)=F(Z)=F(U) =6a,
+F(XY)=12a, F(XZ)=F(YZ)=F(YU)=F(XU)=9a,
+F(ZU)=10a, F(XZU)=F(YZU)=F(XZY)
+
+= F(XYU)=F(XZYU)=12a.
+
+For this function, one of our new inequalities is satisfied with
+equality. A natural question to ask is whether or not this
+function is asymptotically constructible. If this is true, then
+it is likely that
+
+Teaty.
+
+Unfortunately, we were unable to prove this. Therefore, we
+doubt the correctness of this plausible conjecture.
+
+IV. PROOF OF THEOREM 6
+
+In this section, we prove Theorem 6, the inner bound of
+Ti. The result is proven via a series of basic constructions.
+Before we start to work on the proof of the result, we present
+first the basic constructions. In all constructions that follow,
+we use three independent and identically distributed ternary
+random variables W,, W2, and W3 taking values in the set
+{0, 1, 2}. The common distribution of the random variables is
+the uniform distribution. Let Wo represent a constant random
+variable taking a fixed value with probability 1. To make
+the notations simpler, in this section, we assume that the
+logarithmic function is based to 3. Therefore, the random
+variables W; has entropy 1 for 2 = 1, 2, 3. The entropy of
+Wo is zero. In this section, we are going to use the concept
+of atoms. There are 15 atoms in the case of four random
+variables. They are represented by the nonempty subsets of
+{1, 2,3, 4}. For any function F, we will use the values
+of the function at atoms. The values of F' at atoms are
+linear functions of the values of the function at subsets of
+{1, 2, 3, 4}. The values of the function at subsets will be
+denoted, for instance, for {1, 2, 3}, by FC, 2, 3). When F
+is an entropy function, this is the joint entropy. To distinguish
+from the values at subsets, the values of the function at atoms
+are represented, for instance, at atom {1, 2, 3}, by F[1, 2, 3].
+When F is the entropy function of four discrete random
+variables X,, X2, X3, X4, we have
+
+Fl, 2, 3] = 1(X1; X23 X3|X4).
+
+Construction 1: For any nonempty subset a of {1, 2, 3, 4},
+let X; = W, if ¢ € a and X; = Wo, otherwise. The function
+defined by this construction is denoted by F. It is easy to
+check that, for this construction, for any 8 4 a, F4[8] = 0
+and Ffa] = 1.
+
+Construction 2: X, = W,, Xg = Wo, X3 = W3, X4 =
+W, + W2 + W3mod (3). The function defined by this con-
+struction is denoted by F. For this construction, the function
+has value zero at all weight-one atoms, has value 1 at all
+weight-two and weight-four atoms, and has value —1 at all
+weight-three atoms.
+
+<PAGE 8 / 13>
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+
+Construction 3: X, = W,, X2 = Wo, X3 = W,+ We
+(mod 3), X4 = Wo. The function defined by this construction
+is denoted by F? where 4 indicates that random variable
+X4 = Wo. The construction is actually symmetric for the
+other three random variables. We also have the other three
+similar constructions obtained by permuting the four random
+variables. The functions so constructed are denoted by F?
+where 2 indicates that X; = Wo. For this construction
+
+FeUl, 2) = F201, 3] = FR, 3] =1
+and
+F321, 2, 3] =-1.
+
+At all other atoms the values are zero.
+
+Construction 4: X, = W,, Xo = Wo, X3 = X4 = W +
+W2(mod 3). The function so constructed is denoted by F} 4.
+We can also construct a function F} j and its meaning is
+self-explanatory. For this construction,
+
+F3 4{1, 2] =1
+F3 4[2, 3, 4] = F34[1, 3, 4] =1
+and
+F3 4[1, 2, 3, 4] =-1.
+
+At all other atoms it has zero value.
+
+Construction 5: X, = W,, X_ = Wo, X3 = Wy, + We
+(mod3), X4 = W, — W2(mod3). The function constructed
+by this method is denoted by F°. For this construction,
+at all weight-one and -two atoms the value is zero; at all
+weight-three atoms the value is 1; and F°[1, 2, 3, 4] = —2.
+
+Construction 6: X, = W,, X2 = W2, X3 = W3, X4 =
+(W, + W2 (mod 3), Wi + W3(mod3)). The function con-
+structed by this method is denoted by F%. We can also
+construct functions Fe for other values of z by the same
+method. For this construction, F8[1, 2, 3] = 1; at all weight-
+two atoms containing 4, the values are 1; and F'9[1, 2, 3, 4] =
+—1. At all other atoms the values are zero.
+
+Construction 7: X, = Wi, X2 = W2, X3 = Wi + We
+(mod 3), X4 = (Wi, W2). The function constructed by this
+method is denoted by F/. We can also construct F’ for other
+values of z by the same method. For this construction, at
+all atoms of weight at most two the value is zero; at all
+weight-three atoms except the atom {1, 2, 3} the values are
+1; F{[1, 2, 3, 4] = -1 and F7[1, 2, 3] = 0.
+
+To help the reader to understand the proof, we give charts
+for the values of the functions constructed in Constructions
+2-7. Since these functions take zero values at all weight-one
+atoms, we give their values at atoms of weight at least two.
+The atoms of weight at least two are arranged as follows:
+
+23
+120 - 13 - 13
+14 - 1h - 1a - i4
+, - oh — h
+
+1447
+
+The values of the functions 2—7 are given as follows using
+this chart.
+
+(1)
+? - on - ”?
+(-1) - @ - ©) - Q)
+d) - 1) - ()
+
+Function F?.
+
+(1)
+(1) - 1) (1)
+- - — (0)
+(0) - (0) - (©)
+
+Function F?.
+
+(0)
+(1) - 0 - (0)
+1) - a) — (0)
+(0) - ) - ©
+
+Function F3' 4.
+
+”
+0) - @ - ©)
+(1) - 9 - — (0)
+0) - @ - ©)
+
+Function F°.
+
+(0)
+(0) - @ - (0)
+1) - 0) -
+(1) - 0 - )
+
+Function F%.
+
+(0)
+(0) - , - ”
+Gd - (¢-)D- @ - ©
+(0) - an - ©
+
+Function Fi.
+
+<PAGE 9 / 13>
+1448
+
+In [39], we proved the following result:
+
+Lemma 3: If F € T* and a > 0, then aF € I*.
+Fi, € 1%, thn +h €I*.
+That is, '* is a convex cone.
+
+Proof of Theorem 6: A function F' in the region V4
+should satisfy the following conditions in terms of atoms: Let
+the four indices of the random variables be {2, j, k,/} which
+is a permutation of the set {1, 2, 3,4}. From the definition of
+the region Ds, the inequalities the function F’ should satisfy
+include:
+
+If
+
+1) F is nonnegative at all atoms of weight one;
+
+Flt, j, k,l] > 0, where ¢ is the empty set;
+23
+|
+(12) -— (123) - 13
+| | |
+(124) — (1234) - 134 - 14
+| | |
+24 - 234 - 34
+
+The atoms involved in inequality (2).
+
+3) Fli, gk] = Fli, J] + Fle, 9, = 0;
+
+23
+(12) - «1b3) - 2B
+124 — 1234 — 1a —~ 14
+Ho wm -
+
+The atoms involved in inequality (3).
+
+4) Flt, + Fle, 5, A] + Fl, 3, + Fk, Y] 2 0;
+
+23
+
+(12) - (143) - 13
+
+a) — 1234 - 1a - 14
+oo (8H
+
+The atoms involved in inequality (4).
+
+5) Ffi, j] = 0.
+Notice that the fourth condition comes from the constraint
+
+Other inequalities come from the nonnegativity of conditional
+mutual informations of two random variables and the non-
+negativity of the conditional entropies. Lemma | is useful in
+finding the atoms involved in these inequalities. These five
+conditions will be referred to as Conditions 1-5 in the proof.
+The readers can extremely reduce the difficulty in subsequent
+reading by familiarizing themselves with these five conditions
+in the atom chart for all permutations of 7, 7, k, and I.
+
+A function F[.] is called nonnegative if its values at all
+atoms are nonnegative.
+
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
+
+Lemma 4: Nonnegative functions are asymptotically con-
+structible.
+Proof: If J is a function that takes nonnegative values
+at all atoms, then
+
+J= S> JlalFe
+
+where J[a] is nonnegative for all a. It is asymptotically
+constructible from Construction 1 and Lemma 4. The lemma
+is proved. O
+
+The basic idea for the proof is that for any function
+F in Ta, we can find a sequence of basic functions from
+Constructions 1-7 f\,---, Fp, for some m > O and a
+sequence of nonnegative reals a1, ---, Qn such that
+
+j=l
+
+Once we can prove this, then the theorem is proved by
+invoking Lemma 4. Suppose F is in [4 and F” is a basic
+function from Constructions 1-7 and a > 0. If F—aF”’ € Tu,
+then we say that subtracting af’ from F is a legal operation.
+We prove the theorem by finding a sequence of legal operations
+to reduce F to a nonnegative function, which is asymptotically
+constructible by Lemma 5. This implies by invoking Lemma
+4 that the original function is asymptotically constructible.
+
+Construction 1 is used only in Lemma 5. In the proof that
+follows, we use only the other six constructions. We notice
+that in Constructions 2—7, no atom of weight one is involved.
+As long as the values of the function at the weight-one atoms
+are nonnegative to start with, upon subtracting a nonnegative
+multiple of any of these constructions, Condition 1 remains
+satisfied. Therefore, we can always ignore the weight-one
+atoms when we consider subtracting a nonnegative multiple
+of any of these constructions.
+
+We find these legal operations in the following steps.
+
+Step 1: We notice that F°? satisfies all inequalities in Con-
+ditions 2-4 with equalities. So subtracting a? from F' where
+
+= dts 37h I
+
+is a legal operation because 1) Conditions 2-4 will remain to
+be satisfied since subtracting zero does not change the direction
+of the inequalities and 2) since a is defined as the minimum
+of the values of the function at all weight-two atoms, after
+subtracting aF? the values of F at these atoms are at least 0.
+Therefore, Condition 5 holds. Without loss of generality, we
+assume that
+
+FUl, 2) = Fii, Jj).
+
+min
+{i, J}C{1, 2, 3, 4}
+Let F’ = F — aF®?. We have
+) Pets
+ii) Fl, 2] =0.
+
+<PAGE 10 / 13>
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+
+In the following chart, the atoms are marked either by a
+O indicating that the value of the function £” at this atom is
+zero, or by a + indicating that the value of the function £” at
+this atom is nonnegative, or by an X indicating that the value
+of the function F” at this atom may be negative.
+
+a
+(+) -
+
+|
+(X)
+
+” -
+oe -
+(+) -
+
+"
+(X) -
+(X) - G)
+The Function Ff”.
+
+(+)
+
+Step 2: A function is called seminonnegative if its values
+at all atoms of weight up to three are nonnegative. In this step,
+we prove that F” can be reduced to a seminonnegative function
+via a series of legal operations. From the chart for F’, we see
+F’ is not seminonnegative if and only if at least one of two
+values of £’, F’[1, 3, 4] and £’[2, 3, 4], is negative. Suppose
+
+F'"[1, 3, 4] <0.
+
+Let a = —F"[1, 3, 4]. We prove that subtracting af} from F”
+is legal. Let G = F’ — aF}. We notice that
+
+F3[i, j|k] =0,
+
+for any k ¢ {i, j}. These observations and F” € I'y imply that
+
+Gli, j|¢] =0
+Gli, j|k] = 0.
+
+From G{1, 3, 4] = 0, we see that
+Gf1, 3] = Gil, 3) 4+ Gil, 3, 4] = F’[1, 3] + FTL, 3, 4] > 0.
+Similarly, we have
+
+Gl, 4] >0
+GIB, 4] >0.
+
+For other pairs z, 7, since the values of F” are not affected by
+the operation, we still have
+
+Glé, j] = 0.
+To show that GE Ds, we need to check only Condition 4
+Gli, J] + Gli, 5, H+ Ch, 3, +G[k, > 0.
+There are six of them for
+(i, J) = (3, 4), GL, 4), GL, 3), CL, 2), @, 3), @, 4).
+The inequalities for (¢, 7) = (1, 2), (1,3), (1, 4) are triv-
+
+ial because all entries are nonnegative. The proofs for (é, 7) =
+(2, 3), (2, 4) are the same. We prove it only for (¢, 7) =
+
+1449
+
+(2, 4). We need also to prove it for (é, 7) = (3, 4). For
+(i, J) = (2, 4)
+
+Gl, 3]+G[1, 2, 4]+GP, 3, 4]+GP, 4]
+=F'[1, 3]4+F'[1, 2, 4J+F"[2, 3, 4]+£"[2, 4]
+
+—a(F3(1, 3]+- F3[1, 2, 4J4+ FF, 3, 4]+F 32, 4])
+=F"[1, 3]+F"[1, 2, 4J4+F"[2, 3, 4]4+F"[2, 4]-aF3[1, 3]
+=F'[1, 3]+F'[1, 2, 4]+F"[2, 3, 4|+F"[2, 4]+F"[1, 3, 4]
+> FTA, 3]4+-4T, 3, 4]+F"[2, 3, 4]+F"[2, 4]
+>0.
+
+In the next to the last step, we used the fact that F’[1, 2, 4] > 0
+and in the last step, we used the fact that F’ € I'4. For
+
+(i, 7) = (3, 4)
+
+Gil, 2] + G[2, 3, 4] + Gf, 3, 4] + Gf, 4]
+= F'[1, 2]4 F'[1, 3, 4] + F’, 3, 4] + F’B, 4]
+— a F3[1, 2) 4+ FFL, 3, 4] + FF, 3, 4] + F3[3, 4])
+= F'[1, 2]+ F’[1, 3, 4] + F’[2, 3, 4] + F’[, 4]
+— af F3[1, 3, 4] + F3[3, 4])
+= F'[1, 2]4- F'[1, 3, 4] + F’, 3, 4] + £', 4]
+>0.
+
+In the next to the last step, we used the fact that F3[1, 3, 4]+
+F3[3, 4] = 0 and in the last step, we used the fact that
+F’ € Ty. This proves that G € [y. If G[2,3, 4] > 0,
+then G is already seminonnegative. Otherwise, repeating the
+same proof by replacing atom {1, 3, 4} by {2, 3, 4}, we can
+obtain a seminonnegative function. Therefore, without loss of
+generality, we assume that G is already seminonnegative.
+Step 3: Since G is seminonnegative, if the value of G
+at {1, 2, 3, 4} is nonnegative, then the function is already
+nonnegative and therefore asymptotically constructible from
+Lemma 5. Otherwise, we continue to find legal operations to
+convert the function to a nonnegative function. In doing so, the
+inequalities we need to consider are those in which the atom of
+weight four is involved. That is, the following six inequalities
+
+S> Gla] > 0
+
+{i,j} Ca
+
+for all six pairs 7, 7 from {1, 2, 3, 4}. The following obser-
+vations will be useful in the remaining part of the proof.
+
+Observation 1: Lett, j, k, | be a permutation of 1, 2, 3, 4,
+and let J be a seminonnegative function. Then
+
+implies that subtracting aF} ; from J is legal and results in a
+seminonnegative function where
+
+a=min{J|k, J], Ji, kU, JU, k, Of.
+
+<PAGE 11 / 13>
+1450
+
+Observation 2: Lett, j, k, 1 be a permutation of 1, 2, 3, 4,
+and let J be a seminonnegative function. Then
+
+Jfi, J, + J[1, 2, 3, 4] > 0
+Sti, k, + Jf, 2, 3, 4] >0
+
+implies that subtracting af’ from J is legal and results in a
+nonnegative function where
+
+a=min{ Ji, k, J, J[i, i, Ul, Ji, 3, Ey}.
+
+The validity of these propositions is obvious.
+
+Since functions f°, F'°, and F® satisfy all these six in-
+equalities with equalities, as long as at atoms of weight up to
+three the values of the function are not reduced below zero,
+subtracting a nonnegative multiple of one of these functions
+is always legal and results in a seminonnegative function.
+Suppose we keep performing these legal operations until no
+more legal operations resulting in a seminonnegative function
+using these three functions are possible. We distinguish the
+following cases according to the function G’ that is resulted
+in.
+
+Because no operation using function F? is legal, for any
+subset {t, j, k} of {1, 2, 3, 4}, G’ is zero at least one of the
+following atoms: {2, j}, {2, k}, {k, 7} (cf., the atom chart for
+F). There are only two possible cases:
+
+Case 1: There exists a 3-subset, say {7, j, k}, such that G’
+is zero at all three atoms: {2, 7}, {¢, k}, {k, j}.
+
+Case 2: There exist two disjoint weight-two atoms, say
+{i, j} and {k, J}, such that the values of the function G’ at
+these two atoms are both zero.
+
+In Case 1, without loss of generality, we assume that
+G'[1, 2] = G@’[1, 3] = G’[2, 3] =0.
+
+Since F& does not give a legal operation resulting in a
+seminonnegative function, the function takes value zero at one
+of the following four atoms: {1, 4}, {2, 4}, {3, 4}, {1, 2, 3}.
+This gives two subcases,
+
+Case 1.1: The function is zero at {1, 4} (or equivalently
+one of two other weight-two atoms listed above).
+
+Case 1.2: The function is zero at {1, 2, 3}.
+
+In Case 1.1, since F° does not give a legal operation
+resulting in a seminonnegative function, at least one of the four
+weight-three atoms, the function takes zero value. We consider
+only the cases where at one of the three atoms {1, 2, 4},
+{1, 3, 4}, and {2, 3, 4}, the value of the function is zero.
+The case where the function is zero at the atom {1, 2, 3} is
+equivalent to Case 1.2. Since the first two atoms are symmetric
+in this context, we consider only the case that the function G’
+is zero at {1, 2, 4}. We can see that Condition 2 implies
+
+G’[1, 3, 4] + G’[1, 2, 3, 4] > 0
+
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
+
+because both G’[1, 4] and G’[1, 2, 4] are zero
+(0)
+
+4) -— (0)
+
+0) - a - 4) — (0)
+4) - 4) - 4)
+
+The Function G’ in Case 1.1 for G’[1, 2, 4] =0.
+
+(0) -
+
+Let
+a= min{G’[2, 4], G’[1, 2, 3], G’[1, 3, 4]}.
+
+The inequalities above imply that subtracting ak} 3 from G’
+is legal and results in a seminonnegative function G”. If G”
+is zero at either {1, 2, 3} or {1, 3, 4}, then G”[1, 2, 3, 4] >
+0. The function obtained is already nonnegative. Otherwise,
+G"’[2, 4] = 0. This implies
+
+G"[2, 3, 41+ G’[L, 2, 3, 4] > 0.
+
+Let 6 = —G”[1, 2, 3, 4], if b > O then subtracting bFY is a
+legal operation and this results in a function that is nonnegative
+at all atoms.
+
+If G’[2, 3, 4] = 0, we have
+
+G'[1, 2, 3] + G’[1L, 2, 3, 4] >0
+because both G’[2, 3] and G’[2, 3, 4] are zero.
+”
+" - ”
+! | oe — (0)
+(+) - ©) - G)
+The Function G’ in Case 1.1 for G’[2, 3, 4] = 0.
+
+” -
+
+(+) - (XY) -
+
+Let
+a= min{G"[3, 4], G’[L, 2, 3], G’[1, 2, 4]}.
+
+The inequalities above imply that subtracting ak} 9 from G’
+is legal and results in a seminonnegative function G”. If G”
+is zero at {1, 2, 3} then G”[1, 2, 3, 4] > 0. If G” is zero
+at {1, 2, 4} then this goes back to the previous case. In both
+cases, either the function obtained is already nonnegative, or it
+can be reduced to a nonnegative function by legal operations.
+Otherwise, G’’[3, 4] = 0. For this function, we have
+
+G"[1, 2, 3, 4] + G”[1, 3, 4] > 0.
+Let
+a= min{G” [2, 4], G’[1, 2, 3], @”’[1, 3, 4]}.
+
+The inequalities above imply that subtracting ak} 9 from G”
+is legal and results in a seminonnegative function G’”. If G” is
+
+<PAGE 12 / 13>
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+
+zero at either {1, 2, 3} or {1, 3, 4}, then G”’[1, 2, 3, 4] > 0.
+Otherwise, G’”[2, 4] = 0. For this function, we have
+
+G’"[1, 2, 3, 4] + G”[L, 2, 4] >0
+
+G""1, 2, 3, 4] + G”"[L, 2, 3] >0
+
+G’"[1, 2, 3, 4] + G"[1, 3, 4] >0.
+Let b = —G”[1, 2, 3, 4], if b > 0 then subtracting bF{ is a
+legal operation and this results in a function that is nonnegative
+
+at all atoms.
+In Case 1.2, we have
+
+G'[1, 3, 4] + G’[1, 2, 3, 4] >0,
+G'[1, 2, 4] + G’[1, 2, 3, 4] 20,
+G'[2, 3, 4] + G’[1, 2, 3, 4] >0.
+
+(0)
+(0) - © — (0)
+4) - X) 4) -
+hb = &
+The Function G’ in Case 1.2.
+
+(+)
+
+Let a = —G'[{1, 2, 3, 4}]. If @ > 0, then subtracting aF{
+is a legal operation. This results in a nonnegative function.
+Otherwise, the function is already nonnegative.
+
+We now consider Case 2. Without loss of generality, we
+assume that G’[1, 2] = G’[3, 4] = 0. Since F° does not
+give a legal operation resulting in a seminonnegative function,
+the function G’ has value zero at least one of the four
+weight-three atoms. Without loss of generality, we assume
+G"[1, 2] = G’[3, 4] = G"[1, 2, 3] = 0. Then we have
+
+G'[1, 2, 4]+ G’[1, 2, 3, 4] > 0.
+
+"
+” - ” -
+
+Poo G |
+(+) -— (+) - (0)
+The Function G’ in Case 2.
+
+Let a = min{G’[2, 3], G’[1, 3, 4], G’[1, 2, 4]}. Then sub-
+tracting ak} 4 is legal. The function G” resulting from this
+legal operation takes zero value at either {1, 3, 4}, {1, 2, 4},
+or {2, 3}. In the first case, G”[1, 3, 4] = 0, we have
+
+G"[1, 3] + G’[L, 2, 3, 4] > 0.
+
+ae
+
+(X) - G) -
+
+(+)
+
+Apparently, subtracting bFS 4 is legal where
+b= min{G"[1, 3], G’[1, 2, 4], G2, 3, 4]}.
+
+This results in a nonnegative function. In the second case,
+G”[2, 3] = 0, we have
+
+G’[2, 3, 4] + G’[L, 2, 3, 4] > 0.
+
+1451
+
+Let
+a= min{G"[1, 3], G’[1, 2, 4], G’[2, 3, 4]}.
+
+Subtracting af 4 is legal. Let G” be G’ — aF} ,. Then either
+G"'[1, 2, 4] = 0 or G”[1, 3, 4] = 0. In both cases, we must
+have fed [1, 2, 3, 4] > 0, that is, the function is nonnegative.
+Otherwise, G”[1, 3] = 0. This implies
+
+G"[1, 3, 4] + G”[1, 2, 3, 4] >0
+
+G"'T1, 2, 4] + G”[1, 2, 3, 4] >0
+and
+
+G"[2, 3, 4+ G”[1, 2, 3, 4] >0.
+
+Then, subtracting F{ is legal and results in a nonnegative
+function. In the third case, G’[1, 2, 4] = 0, G’[1, 2, 3, 4] must
+be nonnegative. Hence, G’ is a nonnegative function.
+
+Thus we have proved that we can always reduce a function
+in iv by legal operations to a function that takes nonnegative
+values at all atoms. By Lemma 5, Theorem 6 follows.
+
+V. CONCLUDING REMARKS
+
+The key result of this paper is Theorem 3. This discovery
+shows that the set of so-called basic information inequalities
+cannot fully characterize Shannon’s entropy function in the
+sense of Theorem 4. That is, the region [,, is strictly greater
+than the region I*. This is a surprising result because based
+on intuition, one tends to believe that the opposite is true.
+Actually, when we started to look into this problem, we tried
+first to prove that
+
+Te=r,
+
+by finding all kinds of constructions for four random variables
+as in the proof of Theorem 6. Only after we failed to find
+a construction in one of many cases, we started to doubt the
+correctness of our conjecture. This led to the discovery of this
+new information inequality.
+
+The full characterization of the region ['*, seems to be a
+highly nontrivial problem. Even in the case of n = 4, we
+were unable to determine the region. We, instead, provided an
+inner bound of the region. This is Theorem 6 of the paper.
+The inner bound and the outer bound we found in this paper
+differ. It has been shown by an example that the inner bound
+is not tight. Unfortunately, the construction method we used
+in this example is not powerful enough to show that our outer
+bound is tight.
+
+The simplest case of the problem is the case of n = 4
+because this number is the smallest integer for which [,
+and I* differ. Although we mainly have concentrated on
+this simplest case, we have proved Theorem 5 which is
+a generalization of Theorem 3 to any number of random
+variables.
+
+We also determined the missing terms in the inequalities
+in Theorem 3. They are expressed in terms of some auxiliary
+random variables. We did so in hope that this may be helpful
+in further searching for new information inequalities, as well
+as in further searching for improved inner bounds.
+
+<PAGE 13 / 13>
+1452
+
+To get a better understanding of the behavior of the entropy
+function, it is important to fully characterize the function at
+least in the simplest case of n = 4. That is, the simplest task
+in this research direction is to determine the region I. Based
+on our experience, we do not believe our outer bound to be
+tight. That is, we believe that there may exist more linear
+unconditional information inequalities involving four random
+variables.
+
+The meaning of the new information inequalities provided
+by Theorems 3 and 5 are still not fully understood. Although
+we have used the region I to study the so-called distributed
+source coding problem, it is still of great interest to find more
+applications of the inequalities in other information-theoretical
+problems, especially in multiuser channel coding or source
+coding problems.
+
+The problems studied in this paper have close connection
+to some other areas such as probabilistic reasoning, relational
+database, and so on. To study the implication of our results in
+those areas is also of interest.
+
+ACKNOWLEDGMENT
+
+The authors are grateful to the two referees. Their de-
+tailed comments and suggestions have greatly improved the
+readability of the paper.
+
+REFERENCES
+(1]
+[2]
+[3]
+
+N. M. Abramson, Information Theory and Coding. New York:
+McGraw-Hill, 1963.
+
+L. L. Campbell, “Entropy as a measure,” JEEE Trans. Inform. Theory,
+vol. IT-11, pp. 112-114, Jan. 1965.
+
+I. Csiszaér and J. Korner, Information Theory: Coding Theorem for
+Discrete Memoryless Systems. New York: Academic, and Budapest,
+Hungary: Akademiai Kiado, 1981.
+
+A. P. Dawid, “Conditional independence in statistical theory (with
+discussion),” J. Roy. Statist. Soc., Ser. B, vol. 41, pp. 1-31.
+
+S. Fujishige, “Polymatroidal dependence structure of a set of random
+variables,” Inform. Contr.. vol. 39, pp. 55-72, 1978.
+
+T. Kawabata and R. W. Yeung, “The structure of the J-measure of a
+Markov chain,” JEEE Trans. Inform. Theory, vol. 38, pp. 1146-1149,
+1992.
+
+T. S. Han, “Linear dependence structure of the entropy space,” Inform.
+Contr., vol. 29, pp. 337-368.
+
+, ‘Nonnegative entropy measures of multivariate symmetric cor-
+relations,” Inform. Contr., vol. 36, pp. 133-156, 1978.
+
+, “A uniqueness of Shannon’s information distance and re-
+lated nonnegativity problems,” J. Comb., Inform. Syst. Sci., vol. 6, pp.
+320-321, 1981.
+
+G.-d. Hu, “On the amount of information,” Teor. Veroyatnost. i Prime-
+nen., vol. 4, pp. 447-455, 1962, in Russian.
+
+F. Matt, private communication.
+
+F. J. MacWilliams and N. J. A. Sloane, The Theory of Error Correcting
+Codes. Amsterdam, The Netherlands: North-Holland, Elsevier Science
+B.V., 1977.
+
+[4]
+[5
+
+=
+
+[6]
+
+[7]
+[8]
+[9]
+
+[10]
+
+[11]
+[12]
+
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
+
+[13] M. Matis, “Abstract functional dependency structures,” Theor. Comput.
+Sci., vol. 81, pp. 117-126, 1991.
+
+——_— ., “On equivalence of Markov properties over undirected graphs,”
+J. Appl. Probab., vol. 29, pp. 745-749, 1992.
+
+, ‘Ascending and descending conditional independence relations,”
+in Trans. 11th Prague Conf: Information Theory, Statistical Decision
+Functions and Random Processes, vol. B. Prague, Czechoslovakia:
+Academia, pp. 181-200, 1992.
+
+, “Probabilistic conditional independence structures and matroid
+theory: Background,” Int. J. Gen. Syst., vol. 22, pp. 185-196.
+
+, “Extreme convex set functions with many nonnegative differ-
+ences,” Discr. Math., vol. 135, pp. 177-191, 1994.
+
+F. Matus, “Conditional independences among four random variables II,”
+Combin., Prob. Comput., vol. 4, pp. 407-417, 1995.
+
+, “Conditional independence structures examined via minors,”
+Ann. Math., Artificial Intell., vol. 21, pp. 99-128, 1997.
+
+F. MatuS and M. Studeny, “Conditional independences among four
+random variables I,” Combin., Prob. Comput., vol. 4, pp. 269-278, 1995.
+W. J. McGill, “Multivariate information transmission,” in Trans. Prof:
+Group Inform. Theory, 1954 Symp. Information Theory, vol. PGIT-4,
+1955, pp. 93-111.
+
+A. Papoulis, Probability, Random Variables and Stochastic Processes,
+2nd ed. New York: McGraw-Hill, 1984.
+
+J. Pearl, Probabilistic Reasoning in Intelligent Systems.
+CA: Morgan Kaufman, 1988.
+
+An Introduction to Information Theory.
+1961.
+
+M. Studeny, “Attempts at axiomatic description of conditional indepen-
+dence,” in Proc. Workshop on Uncertainty Processing in Expert Systems,
+supplement to Kybernetika, vol. 25, nos. 1-3, pp. 65-72, 1989.
+
+, “Multiinformation and the problem of characterization of con-
+ditional independence relations,” Probl. Contr. Inform. Theory, vol. 18,
+pp. 3-16, 1989.
+
+, “Conditional independence relations have no finite complete
+characterization,” in Trans. 11th Prague Conf. Information Theory,
+Statistical Decision Functions and Random Processes, vol. B. Prague,
+Czechoslovaka: Academia, pp. 377-396, 1992.
+
+, ‘Structural semigraphoids,” Int. J. Gen. Syst., vol. 22, no. 2, pp.
+207-217, 1994.
+
+, ‘Descriptions of structures of stochastic independence by means
+of faces and imsets (in three parts),” Int. J. Gen. Syst., vol. 23, pp.
+123-137, pp. 201-219, pp. 323-341, 1994/1995.
+
+T. Tsujishita, “On triple mutual information,” Adv. Appl. Math., vol. 16,
+pp. 269-274, 1995.
+
+S. Watanabe, “A study of ergodicity and redundancy on intersym-
+bol correlation of finite range,” in Trans. 1954 Symp. Inform. Theory
+(Cambridge, MA, Sept. 15-17, 1954), p. 85.
+
+—___., “Information theoretical analysis of multivariate correlation,”
+IBM J., pp. 66-81, 1960.
+
+D. J. A. Welsh, Matroid Theory. New York: Academic 1976.
+
+R. W. Yeung, “A new outlook on Shannon’s information measures,”
+IEEE Trans. Inform. Theory, vol. 37, pp. 466-474, 1991.
+
+, “A framework for linear information inequalities,” JEEE Trans.
+Inform. Theory, vol. 43, pp. 1924-1934, Nov. 1997.
+
+R. W. Yeung, T. T. Lee, and Z. Ye, “An information-theoretic charac-
+terization of Markov random fields and its applications,” JEEE Trans.
+Inform. Theory, submitted for publication.
+
+R. W. Yeung and Z. Zhang, “Distributed source coding for satellite
+communication,” JEEE Trans. Inform. Theory, submitted for publication.
+R. W. Yeung and Y.-O. Yan, “Information theoretic inequality prover.”
+[Online] Available: http://www.ie.cuhk.edu.hk/ ITIP or http://it.ucsd.
+edu/\verb+”+whyeung(mirrorsite)..
+
+Z. Zhang and R. W. Yeung, “A non-Shannon type conditional inequality
+of information quantities,’ IEEE Trans. Inform. Theory, vol. 43, pp.
+1982-1985, Nov. 1997.
+
+[14]
+
+[15]
+
+[16]
+
+[17]
+
+[18]
+
+[19]
+[20]
+
+[21]
+
+[22]
+[23] San Mateo,
+[24] New York: McGraw-Hill,
+
+[25]
+
+[26]
+
+[27]
+
+[28]
+
+[29]
+
+[30]
+
+[31]
+
+[32]
+
+[33]
+[34]
+
+[35]
+
+[36]
+
+[37]
+
+[38]
+
+[39]
+

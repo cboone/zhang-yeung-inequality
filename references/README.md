@@ -16,7 +16,7 @@ Cite entries by their BibTeX key in Lean docstrings via the `[@key]` syntax expe
 
 ## Regenerating an extraction
 
-Each extraction file is suffixed with the tool that produced it. Both tools drop math glyphs on two-column IEEE papers, but they fail differently and are useful to compare.
+Each extraction file is suffixed with the tool that produced it. The math in IEEE papers of this vintage is set in Type 3 fonts with no `ToUnicode` map, so no layout-based extractor can recover the equation content: pdftotext, pymupdf, pdfminer, and pdfplumber all silently drop it. Rendering the pages and running OCR is the only way to get the math back, and even then the symbols come out transliterated rather than as proper Unicode. Keeping one file per tool makes the complementary failure modes visible.
 
 ```sh
 pdftotext -layout references/papers/<source>.pdf references/extractions/<key>.pdftotext.txt
@@ -36,7 +36,28 @@ with open(sys.argv[2], "w") as f:
 
 `pymupdf` preserves ligatures as Unicode (`ﬁ`, `ﬂ`) and diacritics on author names, and emits no replacement markers, at the cost of silently dropping math glyphs entirely (so sentences lose variables instead of flagging them).
 
-Two-column IEEE papers typically lose equation bodies in every extraction (only equation numbers survive). Transcriptions flag such gaps with `> **Transcription caveat.**` admonitions, which must be resolved against the source PDF before the corresponding statement is formalized.
+```sh
+uv run --with pymupdf python -c '
+import sys, pathlib, pymupdf
+doc = pymupdf.open(sys.argv[1])
+out = pathlib.Path("/tmp/pages"); out.mkdir(exist_ok=True)
+for i, p in enumerate(doc):
+    p.get_pixmap(dpi=300).save(str(out / f"p{i+1:02d}.png"))
+' references/papers/<source>.pdf
+for p in /tmp/pages/p*.png; do
+  tesseract "$p" "${p%.png}" --oem 1 -l eng
+done
+{ for i in $(seq -f %02g 1 13); do
+    printf '<PAGE %d / 13>\n' "${i#0}"
+    cat "/tmp/pages/p${i}.txt"
+    echo
+  done
+} > references/extractions/<key>.tesseract.txt
+```
+
+Tesseract on rendered pages is the only extraction that captures any equation content at all: Theorem 3, Lemma 2, and the basic inequality (8) come through as recognisable prose. The cost is that Greek letters and math operators are transliterated into visually similar Latin-1 and currency glyphs (`α` → `a`, `Γ` → `T` or `[`, `∈` → `€`, `≥` → `>`, `⊕` → `©`), so the output reads like a first-pass draft and should never be used verbatim. It is most useful as a cross-check against the human transcription.
+
+Transcriptions flag layout-extractor gaps with `> **Transcription caveat.**` admonitions. These should be resolved against either the source PDF or the tesseract extraction before the corresponding statement is formalised.
 
 ## Current entries
 
