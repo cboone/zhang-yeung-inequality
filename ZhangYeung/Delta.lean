@@ -22,6 +22,7 @@ is the central quantity of the Zhang-Yeung conditional information inequality [Z
 - `ZhangYeung.delta_eq_entropy`: expansion into raw entropy terms.
 - `ZhangYeung.form21_iff`, `ZhangYeung.form22_iff`, `ZhangYeung.form23_iff`: iff-equivalences between the integer-scaled shape produced by a copy-lemma proof and the shape the paper states.
 - `ZhangYeung.form23_of_form21_form22`: the symmetric form (23) follows from (21) and (22) by averaging.
+- `ZhangYeung.delta_le_mutualInfo`: `Δ ≤ I[Z : U]`, from nonnegativity of conditional mutual information.
 
 ## Implementation notes
 
@@ -132,5 +133,15 @@ lemma delta_eq_entropy
         - (H[Z | X ; μ] + H[U | X ; μ] - H[⟨Z, U⟩ | X ; μ])
         - (H[Z | Y ; μ] + H[U | Y ; μ] - H[⟨Z, U⟩ | Y ; μ]) := by
   rw [delta_def, mutualInfo_def, condMutualInfo_eq hZ hU hX, condMutualInfo_eq hZ hU hY]
+
+omit [Fintype S₃] [Fintype S₄] [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄] in
+/-- `Δ(Z, U | X, Y) ≤ I(Z; U)`: the delta is bounded above by the unconditional mutual information, since conditional mutual information is non-negative. -/
+lemma delta_le_mutualInfo
+    {Z : Ω → S₁} {U : Ω → S₂} (hZ : Measurable Z) (hU : Measurable U)
+    (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
+    delta Z U X Y μ ≤ I[Z : U ; μ] := by
+  have h₁ : 0 ≤ I[Z : U | X ; μ] := condMutualInfo_nonneg hZ hU
+  have h₂ : 0 ≤ I[Z : U | Y ; μ] := condMutualInfo_nonneg hZ hU
+  rw [delta_def]; linarith
 
 end ZhangYeung
