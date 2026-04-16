@@ -7,7 +7,7 @@ External papers referenced by the Zhang-Yeung formalization.
 ```
 references/
   papers/           Source PDFs, committed alongside the transcription that cites them.
-  extractions/      Plain-text extractions of the source PDFs (one file per tool). Regenerable, committed for reproducibility.
+  extractions/      Extractions of the source PDFs (one file per tool, `.txt` for layout/OCR tools and `.md` for ML tools whose output is Markdown with LaTeX). Regenerable, committed for reproducibility.
   transcriptions/   Markdown transcriptions with YAML frontmatter pointing back to papers.bib.
   papers.bib        BibTeX entries keyed by author-year identifiers used across the project.
 ```
@@ -16,7 +16,7 @@ Cite entries by their BibTeX key in Lean docstrings via the `[@key]` syntax expe
 
 ## Regenerating an extraction
 
-Each extraction file is suffixed with the tool that produced it. The math in IEEE papers of this vintage is set in Type 3 fonts with no `ToUnicode` map, so no layout-based extractor can recover the equation content: pdftotext, pymupdf, pdfminer, and pdfplumber all silently drop it. Rendering the pages and running OCR is the only way to get the math back, and even then the symbols come out transliterated rather than as proper Unicode. Keeping one file per tool makes the complementary failure modes visible.
+Each extraction file is suffixed with the tool that produced it. The math in IEEE papers of this vintage is set in Type 3 fonts with no `ToUnicode` map, so no layout-based extractor can recover the equation content: pdftotext, pymupdf, pdfminer, and pdfplumber all silently drop it. Rendering the pages and running classical OCR (Tesseract) recovers the equation shapes but transliterates symbols into visually similar Latin-1 glyphs. Only ML-based academic-paper extractors (marker) recover the math in machine-readable LaTeX. Keeping one file per tool makes the complementary failure modes visible.
 
 ```sh
 pdftotext -layout references/papers/<source>.pdf references/extractions/<key>.pdftotext.txt
@@ -55,9 +55,24 @@ done
 } > references/extractions/<key>.tesseract.txt
 ```
 
-Tesseract on rendered pages is the only extraction that captures any equation content at all: Theorem 3, Lemma 2, and the basic inequality (8) come through as recognisable prose. The cost is that Greek letters and math operators are transliterated into visually similar Latin-1 and currency glyphs (`α` → `a`, `Γ` → `T` or `[`, `∈` → `€`, `≥` → `>`, `⊕` → `©`), so the output reads like a first-pass draft and should never be used verbatim. It is most useful as a cross-check against the human transcription.
+Tesseract on rendered pages captures the equation shapes: Theorem 3, Lemma 2, and the basic inequality (8) come through as recognisable prose. The cost is that Greek letters and math operators are transliterated into visually similar Latin-1 and currency glyphs (`α` → `a`, `Γ` → `T` or `[`, `∈` → `€`, `≥` → `>`, `⊕` → `©`), so the output reads like a first-pass draft and should never be used verbatim. It is most useful as a cross-check against the human transcription.
 
-Transcriptions flag layout-extractor gaps with `> **Transcription caveat.**` admonitions. These should be resolved against either the source PDF or the tesseract extraction before the corresponding statement is formalised.
+```sh
+uv run --with marker-pdf python -c '
+import sys
+from marker.converters.pdf import PdfConverter
+from marker.models import create_model_dict
+from marker.output import text_from_rendered
+converter = PdfConverter(artifact_dict=create_model_dict())
+rendered = converter(sys.argv[1])
+text, _, _ = text_from_rendered(rendered)
+sys.stdout.write(text)
+' references/papers/<source>.pdf > references/extractions/<key>.marker.md
+```
+
+Marker is an ML-based academic-paper extractor (layout detection + OCR + equation recognition) whose output is Pandoc-flavoured Markdown with LaTeX math. For this PDF it recovers the core result (Theorem 3, eq. 21) and Lemma 2's eq. 45 as proper LaTeX: `$\Delta(Z, U|X, Y) \le \tfrac{1}{2} [I(X; Y) + \dots]$` and so on. This is the only extraction suitable as a first-pass Pandoc-Markdown transcription rather than a cross-check. Known failure modes: inline math embedded in prose is sometimes dropped (sentences lose variables), and section numbering occasionally drifts. On Apple Silicon, set `TORCH_DEVICE=cpu` to avoid [datalab-to/surya#490](https://github.com/datalab-to/surya/issues/490) (`torch.AcceleratorError` in `unpack_qkv_with_mask`, fixed by the open PR [#493](https://github.com/datalab-to/surya/pull/493)); CPU runtime is roughly four minutes for a 13-page paper.
+
+Transcriptions flag layout-extractor gaps with `> **Transcription caveat.**` admonitions. These should be resolved against the source PDF, the tesseract extraction, or the marker extraction before the corresponding statement is formalised.
 
 ## Current entries
 
