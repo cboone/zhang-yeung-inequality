@@ -1,0 +1,16 @@
+name = "ZhangYeung"
+version = "0.1.0"
+defaultTargets = ["ZhangYeung"]
+lintDriver = "batteries/runLinter"
+
+[leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+
+[[require]]
+name = "PFR"
+git = "https://github.com/teorth/pfr"
+rev = "80daaf1"
+
+[[lean_lib]]
+name = "ZhangYeung"
