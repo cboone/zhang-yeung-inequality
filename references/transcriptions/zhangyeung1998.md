@@ -20,10 +20,11 @@ The paper uses lightweight subset-indexed notation throughout. For $n \geq 1$ le
 | $X_\alpha$ | Joint RV indexed by $\alpha \subseteq \mathcal{N}_n$ | $(X_i)_{i \in \alpha}$ |
 | $H(\alpha)$ | Joint entropy of $X_\alpha$ | $H(X_\alpha)$ |
 | $I(X_\alpha; X_\beta \mid X_\gamma)$ | Conditional mutual information | $I(X_\alpha; X_\beta \mid X_\gamma)$ |
-| $\mathcal{H}_n$ | All functions $2^{\mathcal{N}_n} \to [0, \infty)$ | -- |
+| $\mathcal{F}_n$ | All functions $2^{\mathcal{N}_n} \to [0, \infty)$ | -- |
 | $\Gamma_n$ | Cone of functions satisfying the basic (Shannon) inequalities, viewed as a subset of $\mathbb{R}^{2^n - 1}$ | Shannon outer bound |
 | $\Gamma^*_n$ | Set of entropy functions of $n$-tuples of discrete RVs (the **constructible** functions) | Entropic region |
 | $\mathrm{cl}(\Gamma^*_n)$ | Closure of $\Gamma^*_n$ (the **asymptotically constructible** functions) | Almost-entropic region |
+| $\tilde{\Gamma}_4$ (Section II, eq. 25) | Outer bound defined from Theorem 3's inequality in function coordinates | -- |
 | $F[\alpha \mid \beta]$ (Section II, eq. 30) | Atom-valued reparametrization of a function $F : 2^{\mathcal{N}_n} \to \mathbb{R}$ | -- |
 | $S_F$ (Section II, eq. 37) | Paper-specific quantity controlling the inner bound of Theorem 6 | -- |
 | $\hat{\Gamma}_4$ (Section II, eq. 42) | Inner bound of $\mathrm{cl}(\Gamma^*_4)$ defined via $S_F$ | -- |
@@ -56,8 +57,10 @@ $$I(X_i; X_j \mid X_\gamma) \geq 0, \qquad i \neq j, \quad \gamma \subseteq \mat
 1. **Submodularity.** For any two subsets $\alpha, \beta$ of $\mathcal{N}_n$,
 $$f(\alpha) + f(\beta) \geq f(\alpha \cup \beta) + f(\alpha \cap \beta). \qquad (8)$$
 2. **Monotonicity.** $\alpha \subseteq \beta$ implies $f(\alpha) \leq f(\beta) \qquad (9)$.
-3. **Nonnegativity.** $f(\alpha) \geq 0 \qquad (10)$, with $f(\varnothing) = 0$.
+3. **Normalization.** $f(\varnothing) = 0 \qquad (10)$.
 :::
+
+In particular, (9) and (10) imply $f(\alpha) \geq 0$ for every $\alpha \subseteq \mathcal{N}_n$.
 
 ### Definitions (Section I)
 
@@ -80,14 +83,20 @@ $$\mathrm{cl}(\Gamma^*_2) = \Gamma_2, \qquad \mathrm{cl}(\Gamma^*_3) = \Gamma_3.
 :::
 
 ::: {.theorem}
-**Theorem 2** ([@zhangyeung1998, Thm. 2], originally [@zhangyeung1997]). For any four discrete random variables $X, Y, Z, U$, if $I(X; Y \mid Z) = 0$ and $I(X; Y \mid U) = 0$, then
+**Theorem 2** ([@zhangyeung1998, Thm. 2], originally [@zhangyeung1997]). For any four discrete random variables $X, Y, Z, U$, if
 
-$$I(X; Y) \leq I(X; Y \mid Z, U) + I(Z; U) + I(X; U \mid Z) + I(Y; Z \mid U). \qquad (16\text{-}17)$$
+$$I(X; Y) = I(X; Y \mid Z) = 0, \qquad (16)$$
 
-Consequently, the conditional independence structure of $(X, Y, Z, U)$ is not freely axiomatizable; in particular $\mathrm{cl}(\Gamma^*_4) \neq \Gamma_4$ under the corresponding conditional restriction (eq. 18).
+then
+
+$$I(X; Y \mid Z, U) \leq I(Z; U \mid X, Y) + I(X; Y \mid U). \qquad (17)$$
+
+The paper also recalls that [@zhangyeung1997] proves this implies
+
+$$\mathrm{cl}(\Gamma^*_4) \neq \Gamma_4. \qquad (18)$$
 :::
 
-Theorem 2 is a *conditional* non-Shannon inequality: it only applies when two mutual informations vanish. The 1998 paper's central advance is removing this conditionality.
+Theorem 2 is a *conditional* non-Shannon inequality: it only applies under the hypotheses $I(X; Y) = I(X; Y \mid Z) = 0$. The 1998 paper's central advance is removing this conditionality.
 
 ## Main results
 
@@ -113,17 +122,37 @@ $$\Delta(Z, U \mid X, Y) := I(Z; U) - I(Z; U \mid X) - I(Z; U \mid Y). \qquad (2
 This inequality does **not** follow from the basic Shannon inequalities (Theorem 4).
 :::
 
+### Auxiliary definitions for Theorem 4 (eq. 24-25)
+
+For $F \in \mathcal{F}_n$ and subsets $\alpha, \beta, \gamma \subseteq \mathcal{N}_n$, the paper defines
+
+$$I_F(\alpha; \beta \mid \gamma) := F(\alpha \cup \gamma) + F(\beta \cup \gamma) - F(\alpha \cup \beta \cup \gamma) - F(\gamma).$$
+
+When $\gamma = \varnothing$, it writes $I_F(\alpha; \beta)$ in place of $I_F(\alpha; \beta \mid \varnothing)$. For distinct indices $i, j, k, l$,
+
+$$\Delta_F(i, j \mid k, l) := I_F(\{i\}; \{j\}) - I_F(\{i\}; \{j\} \mid \{k\}) - I_F(\{i\}; \{j\} \mid \{l\}). \qquad (24)$$
+
+It then defines
+
+$$\tilde{\Gamma}_4 := \left\{F \in \Gamma_4 : \text{for any permutation } \pi \text{ of } \{1, 2, 3, 4\}, \Delta_F(\pi(1), \pi(2) \mid \pi(3), \pi(4)) \leq \tfrac{1}{2} \bigl[I_F(\{\pi(3)\}; \{\pi(4)\}) + I_F(\{\pi(3)\}; \{\pi(1), \pi(2)\}) + I_F(\{\pi(1)\}; \{\pi(2)\} \mid \{\pi(3)\}) - I_F(\{\pi(1)\}; \{\pi(2)\} \mid \{\pi(4)\})\bigr]\right\}. \qquad (25)$$
+
+Theorem 3 says precisely that every four-variable entropy function lies in $\tilde{\Gamma}_4$.
+
 ### Theorem 4 (Shannon incompleteness, eq. 26)
 
 ::: {.theorem}
 **Theorem 4** ([@zhangyeung1998, Thm. 4]). For every $n \geq 4$,
 
-$$\mathrm{cl}(\Gamma^*_n) \subsetneq \Gamma_n.$$
+$$\mathrm{cl}(\Gamma^*_n) \neq \Gamma_n. \qquad (26)$$
 :::
 
-The paper's proof sketch (p. 1442) observes that it suffices to prove the claim for $n = 4$: given a $4$-variable witness, embedding it on the first four coordinates of an $n$-tuple of random variables (with the remaining $n - 4$ set to a constant) produces an $n$-variable witness. The $n = 4$ witness is the explicit function $F : 2^{\mathcal{N}_4} \to [0, \infty)$ defined on p. 1443 (satisfying all 15 elemental Shannon inequalities but violating Theorem 3); concretely the roadmap's milestone M4 plans to reconstruct it as
+Since one always has $\mathrm{cl}(\Gamma^*_n) \subseteq \Gamma_n$, equation (26) is equivalent to strict inclusion. The paper's proof sketch (p. 1443) observes that it suffices to prove the claim for $n = 4$: given a $4$-variable witness, embedding it on the first four coordinates of an $n$-tuple of random variables (with the remaining $n - 4$ set to a constant) produces an $n$-variable witness. The $n = 4$ witness is the explicit function $F : 2^{\mathcal{N}_4} \to [0, \infty)$ defined on p. 1443 (satisfying all 15 elemental Shannon inequalities but violating Theorem 3):
 
-$$F(\alpha) := \begin{cases} 0 & \alpha = \varnothing, \\ 2a & |\alpha| = 1, \\ 4a & \alpha \in \bigl\{\{X, Y\}\bigr\}, \\ 3a & \alpha \in \bigl\{\{X, Z\}, \{X, U\}, \{Y, Z\}, \{Y, U\}, \{Z, U\}\bigr\}, \\ 4a & |\alpha| \geq 3, \end{cases}$$
+$$F(\varnothing) = 0, \qquad F(X) = F(Y) = F(Z) = F(U) = 2a > 0,$$
+
+$$F(X, Y) = 4a, \qquad F(X, U) = F(X, Z) = F(Y, U) = F(Y, Z) = F(Z, U) = 3a,$$
+
+$$F(X, Y, Z) = F(X, Y, U) = F(X, Z, U) = F(Y, Z, U) = F(X, Y, Z, U) = 4a,$$
 
 for any $a > 0$, after identifying $\mathcal{N}_4$ with $\{X, Y, Z, U\}$.
 
@@ -143,9 +172,9 @@ The proof is the same as Theorem 3 combined with induction on $n$ (omitted in th
 
 ### Theorem 6 (inner bound of $\mathrm{cl}(\Gamma^*_4)$, Section II eq. 43)
 
-The paper reparametrizes $F \in \Gamma_4$ using the atom chart $F[\alpha \mid \beta]$ defined for pairs $(\alpha, \beta)$ with $\alpha \neq \varnothing$ by
+The paper reparametrizes an arbitrary function $F \in \mathcal{F}_n$ using atom values $F[\alpha \mid \beta]$, defined for pairs $(\alpha, \beta)$ with $\alpha \neq \varnothing$ by
 
-$$F[\alpha \mid \beta] := \sum_{\gamma \subset \alpha} (-1)^{1+|\gamma|} F(\gamma \cup \beta), \qquad (30)$$
+$$F[\alpha \mid \beta] := \sum_{\gamma \subseteq \alpha} (-1)^{1+|\gamma|} F(\gamma \cup \beta), \qquad (30)$$
 
 and then defines $F[\alpha] := F[\alpha \mid \alpha^c]$ (31). It defines the quantity
 
@@ -163,9 +192,7 @@ $$\hat{\Gamma}_4 \subset \mathrm{cl}(\Gamma^*_4) \qquad (43)$$
 Equivalently, the set $\hat{\Gamma}_4$ is an inner bound of $\mathrm{cl}(\Gamma^*_4)$.
 :::
 
-The paper notes that $S_F$ may be negative for some $F \in \Gamma_4$ (p. 1445, the projective-plane example), so the inner bound is strict; combined with Theorem 3's outer bound, this leaves the exact description of $\mathrm{cl}(\Gamma^*_4)$ open.
-
-> **Transcription caveat.** The definitions of $S_F$ and $\hat{\Gamma}_4$ rely on equations whose bodies were poorly extracted by pdftotext. They have been verified against the source PDF (pp. 1443-1444), but if Theorem 6 is formalized, further verification may be needed.
+The paper notes that $S_F$ may be negative for some $F \in \Gamma_4$ (p. 1445, the projective-plane example), so the inner bound is strict; combined with the outer bound $\tilde{\Gamma}_4$ from Theorem 3, this leaves the exact description of $\mathrm{cl}(\Gamma^*_4)$ open.
 
 ## Lemmas
 
@@ -174,12 +201,10 @@ The paper notes that $S_F$ may be negative for some $F \in \Gamma_4$ (p. 1445, t
 ::: {.lemma}
 **Lemma 1** ([@zhangyeung1998, Lem. 1]). For the atom reparametrization $F[\alpha \mid \beta]$,
 
-$$F[\alpha \mid \beta] = \sum_{\gamma \subset (\alpha \cup \beta)^c} F[\alpha \cup \gamma] \qquad (34)$$
+$$F[\alpha \mid \beta] = \sum_{\gamma \subseteq (\alpha \cup \beta)^c} F[\alpha \cup \gamma] \qquad (34)$$
 
 where $A^c$ stands for the complement of the set $A$.
 :::
-
-> **Transcription caveat.** The right-hand side above has been reconstructed from the source PDF (p. 1444).
 
 ### Lemma 2 (the copy lemma, eq. 44-45)
 
@@ -202,17 +227,44 @@ $$\Delta(Z, U \mid X, Y) = I(X; Y_1) - I(X; Y_1 \mid U) - I(X; Y_1 \mid Z) - I(Z
 
 The construction is the two-step kernel composition $q = p \otimes \kappa$ where $\kappa$ is the Markov kernel from $(Z, U)$ to $(X_1, Y_1)$ induced by $p(\cdot, \cdot \mid Z, U)$; equivalently, $(X_1, Y_1)$ is a conditionally independent "copy" of $(X, Y)$ over the common $(Z, U)$ coordinates.
 
-> **Transcription caveat.** Eq. (45) has been reconstructed line-by-line from the source PDF (p. 1445).
-
 ## Proof of Theorem 3 (Section III)
 
-The proof uses Lemma 2 to construct the six-variable joint distribution $q$ and then proves the companion bound
+With the six-variable joint distribution $q$ from Lemma 2, the paper first observes
 
-$$I_q(X; Y_1) + I_q(X; Z, U) \geq I_q(X; Y) + \ldots$$
+$$I(Z; U) - I(Z; U \mid X) - I(Z; U \mid Y) \leq I(X; Y_1),$$
 
-and its symmetric swap. The data-processing inequality together with the identity $I(X; Y) = I(X; Y_1)$ (which follows from Lemma 2's marginal identity and the conditional-independence structure) then yields (21) and (22) after straightforward Shannon algebra. The proof is mechanical once Lemma 2 is in place.
+and similarly
 
-The paper remarks at the end of Section III (p. 1446) that all "missing terms" in the bound can be made explicit using the six-variable joint; these terms are listed as corollaries but not given independent theorem status.
+$$I(Z; U) - 2 I(Z; U \mid X) \leq I(X; X_1).$$
+
+It then combines these bounds as
+
+$$\begin{aligned}
+2 I(Z; U) - 3 I(Z; U \mid X) - I(Z; U \mid Y)
+&\leq I(X; Y_1) + I(X; X_1) \\
+&= I(X; X_1, Y_1) + I(X_1; Y_1) - I(X_1; Y_1 \mid X) \\
+&\leq I(X; X_1, Y_1) + I(X_1; Y_1) \\
+&\leq I(X; Z, U) + I(X; Y_1) \\
+&= I(X; Z, U) + I(X; Y),
+\end{aligned}$$
+
+where the penultimate step is data processing and the last step uses the marginal identity $I(X; Y_1) = I(X; Y)$. Rearranging gives (21); swapping $X$ and $Y$ gives (22), and averaging yields (23).
+
+The paper also makes the deficit in (21) explicit. Writing
+
+$$R_1 := I(X; Y_1 \mid U) + I(X; Y_1 \mid Z) + I(Z; U \mid X, Y_1),$$
+
+$$R_2 := I(X; X_1 \mid U) + I(X; X_1 \mid Z) + I(Z; U \mid X, X_1),$$
+
+Lemma 2 gives
+
+$$\Delta(Z, U \mid X, Y) = I(X; Y_1) - R_1,$$
+
+$$\Delta(Z, U \mid X, X_1) = I(X; X_1) - R_2,$$
+
+so the missing term in (21) is
+
+$$R(X, Y, Z, U, X_1, Y_1) = \tfrac{1}{2} \bigl[I(X; Z, U \mid X_1, Y_1) + I(X_1; Y_1 \mid X) + R_1 + R_2\bigr].$$
 
 ## Proof of Theorem 6 (Section IV)
 
@@ -246,7 +298,7 @@ The formalization targets in the roadmap (`docs/plans/todo/2026-04-15-zhang-yeun
 | Paper statement | Formalization target | Scope decision |
 | --- | --- | --- |
 | Proposition 1 (basic inequalities) | PFR `ForMathlib/Entropy/{Basic,MutualInfo}`; available upstream | External |
-| Proposition 2 (submodularity, monotonicity, nonnegativity) | `ZhangYeung/Theorem4.lean` (Shannon cone definition); PFR provides per-RV versions | Part of M4 |
+| Proposition 2 (submodularity, monotonicity, normalization) | `ZhangYeung/Theorem4.lean` (Shannon cone definition); PFR provides per-RV versions | Part of M4 |
 | Theorem 1 (cl $\Gamma^*_n = \Gamma_n$ for $n \leq 3$) | Not formalized (cited as context only) | Out of scope |
 | Theorem 2 (conditional non-Shannon inequality from 1997) | Not formalized (cited as historical precursor) | Out of scope |
 | **Lemma 2 (copy lemma)** | `ZhangYeung/CopyLemma.lean` | **Core artifact, Mathlib-ready (M2)** |
