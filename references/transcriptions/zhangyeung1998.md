@@ -8,669 +8,1322 @@ bibliography: ../papers.bib
 doi: 10.1109/18.681320
 pdf: zhenzhang1998.pdf
 transcription_scope: full
+source: >
+  Verbatim transcription of the Mathpix OCR output
+  (`references/extractions/zhangyeung1998.mathpix.md`), audited page by page
+  against the rendered PDF images and corrected where Mathpix introduced OCR
+  errors. See `references/README.md` for the extraction pipeline.
 ---
 
-## Abstract
+1440 &nbsp;&nbsp;&nbsp;&nbsp; IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
 
-Given $n$ discrete random variables $\Omega = \{X_1, \ldots, X_n\}$, associated with any subset $\alpha$ of $\{1, 2, \ldots, n\}$, there is a joint entropy $H(X_\alpha)$ where $X_\alpha = \{X_i : i \in \alpha\}$. This can be viewed as a function defined on $2^{\{1, 2, \ldots, n\}}$, taking values in $[0, +\infty)$. The nonnegativity of the joint entropies implies that this function is nonnegative; the nonnegativity of the conditional joint entropies implies that this function is nondecreasing; and the nonnegativity of the conditional mutual informations implies that this function has the property
+# On Characterization of Entropy Function via Information Inequalities
 
-$$H(\alpha) + H(\beta) \geq H(\alpha \cup \beta) + H(\alpha \cap \beta).$$
+Zhen Zhang, *Senior Member, IEEE*, and Raymond W. Yeung, *Senior Member, IEEE*
 
-These properties are the so-called basic information inequalities of Shannon's information measures. The paper asks whether these properties fully characterize the entropy function. To make this question precise, the entropy function is viewed as a $(2^n - 1)$-dimensional vector whose coordinates are indexed by the nonempty subsets of the ground set. Let $\Gamma_n$ be the cone of all such vectors satisfying the three properties above, and let $\Gamma_n^*$ be the set of all $(2^n - 1)$-dimensional vectors corresponding to entropy functions of sets of $n$ discrete random variables. The question is whether $\mathrm{cl}(\Gamma_n^*) = \Gamma_n$ for every $n$. The answer is yes for $n = 2$ and $3$, as proved in earlier work. The main discovery of the paper is a new information-theoretic inequality involving four discrete random variables which gives a negative answer to this fundamental problem in information theory: $\mathrm{cl}(\Gamma_n^*)$ is strictly smaller than $\Gamma_n$ whenever $n > 3$. While this new inequality gives a nontrivial outer bound to the cone $\mathrm{cl}(\Gamma_4^*)$, an inner bound for $\mathrm{cl}(\Gamma_4^*)$ is also given. The inequality is also extended to any number of random variables.
+*Abstract—*Given $n$ discrete random variables $\Omega = \{X_1, \cdots, X_n\}$, associated with any subset $\alpha$ of $\{1, 2, \cdots, n\}$, there is a joint entropy $H(X_\alpha)$ where $X_\alpha = \{X_i : i \in \alpha\}$. This can be viewed as a function defined on $2^{\{1, 2, \cdots, n\}}$ taking values in $[0, +\infty)$. We call this function the entropy function of $\Omega$. The nonnegativity of the joint entropies implies that this function is nonnegative; the nonnegativity of the conditional joint entropies implies that this function is nondecreasing; and the nonnegativity of the conditional mutual informations implies that this function has the following property: for any two subsets $\alpha$ and $\beta$ of $\{1, 2, \cdots, n\}$
 
-Index terms: entropy, inequality, information measure, mutual information.
+$$H_\Omega(\alpha) + H_\Omega(\beta) \geq H_\Omega(\alpha \cup \beta) + H_\Omega(\alpha \cap \beta).$$
 
-## Front Matter
+These properties are the so-called basic information inequalities of Shannon's information measures. Do these properties fully characterize the entropy function? To make this question more precise, we view an entropy function as a $2^n - 1$-dimensional vector where the coordinates are indexed by the nonempty subsets of the ground set $\{1, 2, \cdots, n\}$. Let $\Gamma_n$ be the cone in $R^{2^n - 1}$ consisting of all vectors which have these three properties when they are viewed as functions defined on $2^{\{1, 2, \cdots, n\}}$. Let $\Gamma_n^*$ be the set of all $2^n - 1$-dimensional vectors which correspond to the entropy functions of some sets of $n$ discrete random variables. The question can be restated as: is it true that for any $n$, $\bar\Gamma_n^* = \Gamma_n$? Here $\bar\Gamma_n^*$ stands for the closure of the set $\Gamma_n^*$. The answer is "yes" when $n = 2$ and 3 as proved in our previous work. Based on intuition, one may tend to believe that the answer should be "yes" for any $n$. The main discovery of this paper is a new information-theoretic inequality involving four discrete random variables which gives a negative answer to this fundamental problem in information theory: $\bar\Gamma_n^*$ is strictly smaller than $\Gamma_n$ whenever $n > 3$. While this new inequality gives a nontrivial outer bound to the cone $\bar\Gamma_4^*$, an inner bound for $\bar\Gamma_4^*$ is also given. The inequality is also extended to any number of random variables.
 
-Manuscript received December 12, 1996; revised November 15, 1997. The work of Z. Zhang was supported in part by the National Science Foundation under Grant NCR-9502828. The work of R. W. Yeung was supported in part by the Research Grant Council of Hong Kong under Earmarked Grant CUHK 332/96E.
+*Index Terms—*Entropy, inequality, information measure, mutual information.
 
-Z. Zhang was with the Department of Electrical Engineering-Systems, Communication Sciences Institute, University of Southern California, Los Angeles, CA 90089-2565 USA (`zzhang@milly.usc.edu`).
+## I. Introduction
 
-R. W. Yeung was with the Department of Information Engineering, the Chinese University of Hong Kong, Shatin, N.T., Hong Kong, China (`whyeung@ie.cuhk.edu.hk`).
+LET $\Omega_{n}=\left\{X_{i}: i=1, \cdots, n\right\}$ be $n$ jointly distributed discrete random variables. The basic Shannon’s information measures associated with these random variables include
 
-Publisher Item Identifier: `S 0018-9448(98)03630-X`.
+Manuscript received December 12, 1996; revised November 15, 1997. The work of Z. Zhang was supported in part by the National Science Foundation under Grant NCR-9502828. The work of R. W. Yeung was supported in part by The Research Grant Council of Hong Kong under Earmarked Grant CUHK 332/96E.
+Z. Zhang is with the Department of Electrical Engineering–Systems, Communication Sciences Institute, University of Southern California, Los Angeles, CA 90089-2565 USA (e-mail: zzhang@milly.usc.edu).
+R. W. Yeung is with the Department of Information Engineering, the Chinese University of Hong Kong, Shatin, N.T., Hong Kong, China (e-mail: whyeung@ie.cuhk.edu.hk).
 
-## Notation
+Publisher Item Identifier S 0018-9448(98)03630-X.
+all joint entropies, conditional entropies, mutual informations, and conditional mutual informations involving some of these random variables. For any subset $\alpha$ of $\mathcal{N}_{n}=\{1, \cdots, n\}$, let
 
-The paper uses lightweight subset-indexed notation throughout. For $n \geq 1$ let $\mathcal{N}_n := \{1, 2, \ldots, n\}$ and let $\mathcal{X} = \{X_1, \ldots, X_n\}$ be an $n$-tuple of jointly distributed discrete random variables. For $\alpha \subseteq \mathcal{N}_n$ write $X_\alpha := \{X_i : i \in \alpha\}$ and $H(\alpha) := H(X_\alpha)$ (with $H(\varnothing) := 0$ by convention, since $X_\varnothing$ is a constant random variable).
+$$
+\begin{equation*}
+X_{\alpha}=\left\{X_{i}: i \in \alpha\right\} . \tag{1}
+\end{equation*}
+$$
 
-| Paper | Meaning | Modern equivalent |
-| --- | --- | --- |
-| $\mathcal{N}_n$ | Ground index set $\{1, 2, \ldots, n\}$ | -- |
-| $X_\alpha$ | Joint RV indexed by $\alpha \subseteq \mathcal{N}_n$ | $(X_i)_{i \in \alpha}$ |
-| $H(\alpha)$ | Joint entropy of $X_\alpha$ | $H(X_\alpha)$ |
-| $I(X_\alpha; X_\beta \mid X_\gamma)$ | Conditional mutual information | $I(X_\alpha; X_\beta \mid X_\gamma)$ |
-| $\mathcal{F}_n$ | All functions $2^{\mathcal{N}_n} \to [0, \infty)$ | -- |
-| $\Gamma_n$ | Cone of functions satisfying the basic (Shannon) inequalities, viewed as a subset of $\mathbb{R}^{2^n - 1}$ | Shannon outer bound |
-| $\Gamma^*_n$ | Set of entropy functions of $n$-tuples of discrete RVs (the **constructible** functions) | Entropic region |
-| $\mathrm{cl}(\Gamma^*_n)$ | Closure of $\Gamma^*_n$ (the **asymptotically constructible** functions) | Almost-entropic region |
-| $\tilde{\Gamma}_4$ (Section II, eq. 25) | Outer bound defined from Theorem 3's inequality in function coordinates | -- |
-| $F[\alpha \mid \beta]$ (Section II, eq. 30) | Atom-valued reparametrization of a function $F : 2^{\mathcal{N}_n} \to \mathbb{R}$ | -- |
-| $S_F$ (Section II, eq. 37) | Paper-specific quantity controlling the inner bound of Theorem 6 | -- |
-| $\hat{\Gamma}_4$ (Section II, eq. 42) | Inner bound of $\mathrm{cl}(\Gamma^*_4)$ defined via $S_F$ | -- |
+Let $X_{\phi}$, where $\phi$ is the empty set, be a random variable taking a fixed value with probability 1. Let
 
-The paper freely switches logarithm base. Theorem 6's concrete construction uses base $3$ so that the three symmetric ternary RVs have entropy $1$. All inequalities in Theorems 3-5 are log-base-agnostic.
+$$
+\begin{equation*}
+I_{\Omega}(\alpha, \beta \mid \gamma)=I\left(X_{\alpha} ; X_{\beta} \mid X_{\gamma}\right) \tag{2}
+\end{equation*}
+$$
 
-Section I begins by fixing the subset-indexed notation
+be the conditional mutual information and let
 
-$$X_\alpha := \{X_i : i \in \alpha\}. \qquad (1)$$
+$$
+\begin{equation*}
+H_{\Omega}(\alpha)=H\left(X_{\alpha}\right) \tag{3}
+\end{equation*}
+$$
 
-With $X_\varnothing$ taken to be a constant random variable, it writes
+be the joint entropy. Sometimes, we drop the subscript $\Omega$ in these notations, when no confusion may occur. It is well known that Shannon’s information measures satisfy the following inequalities.
 
-$$I_\Omega(\alpha; \beta \mid \gamma) := I(X_\alpha; X_\beta \mid X_\gamma), \qquad (2)$$
+*Proposition 1:* For any three subsets $\alpha, \beta$, and $\gamma$ of $\mathcal{N}_{n}$, any set of $n$ jointly distributed discrete random variables $\Omega=\left\{X_{i}, i=1, \cdots, n\right\}$
 
-$$H_\Omega(\alpha) := H(X_\alpha). \qquad (3)$$
+$$
+\begin{equation*}
+I(\alpha, \beta \mid \gamma) \geq 0 \tag{4}
+\end{equation*}
+$$
 
-Sometimes the paper suppresses the subscript $\Omega$. It then views the entropy function of $\Omega$ as the map
+We call these inequalities the basic inequalities of Shannon's information measures, or simply the basic inequalities. By means of the chain rule for conditional mutual informations, we can see that these inequalities are implied by a subset of these inequalities of the form
 
-$$H_\Omega : 2^{\mathcal{N}_n} \to [0, \infty), \qquad \alpha \mapsto H(X_\alpha), \qquad (6)$$
+$$
+\begin{equation*}
+I(\{i\},\{j\} \mid \gamma) \geq 0 \tag{5}
+\end{equation*}
+$$
 
-and recalls that every basic Shannon information measure is a linear function of the joint entropies; in particular,
+That is, the subset of inequalities (4) in which the cardinalities of $\alpha$ and $\beta$ are both 1 . This subset of basic information inequalities is referred to as elemental information inequalities [35].
 
-$$I(\alpha; \beta \mid \gamma) = H(\alpha \cup \gamma) + H(\beta \cup \gamma) - H(\alpha \cup \beta \cup \gamma) - H(\gamma). \qquad (7)$$
+For any set of $n$ jointly distributed discrete random variables $\Omega=\left\{X_{i}, i=1, \cdots, n\right\}$, the associated joint entropies $H_{\Omega}(\alpha)$ can be viewed as a function defined on $2^{\mathcal{N}_{n}}$
 
-The introduction begins by considering jointly distributed discrete random variables $\Omega_n = \{X_i : i = 1, \ldots, n\}$. The basic Shannon information measures associated with these variables include all joint entropies, conditional entropies, mutual informations, and conditional mutual informations involving some of these random variables. The associated entropy function $H_\Omega$ can be viewed as a function on $2^{\mathcal{N}_n}$, and the stated goal of the paper is to study this function for all possible sets of $n$ discrete random variables.
+$$
+\begin{equation*}
+H_{\Omega}: 2^{\mathcal{N}_{n}} \rightarrow[0, \infty) \tag{6}
+\end{equation*}
+$$
 
-## Scope
+The goal of this paper is to study this function for all possible sets $\Omega$ of $n$ discrete random variables.
 
-The paper is the birthplace of the first non-Shannon-type information inequality. Its central contribution is Theorem 3, the **Zhang-Yeung inequality**, together with Theorem 4, which uses it to prove that the Shannon outer bound $\Gamma_n$ strictly contains the almost-entropic region $\mathrm{cl}(\Gamma^*_n)$ for every $n \geq 4$. This transcription now covers the paper's abstract, formal statements, main prose sections, constructions, atom charts, proof skeletons, acknowledgment, and full bibliography. The only remaining compression is that some repetitive inequality checks inside the deepest symmetric branches of the Theorem 6 proof are described structurally rather than reproduced symbol-for-symbol.
+All basic Shannon's information measures can be expressed as linear functions of the joint entropies. Actually, we have
 
-## The Shannon outer bound and the entropic region
+$$
+\begin{align*}
+I(\alpha, \beta \mid \gamma)= & H(\alpha \cup \gamma)+H(\beta \cup \gamma) \\
+& -H(\alpha \cup \beta \cup \gamma)-H(\gamma) \tag{7}
+\end{align*}
+$$
 
-### Proposition 1 (basic information inequalities, eq. 4-5)
+The basic inequalities can be interpreted as a set of inequalities for the entropy function as follows:
 
-::: {.proposition}
-**Proposition 1** ([@zhangyeung1998, Prop. 1]). For any three subsets $\alpha, \beta, \gamma$ of $\mathcal{N}_n$ and any set of $n$ jointly distributed discrete random variables,
+0018–9448/98\$10.00 © 1998 IEEE
 
-$$I(X_\alpha; X_\beta \mid X_\gamma) \geq 0.$$
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES &nbsp;&nbsp;&nbsp;&nbsp; 1441
 
-Equivalently, by the chain rule, every basic inequality is implied by the subset obtained when $|\alpha| = |\beta| = 1$ and $|\gamma|$ is arbitrary (the **elemental** inequalities; cf. [@yeung1997framework]):
+*Proposition 2:* For any set of $n$ jointly distributed discrete random variables $\Omega=\left\{X_{i}, i=1, \cdots, n\right\}$, the entropy function $H$ associated with these random variables has the following properties.
 
-$$I(X_i; X_j \mid X_\gamma) \geq 0, \qquad i \neq j, \quad \gamma \subseteq \mathcal{N}_n \setminus \{i, j\}.$$
-:::
+- For any two subsets $\alpha$ and $\beta$ of $\mathcal{N}_{n}$
 
-### Proposition 2 (basic inequalities lifted to the entropy function, eq. 8-10)
-
-::: {.proposition}
-**Proposition 2** ([@zhangyeung1998, Prop. 2]). Let $f = H$ be the entropy function of some jointly distributed discrete random variables. Then $f : 2^{\mathcal{N}_n} \to [0, \infty)$ satisfies:
-
-1. **Submodularity.** For any two subsets $\alpha, \beta$ of $\mathcal{N}_n$,
-$$f(\alpha) + f(\beta) \geq f(\alpha \cup \beta) + f(\alpha \cap \beta). \qquad (8)$$
-2. **Monotonicity.** $\alpha \subseteq \beta$ implies $f(\alpha) \leq f(\beta) \qquad (9)$.
-3. **Normalization.** $f(\varnothing) = 0 \qquad (10)$.
-:::
-
-In particular, (9) and (10) imply $f(\alpha) \geq 0$ for every $\alpha \subseteq \mathcal{N}_n$.
-
-### Definitions (Section I)
-
-::: {.definition}
-**Definition 1** ([@zhangyeung1998, Def. 1]). A function $f : 2^{\mathcal{N}_n} \to [0, \infty)$ is **constructible** if there exists an $n$-tuple of jointly distributed discrete random variables $X_1, \ldots, X_n$ such that $f(\alpha) = H(X_\alpha)$ for every $\alpha \subseteq \mathcal{N}_n$. The set of constructible functions is denoted $\Gamma^*_n$ (eq. 12).
-:::
-
-::: {.definition}
-**Definition 2** ([@zhangyeung1998, Def. 2]). A function $f : 2^{\mathcal{N}_n} \to [0, \infty)$ is **asymptotically constructible** if there exists a sequence of $n$-tuples of discrete random variables whose entropy functions converge to $f$. The set of asymptotically constructible functions is exactly $\mathrm{cl}(\Gamma^*_n)$.
-:::
-
-Let $\Gamma_n$ denote the cone of functions on $2^{\mathcal{N}_n}$ satisfying the three properties of Proposition 2. Then $\Gamma^*_n \subseteq \Gamma_n$, and $\Gamma_n$ is the **Shannon outer bound** of $\Gamma^*_n$.
-
-### Prior results
-
-::: {.theorem}
-**Theorem 1** ([@zhangyeung1998, Thm. 1], originally [@zhangyeung1997]).
-
-$$\mathrm{cl}(\Gamma^*_2) = \Gamma_2, \qquad \mathrm{cl}(\Gamma^*_3) = \Gamma_3. \qquad (13\text{-}14)$$
-:::
-
-::: {.theorem}
-**Theorem 2** ([@zhangyeung1998, Thm. 2], originally [@zhangyeung1997]). For any four discrete random variables $X, Y, Z, U$, if
-
-$$I(X; Y) = I(X; Y \mid Z) = 0, \qquad (16)$$
-
-then
-
-$$I(X; Y \mid Z, U) \leq I(Z; U \mid X, Y) + I(X; Y \mid U). \qquad (17)$$
-
-The paper also recalls that [@zhangyeung1997] proves this implies
-
-$$\mathrm{cl}(\Gamma^*_4) \neq \Gamma_4. \qquad (18)$$
-:::
-
-Theorem 2 is a *conditional* non-Shannon inequality: it only applies under the hypotheses $I(X; Y) = I(X; Y \mid Z) = 0$. The 1998 paper's central advance is removing this conditionality.
-
-### Conjecture 1 (eq. 19)
-
-::: {.conjecture}
-**Conjecture 1** ([@zhangyeung1998, Conj. 1]). For every $n \geq 4$,
-
-$$\mathrm{cl}(\Gamma_n^*) = \Gamma_n. \qquad (19)$$
-:::
-
-To give an affirmative answer to this problem is the stated goal of the paper. The paper is organized as follows: Section II states the main results and introduces the relevant definitions and notation; Sections III and IV prove the main theorems; Section V summarizes the findings and raises further problems.
-
-### Literature Survey (Section I closing prose)
-
-Before closing the introduction, the paper gives a brief account of earlier work relevant to the subject matter of the paper. Since Shannon's information measures are the most important measures in information theory, researchers in this area have been investigating their structural properties since the 1950s. The early work cited in the paper includes Campbell [2], Hu [10], McGill [21], and Watanabe [31], [32].
-
-McGill [21] proposed a multiple mutual information for any number of random variables, generalizing Shannon's mutual information for two variables. Its properties were further studied by Kawabata and Yeung [6], Tsujishita [30], and Yeung [37].
-
-Hu [10] was the first attempt to establish an analogy between information theory and set theory. Toward this end, he defined a formal substitution of symbols under a set-additive function $\mu$; for example,
-
-$$H(X) + H(Y) = H(X, Y) + I(X; Y)$$
-
-corresponds to
-
-$$\mu(X) + \mu(Y) = \mu(X \cup Y) + \mu(X \cap Y).$$
-
-Han [7], [9] pushed this further by emphasizing that every linear information expression can be rewritten as a linear combination of unconditional joint entropies, via repeated use of identities such as
-
-$$I(X; Y \mid Z) = H(X, Z) + H(Y, Z) - H(X, Y, Z) - H(Z).$$
-
-Han proved that a linear combination of unconditional joint entropies is always equal to zero if and only if all the coefficients are zero. He also established a necessary and sufficient condition for a symmetrical linear information expression to be always nonnegative, and a necessary and sufficient condition for a linear information expression involving three random variables to be always nonnegative. In [9], he raised the important question of what linear combinations of unconditional joint entropies are always nonnegative. In his work, Han viewed a linear combination of unconditional joint entropies as a vector space, and developed a lattice-theoretic description of Shannon's information measures with which some notations can be greatly simplified. During this time, Fujishige [5] found that the entropy function is a polymatroid [33].
-
-In the 1990s, Yeung [34] further developed Hu's work into an explicit set-theoretic formulation of Shannon's information measures. Specifically, he showed that Shannon's information measures uniquely define a signed measure, called the $I$-measure, on a properly defined field. With this formulation, Shannon's information measures can formally be viewed as a signed measure, and McGill's multiple mutual information is naturally included. As a consequence, set-theoretic techniques can be used for the manipulation of information expressions, and the use of information diagrams becomes justified. Kawabata and Yeung [6] studied the structure of the $I$-measure when the random variables form a Markov chain, and Yeung, Lee, and Ye [36] extended this to Markov random fields.
-
-Most directly relevant is Yeung [35], which defined the set of all constructible entropy functions and observed that whether an information inequality, linear or nonlinear, always holds is completely characterized by this region. This geometrical framework enables a unified description of all information inequalities, unconstrained or constrained, which are implied by the nonnegativity of Shannon's information measures, called the basic inequalities. This gives a partial answer to Han's question and directly leads to the question whether all information inequalities which always hold are implied by the basic inequalities for the same set of random variables, equivalently whether $\mathrm{cl}(\Gamma_n^*) = \Gamma_n$. With the result in [39] that $\mathrm{cl}(\Gamma_n^*)$ is a convex cone, answering Han's question becomes equivalent to determining $\Gamma_n^*$. In [37], the same region is used to study the distributed source-coding problem.
-
-As a consequence of [35], the software ITIP (Information Theoretic Inequality Prover) [38] was developed, which can verify all linear information inequalities involving a definite number of random variables that are implied by the basic inequalities for the same set of random variables.
-
-Along another line, motivated by the study of the logic of integrity constraints from databases, researchers in probabilistic reasoning spent much effort in characterizing the compatibility of conditional independence relations among random variables. This effort was launched by a seminal paper of Dawid [4], in which he proposed four axioms as heuristic properties of conditional independence. In information-theoretic terms, these four axioms can be summarized by the implication
-
-$$I(X; Y, Z \mid U) = 0 \implies I(X; Y \mid U) = 0 \quad \text{and} \quad I(X; Z \mid Y, U) = 0.$$
-
-Subsequent work on this subject was done by Pearl and his collaborators in the 1980s and summarized in Pearl's book [23]. Pearl conjectured that Dawid's four axioms completely characterize the conditional independence structure of any joint distribution. This conjecture, however, was refuted by the work of Studeny [25]. Since then, Matus and Studeny wrote a series of papers on this problem [13]-[29]. They solved the problem for up to four random variables. It has been shown in [35] that the problem of characterizing the compatibility of conditional independence relations among random variables is a subproblem of the determination of $\Gamma_n^*$.
-
-## Main results
-
-### Theorem 3 (the Zhang-Yeung inequality)
-
-::: {.theorem}
-**Theorem 3** ([@zhangyeung1998, Thm. 3], eq. 20-23). For any four discrete random variables $X, Y, Z, U$,
-
-$$\Delta(Z, U \mid X, Y) \leq \tfrac{1}{2} \bigl[I(X; Y) + I(X; Z, U) + I(Z; U \mid X) - I(Z; U \mid Y)\bigr]. \qquad (21)$$
-
-By swapping the roles of $X$ and $Y$, the symmetric inequality
-
-$$\Delta(Z, U \mid X, Y) \leq \tfrac{1}{2} \bigl[I(X; Y) + I(Y; Z, U) - I(Z; U \mid X) + I(Z; U \mid Y)\bigr] \qquad (22)$$
-
-also holds. Averaging (21) and (22) gives the symmetric form
-
-$$\Delta(Z, U \mid X, Y) \leq \tfrac{1}{2} \, I(X; Y) + \tfrac{1}{4}\bigl[I(X; Z, U) + I(Y; Z, U)\bigr]. \qquad (23)$$
-
-Where we define
-
-$$\Delta(Z, U \mid X, Y) := I(Z; U) - I(Z; U \mid X) - I(Z; U \mid Y). \qquad (20)$$
-
-This inequality does **not** follow from the basic Shannon inequalities (Theorem 4).
-:::
-
-### Auxiliary definitions for Theorem 4 (eq. 24-25)
-
-For $F \in \mathcal{F}_n$ and subsets $\alpha, \beta, \gamma \subseteq \mathcal{N}_n$, the paper defines
-
-$$I_F(\alpha; \beta \mid \gamma) := F(\alpha \cup \gamma) + F(\beta \cup \gamma) - F(\alpha \cup \beta \cup \gamma) - F(\gamma).$$
-
-When $\gamma = \varnothing$, it writes $I_F(\alpha; \beta)$ in place of $I_F(\alpha; \beta \mid \varnothing)$. For distinct indices $i, j, k, l$,
-
-$$\Delta_F(i, j \mid k, l) := I_F(\{i\}; \{j\}) - I_F(\{i\}; \{j\} \mid \{k\}) - I_F(\{i\}; \{j\} \mid \{l\}). \qquad (24)$$
-
-It then defines
-
-$$\tilde{\Gamma}_4 := \left\{F \in \Gamma_4 : \text{for any permutation } \pi \text{ of } \{1, 2, 3, 4\}, \Delta_F(\pi(1), \pi(2) \mid \pi(3), \pi(4)) \leq \tfrac{1}{2} \bigl[I_F(\{\pi(3)\}; \{\pi(4)\}) + I_F(\{\pi(3)\}; \{\pi(1), \pi(2)\}) + I_F(\{\pi(1)\}; \{\pi(2)\} \mid \{\pi(3)\}) - I_F(\{\pi(1)\}; \{\pi(2)\} \mid \{\pi(4)\})\bigr]\right\}. \qquad (25)$$
-
-Theorem 3 says precisely that every four-variable entropy function lies in $\tilde{\Gamma}_4$.
-
-### Theorem 4 (Shannon incompleteness, eq. 26)
-
-::: {.theorem}
-**Theorem 4** ([@zhangyeung1998, Thm. 4]). For every $n \geq 4$,
-
-$$\mathrm{cl}(\Gamma^*_n) \neq \Gamma_n. \qquad (26)$$
-:::
-
-Since one always has $\mathrm{cl}(\Gamma^*_n) \subseteq \Gamma_n$, equation (26) is equivalent to strict inclusion. The paper's proof sketch (p. 1443) observes that it suffices to prove the claim for $n = 4$: given a $4$-variable witness, embedding it on the first four coordinates of an $n$-tuple of random variables (with the remaining $n - 4$ set to a constant) produces an $n$-variable witness. The $n = 4$ witness is the explicit function $F : 2^{\mathcal{N}_4} \to [0, \infty)$ defined on p. 1443 (satisfying all 15 elemental Shannon inequalities but violating Theorem 3):
-
-$$F(\varnothing) = 0, \qquad F(X) = F(Y) = F(Z) = F(U) = 2a > 0,$$
-
-$$F(X, Y) = 4a, \qquad F(X, U) = F(X, Z) = F(Y, U) = F(Y, Z) = F(Z, U) = 3a,$$
-
-$$F(X, Y, Z) = F(X, Y, U) = F(X, Z, U) = F(Y, Z, U) = F(X, Y, Z, U) = 4a,$$
-
-for any $a > 0$, after identifying $\mathcal{N}_4$ with $\{X, Y, Z, U\}$.
-
-### Theorem 5 (generalization to $n + 2$ variables, eq. 27-28)
-
-::: {.theorem}
-**Theorem 5** ([@zhangyeung1998, Thm. 5]). For any $n \geq 2$ and any $n + 2$ discrete random variables $U, Z, X_1, \ldots, X_n$, and for any $i \in \{1, \ldots, n\}$,
-
-$$n \, I(U; Z) - \sum_{j = 1}^{n} I(U; Z \mid X_j) - n \, I(U; Z \mid X_i) \leq I(X_i; U, Z) + \sum_{j = 1}^{n} H(X_j) - H(X_1 \cdots X_n). \qquad (27)$$
-
-Averaging (27) over $i \in \{1, \ldots, n\}$ yields the symmetric form
-
-$$n \, I(U; Z) - 2 \sum_{j = 1}^{n} I(U; Z \mid X_j) \leq \tfrac{1}{n} \sum_{i = 1}^{n} I(X_i; U, Z) + \sum_{j = 1}^{n} H(X_j) - H(X_1 \cdots X_n). \qquad (28)$$
-
-The proof is the same as Theorem 3 combined with induction on $n$ (omitted in the paper).
-:::
-
-### Theorem 6 (inner bound of $\mathrm{cl}(\Gamma^*_4)$, Section II eq. 43)
-
-The paper reparametrizes an arbitrary function $F \in \mathcal{F}_n$ using atom values $F[\alpha \mid \beta]$, defined for pairs $(\alpha, \beta)$ with $\alpha \neq \varnothing$ by
-
-$$F[\alpha \mid \beta] := \sum_{\gamma \subseteq \alpha} (-1)^{1+|\gamma|} F(\gamma \cup \beta), \qquad (30)$$
-
-and then defines $F[\alpha] := F[\alpha \mid \alpha^c]$ (31). For four variables, the paper next records the elemental inequalities in atom coordinates and rewrites Theorem 3 in those coordinates. It also defines the quantity
-
-For an entropy function of four random variables, the elemental inequalities become, for every permutation $\{i, j, k, l\} = \{1, 2, 3, 4\}$,
-
-$$F[i, j] \geq 0, \qquad F[i, j] + F[i, j, k] \geq 0, \qquad F[i, j] + F[i, j, k] + F[i, j, l] + F[i, j, k, l] \geq 0, \qquad F[i] \geq 0. \qquad (32\text{-}33)$$
-
-Equation (20) becomes
-
-$$\Delta(X_1, X_2 \mid X_3, X_4) = F[1, 2, 3, 4] - F[1, 2]. \qquad (35)$$
-
-Accordingly, for an arbitrary function $F$ the paper extends this to
-
-$$\Delta_F(i, j \mid k, l) := F[i, j, k, l] - F[i, j]. \qquad (36)$$
-
-$$S_F(i, j \mid k, l) := F[i, j] + F[i, j, k] + F[i, j, l] + F[k, l] \qquad (37)$$
-
-and observes that, with $\varnothing$ denoting the empty set,
-
-$$S_F(i, j \mid k, l) = F[i, j \mid \varnothing] - \Delta_F(k, l \mid i, j) = F[i, j] + F[i, j, k] + F[i, j, l] + F[i, j, k, l] - \Delta_F(k, l \mid i, j). \qquad (38)$$
-
-In this coordinate system, Theorem 3 becomes
-
-$$S_F(1, 2 \mid 3, 4) + F[1, 3 \mid 4] + F[1, 4 \mid 3] + F[3, 4 \mid 1] \geq 0. \qquad (39)$$
-
-The two companion inequalities are
-
-$$S_F(1, 2 \mid 3, 4) + F[2, 3 \mid 4] + F[2, 4 \mid 3] + F[3, 4 \mid 2] \geq 0 \qquad (40)$$
+$$
+\begin{equation*}
+H(\alpha \cup \beta)+H(\alpha \cap \beta) \leq H(\alpha)+H(\beta) . \tag{8}
+\end{equation*}
+$$
+
+- $\alpha \subset \beta$ implies
+
+$$
+\begin{equation*}
+H(\alpha) \leq H(\beta) \tag{9}
+\end{equation*}
+$$
 
 and
 
-$$2 S_F(1, 2 \mid 3, 4) + F[1, 3 \mid 4] + F[1, 4 \mid 3] + F[2, 3 \mid 4] + F[2, 4 \mid 3] + F[3, 4 \mid 1] + F[3, 4 \mid 2] \geq 0. \qquad (41)$$
+-
 
-Equivalently, $S_F(1, 2 \mid 3, 4)$ is bounded below by the maximum of
+$$
+\begin{equation*}
+H(\phi)=0 . \tag{10}
+\end{equation*}
+$$
 
-$$-\bigl(F[1, 3 \mid 4] + F[1, 4 \mid 3] + F[3, 4 \mid 1]\bigr), \qquad -\bigl(F[2, 3 \mid 4] + F[2, 4 \mid 3] + F[3, 4 \mid 2]\bigr).$$
+Let $\mathcal{F}_{n}$ be the set of all functions defined on $2^{\mathcal{N}_{n}}$ taking values in $[0, \infty)$. Define
 
-It then defines the region
+$$
+\begin{align*}
+& \Gamma_{n} \stackrel{\text { def }}{=}\left\{F \in \mathcal{F}_{n}: F(\phi)=0 ; \alpha \subset \beta \Rightarrow F(\alpha) \leq F(\beta) ;\right. \\
+& \quad \forall \alpha, \beta \in 2^{\mathcal{N}_{n}}, \left. F(\alpha)+F(\beta) \geq F(\alpha \cup \beta)+F(\alpha \cap \beta)\right\} . \tag{11}
+\end{align*}
+$$
 
-$$\hat{\Gamma}_4 := \{F \in \Gamma_4 : \text{for any permutation } \pi \text{ of } \{1, 2, 3, 4\}, S_F(\pi(1), \pi(2) \mid \pi(3), \pi(4)) \geq 0\}. \qquad (42)$$
+Apparently, for any $\Omega=\left\{X_{i}: i=1, \cdots, n\right\}, H_{\Omega} \in \Gamma_{n}$. This means that the set $\Gamma_{n}$ characterizes some of the properties of the entropy function. A natural question to ask is whether or not this set "fully" characterizes the entropy function. To make the question more precise, we have introduced in [39] the following definitions.
 
-::: {.theorem}
-**Theorem 6** ([@zhangyeung1998, Thm. 6], eq. 43).
+*Definition 1:* A function $F \in \mathcal{F}_{n}$ is called constructible if and only if there exists a set of $n$ jointly distributed discrete random variables $\Omega$ such that the joint entropy function $H_{\Omega}$ associated with these random variables satisfies $H_{\Omega}=F$. Define
 
-$$\hat{\Gamma}_4 \subset \mathrm{cl}(\Gamma^*_4) \qquad (43)$$
+$$
+\begin{equation*}
+\Gamma_{n}^{*}=\left\{F \in \mathcal{F}_{n}: F \text { is constructible }\right\} . \tag{12}
+\end{equation*}
+$$
 
-Equivalently, the set $\hat{\Gamma}_4$ is an inner bound of $\mathrm{cl}(\Gamma^*_4)$.
-:::
+In [39], we have seen that the structure of this set could be very complicated and we mentioned that the following concept is more manageable:
 
-The paper then gives a projective-plane construction (p. 1445) showing that $S_F$ may be negative even for an entropy function. For the resulting four random variables $X_1, X_2, X_3, X_4$, it computes
+*Definition 2:* A function $F \in \mathcal{F}_{n}$ is called asymptotically constructible if and only if there exist a sequence of sets of $n$ discrete random variables $\Omega^{k}$ for $k=1, \cdots$ such that the joint entropy functions $H_{\Omega^{k}}$ associated with $\Omega^{k}$ satisfy $\lim _{k \rightarrow \infty} H_{\Omega^{k}}=F$.
 
-$$I(X_1; X_2) = \log_2(13/12), \qquad H(X_3) = H(X_4) = \log_2 13,$$
+Obviously, a function $F$ is asymptotically constructible if and only if $F \in \bar{\Gamma}_{n}^{*}$, the closure of the set $\Gamma_{n}^{*}$.
 
-$$H(X_3, X_4) = \log_2 6 + \log_2 13,$$
+In [39], we proved the following results.
 
-$$H(X_3 \mid X_1) = H(X_3 \mid X_2) = H(X_4 \mid X_1) = H(X_4 \mid X_2) = \log_2 4,$$
+*Theorem 1:*
 
-$$H(X_3, X_4 \mid X_1) = H(X_3, X_4 \mid X_2) = \log_2 12.$$
+$$
+\begin{equation*}
+\bar{\Gamma}_{2}^{*}=\Gamma_{2} \tag{13}
+\end{equation*}
+$$
 
-Therefore
+and
 
-$$I(X_3; X_4) = \log_2 13 - \log_2 6, \qquad I(X_3; X_4 \mid X_1) = I(X_3; X_4 \mid X_2) = \log_2(4/3),$$
+$$
+\begin{equation*}
+\bar{\Gamma}_{3}^{*}=\Gamma_{3} . \tag{14}
+\end{equation*}
+$$
 
-and hence
+Up to this work, it was not known whether or not this result can be generalized. That is, we did not know whether for $n>3$
 
-$$\begin{aligned}
-S_F(1, 2 \mid 3, 4)
-&= I(X_1; X_2) + I(X_3; X_4 \mid X_1) + I(X_3; X_4 \mid X_2) - I(X_3; X_4) \\
-&= \log_2(13/12) + 2 \log_2(4/3) - \log_2(13/6) \\
-&= -\log_2(9/8) < 0.
-\end{aligned}$$
+$$
+\begin{equation*}
+\bar{\Gamma}_{n}^{*}=\Gamma_{n} . \tag{15}
+\end{equation*}
+$$
 
-So the inner bound is strict; combined with the outer bound $\tilde{\Gamma}_4$ from Theorem 3, this leaves the exact description of $\mathrm{cl}(\Gamma^*_4)$ open.
+This is a fundamental problem in information theory. In [39], we proved a conditional inequality of Shannon's information measures.
 
-## Lemmas
+*Theorem 2:* For any four discrete random variables $\Omega_{4}= \{X, Y, Z, U\}$
 
-### Lemma 1 (atom-to-subset inversion, eq. 34)
+$$
+\begin{equation*}
+I(X ; Y)=I(X ; Y \mid Z)=0 \tag{16}
+\end{equation*}
+$$
 
-::: {.lemma}
-**Lemma 1** ([@zhangyeung1998, Lem. 1]). For the atom reparametrization $F[\alpha \mid \beta]$,
+implies
 
-$$F[\alpha \mid \beta] = \sum_{\gamma \subseteq (\alpha \cup \beta)^c} F[\alpha \cup \gamma] \qquad (34)$$
+$$
+\begin{equation*}
+I(X ; Y \mid Z, U) \leq I(Z ; U \mid X, Y)+I(X ; Y \mid U) \tag{17}
+\end{equation*}
+$$
 
-where $A^c$ stands for the complement of the set $A$.
-:::
+We also proved in [39] that this result implies
 
-### Lemma 2 (the copy lemma, eq. 44-45)
+$$
+\begin{equation*}
+\bar{\Gamma}_{n}^{*} \neq \Gamma_{n} . \tag{18}
+\end{equation*}
+$$
 
-This is the central proof artifact of the paper. In the modern literature, this construction (together with its extension to any number of "copies" over a shared marginal) is called the **copy lemma**.
+Therefore, it lends some evidence for the following conjecture.
+*Conjecture 1:* For $n \geq 4$
 
-::: {.lemma}
-**Lemma 2** ([@zhangyeung1998, Lem. 2]). Let $(X, Y, Z, U)$ be four jointly distributed discrete random variables on a probability space with joint distribution $p(x, y, z, u)$. Define the six-variable distribution
+$$
+\begin{equation*}
+\bar{\Gamma}_{n}^{*} \neq \Gamma_{n} . \tag{19}
+\end{equation*}
+$$
 
-$$q(x, y, z, u, x_1, y_1) := \frac{p(x, y, z, u) \, p(x_1, y_1, z, u)}{p(z, u)} \qquad (44)$$
+To give an affirmative answer to this problem is the goal of the current paper.
 
-wherever $p(z, u) > 0$. Let $X_1, Y_1$ be two random variables jointly distributed with $X, Y, Z, U$ according to the joint distribution $q$. Equivalently, conditioned on $(Z, U)$, the pairs $(X, Y)$ and $(X_1, Y_1)$ are i.i.d. with common conditional law $p(\cdot, \cdot \mid Z, U)$. Then:
+The paper is organized as follows: in the next section, we state the main results and introduce some definitions and notations; Sections III and IV are devoted to the proofs of the results; in Section V, we summarize the findings of the paper and raise some problems for future study.
 
-1. **Identical marginals.** The $(X, Y, Z, U)$-marginal and the $(X_1, Y_1, Z, U)$-marginal of $q$ both equal $p$.
-2. **Conditional independence.** Under $q$, the pair $(X, Y)$ is conditionally independent of $(X_1, Y_1)$ given $(Z, U)$:
-$$I_q\bigl((X, Y); (X_1, Y_1) \mid (Z, U)\bigr) = 0.$$
-3. **Entropy identity** (eq. 45). The conditional mutual information of the original variables satisfies
+Before closing this section, we would like to give a brief account of the works we found in the literature which are relevant to the subject matter of the current paper. As Shannon's information measures are the most important measures in information theory, researchers in this area have been investigating their structural properties since the 1950's. The early works on this subject have been done along various directions by Campbell [2], Hu [10], McGill [21], Watanabe [31], [32].
 
-$$\Delta(Z, U \mid X, Y) = I(X; Y_1) - I(X; Y_1 \mid U) - I(X; Y_1 \mid Z) - I(Z; U \mid X, Y_1) \qquad (45)$$
-:::
+McGill [21] has proposed a multiple mutual information for any number of random variables, which is a generalization of Shannon's mutual information for two random variables. Properties of the multiple mutual information have been investigated in the subsequent works of Kawabata and Yeung [6], Tsujishita [30], and Yeung [37].
 
-The construction is the two-step kernel composition $q = p \otimes \kappa$ where $\kappa$ is the Markov kernel from $(Z, U)$ to $(X_1, Y_1)$ induced by $p(\cdot, \cdot \mid Z, U)$; equivalently, $(X_1, Y_1)$ is a conditionally independent "copy" of $(X, Y)$ over the common $(Z, U)$ coordinates.
+The work of Hu [10] was the first attempt to establish an analogy between information theory and set theory. Toward this end, he defined the following formal substitution of symbols:
 
-## Proof of Theorem 3 (Section III)
+$$
+\begin{array}{ccc}
+H / I & \leftrightarrow & \mu \\
+, & \leftrightarrow & \cup \\
+; & \leftrightarrow & \cap \\
+\mid & \leftrightarrow & -
+\end{array}
+$$
 
-With the six-variable joint distribution $q$ from Lemma 2, the paper first observes
+where $\mu$ is any set-additive function. In the above substitution, on the left are symbols in information theory, while on the right are symbols in set theory. He showed that a linear informationtheoretic identity holds for all distributions if and only if the corresponding set-theoretic identity obtained via the formal substitution of symbols holds for all additive function $\mu$. For example, the information-theoretic identity
 
-$$I(Z; U) - I(Z; U \mid X) - I(Z; U \mid Y) \leq I(X; Y_1),$$
+$$
+H(X)+H(Y)=H(X, Y)+I(X ; Y)
+$$
 
-and similarly
+corresponds to the set-theoretic identity
 
-$$I(Z; U) - 2 I(Z; U \mid X) \leq I(X; X_1).$$
+$$
+\mu(X)+\mu(Y)=\mu(X \cup Y)+\mu(X \cap Y) .
+$$
 
-It then combines these bounds as
+1442
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
 
-$$\begin{aligned}
-2 I(Z; U) - 3 I(Z; U \mid X) - I(Z; U \mid Y)
-&\leq I(X; Y_1) + I(X; X_1) \\
-&= I(X; X_1, Y_1) + I(X_1; Y_1) - I(X_1; Y_1 \mid X) \\
-&\leq I(X; X_1, Y_1) + I(X_1; Y_1) \\
-&\leq I(X; Z, U) + I(X_1; Y_1) \\
-&= I(X; Z, U) + I(X; Y),
-\end{aligned}$$
+Hu's work was originally published in Russian, and it was not widely known in the west until it was reported in Csiszár and Körner [3].
 
-where the penultimate step is data processing and the last step uses the identical-marginal fact $I(X_1; Y_1) = I(X; Y)$. Rearranging gives (21); swapping $X$ and $Y$ gives (22), and averaging yields (23).
+Important progress has been made in the mid 1970's and the early 1980's, mainly by Han [7], [9]. Let us point out that any linear information expression can be expressed as a linear combination of unconditional joint entropies by repeated applications (if necessary) of the following identity:
+$I(X ; Y \mid Z)=H(X, Z)+H(Y, Z)-H(X, Y, Z)-H(Z)$.
+In [7], Han proved the fundamental result that a linear combination of unconditional joint entropies is always equal to zero if and only if all the coefficients are zero. This result was also obtained independently by Csiszár and Körner [3]. Han further established a necessary and sufficient condition for a symmetrical linear information expression to be always nonnegative, and a necessary and sufficient condition for a linear information expression involving three random variables to be always nonnegative [9]. In [9], he raised the important question of what linear combinations of unconditional joint entropies are always nonnegative. In his work, Han viewed a linear combination of unconditional joint entropies as a vector space, and he developed a lattice-theoretic description of Shannon's information measures with which some notations can be greatly simplified. During this time, Fujishige [5] found that the entropy function is a polymatroid [33].
 
-The paper also makes the deficit in (21) explicit. Writing
+In the 1990's, Yeung [34] further developed Hu's work into an explicit set-theoretic formulation of Shannon’s information measures. Specifically, he showed that Shannon's information measures uniquely define a signed measure $\mu^{*}$, called the $I$ measure, on a properly defined field. With this formulation, Shannon's information measures can formally be viewed as a signed measure, and McGill's multiple mutual information is naturally included. As a consequence, all set-theoretic techniques can now be used for the manipulation of information expressions. Furthermore, the use of information diagrams to represent the structure of Shannon's information measures becomes justified. We note that information diagrams have previously been used informally to illustrate the structure of Shannon's information measures [1], [22], [24]. Subsequently, Kawabata and Yeung [6] studied the structure of $\mu^{*}$ when the random variables form a Markov chain. Recently, Yeung et al. [36] have extended the study in [6] to random variables forming a Markov random field.
 
-$$R_1 := I(X; Y_1 \mid U) + I(X; Y_1 \mid Z) + I(Z; U \mid X, Y_1),$$
+Recently, Yeung [35] defined the set $\Gamma_{n}^{*}$ of all constructible entropy functions and observed that whether an information inequality (linear or nonlinear) always holds is completely characterized by $\Gamma_{n}^{*}$. This geometrical framework enables him to develop a unified description of all information inequalities (unconstrained or constrained) which are implied by the nonnegativity of Shannon's information measures, called the basic inequalities. This gives a partial answer to the question raised by Han in [9], and it directly leads to the question of whether all information inequalities which always hold are implied by the basic inequalities for the same set of random variables, or equivalently, whether $\Gamma_{n}^{*}=\Gamma_{n}$ is true. In fact, the same question was raised in [26] and [34], although at that time $\Gamma_{n}^{*}$ had not been defined and the intimate relation
+between $\Gamma_{n}^{*}$ and information inequalities was not known. This question is the starting point of the work by the authors in [39] and in the current paper. With the result in [39] that $\bar{\Gamma}_{n}^{*}$ is a convex cone, answering the question raised by Han in [9] is equivalent to determining $\bar{\Gamma}_{n}^{*}$. In a recent paper [37], we have used the region $\Gamma_{n}^{*}$ to study the so-called distributed source-coding problem.
 
-$$R_2 := I(X; X_1 \mid U) + I(X; X_1 \mid Z) + I(Z; U \mid X, X_1),$$
+As a consequence of the work in [35], a software called ITIP (Information Theoretic Inequality Prover) [38] has been developed which can verify all linear information inequalities involving a definite number of random variables that are implied by the basic inequalities for the same set of random variables.
 
-Lemma 2 gives
+Along another line, motivated by the study of the logic of integrity constraints from databases, researchers in the area of probabilistic reasoning have spent much effort in characterizing the compatibility of conditional independence relation among random variables. This effort was launched by a seminal paper by Dawid [4], in which he proposed four axioms as heuristical properties of conditional independence. In information-theoretic terms, these four axioms can be summarized by the following statement:
 
-$$\Delta(Z, U \mid X, Y) = I(X; Y_1) - R_1,$$
+$$
+I(X ; Y, Z \mid U)=0 \Leftrightarrow I(X ; Y \mid U)=0
+$$
 
-$$\Delta(Z, U \mid X, X_1) = I(X; X_1) - R_2,$$
+and
 
-so the missing term in (21) is
+$$
+I(X ; Z \mid Y, U)=0
+$$
 
-$$R(X, Y, Z, U, X_1, Y_1) = \tfrac{1}{2} \bigl[I(X; Z, U \mid X_1, Y_1) + I(X_1; Y_1 \mid X) + R_1 + R_2\bigr].$$
+Subsequent work on this subject has been done by Pearl and his collaborators in the 1980's, and their work is summarized in the book by Pearl [23]. Pearl conjectured that Dawid's four axioms completely characterize the conditional independence structure of any joint distribution. This conjecture, however, was refuted by the work of Studený [25]. Since then, Matúš and Studený have written a series of papers on this problem [13]-[29]. They have solved the problem for up to four random variables. It has been shown in [35] that the problem of characterizing the compatibility of conditional independence relations among random variables is a subproblem of the determination of $\Gamma_{n}^{*}$.
 
-The paper then points out that the explicit function
+## II. Statement of Main Results
 
-$$F(\varnothing) = 0, \qquad F(X) = F(Y) = F(Z) = F(U) = 6a,$$
+The key result of this paper is the following theorem:
+*Theorem 3:* For any four discrete random variables $X, Y$, $Z, U$, let
 
-$$F(X, Y) = 12a, \qquad F(X, Z) = F(Y, Z) = F(Y, U) = F(X, U) = 9a, \qquad F(Z, U) = 10a,$$
+$$
+\begin{equation*}
+\Delta(Z, U \mid X, Y)=I(Z ; U)-I(Z ; U \mid X)-I(Z ; U \mid Y) \tag{20}
+\end{equation*}
+$$
 
-$$F(X, Z, U) = F(Y, Z, U) = F(X, Y, Z) = F(X, Y, U) = F(X, Y, Z, U) = 12a.$$
+Then the following inequality holds:
 
-This function lies in $\tilde{\Gamma}_4$ and satisfies one of the new inequalities with equality. The authors ask whether it is asymptotically constructible; if it were, one might expect the outer bound to be tight, i.e. $\mathrm{cl}(\Gamma^*_4) = \tilde{\Gamma}_4$. They report that they were unable to prove this and therefore doubt that conjecture.
+$$
+\begin{align*}
+\Delta(Z, U \mid X, Y) \leq \frac{1}{2} & {[I(X ; Y)+I(X ; Z U)} \\
+& +I(Z ; U \mid X)-I(Z ; U \mid Y)] \tag{21}
+\end{align*}
+$$
 
-## Proof of Theorem 6 (Section IV)
+Note that the right-hand side of (21) is not symmetric in $X$ and $Y$, whereas the left-hand side is. Therefore, we also have the following inequality:
 
-Section IV proves the inner bound via seven explicit probabilistic constructions. In the paper, these are defined from three independent ternary random variables $W_1, W_2, W_3$, each uniform on $\{0, 1, 2\}$, together with a constant random variable $W_0$; logarithms are taken in base $3$, so $H(W_i) = 1$ for $i = 1, 2, 3$.
+$$
+\begin{align*}
+\Delta(Z, U \mid X, Y) \leq \frac{1}{2}[I(X ; Y)+I(Y ; Z U) & \\
+& -I(Z ; U \mid X)+I(Z ; U \mid Y)] \tag{22}
+\end{align*}
+$$
 
-- **Construction 1** ($F^1_\alpha$). For any nonempty subset $\alpha \subseteq \{1, 2, 3, 4\}$, set $X_i = W_1$ if $i \in \alpha$ and $X_i = W_0$ otherwise. Then $F^1_\alpha[\beta] = 0$ for every $\beta \neq \alpha$, while $F^1_\alpha[\alpha] = 1$. This is the single-atom indicator construction used in Lemma 4.
-- **Construction 2** ($F^2$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_3$, and $X_4 = W_1 + W_2 + W_3 \pmod 3$. Then the induced atom function is $0$ on all weight-one atoms, $1$ on all weight-two and weight-four atoms, and $-1$ on all weight-three atoms.
-- **Construction 3** ($F^3_4$, and by permutation $F^3_i$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_1 + W_2 \pmod 3$, and $X_4 = W_0$. Then $F^3_4[1, 2] = F^3_4[1, 3] = F^3_4[2, 3] = 1$, $F^3_4[1, 2, 3] = -1$, and all other atoms have value $0$. By symmetry, $F^3_i$ is obtained by making $X_i = W_0$.
-- **Construction 4** ($F^4_{3,4}$, and by symmetry $F^4_{i,j}$). Set $X_1 = W_1$, $X_2 = W_2$, and $X_3 = X_4 = W_1 + W_2 \pmod 3$. Then $F^4_{3,4}[1, 2] = 1$, $F^4_{3,4}[2, 3, 4] = F^4_{3,4}[1, 3, 4] = 1$, $F^4_{3,4}[1, 2, 3, 4] = -1$, and all other atoms have value $0$.
-- **Construction 5** ($F^5$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_1 + W_2 \pmod 3$, and $X_4 = W_1 - W_2 \pmod 3$. Then all weight-one and weight-two atoms have value $0$, all weight-three atoms have value $1$, and $F^5[1, 2, 3, 4] = -2$.
-- **Construction 6** ($F^6_4$, and by symmetry $F^6_i$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_3$, and $X_4 = (W_1 + W_2 \pmod 3, W_1 + W_3 \pmod 3)$. Then $F^6_4[1, 2, 3] = 1$, every weight-two atom containing $4$ has value $1$, $F^6_4[1, 2, 3, 4] = -1$, and all other atoms have value $0$.
-- **Construction 7** ($F^7_4$, and by symmetry $F^7_i$). Set $X_1 = W_1$, $X_2 = W_2$, $X_3 = W_1 + W_2 \pmod 3$, and $X_4 = (W_1, W_2)$. Then all atoms of weight at most $2$ have value $0$, every weight-three atom except $[1, 2, 3]$ has value $1$, $F^7_4[1, 2, 3] = 0$, and $F^7_4[1, 2, 3, 4] = -1$.
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+1443
 
-The paper's atom chart on p. 1447 orders the atoms of weight at least $2$ as
+Averaging inequalities (21) and (22) gives
 
-```text
-23
-12   123   13
-124  1234  134  14
-24   234   34
+$$
+\begin{equation*}
+\Delta(Z, U \mid X, Y) \leq \frac{1}{2} I(X ; Y)+\frac{1}{4}[I(X ; Z U)+I(Y ; Z U)] \tag{23}
+\end{equation*}
+$$
+
+This theorem will be proved in the next section.
+Let $F \in \mathcal{F}_{n}$. Define for three subsets $\alpha, \beta$, and $\gamma$ of $\mathcal{N}_{n}$.
+$I_{F}(\alpha ; \beta \mid \gamma)=F(\alpha \cup \gamma)+F(\beta \cup \gamma)-F(\alpha \cup \beta \cup \gamma)-F(\gamma)$.
+When $\gamma$ is the empty set, we simply write $I_{F}(\alpha ; \beta)$ in place of $I_{F}(\alpha ; \beta \mid \gamma)$. Let
+
+$$
+\begin{align*}
+\Delta_{F}(i, j \mid k, l)= & I_{F}(\{i\} ;\{j\})-I_{F}(\{i\} ;\{j\} \mid\{k\}) \\
+& -I_{F}(\{i\} ;\{j\} \mid\{l\}) \tag{24}
+\end{align*}
+$$
+
+Define
+
+$$
+\begin{gather*}
+\tilde{\Gamma}_{4}=\left\{F \in \Gamma_{4}: \text { for any permutation } \pi \text { of }\{1,2,3,4\}\right. \\
+\quad \Delta_{F}(\pi(1), \pi(2) \mid \pi(3), \pi(4)) \\
+\leq \frac{1}{2}\left[I_{F}(\pi(3) ; \pi(4))+I_{F}(\pi(1) ; \pi(2) \mid \pi(3))\right. \\
+\quad-I_{F}(\pi(1) ; \pi(2) \mid \pi(4)) \\
+\left.\left.\quad+I_{F}(\pi(3) ; \pi(1) \pi(2))\right]\right\} \tag{25}
+\end{gather*}
+$$
+
+(Notice that, if we replace $\pi(i)$ for $i=1,2,3,4$ by $Z, U, X, Y$, respectively, then the inequality in (25) is just (21).) Theorem 3 says that
+
+$$
+\bar{\Gamma}_{4}^{*} \subset \tilde{\Gamma}_{4}
+$$
+
+Theorem 3 implies the following result.
+*Theorem 4:* For $n \geq 4$
+
+$$
+\begin{equation*}
+\bar{\Gamma}_{n}^{*} \neq \Gamma_{n} . \tag{26}
+\end{equation*}
+$$
+
+*Proof:* Apparently, we need to prove the theorem only for $n=4$. This will imply the conclusion of the theorem for any $n \geq 4$. Define a function $F$ by letting
+
+$$
+\begin{aligned}
+F(\phi) & =0 \\
+F(X) & =F(Y)=F(Z)=F(U)=2 a>0 \\
+F(X, Y) & =4 a, F(X, U)=F(X, Z)=F(Y, U) \\
+& =F(Y, Z)=F(Z, U)=3 a \\
+F(X, Y, Z) & =F(X, Y, U)=F(X, Z, U) \\
+& =F(Y, Z, U)=F(X, Y, Z, U)=4 a
+\end{aligned}
+$$
+
+Then Theorem 4 is proved by checking that $F \in \Gamma_{4}$ and $F \notin \tilde{\Gamma}_{4}$.
+
+From Theorem 4, we have
+
+$$
+\tilde{\Gamma}_{4} \neq \Gamma_{4} \quad \tilde{\Gamma}_{4} \subset \Gamma_{4} .
+$$
+
+That is, the set $\tilde{\Gamma}_{4}$ is a nontrivial outer bound of the set $\bar{\Gamma}_{4}^{*}$.
+Theorem 3 can be generalized to the following information inequalities for $n+2$ random variables where $n \geq 2$.
+
+*Theorem 5:* For any set of $n+2$ discrete random variables $U, Z, X_{i}: i=1,2, \cdots, n$ and any $i \in\{1,2, \cdots, n\}$
+
+$$
+\begin{align*}
+& n I(U ; Z)-\sum_{j=1}^{n} I\left(U ; Z \mid X_{j}\right)-n I\left(U ; Z \mid X_{i}\right) \\
+& \quad \leq I\left(X_{i} ; U Z\right)+\sum_{j=1}^{n} H\left(X_{j}\right)-H\left(X_{1} X_{2} \cdots X_{n}\right) \tag{27}
+\end{align*}
+$$
+
+Furthermore, by averaging (27) over $i$, we obtain
+
+$$
+\begin{align*}
+& n I(U ; Z)-2 \sum_{j=1}^{n} I\left(U ; Z \mid X_{j}\right) \\
+& \quad \leq \frac{1}{n} \sum_{i=1}^{n} I\left(X_{i} ; U Z\right)+\sum_{j=1}^{n} H\left(X_{j}\right)-H\left(X_{1} X_{2} \cdots X_{n}\right) \tag{28}
+\end{align*}
+$$
+
+The proof of this theorem is omitted because it can be proved using exactly the same idea used in the proof of Theorem 3 and an inductive argument.
+
+So far, when we study the entropy function, it is viewed as a function defined on $2^{\mathcal{N}_{n}}$. That is, we use the subsets of $\mathcal{N}_{n}$ as coordinates. $H(\alpha)$ is simply the joint entropy $H\left(X_{\alpha}\right)$. It is more convenient to use another coordinate system when we study the inner bound of the set $\bar{\Gamma}_{n}^{*}$. To introduce this new coordinate system, we employ the concept of atoms. The atoms are also indexed by the subsets of $\mathcal{N}_{n}$, or the elements of $2^{\mathcal{N}_{n}}$. To motivate the definitions we are going to introduce, we first check the definitions of the conditional mutual informations of more than two random variables. Let $X_{1}, \cdots, X_{n}$ be $n$ discrete random variables, then the conditional mutual information of $k$ random variables given $X_{\alpha}$ [37] is defined as
+
+$$
+\begin{equation*}
+I\left(X_{i_1} ; \cdots ; X_{i_k} \mid X_{\alpha}\right)=\sum_{\gamma \subset\left\{i_{1}, \cdots, i_{k}\right\}}(-1)^{1+|\gamma|} H\left(X_{\gamma \cup \alpha}\right) . \tag{29}
+\end{equation*}
+$$
+
+Consider an arbitrary function $F$ in $\mathcal{F}_{n}$. We define a function $F[\alpha \mid \beta]$ for any pair of subsets $\alpha, \beta$ of the ground set $\mathcal{N}_{n}$ where $\alpha$ is nonempty. The values of the original function are denoted by $F($.$) , while for the values of the function F[\alpha \mid \beta]$, we use [.] to replace (.) to indicate that these are different from the values of the original function.
+
+$$
+\begin{align*}
+F[\alpha \mid \beta] & \stackrel{\text { def }}{=} \sum_{\gamma \subset \alpha}(-1)^{1+|\gamma|} F(\gamma \cup \beta)  \tag{30}\\
+F[\alpha] & \stackrel{\text { def }}{=} F\left[\alpha \mid \alpha^{c}\right] \tag{31}
+\end{align*}
+$$
+
+where $\alpha^{c}$ stands for the complement of $\alpha$ with respect to the ground set $\{1,2, \cdots, n\}$. As we said, this concept is parallel to the concept of conditional mutual informations of more than two random variables. We have, for instance, when $\alpha=\{1,2,3\}, n=5, F$ is the entropy function of five random variables $X_{1}, \cdots, X_{5}$
+
+$$
+F[\alpha]=I\left(X_{1} ; X_{2} ; X_{3} \mid X_{4} X_{5}\right) .
+$$
+
+We say $F[\alpha]$ is the value of the function $F$ at the atom $\alpha$. The atoms are also indexed by the subsets of $\mathcal{N}_{n}$. The weight of an atom is defined as the cardinality of its index set.
+1444
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
+
+The basic information inequalities can be restated under this new coordinate system as follows: If $F$ is the entropy function of a set of $n$ random variables $\Omega=\left\{X_{1}, \cdots, X_{n}\right\}$, then for any subset $\alpha$ of $\mathcal{N}_{n}$ of cardinality of 2 and any subset $\beta$ of $\mathcal{N}_{n}-\alpha$
+
+$$
+\begin{equation*}
+F[\alpha \mid \beta] \geq 0 \tag{32}
+\end{equation*}
+$$
+
+and for any single element set $\alpha$
+
+$$
+\begin{equation*}
+F[\alpha] \geq 0 \tag{33}
+\end{equation*}
+$$
+
+This includes only a subset of the basic inequalities (called the elemental inequalities in [35]). But as we mentioned before, this subset of basic inequalities implies all other basic inequalities.
+
+We use some simplified notations: as an example, if $\alpha= \{1,2,3\}, \beta=\{4,5,6\}$, we write $F[1,2,3 \mid 4,5,6]$ in place of $F[\{1,2,3\} \mid\{4,5,6\}]$. A useful formula for the function $F[\cdot]$ is the following lemma.
+
+*Lemma 1:*
+
+$$
+\begin{equation*}
+F[\alpha \mid \beta]=\sum_{\gamma \subset(\alpha \cup \beta)^{c}} F[\alpha \cup \gamma] \tag{34}
+\end{equation*}
+$$
+
+where $A^{c}$ stands for the complement of the set $A$.
+For four random variables $X_{1}, X_{2}, X_{3}, X_{4}$, if $F$ is the entropy function of the four random variables, the basic inequalities are as follows: let $\{i, j, k, l\}$ be a permutation of $\{1,2,3,4\}$
+
+$$
+\begin{aligned}
+F[i, j] & \geq 0 \\
+F[i, j]+F[i, j, k] & \geq 0 \\
+F[i, j]+F[i, j, k]+F[i, j, l]+F[i, j, k, l] & \geq 0
+\end{aligned}
+$$
+
+and
+
+$$
+F[i] \geq 0 .
+$$
+
+We have from (20)
+
+$$
+\begin{equation*}
+\Delta\left(X_{1}, X_{2} \mid X_{3}, X_{4}\right)=F[1,2,3,4]-F[1,2] . \tag{35}
+\end{equation*}
+$$
+
+We use $\Delta_{F}(i, j \mid k, l)$ in place of $\Delta\left(X_{i}, X_{j} \mid X_{k}, X_{l}\right)$ when $F$ is the entropy function. By the same formula, $\Delta_{F}$ can be extended to any function $F$ which may not be an entropy function, that is,
+
+$$
+\begin{equation*}
+\Delta_{F}(i, j \mid k, l) \stackrel{\text { def }}{=} F[i, j, k, l]-F[i, j] . \tag{36}
+\end{equation*}
+$$
+
+The following is an interesting quantity useful in the study of $\Gamma_{n}^{*}$ :
+
+$$
+\begin{equation*}
+S_{F}(i, j \mid k, l) \stackrel{\text { def }}{=} F[i, j]+F[i, j, k]+F[i, j, l]+F[k, l] . \tag{37}
+\end{equation*}
+$$
+
+Let $\phi$ be the empty set, we have
+
+$$
+\begin{align*}
+S_{F}(i, j \mid k, l)= & F[i, j \mid \phi]-\Delta_{F}(k, l \mid i, j) \\
+= & F[i, j]+F[i, j, k]+F[i, j, l] \\
+& +F[i, j, k, l]-\Delta_{F}(k, l \mid i, j) . \tag{38}
+\end{align*}
+$$
+
+When $F$ is the entropy function of four discrete random variables $X_{1}, X_{2}, X_{3}$, and $X_{4}$
+
+$$
+\begin{aligned}
+S_{F}(1,2 \mid 3,4)= & I\left(X_{1} ; X_{2}\right)+I\left(X_{3} ; X_{4} \mid X_{1}\right) \\
+& +I\left(X_{3} ; X_{4} \mid X_{2}\right)-I\left(X_{3} ; X_{4}\right)
+\end{aligned}
+$$
+
+This quantity may be negative. This fact will be proved at the end of this section. The importance of this information quantity will be seen in Theorem 6 stated in this section. Theorem 3 can be restated as follows.
+
+*Theorem 3:* For four random variables $X_{1}, X_{2}, X_{3}, X_{4}$, if $F$ is the entropy function, then
+
+$$
+\begin{equation*}
+S_{F}(1,2 \mid 3,4)+F[1,3 \mid 4]+F[1,4 \mid 3]+F[3,4 \mid 1] \geq 0 . \tag{39}
+\end{equation*}
+$$
+
+Inequalities (22) and (23) are now
+
+$$
+\begin{equation*}
+S_{F}(1,2 \mid 3,4)+F[2,3 \mid 4]+F[2,4 \mid 3]+F[3,4 \mid 2] \geq 0 \tag{40}
+\end{equation*}
+$$
+
+and
+
+$$
+\begin{align*}
+2 S_{F}(1,2 \mid 3,4) & +F[1,3 \mid 4]+F[1,4 \mid 3]+F[2,3 \mid 4] \\
+& +F[2,4 \mid 3]+F[3,4 \mid 1]+F[3,4 \mid 2] \geq 0 \tag{41}
+\end{align*}
+$$
+
+That is, although the quantity $S_{F}$ can be negative for some entropy functions $F$, but it is bounded from below by the maximum of the following two quantities:
+
+$$
+\begin{aligned}
+& -(F[1,3 \mid 4]+F[1,4 \mid 3]+F[3,4 \mid 1]) \\
+& -(F[2,3 \mid 4]+F[2,4 \mid 3]+F[3,4 \mid 2])
+\end{aligned}
+$$
+
+We notice that $F[i, j \mid k]$ is the conditional mutual information of the two random variables $X_{i}$ and $X_{j}$ given $X_{k}$ which is always nonnegative.
+
+Define
+
+$$
+\begin{align*}
+\hat{\Gamma}_{4}=\{ & F \in \Gamma_{4}: \text { for any permutation } \pi \text { of }\{1,2,3,4\} \\
+& \left.S_{F}(\pi(1), \pi(2) \mid \pi(3), \pi(4)) \geq 0\right\} \tag{42}
+\end{align*}
+$$
+
+The last theorem of the paper is
+
+*Theorem 6:*
+
+$$
+\begin{equation*}
+\hat{\Gamma}_{4} \subset \bar{\Gamma}_{4}^{*} . \tag{43}
+\end{equation*}
+$$
+
+Theorem 6 has been previously proven in [20]. The example in [22, Sec. V and Lemma 4.1] imply this result. But their proof is very abstract and [22, Lemma 4.1] is based on further references. To make this result more understandable, we give a direct proof of Theorem 6 in Section IV. This theorem provides an inner bound to the cone $\bar{\Gamma}_{4}^{*}$.
+
+The following nontrivial example shows that this inner bound is not tight. In other words, this example shows that the information quantity $S_{F}$ can be negative for some entropy functions $F$.
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+1445
+
+*A Counterexample for the Positivity of $S_{F}$:* A projective plane (for $p$ ) is a collection of $p^{2}-p+1$ subsets of $\{0,1$, $\left.2, \cdots, p^{2}-p\right\}$ of cardinality $p$ such that the intersection of any pair of subsets from the collection has cardinality exactly 1 (see, for instance, [14, Appendix B]). For instance, $012,034,056,135,146,236,245$ is a projective plane for $p=3$ on the ground set $\{0,1,2,3,4,5,6\}$.
+
+0123, 0456, 0789, 0abc, 147a, 158b, 169c, 248c, 259a, 267b, 349b, 357c, 368a
+
+is another example of a projective plane on the ground set $\{0,1,2,3,4,5,6,7,8,9, a, b, c\}$ for $p=4$. We are going to construct four discrete random variables for which the function $S_{F}$ is negative. In our construction, we use a pair of projective planes of the same size satisfying an additional property that, if we take one subset from each projective plane, the intersection of the two subsets taken always has cardinality at most 2 . An example for such a pair is the previous projective plane for $p=4$ and the following projective plane of the same cardinality and on the same ground set:
+
+0148, 025c, 037a, 069b, 1279, 156a, 13bc, 2346, 457b, 49ac, 28ab, 3589, 678c.
+Let the ground set of the projective plane be $\mathcal{P}$, let $\mathcal{D}= \cup_{a \in \mathcal{P}}(a, a)$ be the diagonal of $\mathcal{P} \times \mathcal{P}$. Any projective plane $\mathcal{A}$ has the property that
+
+$$
+\cup_{A \in \mathcal{A}}(A \times A-\mathcal{D})=\mathcal{P} \times \mathcal{P}-\mathcal{D}
+$$
+
+where the sets $A \times A-\mathcal{D}$ are disjoint. Let the two projective planes we constructed above be $\mathcal{A}_{i}$ for $i=1,2$. For $A \in \mathcal{A}_{1}$ and $B \in \mathcal{A}_{2}$, if the intersection of the two sets has cardinality 2 , then $A \times A-\mathcal{D}$ and $B \times B-\mathcal{D}$ intersect at a set of cardinality 2. Otherwise, they are disjoint.
+
+We define the following random variables $X_{1}, X_{2}, X_{3}, X_{4}$ : let both $X_{1}$ and $X_{2}$ take values in $\mathcal{P}$ and the pair $X_{1}, X_{2}$ has the uniform joint distribution over $\mathcal{P} \times \mathcal{P}-\mathcal{D}$. Let the first projective plane be $\mathcal{A}_{1}=\left\{A_{1}, \cdots, A_{13}\right\}$ and the second projective plane be $\mathcal{A}_{2}=\left\{B_{1}, \cdots, B_{13}\right\}$. Let $X_{3}$ take value $i$ on $A_{i} \times A_{i}-\mathcal{D}$ for $i \in\{1,2, \cdots, 13\}$. Let $X_{4}$ take value $i$ on $B_{i} \times B_{i}-\mathcal{D}$ for $i \in\{1,2, \cdots, 13\}$. We have $I\left(X_{1} ; X_{2}\right)=\log _{2}(13 / 12)$.
+
+$$
+\begin{aligned}
+H\left(X_{3}\right) & =H\left(X_{4}\right)=\log _{2} 13 \\
+H\left(X_{3} X_{4}\right) & =\log _{2} 6+\log _{2} 13 \\
+H\left(X_{3} \mid X_{1}\right) & =H\left(X_{3} \mid X_{2}\right)=H\left(X_{4} \mid X_{1}\right) \\
+& =H\left(X_{4} \mid X_{2}\right)=\log _{2} 4 \\
+H\left(X_{3} X_{4} \mid X_{1}\right) & =H\left(X_{3} X_{4} \mid X_{2}\right)=\log _{2} 12 .
+\end{aligned}
+$$
+
+Therefore,
+
+$$
+I\left(X_{3} ; X_{4}\right)=\log _{2} 13-\log _{2} 6
+$$
+
+and
+
+$$
+I\left(X_{3} ; X_{4} \mid X_{1}\right)=I\left(X_{3} ; X_{4} \mid X_{2}\right)=\log _{2}(4 / 3) .
+$$
+
+This gives that for these four random variables
+
+$$
+\begin{aligned}
+S_F(1,2 \mid 3,4)= & I\left(X_{1} ; X_{2}\right)+I\left(X_{3} ; X_{4} \mid X_{1}\right) \\
+& +I\left(X_{3} ; X_{4} \mid X_{2}\right)-I\left(X_{3} ; X_{4}\right) \\
+= & \log_2 (13 / 12)+2 \times \log _{2}(4 / 3)-\log _{2}(13 / 6) \\
+= & \log _{2}(52 / 27)-\log _{2}(13 / 6)=-\log _{2}(9 / 8) \\
+< & 0 .
+\end{aligned}
+$$
+
+This example shows that the function $S_{F}$ may be negative for some entropy functions $F$ and that our inner bound is not tight.
+
+## III. Proof of Theorems 3 and 5
+
+Let $X, Y, Z, U$ be four jointly distributed discrete random variables with distribution $p(x, y, z, u)$. We denote all marginals of this distribution by the same letter $p$. For instance, its marginal on $z, u$ is denoted by $p(z, u)$. Define
+
+$$
+\begin{equation*}
+q\left(x, y, z, u, x_{1}, y_{1}\right) \stackrel{\text { def }}{=} \frac{p(x, y, z, u) p\left(x_{1}, y_{1}, z, u\right)}{p(z, u)} . \tag{44}
+\end{equation*}
+$$
+
+Since both $p(x, y, z, u)$ and $p\left(x_{1}, y_{1}, z, u\right)$ are absolutely continuous with respect to $p(z, u)$, we can see that $q$ is a distribution of six random variables. Let $X_{1}, Y_{1}$ be two random variables jointly distributed with $X, Y, Z, U$ according to the joint distribution $q$.
+
+Actually, we can express $\Delta(Z, U \mid X, Y)$ in terms of the information quantities of the six random variables defined above.
+
+*Lemma 2:*
+
+$$
+\begin{align*}
+\Delta(Z, U \mid X, Y)= & I\left(X ; Y_{1}\right)-I\left(X ; Y_{1} \mid U\right)-I\left(X ; Y_{1} \mid Z\right) \\
+& -I\left(Z ; U \mid X, Y_{1}\right) \tag{45}
+\end{align*}
+$$
+
+*Proof:*
+
+$$
+\begin{aligned}
+\Delta(Z, U \mid X, Y)= & I(Z ; U)-I(Z ; U \mid X)-I(Z ; U \mid Y) \\
+= & I(Z ; U)-I(Z ; U \mid X)-I\left(Z ; U \mid Y_{1}\right) \\
+= & I\left(Z ; U ; X ; Y_{1}\right)-I\left(Z ; U \mid X Y_{1}\right) \\
+= & I\left(X ; Y_{1}\right)-I\left(X ; Y_{1} \mid U\right)-I\left(X ; Y_{1} \mid Z\right) \\
+& +I\left(X ; Y_{1} \mid Z U\right)-I\left(Z ; U \mid X Y_{1}\right) \\
+= & I\left(X ; Y_{1}\right)-I\left(X ; Y_{1} \mid U\right)-I\left(X ; Y_{1} \mid Z\right) \\
+& -I\left(Z ; U \mid X Y_{1}\right)
+\end{aligned}
+$$
+
+The last step is due to the fact that $I\left(X ; Y_{1} \mid Z U\right)=0$. The lemma is proved.
+
+*Proof of Theorem 3:* From Lemma 2, we have
+
+$$
+I(Z ; U)-I(Z ; U \mid X)-I(Z ; U \mid Y) \leq I\left(X ; Y_{1}\right) .
+$$
+
+Similarly, we can prove
+
+$$
+I(Z ; U)-2 I(Z ; U \mid X) \leq I\left(X ; X_{1}\right) .
+$$
+
+1446
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
+
+By means of these two inequalities, Theorem 3 is proved in the following way:
+
+$$
+\begin{aligned}
+& 2 I(Z ; U)-3 I(Z ; U \mid X)-I(Z ; U \mid Y) \\
+& \quad \leq I\left(X ; Y_{1}\right)+I\left(X ; X_{1}\right) \\
+& \quad=I\left(X ; X_{1} Y_{1}\right)+I\left(X ; X_{1} ; Y_{1}\right) \\
+& \quad=I\left(X ; X_{1} Y_{1}\right)+I\left(X_{1} ; Y_{1}\right)-I\left(X_{1} ; Y_{1} \mid X\right) \\
+& \quad \leq I\left(X ; X_{1} Y_{1}\right)+I\left(X_{1} ; Y_{1}\right) \\
+& \quad \leq I(X ; Z U)+I\left(X_{1} ; Y_{1}\right) \\
+& \quad=I(X ; Z U)+I(X ; Y)
+\end{aligned}
+$$
+
+In the penultimate step, we used the data processing inequality and the fact that $I(X ; Y)=I\left(X_{1} ; Y_{1}\right)$. The theorem is proved.
+
+Using the six random variables $X, Y, U, Z, X_{1}, Y_{1}$, we can actually determine all the missing terms of the inequality in Theorem 3. This is done as follows: from Lemma 2
+
+$$
+\begin{aligned}
+\Delta(Z, U \mid X, Y)= & I(Z ; U)-I(Z ; U \mid X)-I(Z ; U \mid Y) \\
+= & I\left(X ; Y_{1}\right)-I\left(X ; Y_{1} \mid U\right)-I\left(X ; Y_{1} \mid Z\right) \\
+& -I\left(Z ; U \mid X Y_{1}\right)
+\end{aligned}
+$$
+
+Let $R_{1}=I\left(X ; Y_{1} \mid U\right)+I\left(X ; Y_{1} \mid Z\right)+I\left(Z ; U \mid X Y_{1}\right)$. This equality is restated as
+
+$$
+\Delta(Z, U \mid X, Y)=I\left(X ; Y_{1}\right)-R_{1} .
+$$
+
+Similarly, we have
+
+$$
+\begin{aligned}
+\Delta\left(Z, U \mid X, X_{1}\right)= & I(Z ; U)-I(Z ; U \mid X)-I\left(Z ; U \mid X_{1}\right) \\
+= & I(Z ; U)-2 I(Z ; U \mid X) \\
+= & I\left(X ; X_{1}\right)-I\left(X ; X_{1} \mid U\right)-I\left(X ; X_{1} \mid Z\right) \\
+& -I\left(Z ; U \mid X X_{1}\right)
+\end{aligned}
+$$
+
+Let $R_{2}=I\left(X ; X_{1} \mid U\right)+I\left(X ; X_{1} \mid Z\right)+I\left(Z ; U \mid X X_{1}\right)$. This equality is restated as
+
+$$
+\Delta\left(Z, U \mid X, X_{1}\right)=I\left(X ; X_{1}\right)-R_{2} .
+$$
+
+Therefore,
+
+$$
+\begin{aligned}
+& 2 I(Z ; U)-3 I(Z ; U \mid X)-I(Z ; U \mid Y) \\
+& \quad=I\left(X ; Y_{1}\right)+I\left(X ; X_{1}\right)-R_{1}-R_{2} \\
+& \quad=I\left(X ; X_{1} Y_{1}\right)+I\left(X ; X_{1} ; Y_{1}\right)-R_{1}-R_{2} \\
+& \quad=I(X ; Z U)-I\left(X ; Z U \mid X_{1} Y_{1}\right)+I\left(X_{1} ; Y_{1}\right) \\
+& \quad-I\left(X_{1} ; Y_{1} \mid X\right)-R_{1}-R_{2} \\
+& =I(X ; Z U)+I(X ; Y)-I\left(X ; Z U \mid X_{1} Y_{1}\right) \\
+& \quad-I\left(X_{1} ; Y_{1} \mid X\right)-R_{1}-R_{2}
+\end{aligned}
+$$
+
+This implies that the missing terms of the first inequality in Theorem 3 are
+
+$$
+\begin{aligned}
+& R\left(X, Y, Z, U, X_{1}, Y_{1}\right) \\
+& \quad=\frac{1}{2}\left[I\left(X ; Z U \mid X_{1} Y_{1}\right)+I\left(X_{1} ; Y_{1} \mid X\right)+R_{1}+R_{2}\right] \\
+& =\frac{1}{2}\left[I\left(X ; X_{1} \mid U\right)+I\left(X ; X_{1} \mid Z\right)+I\left(Z ; U \mid X X_{1}\right)\right. \\
+& \quad+I\left(X_{1} ; Y_{1} \mid X\right)+I\left(X ; Z U \mid X_{1} Y_{1}\right) \\
+& \left.\quad+I\left(X ; Y_{1} \mid U\right)+I\left(X ; Y_{1} \mid Z\right)+I\left(Z ; U \mid X Y_{1}\right)\right] .
+\end{aligned}
+$$
+
+Apparently, the following function is in $\tilde{\Gamma}_{4}$ :
+
+$$
+\begin{aligned}
+F(\phi)=0, & F(X)=F(Y)=F(Z)=F(U)=6 a \\
+F(X Y)=12 a, & F(X Z)=F(Y Z)=F(Y U)=F(X U)=9 a, \\
+F(Z U)=10 a, & F(X Z U)=F(Y Z U)=F(X Z Y) \\
+& =F(X Y U)=F(X Z Y U)=12 a .
+\end{aligned}
+$$
+
+For this function, one of our new inequalities is satisfied with equality. A natural question to ask is whether or not this function is asymptotically constructible. If this is true, then it is likely that
+
+$$
+\bar{\Gamma}_{4}^{*}=\tilde{\Gamma}_{4} .
+$$
+
+Unfortunately, we were unable to prove this. Therefore, we doubt the correctness of this plausible conjecture.
+
+## IV. Proof of Theorem 6
+
+In this section, we prove Theorem 6, the inner bound of $\bar{\Gamma}_{4}^{*}$. The result is proven via a series of basic constructions. Before we start to work on the proof of the result, we present first the basic constructions. In all constructions that follow, we use three independent and identically distributed ternary random variables $W_{1}, W_{2}$, and $W_{3}$ taking values in the set $\{0,1,2\}$. The common distribution of the random variables is the uniform distribution. Let $W_{0}$ represent a constant random variable taking a fixed value with probability 1 . To make the notations simpler, in this section, we assume that the logarithmic function is based to 3 . Therefore, the random variables $W_{i}$ has entropy 1 for $i=1,2,3$. The entropy of $W_{0}$ is zero. In this section, we are going to use the concept of atoms. There are 15 atoms in the case of four random variables. They are represented by the nonempty subsets of $\{1,2,3,4\}$. For any function $F$, we will use the values of the function at atoms. The values of $F$ at atoms are linear functions of the values of the function at subsets of $\{1,2,3,4\}$. The values of the function at subsets will be denoted, for instance, for $\{1,2,3\}$, by $F(1,2,3)$. When $F$ is an entropy function, this is the joint entropy. To distinguish from the values at subsets, the values of the function at atoms are represented, for instance, at atom $\{1,2,3\}$, by $F[1,2,3]$. When $F$ is the entropy function of four discrete random variables $X_{1}, X_{2}, X_{3}, X_{4}$, we have
+
+$$
+F[1,2,3]=I\left(X_{1} ; X_{2} ; X_{3} \mid X_{4}\right) .
+$$
+
+*Construction 1:* For any nonempty subset $\alpha$ of $\{1,2,3,4\}$, let $X_{i}=W_{1}$ if $i \in \alpha$ and $X_{i}=W_{0}$, otherwise. The function defined by this construction is denoted by $F_{\alpha}^{1}$. It is easy to check that, for this construction, for any $\beta \neq \alpha, F_{\alpha}^{1}[\beta]=0$ and $F_{\alpha}^{1}[\alpha]=1$.
+
+*Construction 2:* $X_{1}=W_{1}, X_{2}=W_{2}, X_{3}=W_{3}, X_{4}= W_{1}+W_{2}+W_{3} \bmod (3)$. The function defined by this construction is denoted by $F^{2}$. For this construction, the function has value zero at all weight-one atoms, has value 1 at all weight-two and weight-four atoms, and has value -1 at all weight-three atoms.
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+1447
+
+*Construction 3:* $X_{1}=W_{1}, X_{2}=W_{2}, X_{3}=W_{1}+W_{2} (\bmod 3), X_{4}=W_{0}$. The function defined by this construction is denoted by $F_{4}^{3}$ where 4 indicates that random variable $X_{4}=W_{0}$. The construction is actually symmetric for the other three random variables. We also have the other three similar constructions obtained by permuting the four random variables. The functions so constructed are denoted by $F_{i}^{3}$ where $i$ indicates that $X_{i}=W_{0}$. For this construction
+
+$$
+F_{4}^{3}[1,2]=F_{4}^{3}[1,3]=F_{4}^{3}[2,3]=1
+$$
+
+and
+
+$$
+F_{4}^{3}[1,2,3]=-1 .
+$$
+
+At all other atoms the values are zero.
+*Construction 4:* $X_{1}=W_{1}, X_{2}=W_{2}, X_{3}=X_{4}=W_{1}+ W_{2}(\bmod 3)$. The function so constructed is denoted by $F_{3,4}^{4}$. We can also construct a function $F_{i, j}^{4}$ and its meaning is self-explanatory. For this construction,
+
+$$
+\begin{aligned}
+F_{3,4}^{4}[1,2] & =1 \\
+F_{3,4}^{4}[2,3,4]=F_{3,4}^{4}[1,3,4] & =1
+\end{aligned}
+$$
+
+and
+
+$$
+F_{3,4}^{4}[1,2,3,4]=-1 .
+$$
+
+At all other atoms it has zero value.
+*Construction 5:* $X_{1}=W_{1}, X_{2}=W_{2}, X_{3}=W_{1}+W_{2} (\bmod 3), X_{4}=W_{1}-W_{2}(\bmod 3)$. The function constructed by this method is denoted by $F^{5}$. For this construction, at all weight-one and -two atoms the value is zero; at all weight-three atoms the value is 1 ; and $F^{5}[1,2,3,4]=-2$.
+
+*Construction 6:* $X_{1}=W_{1}, X_{2}=W_{2}, X_{3}=W_{3}, X_{4}= \left(W_{1}+W_{2}(\bmod 3), W_{1}+W_{3}(\bmod 3)\right)$. The function constructed by this method is denoted by $F_{4}^{6}$. We can also construct functions $F_{i}^{6}$ for other values of $i$ by the same method. For this construction, $F_{4}^{6}[1,2,3]=1$; at all weighttwo atoms containing 4 , the values are 1 ; and $F_{4}^{6}[1,2,3,4]=$ -1 . At all other atoms the values are zero.
+
+*Construction 7:* $X_{1}=W_{1}, X_{2}=W_{2}, X_{3}=W_{1}+W_{2} (\bmod 3), X_{4}=\left(W_{1}, W_{2}\right)$. The function constructed by this method is denoted by $F_{4}^{7}$. We can also construct $F_{i}^{7}$ for other values of $i$ by the same method. For this construction, at all atoms of weight at most two the value is zero; at all weight-three atoms except the atom $\{1,2,3\}$ the values are 1; $F_{4}^{7}[1,2,3,4]=-1$ and $F_{4}^{7}[1,2,3]=0$.
+
+To help the reader to understand the proof, we give charts for the values of the functions constructed in Constructions 2-7. Since these functions take zero values at all weight-one atoms, we give their values at atoms of weight at least two. The atoms of weight at least two are arranged as follows:
+
+```
+                  {2,3}
+  {1,2}         {1,2,3}          {1,3}
+ {1,2,4}      {1,2,3,4}      {1,3,4}      {1,4}
+  {2,4}         {2,3,4}          {3,4}
 ```
 
-With that ordering, the chart values for Constructions 2-7 are:
+The values of the functions 2-7 are given as follows using this chart.
 
-| Function | 23 | 12 | 123 | 13 | 124 | 1234 | 134 | 14 | 24 | 234 | 34 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| $F^2$ | 1 | 1 | -1 | 1 | -1 | 1 | -1 | 1 | 1 | -1 | 1 |
-| $F^3_4$ | 1 | 1 | -1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| $F^4_{3,4}$ | 0 | 1 | 0 | 0 | 0 | -1 | 1 | 0 | 0 | 1 | 0 |
-| $F^5$ | 0 | 0 | 1 | 0 | 1 | -2 | 1 | 0 | 0 | 1 | 0 |
-| $F^6_4$ | 0 | 0 | 1 | 0 | 0 | -1 | 0 | 1 | 1 | 0 | 1 |
-| $F^7_4$ | 0 | 0 | 0 | 0 | 1 | -1 | 1 | 0 | 0 | 1 | 0 |
+Function $F^{2}$:
 
-Supporting lemmas:
+```
+                1
+   1           -1            1
+  -1            1           -1           1
+   1           -1            1
+```
 
-- **Lemma 3** ([@zhangyeung1998, Lem. 3]). If $f, g \in \mathrm{cl}(\Gamma^*_n)$ and $\lambda \geq 0$, then $f + g \in \mathrm{cl}(\Gamma^*_n)$ and $\lambda f \in \mathrm{cl}(\Gamma^*_n)$. That is, $\mathrm{cl}(\Gamma^*_n)$ is a convex cone.
-- **Lemma 4** ([@zhangyeung1998, Lem. 4]). Nonnegative atom-valued functions are asymptotically constructible. (Proved via Construction 1 and Lemma 3.)
+Function $F_{4}^{3}$:
 
-Before the case split, the paper rewrites membership in $\hat{\Gamma}_4$ as five families of atom inequalities. For any permutation $\{i, j, k, l\} = \{1, 2, 3, 4\}$, a function $F \in \hat{\Gamma}_4$ satisfies:
+```
+                1
+   1           -1            1
+   0            0            0           0
+   0            0            0
+```
 
-1. $F[\alpha] \geq 0$ for every atom $\alpha$ of weight $1$.
-2. $F[i, j \mid \varnothing] = F[i, j] + F[i, j, k] + F[i, j, l] + F[i, j, k, l] \geq 0$.
-3. $F[i, j \mid k] = F[i, j] + F[i, j, l] \geq 0$.
-4. $S_F(i, j \mid k, l) = F[i, j] + F[i, j, k] + F[i, j, l] + F[k, l] \geq 0$.
-5. $F[i, j] \geq 0$.
+Function $F_{3,4}^{4}$:
 
-The paper calls a function **nonnegative** if all of its atom values are nonnegative, and **seminonnegative** if all atom values of weight at most $3$ are nonnegative. Lemma 4 is proved by the explicit decomposition
+```
+                0
+   1            0            0
+   0           -1            1           0
+   0            1            0
+```
 
-$$J = \sum_{\alpha \neq \varnothing} J[\alpha] \, F^1_\alpha,$$
+Function $F^{5}$:
 
-valid for every nonnegative atom function $J$.
+```
+                0
+   0            1            0
+   1           -2            1           0
+   0            1            0
+```
 
-The main argument is a case analysis (p. 1448-1451) showing that every function $F \in \hat{\Gamma}_4$ can be reduced via a sequence of **legal operations** (subtracting a nonnegative multiple of one of the basic functions from Constructions 2-7 while preserving the relevant inequalities) to a nonnegative function, which is asymptotically constructible by Lemma 4. The proof proceeds in three stages.
+Function $F_{4}^{6}$:
 
-1. **Normalize a weight-two atom with $F^2$.** Since $F^2$ satisfies Conditions 2-4 with equality, the paper subtracts $a F^2$, where $a := \min_{\{i,j\} \subset \{1,2,3,4\}} F[i, j]$, and thereby reduces to a function $F'$ with $F'[1, 2] = 0$.
-2. **Reach seminonnegativity with $F^3_i$.** If one of the relevant weight-three atoms is negative, for instance $F'[1, 3, 4] < 0$, the paper sets $a := -F'[1, 3, 4]$ and subtracts $a F^3_2$. Repeating symmetrically if needed yields a seminonnegative function $G$.
-3. **Eliminate the weight-four atom by a structured branch analysis.** For seminonnegative $G$, the remaining constraints are the six inequalities in which the weight-four atom $[1, 2, 3, 4]$ appears. The paper first records two reusable observations:
+```
+                0
+   0            1            0
+   0           -1            0           1
+   1            0            1
+```
 
-   Observation 1: if $J$ is seminonnegative, $\{i, j, k, l\}$ is a permutation of $\{1, 2, 3, 4\}$, and $J[i, j, k] + J[1, 2, 3, 4] \geq 0$, then subtracting $a F^4_{i,j}$ is legal and keeps the function seminonnegative, where
+Function $F_{4}^{7}$:
 
-$$a = \min\{J[k, l], J[i, k, l], J[j, k, l]\}.$$
+```
+                0
+   0            0            0
+   1           -1            1           0
+   0            1            0
+```
+1448
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
 
-   Observation 2: if, in addition,
+In [39], we proved the following result:
+*Lemma 3:* If $F \in \bar{\Gamma}_{n}^{*}$ and $\alpha>0$, then $\alpha F \in \bar{\Gamma}_{n}^{*}$. If $F_{1}, F_{2} \in \bar{\Gamma}_{n}^{*}$, then $F_{1}+F_{2} \in \bar{\Gamma}_{n}^{*}$.
 
-$$J[i, j, k] + J[1, 2, 3, 4] \geq 0, \qquad J[i, j, l] + J[1, 2, 3, 4] \geq 0, \qquad J[i, k, l] + J[1, 2, 3, 4] \geq 0,$$
+That is, $\bar{\Gamma}_{n}^{*}$ is a convex cone.
+*Proof of Theorem 6:* A function $F$ in the region $\hat{\Gamma}_{4}$ should satisfy the following conditions in terms of atoms: Let the four indices of the random variables be $\{i, j, k, l\}$ which is a permutation of the set $\{1,2,3,4\}$. From the definition of the region $\hat{\Gamma}_{4}$, the inequalities the function $F$ should satisfy include:
 
-then subtracting $a F^7_i$ is legal and produces a nonnegative function, where
+1) $F$ is nonnegative at all atoms of weight one;
+2) $F[i, j \mid \phi]=F[i, j]+F[i, j, k]+F[i, j, l]+ F[i, j, k, l] \geq 0$, where $\phi$ is the empty set;
+> *(Atom chart omitted; see rendered PDF.)*
 
-$$a = \min\{J[i, k, l], J[i, j, l], J[i, j, k]\}.$$
+The atoms involved in inequality (2).
+3) $F[i, j \mid k]=F[i, j]+F[i, j, l] \geq 0$;
+> *(Atom chart omitted; see rendered PDF.)*
 
-   Before invoking these observations, the paper repeatedly subtracts suitable multiples of $F^3_i$, $F^5$, and $F^6_i$ as long as seminonnegativity is preserved. When no such move remains, the proof splits into two master cases.
+The atoms involved in inequality (3).
+4) $F[i, j]+F[i, j, k]+F[i, j, l]+F[k, l] \geq 0$;
+> *(Atom chart omitted; see rendered PDF.)*
 
-   Case 1: some $3$-subset, without loss of generality $\{1, 2, 3\}$, has all three associated weight-two atoms zero:
+The atoms involved in inequality (4).
+5) $F[i, j] \geq 0$.
 
-$$G'[1, 2] = G'[1, 3] = G'[2, 3] = 0.$$
+Notice that the fourth condition comes from the constraint
 
-   Since no $F^6_4$ move is available, one of $G'[1,4]$, $G'[2,4]$, $G'[3,4]$, or $G'[1,2,3]$ must also be zero.
+$$
+S_{F}(i, j, k, l) \geq 0 .
+$$
 
-   Case 1.1: one of the remaining weight-two atoms vanishes, say $G'[1,4] = 0$. Since no $F^5$ move is available, one of $G'[1,2,4]$, $G'[1,3,4]$, or $G'[2,3,4]$ is also zero. The paper then dispatches the branches as follows.
+Other inequalities come from the nonnegativity of conditional mutual informations of two random variables and the nonnegativity of the conditional entropies. Lemma 1 is useful in finding the atoms involved in these inequalities. These five conditions will be referred to as Conditions 1-5 in the proof. The readers can extremely reduce the difficulty in subsequent reading by familiarizing themselves with these five conditions in the atom chart for all permutations of $i, j, k$, and $l$.
 
-   If $G'[1,2,4] = 0$, then Condition 2 gives
+A function $F[$.$] is called nonnegative if its values at all$ atoms are nonnegative.
 
-$$G'[1,3,4] + G'[1,2,3,4] \geq 0,$$
+*Lemma 4:* Nonnegative functions are asymptotically constructible.
 
-   because both $G'[1,4]$ and $G'[1,2,4]$ are zero. Subtract $a F^4_{1,3}$ with
+*Proof:* If $J$ is a function that takes nonnegative values at all atoms, then
 
-$$a = \min\{G'[2,4], G'[1,2,3], G'[1,3,4]\};$$
+$$
+J=\sum_{\alpha} J[\alpha] F_{\alpha}^{1}
+$$
 
-   this is legal and yields a seminonnegative function $G''$. If $G''[1,2,3] = 0$ or $G''[1,3,4] = 0$, then $G''[1,2,3,4] \geq 0$ and the function is already nonnegative. Otherwise $G''[2,4] = 0$, which implies
+where $J[\alpha]$ is nonnegative for all $\alpha$. It is asymptotically constructible from Construction 1 and Lemma 4. The lemma is proved. $\square$
 
-$$G''[2,3,4] + G''[1,2,3,4] \geq 0.$$
+The basic idea for the proof is that for any function $F$ in $\hat{\Gamma}_{4}$, we can find a sequence of basic functions from Constructions $1-7 F_{1}, \cdots, F_{m}$ for some $m>0$ and a sequence of nonnegative reals $a_{1}, \cdots, a_{m}$ such that
 
-   Let $b := -G''[1,2,3,4]$. If $b > 0$, then subtracting $b F^7_1$ is legal and produces a function that is nonnegative at all atoms.
+$$
+F=\sum_{j=1}^{m} a_{j} F_{j} .
+$$
 
-   If $G'[2,3,4] = 0$, then
+Once we can prove this, then the theorem is proved by invoking Lemma 4. Suppose $F$ is in $\hat{\Gamma}_{4}$ and $F^{\prime}$ is a basic function from Constructions 1-7 and $a>0$. If $F-a F^{\prime} \in \hat{\Gamma}_{4}$, then we say that subtracting $a F^{\prime}$ from $F$ is a legal operation. We prove the theorem by finding a sequence of legal operations to reduce $F$ to a nonnegative function, which is asymptotically constructible by Lemma 5. This implies by invoking Lemma 4 that the original function is asymptotically constructible.
 
-$$G'[1,2,3] + G'[1,2,3,4] \geq 0,$$
+Construction 1 is used only in Lemma 5. In the proof that follows, we use only the other six constructions. We notice that in Constructions 2-7, no atom of weight one is involved. As long as the values of the function at the weight-one atoms are nonnegative to start with, upon subtracting a nonnegative multiple of any of these constructions, Condition 1 remains satisfied. Therefore, we can always ignore the weight-one atoms when we consider subtracting a nonnegative multiple of any of these constructions.
 
-   because both $G'[2,3]$ and $G'[2,3,4]$ are zero. Subtract $a F^4_{1,2}$ with
+We find these legal operations in the following steps.
+*Step 1:* We notice that $F^{2}$ satisfies all inequalities in Conditions $2-4$ with equalities. So subtracting $a F^{2}$ from $F$ where
 
-$$a = \min\{G'[3,4], G'[1,2,3], G'[1,2,4]\};$$
+$$
+a=\min _{\{i, j\} \subset\{1,2,3,4\}} F[i, j]
+$$
 
-   This yields a seminonnegative function $G''$. If $G''[1,2,3] = 0$, then $G''[1,2,3,4] \geq 0$. If $G''[1,2,4] = 0$, this reduces to the previous subcase. Otherwise $G''[3,4] = 0$, and then
+is a legal operation because 1) Conditions 2-4 will remain to be satisfied since subtracting zero does not change the direction of the inequalities and 2) since $a$ is defined as the minimum of the values of the function at all weight-two atoms, after subtracting $a F^{2}$ the values of $F$ at these atoms are at least 0 . Therefore, Condition 5 holds. Without loss of generality, we assume that
 
-$$G''[1,2,3,4] + G''[1,3,4] \geq 0.$$
+$$
+F[1,2]=\min _{\{i, j\} \subset\{1,2,3,4\}} F[i, j] .
+$$
 
-   Now subtract $a' F^4_{1,3}$ with
+Let $F^{\prime}=F-a F^{2}$. We have
+i) $F^{\prime} \in \widehat{\Gamma}_{4}$;
+ii) $F^{\prime}[1,2]=0$.
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+1449
 
-$$a' = \min\{G''[2,4], G''[1,2,3], G''[1,3,4]\}.$$
+In the following chart, the atoms are marked either by a 0 indicating that the value of the function $F^{\prime}$ at this atom is zero, or by a + indicating that the value of the function $F^{\prime}$ at this atom is nonnegative, or by an $X$ indicating that the value of the function $F^{\prime}$ at this atom may be negative.
 
-   This produces a seminonnegative function $G'''$. If $G'''[1,2,3] = 0$ or $G'''[1,3,4] = 0$, then $G'''[1,2,3,4] \geq 0$. Otherwise $G'''[2,4] = 0$, in which case
+> *(Atom chart omitted; see rendered PDF.)*
+The Function $F^{\prime}$.
 
-$$G'''[1,2,4] + G'''[1,2,3,4] \geq 0,$$
+*Step 2:* A function is called seminonnegative if its values at all atoms of weight up to three are nonnegative. In this step, we prove that $F^{\prime}$ can be reduced to a seminonnegative function via a series of legal operations. From the chart for $F^{\prime}$, we see $F^{\prime}$ is not seminonnegative if and only if at least one of two values of $F^{\prime}, F^{\prime}[1,3,4]$ and $F^{\prime}[2,3,4]$, is negative. Suppose
 
-$$G'''[1,2,3] + G'''[1,2,3,4] \geq 0,$$
+$$
+F^{\prime}[1,3,4]<0 .
+$$
 
-$$G'''[1,3,4] + G'''[1,2,3,4] \geq 0.$$
+Let $a=-F^{\prime}[1,3,4]$. We prove that subtracting $a F_{2}^{3}$ from $F^{\prime}$ is legal. Let $G=F^{\prime}-a F_{2}^{3}$. We notice that
 
-   Let $b := -G'''[1,2,3,4]$. If $b > 0$, then subtracting $b F^7_1$ is legal and yields a function nonnegative at all atoms.
+$$
+\begin{aligned}
+F_{2}^{3}[i, j \mid \phi] & =0 \\
+F_{2}^{3}[i, j \mid k] & =0,
+\end{aligned}
+$$
 
-   Case 1.2: the extra zero is the weight-three atom $G'[1,2,3] = 0$. Then
+for any $k \notin\{i, j\}$. These observations and $F^{\prime} \in \hat{\Gamma}_{4}$ imply that
 
-$$G'[1,3,4] + G'[1,2,3,4] \geq 0, \qquad G'[1,2,4] + G'[1,2,3,4] \geq 0, \qquad G'[2,3,4] + G'[1,2,3,4] \geq 0,$$
+$$
+\begin{aligned}
+& G[i, j \mid \phi] \geq 0 \\
+& G[i, j \mid k] \geq 0 .
+\end{aligned}
+$$
 
-   and the paper draws the corresponding atom chart for this case. Let $a := -G'[1,2,3,4]$. If $a > 0$, then subtracting $a F^7_1$ is a legal operation and results in a nonnegative function. Otherwise the function is already nonnegative.
+From $G[1,3,4]=0$, we see that
 
-   Case 2: two disjoint weight-two atoms vanish, without loss of generality
+$$
+G[1,3]=G[1,3]+G[1,3,4]=F^{\prime}[1,3]+F^{\prime}[1,3,4] \geq 0 .
+$$
 
-$$G'[1,2] = G'[3,4] = 0.$$
+Similarly, we have
 
-   Since no $F^5$ move remains, one may further assume $G'[1,2,3] = 0$. The paper first subtracts $a F^4_{1,4}$ with
+$$
+\begin{aligned}
+& G[1,4] \geq 0 \\
+& G[3,4] \geq 0 .
+\end{aligned}
+$$
 
-$$a = \min\{G'[2,3], G'[1,3,4], G'[1,2,4]\}.$$
+For other pairs $i, j, j$, since the values of $F^{\prime}$ are not affected by the operation, we still have
 
-   This is legal, and the resulting function $G''$ has one of $G''[1,3,4]$, $G''[1,2,4]$, or $G''[2,3]$ equal to zero.
+$$
+G[i, j] \geq 0 .
+$$
 
-   If $G''[1,3,4] = 0$, then
+To show that $G \in \hat{\Gamma}_{4}$, we need to check only Condition 4
 
-$$G''[1,3] + G''[1,2,3,4] \geq 0.$$
+$$
+G[i, j]+G[i, j, k]+G[i, j, l]+G[k, l] \geq 0 .
+$$
 
-   Apparently, subtracting $b F^4_{2,4}$ is legal, where
+There are six of them for
 
-$$b = \min\{G''[1,3], G''[1,2,4], G''[2,3,4]\},$$
+$$
+(i, j)=(3,4),(1,4),(1,3),(1,2),(2,3),(2,4) .
+$$
 
-   and this results in a nonnegative function.
+The inequalities for $(i, j)=(1,2),(1,3),(1,4)$ are trivial because all entries are nonnegative. The proofs for $(i, j)= (2,3)$, ( 2,4 ) are the same. We prove it only for $(i, j)=$
+$(2,4)$. We need also to prove it for $(i, j)=(3,4)$. For $(i, j)=(2,4)$
 
-   If $G''[2,3] = 0$, then
+$$
+\begin{aligned}
+G & {[1,3]+G[1,2,4]+G[2,3,4]+G[2,4] } \\
+& =F^{\prime}[1,3]+F^{\prime}[1,2,4]+F^{\prime}[2,3,4]+F^{\prime}[2,4] \\
+& -a\left(F_{2}^{3}[1,3]+F_{2}^{3}[1,2,4]+F_{2}^{3}[2,3,4]+F_{2}^{3}[2,4]\right) \\
+& =F^{\prime}[1,3]+F^{\prime}[1,2,4]+F^{\prime}[2,3,4]+F^{\prime}[2,4]-a F_{2}^{3}[1,3] \\
+& =F^{\prime}[1,3]+F^{\prime}[1,2,4]+F^{\prime}[2,3,4]+F^{\prime}[2,4]+F^{\prime}[1,3,4] \\
+& \geq F^{\prime}[1,3]+F^{\prime}[1,3,4]+F^{\prime}[2,3,4]+F^{\prime}[2,4] \\
+& \geq 0
+\end{aligned}
+$$
 
-$$G''[2,3,4] + G''[1,2,3,4] \geq 0.$$
+In the next to the last step, we used the fact that $F^{\prime}[1,2,4] \geq 0$ and in the last step, we used the fact that $F^{\prime} \in \hat{\Gamma}_{4}$. For $(i, j)=(3,4)$
 
-   Let
+$$
+\begin{aligned}
+G & {[1,2]+G[2,3,4]+G[1,3,4]+G[3,4] } \\
+& =F^{\prime}[1,2]+F^{\prime}[1,3,4]+F^{\prime}[2,3,4]+F^{\prime}[3,4] \\
+& -a\left(F_{2}^{3}[1,2]+F_{2}^{3}[1,3,4]+F_{2}^{3}[2,3,4]+F_{2}^{3}[3,4]\right) \\
+& =F^{\prime}[1,2]+F^{\prime}[1,3,4]+F^{\prime}[2,3,4]+F^{\prime}[3,4] \\
+& -a\left(F_{2}^{3}[1,3,4]+F_{2}^{3}[3,4]\right) \\
+& =F^{\prime}[1,2]+F^{\prime}[1,3,4]+F^{\prime}[2,3,4]+F^{\prime}[3,4] \\
+& \geq 0
+\end{aligned}
+$$
 
-$$a' = \min\{G''[1,3], G''[1,2,4], G''[2,3,4]\}.$$
+In the next to the last step, we used the fact that $F_{2}^{3}[1,3,4]+ F_{2}^{3}[3,4]=0$ and in the last step, we used the fact that $F^{\prime} \in \hat{\Gamma}_{4}$. This proves that $G \in \hat{\Gamma}_{4}$. If $G[2,3,4] \geq 0$, then $G$ is already seminonnegative. Otherwise, repeating the same proof by replacing atom $\{1,3,4\}$ by $\{2,3,4\}$, we can obtain a seminonnegative function. Therefore, without loss of generality, we assume that $G$ is already seminonnegative.
 
-   Subtracting $a' F^4_{2,4}$ is legal. Let $G''' := G'' - a' F^4_{2,4}$. Then either $G'''[1,2,4] = 0$ or $G'''[1,3,4] = 0$. In both cases, the paper notes that one must have $G'''[1,2,3,4] \geq 0$, so the function is nonnegative. Otherwise $G'''[1,3] = 0$, which implies
+*Step 3:* Since $G$ is seminonnegative, if the value of $G$ at $\{1,2,3,4\}$ is nonnegative, then the function is already nonnegative and therefore asymptotically constructible from Lemma 5. Otherwise, we continue to find legal operations to convert the function to a nonnegative function. In doing so, the inequalities we need to consider are those in which the atom of weight four is involved. That is, the following six inequalities
 
-$$G'''[1,3,4] + G'''[1,2,3,4] \geq 0,$$
+$$
+\sum_{\{i, j\} \subset \alpha} G[\alpha] \geq 0
+$$
 
-$$G'''[1,2,4] + G'''[1,2,3,4] \geq 0,$$
+for all six pairs $i, j$ from $\{1,2,3,4\}$. The following observations will be useful in the remaining part of the proof.
 
-$$G'''[2,3,4] + G'''[1,2,3,4] \geq 0.$$
+*Observation 1:* Let $i, j, k, l$ be a permutation of $1,2,3,4$, and let $J$ be a seminonnegative function. Then
 
-   Then subtracting $F^7_4$ is legal and results in a nonnegative function.
+$$
+J[i, j, k]+J[1,2,3,4] \geq 0
+$$
 
-   If $G''[1,2,4] = 0$, then the paper concludes that $G''[1,2,3,4]$ must already be nonnegative. Hence $G''$ is a nonnegative function.
+implies that subtracting $a F_{i, j}^{4}$ from $J$ is legal and results in a seminonnegative function where
 
-In every branch, the process terminates at a nonnegative atom function, proving Theorem 6.
+$$
+a=\min \{J[k, l], J[i, k, l], J[j, k, l]\} .
+$$
 
-> **Transcription note.** The chart values and the branch structure of the Theorem 6 proof are now recorded from the source PDF. The only remaining compression is that repeated inequality verifications inside symmetric subcases are not all reproduced symbol-for-symbol.
+1450
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
 
-## Concluding remarks (Section V)
+*Observation 2:* Let $i, j, k, l$ be a permutation of $1,2,3,4$, and let $J$ be a seminonnegative function. Then
 
-The key result of the paper is Theorem 3. This discovery shows that the set of so-called basic information inequalities cannot fully characterize Shannon's entropy function in the sense of Theorem 4. That is, the region $\Gamma_n$ is strictly greater than the region $\mathrm{cl}(\Gamma_n^*)$. This is a surprising result because, based on intuition, one tends to believe that the opposite is true.
+$$
+\begin{array}{r}
+J[i, j, k]+J[1,2,3,4] \geq 0 \\
+J[i, j, l]+J[1,2,3,4] \geq 0 \\
+J[i, k, l]+J[1,2,3,4] \geq 0
+\end{array}
+$$
 
-Actually, when the authors started to look into this problem, they first tried to prove
+implies that subtracting $a F_{i}^{7}$ from $J$ is legal and results in a nonnegative function where
 
-$$\mathrm{cl}(\Gamma_4^*) = \Gamma_4$$
+$$
+a=\min \{J[i, k, l], J[i, j, l], J[i, j, k]\} .
+$$
 
-by finding all kinds of constructions for four random variables as in the proof of Theorem 6. Only after they failed to find a construction in one of many cases did they start to doubt the correctness of the conjecture. This led to the discovery of the new information inequality.
+The validity of these propositions is obvious.
+Since functions $F_{i}^{3}, F^{5}$, and $F_{i}^{6}$ satisfy all these six inequalities with equalities, as long as at atoms of weight up to three the values of the function are not reduced below zero, subtracting a nonnegative multiple of one of these functions is always legal and results in a seminonnegative function. Suppose we keep performing these legal operations until no more legal operations resulting in a seminonnegative function using these three functions are possible. We distinguish the following cases according to the function $G^{\prime}$ that is resulted in.
 
-The full characterization of the region $\mathrm{cl}(\Gamma_n^*)$ seems to be a highly nontrivial problem. Even in the case $n = 4$, the authors were unable to determine the region. They instead provided an inner bound, namely Theorem 6. The inner bound and the outer bound found in the paper differ. It has been shown by an example that the inner bound is not tight. Unfortunately, the construction method used in this example is not powerful enough to show that the outer bound is tight.
+Because no operation using function $F_{i}^{3}$ is legal, for any subset $\{i, j, k\}$ of $\{1,2,3,4\}, G^{\prime}$ is zero at least one of the following atoms: $\{i, j\},\{i, k\},\{k, j\}$ (cf., the atom chart for $F_{i}^{3}$ ). There are only two possible cases:
 
-The simplest case of the problem is the case $n = 4$ because this number is the smallest integer for which $\mathrm{cl}(\Gamma_n^*)$ and $\Gamma_n$ differ. Although the paper concentrates on this simplest case, it also proves Theorem 5, which is a generalization of Theorem 3 to any number of random variables.
+*Case 1:* There exists a 3-subset, say $\{i, j, k\}$, such that $G^{\prime}$ is zero at all three atoms: $\{i, j\},\{i, k\},\{k, j\}$.
 
-The paper also determines the missing terms in the inequalities in Theorem 3. They are expressed in terms of some auxiliary random variables. The authors do so in the hope that this may be helpful in further searching for new information inequalities, as well as in further searching for improved inner bounds.
+*Case 2:* There exist two disjoint weight-two atoms, say $\{i, j\}$ and $\{k, l\}$, such that the values of the function $G^{\prime}$ at these two atoms are both zero.
 
-To get a better understanding of the behavior of the entropy function, it is important to fully characterize the function at least in the simplest case $n = 4$. That is, the simplest task in this research direction is to determine the region $\mathrm{cl}(\Gamma_4^*)$. Based on their experience, the authors do not believe the outer bound to be tight. That is, they believe that there may exist more linear unconditional information inequalities involving four random variables.
+In Case 1, without loss of generality, we assume that
 
-The meaning of the new information inequalities provided by Theorems 3 and 5 is still not fully understood. Although the authors have used the region $\mathrm{cl}(\Gamma_n^*)$ to study the distributed source-coding problem, it is still of great interest to find more applications of the inequalities in other information-theoretical problems, especially in multiuser channel coding or source coding problems.
+$$
+G^{\prime}[1,2]=G^{\prime}[1,3]=G^{\prime}[2,3]=0 .
+$$
 
-The problems studied in the paper have close connection to other areas such as probabilistic reasoning, relational databases, and so on. To study the implication of the results in those areas is also of interest.
+Since $F_{4}^{6}$ does not give a legal operation resulting in a seminonnegative function, the function takes value zero at one of the following four atoms: $\{1,4\},\{2,4\},\{3,4\},\{1,2,3\}$. This gives two subcases,
+
+*Case 1.1:* The function is zero at $\{1,4\}$ (or equivalently one of two other weight-two atoms listed above).
+
+*Case 1.2:* The function is zero at $\{1,2,3\}$.
+In Case 1.1, since $F^{5}$ does not give a legal operation resulting in a seminonnegative function, at least one of the four weight-three atoms, the function takes zero value. We consider only the cases where at one of the three atoms $\{1,2,4\}$, $\{1,3,4\}$, and $\{2,3,4\}$, the value of the function is zero. The case where the function is zero at the atom $\{1,2,3\}$ is equivalent to Case 1.2. Since the first two atoms are symmetric in this context, we consider only the case that the function $G^{\prime}$ is zero at $\{1,2,4\}$. We can see that Condition 2 implies
+
+$$
+G^{\prime}[1,3,4]+G^{\prime}[1,2,3,4] \geq 0
+$$
+
+because both $G^{\prime}[1,4]$ and $G^{\prime}[1,2,4]$ are zero
+> *(Atom chart omitted; see rendered PDF.)*
+
+The Function $G^{\prime}$ in Case 1.1 for $G^{\prime}[1,2,4]=0$.
+Let
+
+$$
+a=\min \left\{G^{\prime}[2,4], G^{\prime}[1,2,3], G^{\prime}[1,3,4]\right\} .
+$$
+
+The inequalities above imply that subtracting $a F_{1,3}^{4}$ from $G^{\prime}$ is legal and results in a seminonnegative function $G^{\prime \prime}$. If $G^{\prime \prime}$ is zero at either $\{1,2,3\}$ or $\{1,3,4\}$, then $G^{\prime \prime}[1,2,3,4] \geq$ 0 . The function obtained is already nonnegative. Otherwise, $G^{\prime \prime}[2,4]=0$. This implies
+
+$$
+G^{\prime \prime}[2,3,4]+G^{\prime \prime}[1,2,3,4] \geq 0 .
+$$
+
+Let $b=-G^{\prime \prime}[1,2,3,4]$, if $b>0$ then subtracting $b F_{3}^{7}$ is a legal operation and this results in a function that is nonnegative at all atoms.
+
+If $G^{\prime}[2,3,4]=0$, we have
+
+$$
+G^{\prime}[1,2,3]+G^{\prime}[1,2,3,4] \geq 0
+$$
+
+because both $G^{\prime}[2,3]$ and $G^{\prime}[2,3,4]$ are zero.
+> *(Atom chart omitted; see rendered PDF.)*
+
+The Function $G^{\prime}$ in Case 1.1 for $G^{\prime}[2,3,4]=0$.
+Let
+
+$$
+a=\min \left\{G^{\prime}[3,4], G^{\prime}[1,2,3], G^{\prime}[1,2,4]\right\} .
+$$
+
+The inequalities above imply that subtracting $a F_{1,2}^{4}$ from $G^{\prime}$ is legal and results in a seminonnegative function $G^{\prime \prime}$. If $G^{\prime \prime}$ is zero at $\{1,2,3\}$ then $G^{\prime \prime}[1,2,3,4] \geq 0$. If $G^{\prime \prime}$ is zero at $\{1,2,4\}$ then this goes back to the previous case. In both cases, either the function obtained is already nonnegative, or it can be reduced to a nonnegative function by legal operations. Otherwise, $G^{\prime \prime}[3,4]=0$. For this function, we have
+
+$$
+G^{\prime \prime}[1,2,3,4]+G^{\prime \prime}[1,3,4] \geq 0 .
+$$
+
+Let
+
+$$
+a=\min \left\{G^{\prime \prime}[2,4], G^{\prime \prime}[1,2,3], G^{\prime \prime}[1,3,4]\right\} .
+$$
+
+The inequalities above imply that subtracting $a F_{1,3}^{4}$ from $G^{\prime \prime}$ is legal and results in a seminonnegative function $G^{\prime \prime \prime}$. If $G^{\prime \prime \prime}$ is
+ZHANG AND YEUNG: ON CHARACTERIZATION OF ENTROPY FUNCTION VIA INFORMATION INEQUALITIES
+1451
+
+zero at either $\{1,2,3\}$ or $\{1,3,4\}$, then $G^{\prime \prime}[1,2,3,4] \geq 0$. Otherwise, $G^{\prime \prime \prime}[2,4]=0$. For this function, we have
+
+$$
+\begin{aligned}
+& G^{\prime \prime \prime}[1,2,3,4]+G^{\prime \prime \prime}[1,2,4] \geq 0 \\
+& G^{\prime \prime \prime}[1,2,3,4]+G^{\prime \prime \prime}[1,2,3] \geq 0 \\
+& G^{\prime \prime \prime}[1,2,3,4]+G^{\prime \prime \prime}[1,3,4] \geq 0
+\end{aligned}
+$$
+
+Let $b=-G^{\prime \prime}[1,2,3,4]$, if $b>0$ then subtracting $b F_{1}^{7}$ is a legal operation and this results in a function that is nonnegative at all atoms.
+
+In Case 1.2, we have
+
+$$
+\begin{aligned}
+& G^{\prime}[1,3,4]+G^{\prime}[1,2,3,4] \geq 0, \\
+& G^{\prime}[1,2,4]+G^{\prime}[1,2,3,4] \geq 0, \\
+& G^{\prime}[2,3,4]+G^{\prime}[1,2,3,4] \geq 0 .
+\end{aligned}
+$$
+
+> *(Atom chart omitted; see rendered PDF.)*
+The Function $G^{\prime}$ in Case 1.2.
+
+Let $a=-G^{\prime}[\{1,2,3,4\}]$. If $a>0$, then subtracting $a F_{4}^{7}$ is a legal operation. This results in a nonnegative function. Otherwise, the function is already nonnegative.
+
+We now consider Case 2. Without loss of generality, we assume that $G^{\prime}[1,2]=G^{\prime}[3,4]=0$. Since $F^{5}$ does not give a legal operation resulting in a seminonnegative function, the function $G^{\prime}$ has value zero at least one of the four weight-three atoms. Without loss of generality, we assume $G^{\prime}[1,2]=G^{\prime}[3,4]=G^{\prime}[1,2,3]=0$. Then we have
+
+$$
+G^{\prime}[1,2,4]+G^{\prime}[1,2,3,4] \geq 0 .
+$$
+
+> *(Atom chart omitted; see rendered PDF.)*
+
+The Function $G^{\prime}$ in Case 2.
+Let $a=\min \left\{G^{\prime}[2,3], G^{\prime}[1,3,4], G^{\prime}[1,2,4]\right\}$. Then subtracting $a F_{1,4}^{4}$ is legal. The function $G^{\prime \prime}$ resulting from this legal operation takes zero value at either $\{1,3,4\},\{1,2,4\}$, or $\{2,3\}$. In the first case, $G^{\prime \prime}[1,3,4]=0$, we have
+
+$$
+G^{\prime \prime}[1,3]+G^{\prime \prime}[1,2,3,4] \geq 0
+$$
+
+Apparently, subtracting $b F_{2,4}^{4}$ is legal where
+
+$$
+b=\min \left\{G^{\prime \prime}[1,3], G^{\prime \prime}[1,2,4], G^{\prime \prime}[2,3,4]\right\} .
+$$
+
+This results in a nonnegative function. In the second case, $G^{\prime \prime}[2,3]=0$, we have
+
+$$
+G^{\prime}[2,3,4]+G^{\prime}[1,2,3,4] \geq 0 .
+$$
+
+Let
+
+$$
+a=\min \left\{G^{\prime}[1,3], G^{\prime}[1,2,4], G^{\prime}[2,3,4]\right\} .
+$$
+
+Subtracting $a F_{2,4}^{4}$ is legal. Let $G^{\prime \prime}$ be $G^{\prime}-a F_{2,4}^{4}$. Then either $G^{\prime \prime}[1,2,4]=0$ or $G^{\prime \prime}[1,3,4]=0$. In both cases, we must have $G^{\prime \prime}[1,2,3,4] \geq 0$, that is, the function is nonnegative. Otherwise, $G^{\prime \prime}[1,3]=0$. This implies
+
+$$
+\begin{aligned}
+& G^{\prime \prime}[1,3,4]+G^{\prime \prime}[1,2,3,4] \geq 0 \\
+& G^{\prime \prime}[1,2,4]+G^{\prime \prime}[1,2,3,4] \geq 0
+\end{aligned}
+$$
+
+and
+
+$$
+G^{\prime \prime}[2,3,4]+G^{\prime \prime}[1,2,3,4] \geq 0 .
+$$
+
+Then, subtracting $F_{4}^{7}$ is legal and results in a nonnegative function. In the third case, $G^{\prime}[1,2,4]=0, G^{\prime}[1,2,3,4]$ must be nonnegative. Hence, $G^{\prime}$ is a nonnegative function.
+
+Thus we have proved that we can always reduce a function in $\hat{\Gamma}_{4}$ by legal operations to a function that takes nonnegative values at all atoms. By Lemma 5, Theorem 6 follows.
+
+## V. Concluding Remarks
+
+The key result of this paper is Theorem 3. This discovery shows that the set of so-called basic information inequalities cannot fully characterize Shannon's entropy function in the sense of Theorem 4. That is, the region $\Gamma_{n}$ is strictly greater than the region $\bar{\Gamma}_{n}^{*}$. This is a surprising result because based on intuition, one tends to believe that the opposite is true. Actually, when we started to look into this problem, we tried first to prove that
+
+$$
+\bar{\Gamma}_{4}^{*}=\Gamma_{4}
+$$
+
+by finding all kinds of constructions for four random variables as in the proof of Theorem 6. Only after we failed to find a construction in one of many cases, we started to doubt the correctness of our conjecture. This led to the discovery of this new information inequality.
+
+The full characterization of the region $\bar{\Gamma}_{n}^{*}$ seems to be a highly nontrivial problem. Even in the case of $n=4$, we were unable to determine the region. We, instead, provided an inner bound of the region. This is Theorem 6 of the paper. The inner bound and the outer bound we found in this paper differ. It has been shown by an example that the inner bound is not tight. Unfortunately, the construction method we used in this example is not powerful enough to show that our outer bound is tight.
+
+The simplest case of the problem is the case of $n=4$ because this number is the smallest integer for which $\Gamma_{n}$ and $\bar{\Gamma}_{n}^{*}$ differ. Although we mainly have concentrated on this simplest case, we have proved Theorem 5 which is a generalization of Theorem 3 to any number of random variables.
+
+We also determined the missing terms in the inequalities in Theorem 3. They are expressed in terms of some auxiliary random variables. We did so in hope that this may be helpful in further searching for new information inequalities, as well as in further searching for improved inner bounds.
+1452
+IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
+
+To get a better understanding of the behavior of the entropy function, it is important to fully characterize the function at least in the simplest case of $n=4$. That is, the simplest task in this research direction is to determine the region $\bar{\Gamma}_{4}^{*}$. Based on our experience, we do not believe our outer bound to be tight. That is, we believe that there may exist more linear unconditional information inequalities involving four random variables.
+
+The meaning of the new information inequalities provided by Theorems 3 and 5 are still not fully understood. Although we have used the region $\Gamma_{n}^{*}$ to study the so-called distributed source coding problem, it is still of great interest to find more applications of the inequalities in other information-theoretical problems, especially in multiuser channel coding or source coding problems.
+
+The problems studied in this paper have close connection to some other areas such as probabilistic reasoning, relational database, and so on. To study the implication of our results in those areas is also of interest.
 
 ## Acknowledgment
 
-The authors thank the two referees, noting that their detailed comments and suggestions greatly improved the readability of the paper.
+The authors are grateful to the two referees. Their detailed comments and suggestions have greatly improved the readability of the paper.
 
-## Formalization cross-references
+## References
 
-The formalization targets in the roadmap (`docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md`, Sections 4-6) map to this transcription as follows.
+[1] N. M. Abramson, Information Theory and Coding. New York: McGraw-Hill, 1963.
+[2] L. L. Campbell, "Entropy as a measure," IEEE Trans. Inform. Theory, vol. IT-11, pp. 112-114, Jan. 1965.
+[3] I. Csiszár and J. Körner, Information Theory: Coding Theorem for Discrete Memoryless Systems. New York: Academic, and Budapest, Hungary: Akademiai Kiado, 1981.
+[4] A. P. Dawid, "Conditional independence in statistical theory (with discussion)," J. Roy. Statist. Soc., Ser. B, vol. 41, pp. 1-31.
+[5] S. Fujishige, "Polymatroidal dependence structure of a set of random variables," Inform. Contr., vol. 39, pp. 55-72, 1978.
+[6] T. Kawabata and R. W. Yeung, "The structure of the $I$-measure of a Markov chain," IEEE Trans. Inform. Theory, vol. 38, pp. 1146-1149, 1992.
+[7] T. S. Han, "Linear dependence structure of the entropy space," Inform. Contr., vol. 29, pp. 337-368.
+[8] ——, "Nonnegative entropy measures of multivariate symmetric correlations," Inform. Contr., vol. 36, pp. 133-156, 1978.
+[9] ——, "A uniqueness of Shannon's information distance and related nonnegativity problems," J. Comb., Inform. Syst. Sci., vol. 6, pp. 320-321, 1981.
+[10] G.-d. Hu, "On the amount of information," Teor. Veroyatnost. i Primenen., vol. 4, pp. 447-455, 1962, in Russian.
+[11] F. Matúš, private communication.
+[12] F. J. MacWilliams and N. J. A. Sloane, The Theory of Error Correcting Codes. Amsterdam, The Netherlands: North-Holland, Elsevier Science B.V., 1977.
+[13] M. Matúš, "Abstract functional dependency structures," Theor. Comput. Sci., vol. 81, pp. 117-126, 1991.
+[14] ——, "On equivalence of Markov properties over undirected graphs," J. Appl. Probab., vol. 29, pp. 745-749, 1992.
+[15] ——, "Ascending and descending conditional independence relations," in Trans. 11th Prague Conf. Information Theory, Statistical Decision Functions and Random Processes, vol. B. Prague, Czechoslovakia: Academia, pp. 181-200, 1992.
+[16] ——, "Probabilistic conditional independence structures and matroid theory: Background," Int. J. Gen. Syst., vol. 22, pp. 185-196.
+[17] ——, "Extreme convex set functions with many nonnegative differences," Discr. Math., vol. 135, pp. 177-191, 1994.
+[18] F. Matúš, "Conditional independences among four random variables II," Combin., Prob. Comput., vol. 4, pp. 407-417, 1995.
+[19] ——, "Conditional independence structures examined via minors," Ann. Math., Artificial Intell., vol. 21, pp. 99-128, 1997.
+[20] F. Matúš and M. Studený, "Conditional independences among four random variables I," Combin., Prob. Comput., vol. 4, pp. 269-278, 1995.
+[21] W. J. McGill, "Multivariate information transmission," in Trans. Prof. Group Inform. Theory, 1954 Symp. Information Theory, vol. PGIT-4, 1955, pp. 93-111.
+[22] A. Papoulis, Probability, Random Variables and Stochastic Processes, 2nd ed. New York: McGraw-Hill, 1984.
+[23] J. Pearl, Probabilistic Reasoning in Intelligent Systems. San Mateo, CA: Morgan Kaufman, 1988.
+[24] An Introduction to Information Theory. New York: McGraw-Hill, 1961.
+[25] M. Studený, "Attempts at axiomatic description of conditional independence," in Proc. Workshop on Uncertainty Processing in Expert Systems, supplement to Kybernetika, vol. 25, nos. 1-3, pp. 65-72, 1989.
+[26] ——, "Multiinformation and the problem of characterization of conditional independence relations," Probl. Contr. Inform. Theory, vol. 18, pp. 3-16, 1989.
+[27] ——, "Conditional independence relations have no finite complete characterization," in Trans. 11th Prague Conf. Information Theory, Statistical Decision Functions and Random Processes, vol. B. Prague, Czechoslovaka: Academia, pp. 377-396, 1992.
+[28] ——, "Structural semigraphoids," Int. J. Gen. Syst., vol. 22, no. 2, pp. 207-217, 1994.
+[29] ——, "Descriptions of structures of stochastic independence by means of faces and imsets (in three parts)," Int. J. Gen. Syst., vol. 23, pp. 123-137, pp. 201-219, pp. 323-341, 1994/1995.
+[30] T. Tsujishita, "On triple mutual information," Adv. Appl. Math., vol. 16, pp. 269-274, 1995.
+[31] S. Watanabe, "A study of ergodicity and redundancy on intersymbol correlation of finite range," in Trans. 1954 Symp. Inform. Theory (Cambridge, MA, Sept. 15-17, 1954), p. 85.
+[32] ——, "Information theoretical analysis of multivariate correlation," IBM J., pp. 66-81, 1960.
+[33] D. J. A. Welsh, Matroid Theory. New York: Academic 1976.
+[34] R. W. Yeung, "A new outlook on Shannon's information measures," IEEE Trans. Inform. Theory, vol. 37, pp. 466-474, 1991.
+[35] ——, "A framework for linear information inequalities," IEEE Trans. Inform. Theory, vol. 43, pp. 1924-1934, Nov. 1997.
+[36] R. W. Yeung, T. T. Lee, and Z. Ye, "An information-theoretic characterization of Markov random fields and its applications," IEEE Trans. Inform. Theory, submitted for publication.
+[37] R. W. Yeung and Z. Zhang, "Distributed source coding for satellite communication," IEEE Trans. Inform. Theory, submitted for publication.
+[38] R. W. Yeung and Y.-O. Yan, "Information theoretic inequality prover." [Online] Available: http://www.ie.cuhk.edu.hk/ITIP or http://it.ucsd.edu/~whyeung (mirror site).
+[39] Z. Zhang and R. W. Yeung, "A non-Shannon type conditional inequality of information quantities," IEEE Trans. Inform. Theory, vol. 43, pp. 1982-1985, Nov. 1997.
 
-| Paper statement | Formalization target | Scope decision |
-| --- | --- | --- |
-| Proposition 1 (basic inequalities) | PFR `ForMathlib/Entropy/{Basic,MutualInfo}`; available upstream | External |
-| Proposition 2 (submodularity, monotonicity, normalization) | `ZhangYeung/Theorem4.lean` (Shannon cone definition); PFR provides per-RV versions | Part of M4 |
-| Theorem 1 (cl $\Gamma^*_n = \Gamma_n$ for $n \leq 3$) | Not formalized (cited as context only) | Out of scope |
-| Theorem 2 (conditional non-Shannon inequality from 1997) | Not formalized (cited as historical precursor) | Out of scope |
-| **Lemma 2 (copy lemma)** | `ZhangYeung/CopyLemma.lean` | **Core artifact, Mathlib-ready (M2)** |
-| **Theorem 3 (Zhang-Yeung inequality)** | `ZhangYeung/Theorem3.lean` | **Core (M3)** |
-| $\Delta(Z, U \mid X, Y)$ (eq. 20) | `ZhangYeung/Delta.lean` | Core (M1) |
-| **Theorem 4 (cl $\Gamma^*_n \neq \Gamma_n$ for $n \geq 4$)** | `ZhangYeung/Theorem4.lean` (witness $F$) | **Core (M4)** |
-| Theorem 5 ($(n + 2)$-variable generalization) | `ZhangYeung/Theorem5.lean` | Stretch (M5) |
-| Theorem 6 (inner bound via atom charts) | Not formalized | Out of scope |
-| Lemma 1 (atom-to-subset identity) | Only if Theorem 6 is formalized | Out of scope |
-| Lemmas 3-4, Constructions 1-7 | Only if Theorem 6 is formalized | Out of scope |
-
-The central formalization artifact is therefore **Lemma 2**, generalized away from paper-specific notation and proved on four arbitrary $\mathsf{Fintype}$-valued random variables. Theorem 3 is a short Shannon-algebra derivation from Lemma 2. Theorem 4's witness $F$ is a 15-constraint `norm_num`/`linarith` verification once the Shannon cone is defined.
-
-## Open transcription items
-
-No known substantive content gaps remain. The prose, constructions, charts, acknowledgment, and bibliography are now transcribed. Some repetitive inequality checks inside the deepest Theorem 6 subcases are normalized and condensed slightly, but the mathematical content is preserved.
-
-## References (paper bibliography)
-
-- **[1]** N. M. Abramson, *Information Theory and Coding*. New York: McGraw-Hill, 1963.
-- **[2]** L. L. Campbell, "Entropy as a measure," *IEEE Trans. Inform. Theory*, vol. IT-11, pp. 112-114, Jan. 1965.
-- **[3]** I. Csiszár and J. Körner, *Information Theory: Coding Theorem for Discrete Memoryless Systems*. New York: Academic, and Budapest, Hungary: Akademiai Kiado, 1981.
-- **[4]** A. P. Dawid, "Conditional independence in statistical theory (with discussion)," *J. Roy. Statist. Soc., Ser. B*, vol. 41, pp. 1-31.
-- **[5]** S. Fujishige, "Polymatroidal dependence structure of a set of random variables," *Inform. Contr.*, vol. 39, pp. 55-72, 1978.
-- **[6]** T. Kawabata and R. W. Yeung, "The structure of the I-measure of a Markov chain," *IEEE Trans. Inform. Theory*, vol. 38, pp. 1146-1149, 1992.
-- **[7]** T. S. Han, "Linear dependence structure of the entropy space," *Inform. Contr.*, vol. 29, pp. 337-368.
-- **[8]** T. S. Han, "Nonnegative entropy measures of multivariate symmetric correlations," *Inform. Contr.*, vol. 36, pp. 133-156, 1978.
-- **[9]** T. S. Han, "A uniqueness of Shannon's information distance and related nonnegativity problems," *J. Comb., Inform. Syst. Sci.*, vol. 6, pp. 320-321, 1981.
-- **[10]** G.-d. Hu, "On the amount of information," *Teor. Veroyatnost. i Primenen.*, vol. 4, pp. 447-455, 1962, in Russian.
-- **[11]** F. Matus̆, private communication.
-- **[12]** F. J. MacWilliams and N. J. A. Sloane, *The Theory of Error Correcting Codes*. Amsterdam, The Netherlands: North-Holland, Elsevier Science B.V., 1977.
-- **[13]** M. Matus̆, "Abstract functional dependency structures," *Theor. Comput. Sci.*, vol. 81, pp. 117-126, 1991.
-- **[14]** M. Matus̆, "On equivalence of Markov properties over undirected graphs," *J. Appl. Probab.*, vol. 29, pp. 745-749, 1992.
-- **[15]** M. Matus̆, "Ascending and descending conditional independence relations," in *Trans. 11th Prague Conf. Information Theory, Statistical Decision Functions and Random Processes*, vol. B. Prague, Czechoslovakia: Academia, pp. 181-200, 1992.
-- **[16]** M. Matus̆, "Probabilistic conditional independence structures and matroid theory: Background," *Int. J. Gen. Syst.*, vol. 22, pp. 185-196.
-- **[17]** M. Matus̆, "Extreme convex set functions with many nonnegative differences," *Discr. Math.*, vol. 135, pp. 177-191, 1994.
-- **[18]** F. Matus̆, "Conditional independences among four random variables II," *Combin., Prob. Comput.*, vol. 4, pp. 407-417, 1995.
-- **[19]** F. Matus̆, "Conditional independence structures examined via minors," *Ann. Math. Artificial Intell.*, vol. 21, pp. 99-128, 1997.
-- **[20]** F. Matus̆ and M. Studený, "Conditional independences among four random variables I," *Combin., Prob. Comput.*, vol. 4, pp. 269-278, 1995.
-- **[21]** W. J. McGill, "Multivariate information transmission," in *Trans. Prof. Group Inform. Theory, 1954 Symp. Information Theory*, vol. PGIT-4, 1955, pp. 93-111.
-- **[22]** A. Papoulis, *Probability, Random Variables and Stochastic Processes*, 2nd ed. New York: McGraw-Hill, 1984.
-- **[23]** J. Pearl, *Probabilistic Reasoning in Intelligent Systems*. San Mateo, CA: Morgan Kaufman, 1988.
-- **[24]** *An Introduction to Information Theory*. New York: McGraw-Hill, 1961.
-- **[25]** M. Studený, "Attempts at axiomatic description of conditional independence," in *Proc. Workshop on Uncertainty Processing in Expert Systems*, supplement to *Kybernetika*, vol. 25, nos. 1-3, pp. 65-72, 1989.
-- **[26]** M. Studený, "Multiinformation and the problem of characterization of conditional independence relations," *Probl. Contr. Inform. Theory*, vol. 18, pp. 3-16, 1989.
-- **[27]** M. Studený, "Conditional independence relations have no finite complete characterization," in *Trans. 11th Prague Conf. Information Theory, Statistical Decision Functions and Random Processes*, vol. B. Prague, Czechoslovaka: Academia, pp. 377-396, 1992.
-- **[28]** M. Studený, "Structural semigraphoids," *Int. J. Gen. Syst.*, vol. 22, no. 2, pp. 207-217, 1994.
-- **[29]** M. Studený, "Descriptions of structures of stochastic independence by means of faces and imsets (in three parts)," *Int. J. Gen. Syst.*, vol. 23, pp. 123-137, pp. 201-219, pp. 323-341, 1994/1995.
-- **[30]** T. Tsujishita, "On triple mutual information," *Adv. Appl. Math.*, vol. 16, pp. 269-274, 1995.
-- **[31]** S. Watanabe, "A study of ergodicity and redundancy on intersymbol correlation of finite range," in *Trans. 1954 Symp. Inform. Theory* (Cambridge, MA, Sept. 15-17, 1954), p. 85.
-- **[32]** S. Watanabe, "Information theoretical analysis of multivariate correlation," *IBM J.*, pp. 66-81, 1960.
-- **[33]** D. J. A. Welsh, *Matroid Theory*. New York: Academic, 1976.
-- **[34]** R. W. Yeung, "A new outlook on Shannon's information measures," *IEEE Trans. Inform. Theory*, vol. 37, pp. 466-474, 1991.
-- **[35]** R. W. Yeung, "A framework for linear information inequalities," *IEEE Trans. Inform. Theory*, vol. 43, pp. 1924-1934, Nov. 1997.
-- **[36]** R. W. Yeung, T. T. Lee, and Z. Ye, "An information-theoretic characterization of Markov random fields and its applications," *IEEE Trans. Inform. Theory*, submitted for publication.
-- **[37]** R. W. Yeung and Z. Zhang, "Distributed source coding for satellite communication," *IEEE Trans. Inform. Theory*, submitted for publication.
-- **[38]** R. W. Yeung and Y.-O. Yan, "Information theoretic inequality prover." [Online] Available: `http://www.ie.cuhk.edu.hk/ITIP` or `http://it.ucsd.edu/~whyeung` (mirror site).
-- **[39]** Z. Zhang and R. W. Yeung, "A non-Shannon type conditional inequality of information quantities," *IEEE Trans. Inform. Theory*, vol. 43, pp. 1982-1985, Nov. 1997.
