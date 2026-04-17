@@ -32,9 +32,7 @@ The second layer (`theorem2_delta_le_zero`) discharges the reduced inequality vi
 
 **Connection to the 1998 copy construction.** The auxiliary PMF `p̃(x, y, z, u) := p(x, z, u) p(y, z, u) / p(z, u)` defined above is precisely the `(X', Y₁, Z', U')`-marginal of the extended probability measure `ν` that PFR's `ProbabilityTheory.condIndep_copies`, applied to `⟨X, Y⟩` conditioned on `⟨Z, U⟩`, would produce. Projecting the copy -- set `X' := Prod.fst ∘ W₁`, `Y₁ := Prod.snd ∘ W₂`, `⟨Z', U'⟩ := V` -- the conditional independence `X' ⟂ Y₁ | ⟨Z', U'⟩` plus the marginal identities `(X', Z', U') ∼ (X, Z, U)` and `(Y₁, Z', U') ∼ (Y, Z, U)` force `p_ν(x, y, z, u) = p(x, z, u) p(y, z, u) / p(z, u) = p̃(x, y, z, u)`. So the 1997 KL proof and the 1998 two-copy copy-lemma framework reach the same object from two directions: the 1997 paper constructs `p̃` as a PMF and closes via `Real.sum_mul_log_div_leq`; the 1998 paper (Lemma 2 in §III, eq. 44-45) constructs `ν` via kernel composition and closes Theorem 3 (the unconditional inequality) via a Shannon chase on the copy joint. For Theorem 2 specifically a pure copy + Shannon-chase close is ruled out: [@kaced2013, Theorem 3 + Claim 1, Theorem 5] show this inequality is essentially conditional and fails on the closure of the entropic region, so no combination of basic Shannon inequalities plus Lagrange multiples of the premises can derive it. This module follows the 1997 KL route rather than attempting the copy-construction framing.
 
-**Current state:** `theorem2_delta_le_zero` is wired end-to-end, with the main proof body assembled around `Real.sum_mul_log_div_leq` and its absolute-continuity side condition (closed inline via marginal bounds). `ptilde_sum_eq_one`, `phat_sum_eq_one`, and `sum_joint_eq_sum_ptilde` are closed. The `phat_sum_eq_one` closure uses the module-level helpers `condIndepFun_map_triple_real_singleton` (extracting `p(x,y,z) · p(z) = p(x,z) · p(y,z)` from `CondIndepFun X Y Z`), `condIndep_normalized_pair_eq_triple`, and `indepFun_map_pair_real_singleton` (extracting `p(x,y) = p(x) · p(y)` from `IndepFun X Y`); the `sum_joint_eq_sum_ptilde` closure is the 11-factor marginal-swap closing argument, factored through the `marg_swap_helper` helper. One scaffolded sub-lemma remains `sorry`:
-
-- `delta_eq_sum_log_ratio` (entropy expansion over the 4-tuple space; the `entropy_eq_sum_joint` helper lifts each entropy `H[f ; μ]` to a 4-tuple weighted sum, after which the eleven signed entropy contributions recombine into `∑ p · log (p̂/p̃)`; the algebraic recombination step is the residual work).
+**Current state:** The implication (16) ⇒ (17) is fully proved (no `sorry`). `theorem2_delta_le_zero` is wired end-to-end, with the main proof body assembled around `Real.sum_mul_log_div_leq` and its absolute-continuity side condition (closed inline via marginal bounds). `ptilde_sum_eq_one`, `phat_sum_eq_one`, `sum_joint_eq_sum_ptilde`, and `delta_eq_sum_log_ratio` are all closed. The `phat_sum_eq_one` closure uses the module-level helpers `condIndepFun_map_triple_real_singleton` (extracting `p(x,y,z) · p(z) = p(x,z) · p(y,z)` from `CondIndepFun X Y Z`), `condIndep_normalized_pair_eq_triple`, and `indepFun_map_pair_real_singleton` (extracting `p(x,y) = p(x) · p(y)` from `IndepFun X Y`); the `sum_joint_eq_sum_ptilde` closure is the 11-factor marginal-swap closing argument, factored through the `marg_swap_helper` helper. The `delta_eq_sum_log_ratio` closure lifts each of the eleven entropy terms to a 4-tuple weighted sum via `entropy_eq_sum_joint`, combines via `sub_eq_add_neg` + `← Finset.sum_add_distrib` + `← Finset.sum_neg_distrib`, and closes via `ring` on the pointwise residual.
 
 The file is organized into the following sections:
 
@@ -43,7 +41,7 @@ The file is organized into the following sections:
 3. Generic finite-alphabet utilities (marginal summations, marginal bounds, `IndepFun` product formula, fibrewise-swap helper).
 4. The eleven marginal-match facts for `p̃`.
 5. Sum-to-one facts (`ptilde_sum_eq_one` and `phat_sum_eq_one` closed).
-6. Δ-to-log-ratio identities (`delta_eq_sum_log_ratio` sorry; `sum_joint_eq_sum_ptilde` closed).
+6. Δ-to-log-ratio identities (`delta_eq_sum_log_ratio` and `sum_joint_eq_sum_ptilde` closed).
 7. `theorem2_delta_le_zero` + `theorem2`.
 
 The four codomains `S₁, S₂, S₃, S₄` are specialized to `[Fintype]` + `[MeasurableSingletonClass]` so PFR's `FiniteRange`/`Countable` obligations are discharged uniformly.
@@ -1001,6 +999,7 @@ private lemma entropy_eq_sum_joint
       rw [(Finset.mem_filter.mp ht).2]]
   rw [sum_filter_map_real_eq_map_comp hF hproj μ b]
 
+set_option maxHeartbeats 3200000 in
 /-- **`Δ` as a weighted-log sum.** The identity `Δ(Z, U | X, Y) = ∑_{x,y,z,u} p(x,y,z,u) · log (p̂(x,y,z,u) / p̃(x,y,z,u))` obtained by expanding each of `I[Z:U]`, `I[Z:U|X]`, `I[Z:U|Y]` via `entropy_eq_sum_joint` over the 4-tuple marginal and combining the eleven lifted contributions. The right-hand side is the raw form of Zhang-Yeung 1997's eq. (41). -/
 private lemma delta_eq_sum_log_ratio
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
@@ -1009,7 +1008,169 @@ private lemma delta_eq_sum_log_ratio
     delta Z U X Y μ
       = ∑ t : S₁ × S₂ × S₃ × S₄,
           pJoint X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t) := by
-  sorry
+  classical
+  -- Marginal abbreviations.
+  set pXZ  : S₁ × S₃        → ℝ := fun p => (μ.map (fun ω => (X ω, Z ω))).real {p}
+  set pXU  : S₁ × S₄        → ℝ := fun p => (μ.map (fun ω => (X ω, U ω))).real {p}
+  set pYZ  : S₂ × S₃        → ℝ := fun p => (μ.map (fun ω => (Y ω, Z ω))).real {p}
+  set pYU  : S₂ × S₄        → ℝ := fun p => (μ.map (fun ω => (Y ω, U ω))).real {p}
+  set pZU  : S₃ × S₄        → ℝ := fun p => (μ.map (fun ω => (Z ω, U ω))).real {p}
+  set pX   : S₁             → ℝ := fun x => (μ.map X).real {x}
+  set pY   : S₂             → ℝ := fun y => (μ.map Y).real {y}
+  set pZ   : S₃             → ℝ := fun z => (μ.map Z).real {z}
+  set pU   : S₄             → ℝ := fun u => (μ.map U).real {u}
+  set pXZU : S₁ × S₃ × S₄   → ℝ := fun p => (μ.map (fun ω => (X ω, Z ω, U ω))).real {p}
+  set pYZU : S₂ × S₃ × S₄   → ℝ := fun p => (μ.map (fun ω => (Y ω, Z ω, U ω))).real {p}
+  set L : S₁ × S₂ × S₃ × S₄ → ℝ := fun t =>
+    Real.log (pXZ (t.1, t.2.2.1)) + Real.log (pXU (t.1, t.2.2.2))
+    + Real.log (pYZ (t.2.1, t.2.2.1)) + Real.log (pYU (t.2.1, t.2.2.2))
+    + Real.log (pZU t.2.2)
+    - Real.log (pZ t.2.2.1) - Real.log (pU t.2.2.2)
+    - Real.log (pX t.1) - Real.log (pY t.2.1)
+    - Real.log (pXZU (t.1, t.2.2)) - Real.log (pYZU (t.2.1, t.2.2))
+  -- Pointwise: `pJoint t * log(p̂/p̃)(t) = pJoint t * L t`.
+  have h_pJ_log : ∀ t : S₁ × S₂ × S₃ × S₄,
+      pJoint X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t)
+        = pJoint X Y Z U μ t * L t := by
+    intro t
+    by_cases h_pJ_zero : pJoint X Y Z U μ t = 0
+    · rw [h_pJ_zero, zero_mul, zero_mul]
+    · have h_pJ_pos : 0 < pJoint X Y Z U μ t :=
+        lt_of_le_of_ne measureReal_nonneg (Ne.symm h_pJ_zero)
+      rcases t with ⟨x, y, z, u⟩
+      have hXZU_pos : 0 < pXZU (x, z, u) := by
+        apply lt_of_lt_of_le h_pJ_pos
+        exact measureReal_map_triple_le_map_pair_13 hX hY (hZ.prodMk hU) μ x y (z, u)
+      have hYZU_pos : 0 < pYZU (y, z, u) := by
+        apply lt_of_lt_of_le h_pJ_pos
+        exact measureReal_map_pair_le_map_snd hX (hY.prodMk (hZ.prodMk hU)) μ x (y, z, u)
+      have hZU_pos : 0 < pZU (z, u) :=
+        lt_of_lt_of_le hXZU_pos (measureReal_map_pair_le_map_snd hX (hZ.prodMk hU) μ x (z, u))
+      have hXZ_pos : 0 < pXZ (x, z) := lt_of_lt_of_le hXZU_pos
+        (measureReal_map_triple_le_map_pair_12 hX hZ hU μ x z u)
+      have hXU_pos : 0 < pXU (x, u) := lt_of_lt_of_le hXZU_pos
+        (measureReal_map_triple_le_map_pair_13 hX hZ hU μ x z u)
+      have hYZ_pos : 0 < pYZ (y, z) := lt_of_lt_of_le hYZU_pos
+        (measureReal_map_triple_le_map_pair_12 hY hZ hU μ y z u)
+      have hYU_pos : 0 < pYU (y, u) := lt_of_lt_of_le hYZU_pos
+        (measureReal_map_triple_le_map_pair_13 hY hZ hU μ y z u)
+      have hX_pos : 0 < pX x := lt_of_lt_of_le hXZU_pos
+        (measureReal_map_pair_le_map_fst hX (hZ.prodMk hU) μ x (z, u))
+      have hY_pos : 0 < pY y := lt_of_lt_of_le hYZU_pos
+        (measureReal_map_pair_le_map_fst hY (hZ.prodMk hU) μ y (z, u))
+      have hZ_pos : 0 < pZ z := lt_of_lt_of_le hZU_pos
+        (measureReal_map_pair_le_map_fst hZ hU μ z u)
+      have hU_pos : 0 < pU u := lt_of_lt_of_le hZU_pos
+        (measureReal_map_pair_le_map_snd hZ hU μ z u)
+      congr 1
+      have h_phat_form : phat X Y Z U μ (x, y, z, u)
+          = pXZ (x, z) * pXU (x, u) * pYZ (y, z) * pYU (y, u) / (pZ z * pU u * pX x * pY y) := rfl
+      have h_ptilde_form : ptilde X Y Z U μ (x, y, z, u)
+          = pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u) := rfl
+      rw [h_phat_form, h_ptilde_form]
+      rw [show pXZ (x, z) * pXU (x, u) * pYZ (y, z) * pYU (y, u) / (pZ z * pU u * pX x * pY y)
+          / (pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u))
+        = pXZ (x, z) * pXU (x, u) * pYZ (y, z) * pYU (y, u) * pZU (z, u)
+          / (pZ z * pU u * pX x * pY y * pXZU (x, z, u) * pYZU (y, z, u)) from by field_simp]
+      rw [Real.log_div (by positivity) (by positivity)]
+      rw [show pXZ (x, z) * pXU (x, u) * pYZ (y, z) * pYU (y, u) * pZU (z, u)
+          = pXZ (x, z) * (pXU (x, u) * (pYZ (y, z) * (pYU (y, u) * pZU (z, u)))) from by ring]
+      rw [Real.log_mul hXZ_pos.ne' (by positivity),
+          Real.log_mul hXU_pos.ne' (by positivity),
+          Real.log_mul hYZ_pos.ne' (by positivity),
+          Real.log_mul hYU_pos.ne' hZU_pos.ne']
+      rw [show pZ z * pU u * pX x * pY y * pXZU (x, z, u) * pYZU (y, z, u)
+          = pZ z * (pU u * (pX x * (pY y * (pXZU (x, z, u) * pYZU (y, z, u))))) from by ring]
+      rw [Real.log_mul hZ_pos.ne' (by positivity),
+          Real.log_mul hU_pos.ne' (by positivity),
+          Real.log_mul hX_pos.ne' (by positivity),
+          Real.log_mul hY_pos.ne' (by positivity),
+          Real.log_mul hXZU_pos.ne' hYZU_pos.ne']
+      show _ = L (x, y, z, u)
+      simp only [L]
+      ring
+  -- Rewrite RHS as `∑ t, pJoint t * L t`.
+  rw [show (∑ t : S₁ × S₂ × S₃ × S₄,
+            pJoint X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t))
+        = ∑ t, pJoint X Y Z U μ t * L t from
+      Finset.sum_congr rfl fun t _ => h_pJ_log t]
+  -- Expand delta entropy-by-entropy, applying chain_rule and entropy_comm.
+  rw [delta_eq_entropy hZ hU hX hY μ,
+      chain_rule'' μ hZ hX, chain_rule'' μ hU hX, chain_rule'' μ (hZ.prodMk hU) hX,
+      chain_rule'' μ hZ hY, chain_rule'' μ hU hY, chain_rule'' μ (hZ.prodMk hU) hY,
+      entropy_comm hZ hX μ, entropy_comm hU hX μ, entropy_comm (hZ.prodMk hU) hX μ,
+      entropy_comm hZ hY μ, entropy_comm hU hY μ, entropy_comm (hZ.prodMk hU) hY μ]
+  have hF : Measurable (fun ω => (X ω, Y ω, Z ω, U ω)) :=
+    hX.prodMk (hY.prodMk (hZ.prodMk hU))
+  -- Lift each of the eleven entropies to a 4-tuple sum. Each `hH_*` uses
+  -- `entropy_eq_sum_joint` with a specific projection; Lean recognizes the
+  -- composed function as the original random variable via iota + eta reduction.
+  have hHZ : H[Z ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map Z).real {t.2.2.1}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => t.2.2.1) hF
+      (measurable_fst.comp (measurable_snd.comp measurable_snd)) μ
+  have hHU : H[U ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map U).real {t.2.2.2}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => t.2.2.2) hF
+      (measurable_snd.comp (measurable_snd.comp measurable_snd)) μ
+  have hHZU : H[⟨Z, U⟩ ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map (fun ω => (Z ω, U ω))).real {t.2.2}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => t.2.2) hF
+      (measurable_snd.comp measurable_snd) μ
+  have hHX : H[X ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map X).real {t.1}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => t.1) hF measurable_fst μ
+  have hHY : H[Y ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map Y).real {t.2.1}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => t.2.1) hF
+      (measurable_fst.comp measurable_snd) μ
+  have hHXZ : H[⟨X, Z⟩ ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map (fun ω => (X ω, Z ω))).real {(t.1, t.2.2.1)}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.2.1)) hF
+      (measurable_fst.prodMk (measurable_fst.comp (measurable_snd.comp measurable_snd))) μ
+  have hHXU : H[⟨X, U⟩ ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map (fun ω => (X ω, U ω))).real {(t.1, t.2.2.2)}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.2.2)) hF
+      (measurable_fst.prodMk (measurable_snd.comp (measurable_snd.comp measurable_snd))) μ
+  have hHXZU : H[⟨X, ⟨Z, U⟩⟩ ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map (fun ω => (X ω, Z ω, U ω))).real {(t.1, t.2.2)}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.2)) hF
+      (measurable_fst.prodMk (measurable_snd.comp measurable_snd)) μ
+  have hHYZ : H[⟨Y, Z⟩ ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map (fun ω => (Y ω, Z ω))).real {(t.2.1, t.2.2.1)}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2.1)) hF
+      ((measurable_fst.comp measurable_snd).prodMk
+        (measurable_fst.comp (measurable_snd.comp measurable_snd))) μ
+  have hHYU : H[⟨Y, U⟩ ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map (fun ω => (Y ω, U ω))).real {(t.2.1, t.2.2.2)}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2.2)) hF
+      ((measurable_fst.comp measurable_snd).prodMk
+        (measurable_snd.comp (measurable_snd.comp measurable_snd))) μ
+  have hHYZU : H[⟨Y, ⟨Z, U⟩⟩ ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
+      (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
+      * Real.log ((μ.map (fun ω => (Y ω, Z ω, U ω))).real {(t.2.1, t.2.2)}) :=
+    entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2)) hF
+      ((measurable_fst.comp measurable_snd).prodMk (measurable_snd.comp measurable_snd)) μ
+  rw [hHZ, hHU, hHZU, hHX, hHY, hHXZ, hHXU, hHXZU, hHYZ, hHYU, hHYZU]
+  -- Now both sides are combinations of `-∑ t, pJoint * log(marginal at projection)`.
+  -- Convert all subtraction to `A + (-B)` so that `← sum_neg_distrib` and
+  -- `← sum_add_distrib` can combine every term into a single outer `∑ t`.
+  simp_rw [sub_eq_add_neg, neg_add, neg_neg, ← Finset.sum_neg_distrib,
+           ← Finset.sum_add_distrib]
+  refine @Finset.sum_congr (S₁ × S₂ × S₃ × S₄) ℝ _ _ _ _ _ rfl ?_
+  intro t _
+  simp only [L, pJoint]
+  ring
 
 /-- **Marginal-swap helper.** Given a measurable projection `proj : S₁ × S₂ × S₃ × S₄ → γ` of the 4-tuple alphabet, and given that `p̃` agrees with the μ-pushforward of `proj ∘ ⟨X, Y, Z, U⟩` on every fibre, the sum of `pJoint · φ(proj ·)` equals the sum of `p̃ · φ(proj ·)` for any `φ`. The pJoint half of the filter-sum identity is automatic from `sum_filter_map_real_eq_map_comp` (since `pJoint` is a pushforward singleton value); the `p̃` half is the `h_pt_marg` hypothesis. This helper factors out the shared bookkeeping of the eleven projection-specific applications in `sum_joint_eq_sum_ptilde`. -/
 private lemma marg_swap_helper
