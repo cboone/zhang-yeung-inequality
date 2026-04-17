@@ -8,23 +8,31 @@ milestone: M1.5
 depends_on: M1 (`ZhangYeung/Delta.lean`, merged into `main` via PR #4)
 ---
 
-## Status (2026-04-17): finishing via KL; reframing as standalone
+## Status (2026-04-17): complete; all three KL sorries closed
 
 This section supersedes the original single-copy-construction plan; see "Historical context (pre-pivot design)" at the bottom of the document for the pre-pivot design.
 
 ### What landed
 
-The implementation in `ZhangYeung/Theorem2.lean` follows the [@zhangyeung1997, Theorem 3] auxiliary-PMF + KL-divergence argument, not the single-copy kernel construction the original plan was written around. The Shannon-algebra reduction `theorem2_shannon_identity` (target ⟺ `Δ(Z, U | X, Y) ≤ 0` under (16)) is closed. The `theorem2_delta_le_zero` assembly is wired end-to-end around `Real.sum_mul_log_div_leq` (the log-sum inequality), with the absolute-continuity side condition discharged inline via marginal-bound lemmas. `ptilde_sum_eq_one` is closed via a direct fibrewise computation. Eleven marginal-match helpers (covering the eleven factors of `p̂/p̃`), eight generic Fintype utilities (marginal summation for pairs and triples, marginal bounds, the `IndepFun` product formula, the fibrewise-swap helper `sum_mul_proj_eq_of_marginal_eq`), and the module-level variable block are all landed.
+The implementation in `ZhangYeung/Theorem2.lean` follows the [@zhangyeung1997, Theorem 3] auxiliary-PMF + KL-divergence argument, not the single-copy kernel construction the original plan was written around. **M1.5 is complete: `theorem2` has no `sorry`, the full `make check` (build + lint + tests) is green.**
+
+The Shannon-algebra reduction `theorem2_shannon_identity` (target ⟺ `Δ(Z, U | X, Y) ≤ 0` under (16)) is closed. The `theorem2_delta_le_zero` assembly is wired end-to-end around `Real.sum_mul_log_div_leq` (the log-sum inequality), with the absolute-continuity side condition discharged inline via marginal-bound lemmas.
+
+All three KL sorries from the original plan are closed:
+
+- **`ptilde_sum_eq_one`** via a direct fibrewise computation (uses `ptilde_fibre_sum`).
+- **`phat_sum_eq_one`** via the 4-step telescope (`∑_z` via CondIndep product, `∑_y, ∑_x` via marginal identities, `∑_u` via the probability-measure property). New helpers: `condIndepFun_map_triple_real_singleton` and `condIndep_normalized_pair_eq_triple`.
+- **`sum_joint_eq_sum_ptilde`** via 11 applications of `sum_mul_proj_eq_of_marginal_eq`, factored through `marg_swap_helper`. Pointwise log decomposition proved on the support of `p̃` with positivity propagation from triple marginals.
+- **`delta_eq_sum_log_ratio`** via `entropy_eq_sum_joint` (new helper) lifting each of the eleven signed entropy terms to a 4-tuple weighted sum, followed by `sub_eq_add_neg` + `← Finset.sum_add_distrib` + `← Finset.sum_neg_distrib` to combine into a single `Finset.sum`, then `ring` on the pointwise residual.
+
+Eleven marginal-match helpers for `p̃` (covering the eleven factors of `p̂/p̃`), eight generic Fintype utilities (marginal summation for pairs and triples, marginal bounds, the `IndepFun` product formula, the fibrewise-swap helper `sum_mul_proj_eq_of_marginal_eq`, the pushforward-fibre-sum helper `sum_filter_map_real_eq_map_comp`), and the module-level variable block are all landed.
 
 ### What remains
 
-Three scaffolded non-Shannon sub-lemmas carry localized `sorry`s:
+Nothing in the M1.5 scope. Follow-up:
 
-- `phat_sum_eq_one` (`∑ p̂ = 1` under the two hypotheses of (16)),
-- `delta_eq_sum_log_ratio` (`Δ = ∑ p · log(p̂/p̃)`, the 4-tuple entropy expansion),
-- `sum_joint_eq_sum_ptilde` (`∑ p · log(p̂/p̃) = ∑ p̃ · log(p̂/p̃)`, the 11-factor marginal-swap).
-
-Each closes independently. Routes for each are in "Finishing plan: close three KL sorries" below.
+- Push the branch and open the PR (title "feat: prove Theorem 2 (Zhang-Yeung 1997 conditional inequality)").
+- M2 copy-construction helpers (see "Out of scope: M2 copy-construction helpers" below) are a separate task.
 
 ### Reframing: Theorem 2 is not a warm-up
 
@@ -38,10 +46,12 @@ Taken together, M1.5 is a **standalone formalization** of the first known non-Sh
 
 ### Plan from here
 
-1. Close the three sorries using the routes described in "Finishing plan" below.
-2. Update `Theorem2.lean`'s module docstring with the reframing and the linking note (see "Docstring updates").
-3. Run `make check`; confirm lint and test modules stay green.
-4. Land via PR framed as a standalone result, not as a warm-up.
+All four steps below are done:
+
+1. ✓ The three KL sorries are closed. Routes documented in "Finishing plan" below match what actually landed.
+2. ✓ `Theorem2.lean`'s module docstring carries the standalone framing and the linking note to the 1998 copy construction.
+3. ✓ `make check` passes (build + lint + test).
+4. Remaining: push the branch and land via PR framed as a standalone result, not as a warm-up.
 
 M2 copy-construction infrastructure is valuable, still wanted, and orthogonal; see "Out of scope: M2 copy-construction helpers" for the follow-up task.
 
