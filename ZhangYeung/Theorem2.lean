@@ -180,7 +180,29 @@ private lemma sum_map_triple_second
       (fun y _ => hg (measurableSet_singleton y))]
   simp
 
-/-- **`p̃` is a probability distribution.** This is the unconditional half of the Zhang-Yeung auxiliary-distribution argument: `∑_{x,y,z,u} p(x,z,u) p(y,z,u) / p(z,u) = 1` for any probability measure. The proof groups the sum by `(z, u)`, applies marginal identities `∑_x p(x, z, u) = p(z, u)` and `∑_y p(y, z, u) = p(z, u)` on each fibre, and collapses to `∑_{z,u} p(z, u) = 1`. The two marginal identities are provided by `sum_map_triple_first`. -/
+/-- **Inner fiber sum.** For each fixed `(z, u)`, the fibre sum of `p̃` over `(x, y)` collapses to `p(z, u)`. This is the core computation of `ptilde_sum_eq_one`: the marginal identities supply `∑_x p(x, z, u) = p(z, u)` and `∑_y p(y, z, u) = p(z, u)`, factoring the inner product-of-sums out of the division. -/
+private lemma ptilde_fibre_sum
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (z : S₃) (u : S₄) :
+    (∑ x : S₁, ∑ y : S₂,
+        (μ.map (fun ω => (X ω, Z ω, U ω))).real {(x, z, u)} *
+        (μ.map (fun ω => (Y ω, Z ω, U ω))).real {(y, z, u)} /
+        (μ.map (fun ω => (Z ω, U ω))).real {(z, u)})
+      = (μ.map (fun ω => (Z ω, U ω))).real {(z, u)} := by
+  set c := (μ.map (fun ω => (Z ω, U ω))).real {(z, u)}
+  set Fx := fun x : S₁ => (μ.map (fun ω => (X ω, Z ω, U ω))).real {(x, z, u)}
+  set Fy := fun y : S₂ => (μ.map (fun ω => (Y ω, Z ω, U ω))).real {(y, z, u)}
+  have hSumFx : ∑ x, Fx x = c := sum_map_triple_first hX hZ hU μ z u
+  have hSumFy : ∑ y, Fy y = c := sum_map_triple_first hY hZ hU μ z u
+  show ∑ x, ∑ y, Fx x * Fy y / c = c
+  simp_rw [div_eq_mul_inv, ← Finset.sum_mul]
+  rw [← Finset.sum_mul_sum, hSumFx, hSumFy]
+  by_cases hc : c = 0
+  · simp [hc]
+  · field_simp
+
+/-- **`p̃` is a probability distribution.** This is the unconditional half of the Zhang-Yeung auxiliary-distribution argument: `∑_{x,y,z,u} p(x,z,u) p(y,z,u) / p(z,u) = 1` for any probability measure. The proof flattens the 4-tuple sum, reorders to bring `(z, u)` out front, then applies `ptilde_fibre_sum` and collapses the outer `∑_{z,u} p(z, u) = 1` via the probability-measure property of the pushforward `μ.map ⟨Z, U⟩`. -/
 private lemma ptilde_sum_eq_one
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
