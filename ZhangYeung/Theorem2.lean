@@ -1011,6 +1011,7 @@ private lemma delta_eq_sum_log_ratio
       = ∑ t : S₁ × S₂ × S₃ × S₄,
           pJoint X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t) := by
   sorry
+
 /-- **Marginal-swap helper.** Given a measurable projection `proj : S₁ × S₂ × S₃ × S₄ → γ` of the 4-tuple alphabet, and given that `p̃` agrees with the μ-pushforward of `proj ∘ ⟨X, Y, Z, U⟩` on every fibre, the sum of `pJoint · φ(proj ·)` equals the sum of `p̃ · φ(proj ·)` for any `φ`. The pJoint half of the filter-sum identity is automatic from `sum_filter_map_real_eq_map_comp` (since `pJoint` is a pushforward singleton value); the `p̃` half is the `h_pt_marg` hypothesis. This helper factors out the shared bookkeeping of the eleven projection-specific applications in `sum_joint_eq_sum_ptilde`. -/
 private lemma marg_swap_helper
     {γ : Type*} [Fintype γ] [MeasurableSpace γ] [MeasurableSingletonClass γ] [DecidableEq γ]
