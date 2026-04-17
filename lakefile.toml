@@ -1,6 +1,6 @@
 name = "ZhangYeung"
 version = "0.1.0"
-defaultTargets = ["ZhangYeung"]
+defaultTargets = ["ZhangYeung", "ZhangYeungTest"]
 lintDriver = "batteries/runLinter"
 
 [leanOptions]
@@ -14,3 +14,6 @@ rev = "80daaf1"
 
 [[lean_lib]]
 name = "ZhangYeung"
+
+[[lean_lib]]
+name = "ZhangYeungTest"
