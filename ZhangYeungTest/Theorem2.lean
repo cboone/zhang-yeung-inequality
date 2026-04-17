@@ -47,6 +47,23 @@ example
   have h := theorem2 hX hY hZ hU μ h₁ h₂
   linarith [h, h₃]
 
+/- `X ↔ Y` swap via `mutualInfo_comm` and `condMutualInfo_comm`: a caller whose
+hypotheses are stated as `I[Y : X ; μ] = 0` and `I[Y : X | Z ; μ] = 0` -- the
+syntactic commute of the paper's eq. (16) -- still recovers the conclusion by
+rebasing through the commutation lemmas before calling `theorem2`. This
+exercises the theorem's interplay with the commutative structure of mutual
+information. -/
+example
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y)
+    (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ]
+    (h₁ : I[Y : X ; μ] = 0)
+    (h₂ : I[Y : X | Z ; μ] = 0) :
+    I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ] :=
+  theorem2 hX hY hZ hU μ ((mutualInfo_comm hY hX μ).symm.trans h₁)
+    ((condMutualInfo_comm hY hX Z μ).symm.trans h₂)
+
 end Signature
 
 section ConcreteFintype
