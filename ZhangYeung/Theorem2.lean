@@ -360,6 +360,54 @@ private lemma sum_ptilde_over_x
     simp [ha, hb]
   · field_simp
 
+omit [Fintype S₁] [Fintype S₃] in
+/-- **`p̃` marginal over `(y, u)` is `pXZ`.** Derived from `sum_ptilde_over_y` (collapse y, leaving pXZU) and `sum_map_triple_third` (collapse u, leaving pXZ). -/
+private lemma sum_ptilde_over_y_u
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (x : S₁) (z : S₃) :
+    (∑ y : S₂, ∑ u : S₄, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map (fun ω => (X ω, Z ω))).real {(x, z)} := by
+  rw [Finset.sum_comm]
+  simp_rw [sum_ptilde_over_y hX hY hZ hU μ]
+  exact sum_map_triple_third hX hZ hU μ x z
+
+omit [Fintype S₁] [Fintype S₄] in
+/-- **`p̃` marginal over `(y, z)` is `pXU`.** Derived from `sum_ptilde_over_y` and `sum_map_triple_second`. -/
+private lemma sum_ptilde_over_y_z
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (x : S₁) (u : S₄) :
+    (∑ y : S₂, ∑ z : S₃, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map (fun ω => (X ω, U ω))).real {(x, u)} := by
+  rw [Finset.sum_comm]
+  simp_rw [sum_ptilde_over_y hX hY hZ hU μ]
+  exact sum_map_triple_second hX hZ hU μ x u
+
+omit [Fintype S₂] [Fintype S₃] in
+/-- **`p̃` marginal over `(x, u)` is `pYZ`.** Derived from `sum_ptilde_over_x` and `sum_map_triple_third`. -/
+private lemma sum_ptilde_over_x_u
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (y : S₂) (z : S₃) :
+    (∑ x : S₁, ∑ u : S₄, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map (fun ω => (Y ω, Z ω))).real {(y, z)} := by
+  rw [Finset.sum_comm]
+  simp_rw [sum_ptilde_over_x hX hY hZ hU μ]
+  exact sum_map_triple_third hY hZ hU μ y z
+
+omit [Fintype S₂] [Fintype S₄] in
+/-- **`p̃` marginal over `(x, z)` is `pYU`.** Derived from `sum_ptilde_over_x` and `sum_map_triple_second`. -/
+private lemma sum_ptilde_over_x_z
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (y : S₂) (u : S₄) :
+    (∑ x : S₁, ∑ z : S₃, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map (fun ω => (Y ω, U ω))).real {(y, u)} := by
+  rw [Finset.sum_comm]
+  simp_rw [sum_ptilde_over_x hX hY hZ hU μ]
+  exact sum_map_triple_second hY hZ hU μ y u
+
 omit [Fintype S₃] [Fintype S₄] in
 /-- **Inner fiber sum.** For each fixed `(z, u)`, the fibre sum of `p̃` over `(x, y)` collapses to `p(z, u)`. This is the core computation of `ptilde_sum_eq_one`: the marginal identities supply `∑_x p(x, z, u) = p(z, u)` and `∑_y p(y, z, u) = p(z, u)`, factoring the inner product-of-sums out of the division. -/
 private lemma ptilde_fibre_sum
