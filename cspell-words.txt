@@ -89,6 +89,7 @@ oleans
 opencode
 Pandoc
 phat
+pointwise
 preimage
 ptilde
 pushforward

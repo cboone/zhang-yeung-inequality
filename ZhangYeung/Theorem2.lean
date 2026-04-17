@@ -30,7 +30,21 @@ The second layer (`theorem2_delta_le_zero`) discharges the reduced inequality vi
 
 (both vanishing on the appropriate zero-measure diagonals). Both sum to one -- `p̃` unconditionally, `p̂` by way of the two hypotheses `I[X:Y] = 0` and `I[X:Y|Z] = 0`. One then expands `Δ` and observes that every marginal appearing in the log-expression is shared between the original law and `p̃`, so the `p`-weighted sum equals the `p̃`-weighted sum, and what drops out is exactly `-KL(p̃ ‖ p̂) ≤ 0`. This is an `IsZeroOrProbabilityMeasure`-level KL-divergence argument and does *not* use the kernel/`condIndep_copies` machinery that Candidate A of the milestone plan envisioned; PFR's `KLDiv_nonneg` (and the underlying log-sum inequality `Real.sum_mul_log_div_leq`) is the relevant non-negativity lemma.
 
-**Current state:** `theorem2_delta_le_zero` is wired end-to-end, with the main proof body assembled around `Real.sum_mul_log_div_leq` and its absolute-continuity side condition (closed). `ptilde_sum_eq_one` is closed. Three scaffolded sub-lemmas remain `sorry`: `phat_sum_eq_one` (requires extracting `p(x,y) = p(x)p(y)` from `IndepFun X Y` and `p(x,y,z) = p(x,z)p(y,z)/p(z)` from `CondIndepFun X Y Z`), `delta_eq_sum_log_ratio` (entropy expansion over the 4-tuple space), and `sum_joint_eq_sum_ptilde` (the 11-factor marginal-swap observation). Each closes independently.
+**Current state:** `theorem2_delta_le_zero` is wired end-to-end, with the main proof body assembled around `Real.sum_mul_log_div_leq` and its absolute-continuity side condition (closed inline via marginal bounds). `ptilde_sum_eq_one` is closed. Three scaffolded sub-lemmas remain `sorry`:
+
+- `phat_sum_eq_one` (requires extracting `p(x,y) = p(x)p(y)` from `IndepFun X Y` and `p(x,y,z) = p(x,z)p(y,z)/p(z)` from `CondIndepFun X Y Z`),
+- `delta_eq_sum_log_ratio` (entropy expansion over the 4-tuple space), and
+- `sum_joint_eq_sum_ptilde` (the 11-factor marginal-swap observation).
+
+Each closes independently of the others. The file is organized into the following sections:
+
+1. `theorem2_shannon_identity` -- Shannon-algebra reduction to `Δ ≤ 0`.
+2. Auxiliary distributions `p̃`, `p̂` (plus `pJoint`) and their nonnegativity.
+3. Generic finite-alphabet utilities (marginal summations, marginal bounds, `IndepFun` product formula, fibrewise-swap helper).
+4. The eleven marginal-match facts for `p̃`.
+5. Sum-to-one facts (`ptilde_sum_eq_one` closed; `phat_sum_eq_one` sorry).
+6. Δ-to-log-ratio identities (`delta_eq_sum_log_ratio`, `sum_joint_eq_sum_ptilde` -- both sorry).
+7. `theorem2_delta_le_zero` + `theorem2`.
 
 The four codomains `S₁, S₂, S₃, S₄` are specialized to `[Fintype]` + `[MeasurableSingletonClass]` so PFR's `FiniteRange`/`Countable` obligations are discharged uniformly.
 
@@ -57,6 +71,8 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
+
+/-! ### Shannon-algebra reduction -/
 
 /-- **Shannon-type reduction for Theorem 2.** The algebraic identity that rewrites `I[X:Y|⟨Z,U⟩] - I[Z:U|⟨X,Y⟩] - I[X:Y|U]` as `Δ(Z, U | X, Y) + I[X:Y|Z] - I[X:Y]`, where `Δ` is `ZhangYeung.delta`. Under the hypotheses of Theorem 2 (eq. 16), the two correction terms are zero and the Theorem 2 target is equivalent to `Δ(Z, U | X, Y) ≤ 0`. The identity is pure Shannon algebra and needs no hypotheses beyond `IsProbabilityMeasure`. -/
 private lemma theorem2_shannon_identity
@@ -93,10 +109,7 @@ private lemma theorem2_shannon_identity
     entropy_comm hXY hZU μ
   linarith [e_XZU, e_YZU, e_ZXY, e_UXY, e_XU, e_YU, e_XZ, e_YZ, e_XYZU]
 
-/-! ### KL-divergence scaffolding for `theorem2_delta_le_zero`
-
-The four sub-lemmas below factor the [@zhangyeung1997] proof of `Δ(Z, U | X, Y) ≤ 0`. They share the auxiliary distributions `ptilde` and `phat` defined immediately below; each captures one algebraic obligation of the KL-divergence argument so the main proof is a composition that invokes `Real.sum_mul_log_div_leq` on the finite-alphabet sum.
--/
+/-! ### Auxiliary distributions `p̃`, `p̂`, and the joint PMF -/
 
 /-- The first auxiliary distribution `p̃(x, y, z, u) := p(x, z, u) p(y, z, u) / p(z, u)` on `S₁ × S₂ × S₃ × S₄`, built from the joint law of `(X, Y, Z, U)` under `μ`. Under Lean's convention `0 / 0 = 0` and the absolute-continuity of the marginals, `ptilde` vanishes exactly on the zero-measure diagonal `{(x, y, z, u) : p(z, u) = 0}` without an explicit case split. -/
 private noncomputable def ptilde
@@ -122,34 +135,33 @@ private noncomputable def pJoint
     S₁ × S₂ × S₃ × S₄ → ℝ := fun t =>
   (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
 
-/-- **Marginal summation.** For a triple-valued joint `(f, g, h) : Ω → α × β × γ` with `α` finite and discrete, summing the real joint PMF over the first coordinate recovers the two-coordinate marginal PMF `(g, h)`. This is the Fintype-level `Prod.snd`-pushforward fact used in the `ptilde`/`phat` sum arguments. -/
-private lemma sum_map_triple_first
-    {α β γ : Type*} [Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]
-    [MeasurableSpace β] [MeasurableSingletonClass β]
-    [MeasurableSpace γ] [MeasurableSingletonClass γ]
-    {Ω' : Type*} [MeasurableSpace Ω']
-    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
-    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
-    (μ : Measure Ω') [IsFiniteMeasure μ] (b : β) (c : γ) :
-    ∑ a : α, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
-      = (μ.map (fun ω => (g ω, h ω))).real {(b, c)} := by
-  have hfgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
-  have hgh : Measurable (fun ω => (g ω, h ω)) := hg.prodMk hh
-  simp_rw [map_measureReal_apply hfgh (measurableSet_singleton _),
-           map_measureReal_apply hgh (measurableSet_singleton _)]
-  have preimage_eq : ∀ a : α,
-      (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
-        = f ⁻¹' {a} ∩ (fun ω => (g ω, h ω))⁻¹' {(b, c)} := by
-    intro a; ext ω; simp
-  simp_rw [preimage_eq]
-  have hA : MeasurableSet ((fun ω => (g ω, h ω))⁻¹' {(b, c)}) :=
-    hgh (measurableSet_singleton _)
-  simp_rw [show ∀ a : α, μ.real (f ⁻¹' {a} ∩ (fun ω => (g ω, h ω))⁻¹' {(b, c)})
-      = (μ.restrict ((fun ω => (g ω, h ω))⁻¹' {(b, c)})).real (f ⁻¹' {a}) from
-    fun a => (measureReal_restrict_apply (hf (measurableSet_singleton a))).symm]
-  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset α)
-      (fun y _ => hf (measurableSet_singleton y))]
-  simp
+omit [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
+  [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄] in
+/-- **`p̃` is nonnegative.** Quotients of nonneg reals are nonneg in Lean (with `0 / 0 = 0`). -/
+private lemma ptilde_nonneg
+    (X : Ω → S₁) (Y : Ω → S₂) (Z : Ω → S₃) (U : Ω → S₄) (μ : Measure Ω)
+    (t : S₁ × S₂ × S₃ × S₄) :
+    0 ≤ ptilde X Y Z U μ t := by
+  obtain ⟨x, y, z, u⟩ := t
+  unfold ptilde
+  positivity
+
+omit [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
+  [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄] in
+/-- **`p̂` is nonnegative.** Quotients of nonneg reals are nonneg. -/
+private lemma phat_nonneg
+    (X : Ω → S₁) (Y : Ω → S₂) (Z : Ω → S₃) (U : Ω → S₄) (μ : Measure Ω)
+    (t : S₁ × S₂ × S₃ × S₄) :
+    0 ≤ phat X Y Z U μ t := by
+  obtain ⟨x, y, z, u⟩ := t
+  unfold phat
+  positivity
+
+/-! ### Generic finite-alphabet utilities
+
+Pair and triple pushforward helpers -- marginal summation over each coordinate, pointwise marginal bounds, the `IndepFun` product formula, and the fibrewise-swap identity. All are stated generically (on abstract `Ω' / α / β / γ`) so they apply independently of this module's `X, Y, Z, U` variables. -/
 
 /-- Marginal summation for pairs: summing the pair-joint over the *first* coordinate recovers the marginal of `g`. -/
 private lemma sum_map_pair_first
@@ -202,7 +214,62 @@ private lemma sum_map_pair_second
       (fun y _ => hg (measurableSet_singleton y))]
   simp
 
-/-- Marginal summation, third variant: summing the triple joint over the *third* coordinate recovers the marginal of `(f, g)`. -/
+/-- Marginal summation for triples: summing over the *first* coordinate recovers the `(g, h)` marginal. -/
+private lemma sum_map_triple_first
+    {α β γ : Type*} [Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    [MeasurableSpace γ] [MeasurableSingletonClass γ]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
+    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (b : β) (c : γ) :
+    ∑ a : α, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
+      = (μ.map (fun ω => (g ω, h ω))).real {(b, c)} := by
+  have hfgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
+  have hgh : Measurable (fun ω => (g ω, h ω)) := hg.prodMk hh
+  simp_rw [map_measureReal_apply hfgh (measurableSet_singleton _),
+           map_measureReal_apply hgh (measurableSet_singleton _)]
+  have preimage_eq : ∀ a : α,
+      (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
+        = f ⁻¹' {a} ∩ (fun ω => (g ω, h ω))⁻¹' {(b, c)} := by
+    intro a; ext ω; simp
+  simp_rw [preimage_eq]
+  simp_rw [show ∀ a : α, μ.real (f ⁻¹' {a} ∩ (fun ω => (g ω, h ω))⁻¹' {(b, c)})
+      = (μ.restrict ((fun ω => (g ω, h ω))⁻¹' {(b, c)})).real (f ⁻¹' {a}) from
+    fun a => (measureReal_restrict_apply (hf (measurableSet_singleton a))).symm]
+  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset α)
+      (fun y _ => hf (measurableSet_singleton y))]
+  simp
+
+/-- Marginal summation for triples: summing over the *second* coordinate recovers the `(f, h)` marginal. -/
+private lemma sum_map_triple_second
+    {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
+    [Fintype β] [MeasurableSpace β] [MeasurableSingletonClass β]
+    [MeasurableSpace γ] [MeasurableSingletonClass γ]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
+    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (c : γ) :
+    ∑ b : β, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
+      = (μ.map (fun ω => (f ω, h ω))).real {(a, c)} := by
+  have hfgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
+  have hfh : Measurable (fun ω => (f ω, h ω)) := hf.prodMk hh
+  simp_rw [map_measureReal_apply hfgh (measurableSet_singleton _),
+           map_measureReal_apply hfh (measurableSet_singleton _)]
+  have preimage_eq : ∀ b : β,
+      (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
+        = g ⁻¹' {b} ∩ ((fun ω => (f ω, h ω))⁻¹' {(a, c)}) := by
+    intro b; ext ω; simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq,
+      Set.mem_inter_iff]; tauto
+  simp_rw [preimage_eq]
+  simp_rw [show ∀ b : β, μ.real (g ⁻¹' {b} ∩ (fun ω => (f ω, h ω))⁻¹' {(a, c)})
+      = (μ.restrict ((fun ω => (f ω, h ω))⁻¹' {(a, c)})).real (g ⁻¹' {b}) from
+    fun b => (measureReal_restrict_apply (hg (measurableSet_singleton b))).symm]
+  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset β)
+      (fun y _ => hg (measurableSet_singleton y))]
+  simp
+
+/-- Marginal summation for triples: summing over the *third* coordinate recovers the `(f, g)` marginal. -/
 private lemma sum_map_triple_third
     {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
     [MeasurableSpace β] [MeasurableSingletonClass β]
@@ -230,37 +297,94 @@ private lemma sum_map_triple_third
       (fun y _ => hh (measurableSet_singleton y))]
   simp
 
-/-- Marginal summation, second variant: summing the triple joint over the *second* coordinate recovers the marginal of `(f, h)`. -/
-private lemma sum_map_triple_second
+/-- **Marginal bound (pair, first).** The pair mass is bounded by the first projection. Used for the absolute-continuity claim `p̂ = 0 → p̃ = 0`. -/
+private lemma measureReal_map_pair_le_map_fst
+    {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β}
+    (hf : Measurable f) (hg : Measurable g)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (b : β) :
+    (μ.map (fun ω => (f ω, g ω))).real {(a, b)} ≤ (μ.map f).real {a} := by
+  rw [map_measureReal_apply (hf.prodMk hg) (measurableSet_singleton _),
+      map_measureReal_apply hf (measurableSet_singleton _)]
+  apply measureReal_mono _ (measure_ne_top _ _)
+  intro ω hω
+  simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
+  exact hω.1
+
+/-- **Marginal bound (pair, second).** The pair mass is bounded by the second projection. -/
+private lemma measureReal_map_pair_le_map_snd
+    {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β}
+    (hf : Measurable f) (hg : Measurable g)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (b : β) :
+    (μ.map (fun ω => (f ω, g ω))).real {(a, b)} ≤ (μ.map g).real {b} := by
+  rw [map_measureReal_apply (hf.prodMk hg) (measurableSet_singleton _),
+      map_measureReal_apply hg (measurableSet_singleton _)]
+  apply measureReal_mono _ (measure_ne_top _ _)
+  intro ω hω
+  simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
+  exact hω.2
+
+/-- **Marginal bound (triple, forget third).** `p(a, b, c) ≤ p(a, b)`. -/
+private lemma measureReal_map_triple_le_map_pair_12
     {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
-    [Fintype β] [MeasurableSpace β] [MeasurableSingletonClass β]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
     [MeasurableSpace γ] [MeasurableSingletonClass γ]
     {Ω' : Type*} [MeasurableSpace Ω']
     {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
     (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
-    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (c : γ) :
-    ∑ b : β, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
-      = (μ.map (fun ω => (f ω, h ω))).real {(a, c)} := by
-  have hfgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
-  have hfh : Measurable (fun ω => (f ω, h ω)) := hf.prodMk hh
-  simp_rw [map_measureReal_apply hfgh (measurableSet_singleton _),
-           map_measureReal_apply hfh (measurableSet_singleton _)]
-  have preimage_eq : ∀ b : β,
-      (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
-        = g ⁻¹' {b} ∩ ((fun ω => (f ω, h ω))⁻¹' {(a, c)}) := by
-    intro b; ext ω; simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq,
-      Set.mem_inter_iff]; tauto
-  simp_rw [preimage_eq]
-  have hA : MeasurableSet ((fun ω => (f ω, h ω))⁻¹' {(a, c)}) :=
-    hfh (measurableSet_singleton _)
-  simp_rw [show ∀ b : β, μ.real (g ⁻¹' {b} ∩ (fun ω => (f ω, h ω))⁻¹' {(a, c)})
-      = (μ.restrict ((fun ω => (f ω, h ω))⁻¹' {(a, c)})).real (g ⁻¹' {b}) from
-    fun b => (measureReal_restrict_apply (hg (measurableSet_singleton b))).symm]
-  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset β)
-      (fun y _ => hg (measurableSet_singleton y))]
-  simp
+    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (b : β) (c : γ) :
+    (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
+      ≤ (μ.map (fun ω => (f ω, g ω))).real {(a, b)} := by
+  rw [map_measureReal_apply (hf.prodMk (hg.prodMk hh)) (measurableSet_singleton _),
+      map_measureReal_apply (hf.prodMk hg) (measurableSet_singleton _)]
+  apply measureReal_mono _ (measure_ne_top _ _)
+  intro ω hω
+  simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
+  exact ⟨hω.1, hω.2.1⟩
 
-/-- **Marginal-swap (fiberwise rearrangement).** If two weight functions `f, g : α → ℝ` agree on every fibre of a projection `proj : α → β` (i.e., share the same `proj`-marginal), then their weighted sums of any `proj`-composed function agree. This is the abstract kernel of the 11-factor marginal-swap argument used in `sum_joint_eq_sum_ptilde`. -/
+/-- **Marginal bound (triple, forget second).** `p(a, b, c) ≤ p(a, c)`. -/
+private lemma measureReal_map_triple_le_map_pair_13
+    {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    [MeasurableSpace γ] [MeasurableSingletonClass γ]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
+    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (b : β) (c : γ) :
+    (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
+      ≤ (μ.map (fun ω => (f ω, h ω))).real {(a, c)} := by
+  rw [map_measureReal_apply (hf.prodMk (hg.prodMk hh)) (measurableSet_singleton _),
+      map_measureReal_apply (hf.prodMk hh) (measurableSet_singleton _)]
+  apply measureReal_mono _ (measure_ne_top _ _)
+  intro ω hω
+  simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
+  exact ⟨hω.1, hω.2.2⟩
+
+/-- **IndepFun product formula.** If `f, g` are independent, the joint singleton mass factors: `(μ.map ⟨f, g⟩).real {(a, b)} = (μ.map f).real {a} * (μ.map g).real {b}`. This extracts the product identity from `IndepFun.measure_inter_preimage_eq_mul` in the shape used by `phat_sum_eq_one`. -/
+private lemma indepFun_map_pair_real_singleton
+    {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    {Ω' : Type*} [MeasurableSpace Ω'] {f : Ω' → α} {g : Ω' → β}
+    (hf : Measurable f) (hg : Measurable g)
+    {μ : Measure Ω'} (h_indep : IndepFun f g μ) (a : α) (b : β) :
+    (μ.map (fun ω => (f ω, g ω))).real {(a, b)}
+      = (μ.map f).real {a} * (μ.map g).real {b} := by
+  rw [map_measureReal_apply (hf.prodMk hg) (measurableSet_singleton _),
+      map_measureReal_apply hf (measurableSet_singleton _),
+      map_measureReal_apply hg (measurableSet_singleton _)]
+  have h_pre : (fun ω => (f ω, g ω)) ⁻¹' {(a, b)} = f ⁻¹' {a} ∩ g ⁻¹' {b} := by
+    ext ω; simp
+  rw [h_pre, measureReal_def, measureReal_def, measureReal_def,
+      h_indep.measure_inter_preimage_eq_mul {a} {b}
+        (measurableSet_singleton a) (measurableSet_singleton b),
+      ENNReal.toReal_mul]
+
+/-- **Fibrewise marginal-swap.** If two weight functions `f, g : α → ℝ` agree on every fibre of a projection `proj : α → β` (i.e., share the same `proj`-marginal), then their weighted sums of any `proj`-composed function agree. This is the abstract kernel of the 11-factor marginal-swap argument used in `sum_joint_eq_sum_ptilde`. -/
 private lemma sum_mul_proj_eq_of_marginal_eq
     {α β : Type*} [Fintype α] [Fintype β] [DecidableEq β]
     (f g : α → ℝ) (proj : α → β) (φ : β → ℝ)
@@ -284,95 +408,35 @@ private lemma sum_mul_proj_eq_of_marginal_eq
     rw [(Finset.mem_filter.mp ha).2]
   rw [hf, hg, h_marg]
 
-/-- **IndepFun product formula.** If `f, g` are independent, the joint singleton mass factors: `(μ.map ⟨f, g⟩).real {(a, b)} = (μ.map f).real {a} * (μ.map g).real {b}`. This extracts the product identity from `IndepFun.measure_inter_preimage_eq_mul` in the shape used by `phat_sum_eq_one`. -/
-private lemma indepFun_map_pair_real_singleton
-    {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
-    [MeasurableSpace β] [MeasurableSingletonClass β]
-    {Ω' : Type*} [MeasurableSpace Ω'] {f : Ω' → α} {g : Ω' → β}
-    (hf : Measurable f) (hg : Measurable g)
-    {μ : Measure Ω'} (h_indep : IndepFun f g μ) (a : α) (b : β) :
-    (μ.map (fun ω => (f ω, g ω))).real {(a, b)}
-      = (μ.map f).real {a} * (μ.map g).real {b} := by
-  rw [map_measureReal_apply (hf.prodMk hg) (measurableSet_singleton _),
-      map_measureReal_apply hf (measurableSet_singleton _),
-      map_measureReal_apply hg (measurableSet_singleton _)]
-  have h_pre : (fun ω => (f ω, g ω)) ⁻¹' {(a, b)} = f ⁻¹' {a} ∩ g ⁻¹' {b} := by
-    ext ω; simp
-  rw [h_pre, measureReal_def, measureReal_def, measureReal_def,
-      h_indep.measure_inter_preimage_eq_mul {a} {b}
-        (measurableSet_singleton a) (measurableSet_singleton b),
-      ENNReal.toReal_mul]
+/-! ### Marginal structure of `p̃`
 
-/-- **Marginal bound.** The joint mass at a specific tuple is bounded by the marginal mass at any projection. This is the key fact behind the absolute-continuity claim `phat = 0 → ptilde = 0`. -/
-private lemma measureReal_map_pair_le_map_fst
-    {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
-    [MeasurableSpace β] [MeasurableSingletonClass β]
-    {Ω' : Type*} [MeasurableSpace Ω']
-    {f : Ω' → α} {g : Ω' → β}
-    (hf : Measurable f) (hg : Measurable g)
-    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (b : β) :
-    (μ.map (fun ω => (f ω, g ω))).real {(a, b)} ≤ (μ.map f).real {a} := by
-  rw [map_measureReal_apply (hf.prodMk hg) (measurableSet_singleton _),
-      map_measureReal_apply hf (measurableSet_singleton _)]
-  apply measureReal_mono _ (measure_ne_top _ _)
-  intro ω hω
-  simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
-  exact hω.1
+The eleven marginal-match facts: each of `p̃`'s projection-marginals agrees with `pJoint`'s. `ptilde_fibre_sum` handles the `(x, y)` fibre at the 2-tuple level; the rest cascade from `sum_ptilde_over_y`/`sum_ptilde_over_x` plus `sum_map_triple_*` / `sum_map_pair_*` to descend through the other projections. -/
 
-/-- **Marginal bound, second variant.** The joint mass is bounded by the second projection. -/
-private lemma measureReal_map_pair_le_map_snd
-    {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
-    [MeasurableSpace β] [MeasurableSingletonClass β]
-    {Ω' : Type*} [MeasurableSpace Ω']
-    {f : Ω' → α} {g : Ω' → β}
-    (hf : Measurable f) (hg : Measurable g)
-    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (b : β) :
-    (μ.map (fun ω => (f ω, g ω))).real {(a, b)} ≤ (μ.map g).real {b} := by
-  rw [map_measureReal_apply (hf.prodMk hg) (measurableSet_singleton _),
-      map_measureReal_apply hg (measurableSet_singleton _)]
-  apply measureReal_mono _ (measure_ne_top _ _)
-  intro ω hω
-  simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
-  exact hω.2
-
-/-- **Marginal bound for triples, forgetting the third.** `p(a, b, c) ≤ p(a, b)`. -/
-private lemma measureReal_map_triple_le_map_pair_12
-    {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
-    [MeasurableSpace β] [MeasurableSingletonClass β]
-    [MeasurableSpace γ] [MeasurableSingletonClass γ]
-    {Ω' : Type*} [MeasurableSpace Ω']
-    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
-    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
-    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (b : β) (c : γ) :
-    (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
-      ≤ (μ.map (fun ω => (f ω, g ω))).real {(a, b)} := by
-  rw [map_measureReal_apply (hf.prodMk (hg.prodMk hh)) (measurableSet_singleton _),
-      map_measureReal_apply (hf.prodMk hg) (measurableSet_singleton _)]
-  apply measureReal_mono _ (measure_ne_top _ _)
-  intro ω hω
-  simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
-  exact ⟨hω.1, hω.2.1⟩
-
-/-- **Marginal bound for triples, forgetting the second.** `p(a, b, c) ≤ p(a, c)`. -/
-private lemma measureReal_map_triple_le_map_pair_13
-    {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
-    [MeasurableSpace β] [MeasurableSingletonClass β]
-    [MeasurableSpace γ] [MeasurableSingletonClass γ]
-    {Ω' : Type*} [MeasurableSpace Ω']
-    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
-    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
-    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (b : β) (c : γ) :
-    (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
-      ≤ (μ.map (fun ω => (f ω, h ω))).real {(a, c)} := by
-  rw [map_measureReal_apply (hf.prodMk (hg.prodMk hh)) (measurableSet_singleton _),
-      map_measureReal_apply (hf.prodMk hh) (measurableSet_singleton _)]
-  apply measureReal_mono _ (measure_ne_top _ _)
-  intro ω hω
-  simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
-  exact ⟨hω.1, hω.2.2⟩
+omit [Fintype S₃] [Fintype S₄] in
+/-- **Inner fibre sum.** For each fixed `(z, u)`, the fibre sum of `p̃` over `(x, y)` collapses to `p(z, u)`. This is the core computation of `ptilde_sum_eq_one`: the marginal identities supply `∑_x p(x, z, u) = p(z, u)` and `∑_y p(y, z, u) = p(z, u)`, factoring the inner product-of-sums out of the division. -/
+private lemma ptilde_fibre_sum
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (z : S₃) (u : S₄) :
+    (∑ x : S₁, ∑ y : S₂,
+        (μ.map (fun ω => (X ω, Z ω, U ω))).real {(x, z, u)} *
+        (μ.map (fun ω => (Y ω, Z ω, U ω))).real {(y, z, u)} /
+        (μ.map (fun ω => (Z ω, U ω))).real {(z, u)})
+      = (μ.map (fun ω => (Z ω, U ω))).real {(z, u)} := by
+  set c := (μ.map (fun ω => (Z ω, U ω))).real {(z, u)}
+  set Fx := fun x : S₁ => (μ.map (fun ω => (X ω, Z ω, U ω))).real {(x, z, u)}
+  set Fy := fun y : S₂ => (μ.map (fun ω => (Y ω, Z ω, U ω))).real {(y, z, u)}
+  have hSumFx : ∑ x, Fx x = c := sum_map_triple_first hX hZ hU μ z u
+  have hSumFy : ∑ y, Fy y = c := sum_map_triple_first hY hZ hU μ z u
+  show ∑ x, ∑ y, Fx x * Fy y / c = c
+  simp_rw [div_eq_mul_inv, ← Finset.sum_mul]
+  rw [← Finset.sum_mul_sum, hSumFx, hSumFy]
+  by_cases hc : c = 0
+  · simp [hc]
+  · field_simp
 
 omit [Fintype S₁] [Fintype S₃] [Fintype S₄] in
-/-- **`p̃` marginal over `y` is `pXZU`.** Summing `p̃(x, y, z, u)` over `y ∈ S₂` gives `pXZU(x, z, u)`. This matches `pJoint`'s corresponding marginal over `y`, and is one of the 11 marginal-match facts behind `sum_joint_eq_sum_ptilde`. -/
+/-- **`p̃` marginal over `y` is `pXZU`.** Summing `p̃(x, y, z, u)` over `y ∈ S₂` gives `pXZU(x, z, u)`. -/
 private lemma sum_ptilde_over_y
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -412,7 +476,7 @@ private lemma sum_ptilde_over_x
   · field_simp
 
 omit [Fintype S₁] [Fintype S₃] in
-/-- **`p̃` marginal over `(y, u)` is `pXZ`.** Derived from `sum_ptilde_over_y` (collapse y, leaving pXZU) and `sum_map_triple_third` (collapse u, leaving pXZ). -/
+/-- **`p̃` marginal over `(y, u)` is `pXZ`.** Derived from `sum_ptilde_over_y` (collapse `y`, leaving pXZU) and `sum_map_triple_third` (collapse `u`, leaving pXZ). -/
 private lemma sum_ptilde_over_y_u
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -459,29 +523,6 @@ private lemma sum_ptilde_over_x_z
   simp_rw [sum_ptilde_over_x hX hY hZ hU μ]
   exact sum_map_triple_second hY hZ hU μ y u
 
-omit [Fintype S₃] [Fintype S₄] in
-/-- **Inner fiber sum.** For each fixed `(z, u)`, the fibre sum of `p̃` over `(x, y)` collapses to `p(z, u)`. This is the core computation of `ptilde_sum_eq_one`: the marginal identities supply `∑_x p(x, z, u) = p(z, u)` and `∑_y p(y, z, u) = p(z, u)`, factoring the inner product-of-sums out of the division. -/
-private lemma ptilde_fibre_sum
-    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
-    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
-    (μ : Measure Ω) [IsFiniteMeasure μ] (z : S₃) (u : S₄) :
-    (∑ x : S₁, ∑ y : S₂,
-        (μ.map (fun ω => (X ω, Z ω, U ω))).real {(x, z, u)} *
-        (μ.map (fun ω => (Y ω, Z ω, U ω))).real {(y, z, u)} /
-        (μ.map (fun ω => (Z ω, U ω))).real {(z, u)})
-      = (μ.map (fun ω => (Z ω, U ω))).real {(z, u)} := by
-  set c := (μ.map (fun ω => (Z ω, U ω))).real {(z, u)}
-  set Fx := fun x : S₁ => (μ.map (fun ω => (X ω, Z ω, U ω))).real {(x, z, u)}
-  set Fy := fun y : S₂ => (μ.map (fun ω => (Y ω, Z ω, U ω))).real {(y, z, u)}
-  have hSumFx : ∑ x, Fx x = c := sum_map_triple_first hX hZ hU μ z u
-  have hSumFy : ∑ y, Fy y = c := sum_map_triple_first hY hZ hU μ z u
-  show ∑ x, ∑ y, Fx x * Fy y / c = c
-  simp_rw [div_eq_mul_inv, ← Finset.sum_mul]
-  rw [← Finset.sum_mul_sum, hSumFx, hSumFy]
-  by_cases hc : c = 0
-  · simp [hc]
-  · field_simp
-
 omit [Fintype S₁] in
 /-- **`p̃` marginal over `(y, z, u)` is `pX`.** Derived from `sum_ptilde_over_y_z` and `sum_map_pair_second`. -/
 private lemma sum_ptilde_over_y_z_u
@@ -519,7 +560,7 @@ private lemma sum_ptilde_over_x_z_u
   exact sum_map_pair_second hY hU μ y
 
 omit [Fintype S₃] in
-/-- **`p̃` marginal over `(x, y, u)` is `pZ`.** Derived from `ptilde_fibre_sum` and `sum_map_pair_first`. -/
+/-- **`p̃` marginal over `(x, y, u)` is `pZ`.** Derived from `ptilde_fibre_sum` and `sum_map_pair_second`. -/
 private lemma sum_ptilde_over_x_y_u
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -560,6 +601,8 @@ private lemma sum_ptilde_over_x_y_z
   simp_rw [hFibre]
   exact sum_map_pair_first hZ hU μ u
 
+/-! ### Sum-to-one -/
+
 /-- **`p̃` is a probability distribution.** This is the unconditional half of the Zhang-Yeung auxiliary-distribution argument: `∑_{x,y,z,u} p(x,z,u) p(y,z,u) / p(z,u) = 1` for any probability measure. The proof reshapes the 4-tuple sum via an `Equiv` `S₃ × S₄ × S₁ × S₂ ≃ S₁ × S₂ × S₃ × S₄`, uses `ptilde_fibre_sum` to collapse each `(z, u)` fibre, and reassembles the outer `∑_{z,u} p(z, u) = 1` via the probability-measure property of the pushforward `μ.map ⟨Z, U⟩`. -/
 private lemma ptilde_sum_eq_one
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
@@ -581,7 +624,6 @@ private lemma ptilde_sum_eq_one
         = (μ.map (fun ω => (Z ω, U ω))).real {(z, u)} :=
     fun z u => ptilde_fibre_sum hX hY hZ hU μ z u
   simp_rw [hFibre]
-  -- Goal: ∑ z, ∑ u, (μ.map ⟨Z, U⟩).real {(z, u)} = 1.
   have hSingletonSum : (∑ p : S₃ × S₄, (μ.map (fun ω => (Z ω, U ω))).real {p}) = 1 := by
     rw [sum_measureReal_singleton (Finset.univ : Finset (S₃ × S₄))]
     simp
@@ -602,6 +644,8 @@ private lemma phat_sum_eq_one
     (h₁ : I[X : Y ; μ] = 0) (h₂ : I[X : Y | Z ; μ] = 0) :
     ∑ t : S₁ × S₂ × S₃ × S₄, phat X Y Z U μ t = 1 := by
   sorry
+
+/-! ### Δ-to-log-ratio identities -/
 
 /-- **`Δ` as a weighted-log sum.** The identity `Δ(Z, U | X, Y) = ∑_{x,y,z,u} p(x,y,z,u) · log (p̂(x,y,z,u) / p̃(x,y,z,u))` obtained by expanding each of `I[Z:U]`, `I[Z:U|X]`, `I[Z:U|Y]` via `entropy_eq_sum_finset` over the 4-tuple marginal and combining the eleven `negMulLog` contributions. The right-hand side is the raw form of Zhang-Yeung 1997's eq. (41). -/
 private lemma delta_eq_sum_log_ratio
@@ -624,29 +668,7 @@ private lemma sum_joint_eq_sum_ptilde
           ptilde X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t) := by
   sorry
 
-omit [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
-  [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
-  [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄] in
-/-- **`ptilde` is nonnegative.** Quotients of nonneg reals are nonneg in Lean (with `0 / 0 = 0`). -/
-private lemma ptilde_nonneg
-    (X : Ω → S₁) (Y : Ω → S₂) (Z : Ω → S₃) (U : Ω → S₄) (μ : Measure Ω)
-    (t : S₁ × S₂ × S₃ × S₄) :
-    0 ≤ ptilde X Y Z U μ t := by
-  obtain ⟨x, y, z, u⟩ := t
-  unfold ptilde
-  positivity
-
-omit [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
-  [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
-  [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄] in
-/-- **`phat` is nonnegative.** Quotients of nonneg reals are nonneg. -/
-private lemma phat_nonneg
-    (X : Ω → S₁) (Y : Ω → S₂) (Z : Ω → S₃) (U : Ω → S₄) (μ : Measure Ω)
-    (t : S₁ × S₂ × S₃ × S₄) :
-    0 ≤ phat X Y Z U μ t := by
-  obtain ⟨x, y, z, u⟩ := t
-  unfold phat
-  positivity
+/-! ### Main proof -/
 
 /-- **Zhang-Yeung delta is nonpositive under the hypotheses of Theorem 2** ([@zhangyeung1997, Theorem 3]). The direct proof (op. cit.) introduces the auxiliary distributions `ptilde` and `phat` (defined above), expands `Δ` as `∑ p · log(p̂ / p̃)`, reweights via `sum_joint_eq_sum_ptilde` to `∑ p̃ · log(p̂ / p̃) = -KL(p̃ ‖ p̂)`, and closes by the log-sum inequality `Real.sum_mul_log_div_leq` applied to `p̃`, `p̂`. The main proof body here is complete and wires `ptilde_sum_eq_one`, `phat_sum_eq_one`, `delta_eq_sum_log_ratio`, `sum_joint_eq_sum_ptilde`, plus the inline absolute-continuity claim, into the final inequality via `linarith`. -/
 private lemma theorem2_delta_le_zero
@@ -664,12 +686,12 @@ private lemma theorem2_delta_le_zero
     fun t _ => ptilde_nonneg X Y Z U μ t
   have h_phat_nn : ∀ t ∈ s, 0 ≤ phat X Y Z U μ t :=
     fun t _ => phat_nonneg X Y Z U μ t
-  -- Absolute-continuity side condition for `Real.sum_mul_log_div_leq`.
+  -- Absolute-continuity side condition for `Real.sum_mul_log_div_leq`:
+  -- whenever a factor of `p̂` vanishes, the corresponding marginal of `p̃`
+  -- also vanishes (by the pair- and triple-projection bounds), so `p̃ = 0`.
   have h_abs : ∀ t ∈ s, phat X Y Z U μ t = 0 → ptilde X Y Z U μ t = 0 := by
     rintro ⟨x, y, z, u⟩ _ hphat
-    -- Extract a vanishing factor of phat: one of pXZ, pXU, pYZ, pYU, pZ, pU, pX, pY = 0.
     simp only [phat, div_eq_zero_iff, mul_eq_zero] at hphat
-    -- Reduce each case to one of pXZU = 0, pYZU = 0, or pZU = 0, then conclude.
     have h_XZU_le_XZ := measureReal_map_triple_le_map_pair_12 hX hZ hU μ x z u
     have h_XZU_le_XU := measureReal_map_triple_le_map_pair_13 hX hZ hU μ x z u
     have h_YZU_le_YZ := measureReal_map_triple_le_map_pair_12 hY hZ hU μ y z u
