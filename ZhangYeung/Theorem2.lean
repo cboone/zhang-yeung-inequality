@@ -32,18 +32,17 @@ The second layer (`theorem2_delta_le_zero`) discharges the reduced inequality vi
 
 **Connection to the 1998 copy construction.** The auxiliary PMF `p̃(x, y, z, u) := p(x, z, u) p(y, z, u) / p(z, u)` defined above is precisely the `(X', Y₁, Z', U')`-marginal of the extended probability measure `ν` that PFR's `ProbabilityTheory.condIndep_copies`, applied to `⟨X, Y⟩` conditioned on `⟨Z, U⟩`, would produce. Projecting the copy -- set `X' := Prod.fst ∘ W₁`, `Y₁ := Prod.snd ∘ W₂`, `⟨Z', U'⟩ := V` -- the conditional independence `X' ⟂ Y₁ | ⟨Z', U'⟩` plus the marginal identities `(X', Z', U') ∼ (X, Z, U)` and `(Y₁, Z', U') ∼ (Y, Z, U)` force `p_ν(x, y, z, u) = p(x, z, u) p(y, z, u) / p(z, u) = p̃(x, y, z, u)`. So the 1997 KL proof and the 1998 two-copy copy-lemma framework reach the same object from two directions: the 1997 paper constructs `p̃` as a PMF and closes via `Real.sum_mul_log_div_leq`; the 1998 paper (Lemma 2 in §III, eq. 44-45) constructs `ν` via kernel composition and closes Theorem 3 (the unconditional inequality) via a Shannon chase on the copy joint. For Theorem 2 specifically a pure copy + Shannon-chase close is ruled out: [@kaced2013, Theorem 3 + Claim 1, Theorem 5] show this inequality is essentially conditional and fails on the closure of the entropic region, so no combination of basic Shannon inequalities plus Lagrange multiples of the premises can derive it. This module follows the 1997 KL route rather than attempting the copy-construction framing.
 
-**Current state:** `theorem2_delta_le_zero` is wired end-to-end, with the main proof body assembled around `Real.sum_mul_log_div_leq` and its absolute-continuity side condition (closed inline via marginal bounds). `ptilde_sum_eq_one` and `sum_joint_eq_sum_ptilde` are closed; the latter is the 11-factor marginal-swap closing argument, factored through the `marg_swap_helper` module-level private lemma. Two scaffolded sub-lemmas remain `sorry`:
+**Current state:** `theorem2_delta_le_zero` is wired end-to-end, with the main proof body assembled around `Real.sum_mul_log_div_leq` and its absolute-continuity side condition (closed inline via marginal bounds). `ptilde_sum_eq_one`, `phat_sum_eq_one`, and `sum_joint_eq_sum_ptilde` are closed. The `phat_sum_eq_one` closure uses the module-level helpers `condIndepFun_map_triple_real_singleton` (extracting `p(x,y,z) · p(z) = p(x,z) · p(y,z)` from `CondIndepFun X Y Z`), `condIndep_normalized_pair_eq_triple`, and `indepFun_map_pair_real_singleton` (extracting `p(x,y) = p(x) · p(y)` from `IndepFun X Y`); the `sum_joint_eq_sum_ptilde` closure is the 11-factor marginal-swap closing argument, factored through the `marg_swap_helper` helper. One scaffolded sub-lemma remains `sorry`:
 
-- `phat_sum_eq_one` (requires extracting `p(x,y) = p(x)p(y)` from `IndepFun X Y` and `p(x,y,z) = p(x,z)p(y,z)/p(z)` from `CondIndepFun X Y Z`), and
-- `delta_eq_sum_log_ratio` (entropy expansion over the 4-tuple space).
+- `delta_eq_sum_log_ratio` (entropy expansion over the 4-tuple space; the `entropy_eq_sum_joint` helper lifts each entropy `H[f ; μ]` to a 4-tuple weighted sum, after which the eleven signed entropy contributions recombine into `∑ p · log (p̂/p̃)`; the algebraic recombination step is the residual work).
 
-Each closes independently of the other. The file is organized into the following sections:
+The file is organized into the following sections:
 
 1. `theorem2_shannon_identity` -- Shannon-algebra reduction to `Δ ≤ 0`.
 2. Auxiliary distributions `p̃`, `p̂` (plus `pJoint`) and their nonnegativity.
 3. Generic finite-alphabet utilities (marginal summations, marginal bounds, `IndepFun` product formula, fibrewise-swap helper).
 4. The eleven marginal-match facts for `p̃`.
-5. Sum-to-one facts (`ptilde_sum_eq_one` closed; `phat_sum_eq_one` sorry).
+5. Sum-to-one facts (`ptilde_sum_eq_one` and `phat_sum_eq_one` closed).
 6. Δ-to-log-ratio identities (`delta_eq_sum_log_ratio` sorry; `sum_joint_eq_sum_ptilde` closed).
 7. `theorem2_delta_le_zero` + `theorem2`.
 
