@@ -4,6 +4,14 @@
 **Target:** `references/transcriptions/zhangyeung1998.md`
 **Source:** Commit `8d8afdc` (faithful transcription built from Mathpix OCR, page-by-page audited).
 
+## Status
+
+- **Phase A1** (Pandoc build): complete. Commit `6dd19f7`. Three build issues fixed (title duplication, Publisher-Item run-on, references without paragraph breaks). PDF builds cleanly on xelatex.
+- **Phase A2** (projective-plane arithmetic): complete. Commit `60791a3`. All three checks pass symbolically — transcribed intermediate values on p. 1445 combine to exactly `-log_2(9/8)`.
+- **Phase A3** (structural diff vs raw Mathpix): complete. Commit `b5a2610`. Word-count delta (-11) and paragraph-count delta (+40) both fully accounted for by documented audit fixes.
+- **Phase B1** (vision re-extraction): complete. Commit `8fb5bbe`. One real content fix surfaced (eq. 13 and 18 bar removals — Mathpix and vision agreed, my audit was wrong). Remaining agent disagreements on pages 3-12 were agent hallucinations (verified by direct image reads at 450 dpi); my audit was correct on every disputed point.
+- **Phase B2** (Section IV subscript audit): complete. All atom subscripts on pages 10-12 independently verified against the rendered PDF at 450 dpi. Specifically confirmed: `F^4_{1,2}`, `F^4_{1,3}`, `F^4_{1,4}`, `F^4_{2,4}`, `F^7_3`, `F^7_4` assignments across Case 1.1, Case 1.2, and Case 2 branches. The `F^4_{1,3}` fix I made during the original audit (correcting Mathpix's `F_{1,2}^{4,}` typo) is verified correct.
+
 ## 1. Context
 
 The current transcription was derived from Mathpix's API output (commit `bdbc2c1`) and hand-audited page by page at 300 dpi (commit `8d8afdc`). Identified OCR errors have been corrected inline and documented in the commit body. Known residual risks, in decreasing order of concern:
