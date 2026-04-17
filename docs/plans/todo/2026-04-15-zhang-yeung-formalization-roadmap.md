@@ -15,14 +15,16 @@
 
 The Zhang-Yeung inequality is the first known *non-Shannon-type* information inequality. Its discovery proved that the Shannon "basic" inequalities (nonnegativity of entropy, conditional entropy, and conditional mutual information) do not fully characterize the set of entropic functions for n >= 4 discrete random variables. The paper contains four main results:
 
-- **Theorem 3** (the Zhang-Yeung inequality). For any four discrete random variables X, Y, Z, U, writing Delta(Z, U | X, Y) := I(Z; U) - I(Z; U | X) - I(Z; U | Y), the inequality
-  Delta(Z, U | X, Y) <= (1/2) I(X; Y) + (1/4) [I(X; Z, U) + I(Y; Z, U)]
-  holds, and it does not follow from the basic Shannon inequalities.
+- **Theorem 3** (the Zhang-Yeung inequality). For any four discrete random variables X, Y, Z, U, writing Delta(Z, U | X, Y) := I(Z; U) - I(Z; U | X) - I(Z; U | Y), the inequality (paper's eq. 21)
+  Delta(Z, U | X, Y) <= (1/2) [I(X; Y) + I(X; Z, U) + I(Z; U | X) - I(Z; U | Y)]
+  holds, and it does not follow from the basic Shannon inequalities. The left side is symmetric in X, Y, but the right side is not; swapping X <-> Y yields the dual form (22), and averaging (21) and (22) gives the symmetric corollary (23):
+  Delta(Z, U | X, Y) <= (1/2) I(X; Y) + (1/4) [I(X; Z, U) + I(Y; Z, U)].
+  The paper also restates Theorem 3 in atom coordinates (eq. 39) as S_F(1,2|3,4) + F[1,3|4] + F[1,4|3] + F[3,4|1] >= 0; the standard entropy-coordinate form is used throughout this roadmap.
 - **Theorem 4.** The closure of the set of constructible entropy functions is strictly smaller than the Shannon outer bound: cl(Gamma*_n) != Gamma_n for n >= 4 (immediate corollary of Theorem 3).
-- **Theorem 5.** Generalization of Theorem 3 to n + 2 random variables (same proof strategy).
+- **Theorem 5.** Generalization of Theorem 3 to n + 2 random variables (same proof strategy; the paper omits the proof, noting it uses the Theorem 3 idea plus induction).
 - **Theorem 6.** A nontrivial inner bound on cl(Gamma*_4), via seven explicit probabilistic constructions and a ~5-page case analysis.
 
-The central proof technique is what modern information theory calls the **copy lemma** (Lemma 2 of the paper): given jointly distributed (X, Y, Z, U), construct X_1, Y_1 on a common extended space such that (X, Y_1, Z, U) and (X_1, Y, Z, U) each have the original joint distribution, and I(X; Y_1 | Z, U) = 0 (conditional independence of the two copies given (Z, U)). Once this auxiliary distribution exists, Theorem 3 follows from a mechanical Shannon-inequality chase.
+The central proof technique is what modern information theory calls the **copy lemma**. The paper splits it into two pieces: equation (44) defines the auxiliary distribution q(x, y, z, u, x_1, y_1) := p(x, y, z, u) p(x_1, y_1, z, u) / p(z, u) by kernel composition, and Lemma 2 (eq. 45) is the resulting *identity* expressing Delta(Z, U | X, Y) in the six-variable joint. Together they give: (X, Y_1, Z, U) and (X_1, Y, Z, U) each have the original joint law, and I(X; Y_1 | Z, U) = 0 (conditional independence of the two copies given (Z, U)). Once this auxiliary distribution exists, Theorem 3 follows from a mechanical Shannon-inequality chase.
 
 **Why formalize this?** No proof assistant (Lean, Coq/Rocq infotheo, Isabelle/HOL Hoelzl, HOL4, Mizar, HOL Light) has formalized any non-Shannon-type inequality. This would be a first. It is also the natural entry point to a family of follow-on results (Matus, Dougherty-Freiling-Zeger, Kinser, Chan-Yeung group-theoretic), all of which rest on the same copy-lemma infrastructure. Formalizing the copy lemma cleanly is therefore the highest-leverage artifact this project can produce.
 
@@ -114,9 +116,11 @@ Depend on PFR via `lakefile.toml` at a pinned rev. Import only `PFR.ForMathlib.E
 ### What we are building
 
 **Core (S2):**
-- **Lemma 2 (copy lemma):** The highest-leverage artifact. Standalone, reusable, Mathlib-ready.
-- **Theorem 3 (Zhang-Yeung inequality):** For four discrete RVs X, Y, Z, U:
-  2I(Z;U) <= I(X;Y) + I(X;Z,U) + 3I(Z;U|X) + I(Z;U|Y).
+- **Theorem 2 (warm-up; Zhang-Yeung 1997 conditional inequality, restated from [39] as Theorem 2 of the paper):** Under I(X; Y) = I(X; Y | Z) = 0, I(X; Y | Z, U) <= I(Z; U | X, Y) + I(X; Y | U). Uses a single auxiliary copy (a degenerate form of the M2 construction); serves as a warm-up that exercises the construction machinery before the two-copy argument.
+- **Lemma 2 / copy construction (copy lemma):** The highest-leverage artifact. Standalone, reusable, Mathlib-ready. Bundles the auxiliary distribution of eq. (44) and the Delta-identity of Lemma 2 (eq. 45).
+- **Theorem 3 (Zhang-Yeung inequality):** For four discrete RVs X, Y, Z, U, paper's equation (21):
+  Delta(Z, U | X, Y) <= (1/2) [I(X; Y) + I(X; Z, U) + I(Z; U | X) - I(Z; U | Y)],
+  together with the dual (22) (via X <-> Y swap) and the averaged corollary (23).
 - **Theorem 4 (Shannon is incomplete):** Explicit witness function F in Gamma_4 \ tilde{Gamma}_4, proving cl(Gamma*_n) != Gamma_n for n >= 4.
 
 **Stretch (Theorem 5):**
@@ -131,8 +135,9 @@ zhang-yeung-inequality/
   ZhangYeung.lean             # top-level re-export
   ZhangYeung/
     Prelude.lean              # notation, import surface, namespace setup
-    CopyLemma.lean            # Lemma 2, generalized and standalone (Mathlib-ready)
     Delta.lean                # Delta(Z,U|X,Y), equational lemmas
+    Theorem2.lean             # conditional warm-up (single copy)
+    CopyLemma.lean            # Lemma 2, generalized and standalone (Mathlib-ready)
     Theorem3.lean             # the main Zhang-Yeung inequality
     Theorem4.lean             # cl(Gamma*_n) != Gamma_n, explicit witness
     Theorem5.lean             # (stretch) n+2-variable generalization
@@ -149,6 +154,9 @@ M0 (scaffolding)
  |
  v
 M1 (Delta lemmas)
+ |
+ v
+M1.5 (Thm 2, conditional warm-up)
  |
  v
 M2 (copy lemma)
@@ -173,7 +181,7 @@ M6 (polish)
 
 **Concurrent worktree strategy:** Two worktrees can run productively:
 
-- **Worktree A (main proof):** M0 -> M1 -> M2 -> M3 -> M5
+- **Worktree A (main proof):** M0 -> M1 -> M1.5 -> M2 -> M3 -> M5
 - **Worktree B (counterexample):** M4 part (a) (Shannon cone definition and constraint verification), merging with Worktree A once M3 lands to close M4 part (b).
 
 ### M0: Project scaffolding
@@ -191,6 +199,13 @@ M6 (polish)
 - `ZhangYeung/Delta.lean`: define `delta` matching Delta(Z, U | X, Y) := I(Z; U) - I(Z; U | X) - I(Z; U | Y); prove equivalent reformulations (paper's equations 20-23).
 - **Checkpoint:** each equational form reduces to `ring_nf`/`linarith` over entropy terms.
 
+### M1.5: Theorem 2 (conditional warm-up)
+
+- `ZhangYeung/Theorem2.lean`: the Zhang-Yeung 1997 conditional inequality, included in the 1998 paper as Theorem 2 (eq. 16-17).
+- **Statement:** for four discrete RVs X, Y, Z, U, if I(X; Y) = 0 and I(X; Y | Z) = 0, then I(X; Y | Z, U) <= I(Z; U | X, Y) + I(X; Y | U).
+- **Why now:** exercises the single-copy construction (a degenerate form of M2's two-copy construction) on a materially simpler statement. Validates the planned kernel-composition approach before M2's full bookkeeping load. Produces a reusable helper lemma for conditional inequalities.
+- **Checkpoint:** theorem with all hypotheses explicit, discharged by the single-copy construction and Shannon basics.
+
 ### M2: The copy lemma
 
 - `ZhangYeung/CopyLemma.lean`: state and prove the generalized copy lemma.
@@ -207,14 +222,15 @@ M6 (polish)
 ### M3: Theorem 3
 
 - `ZhangYeung/Theorem3.lean`: derive the main inequality.
-- Follow Section III: expand Delta(Z, U | X, Y) using Lemma 2's six-variable joint; apply data-processing I(X; Y) = I(X; Y_1) and the entropy chain rule.
+- Follow Section III. Two applications of Lemma 2 give `Delta(Z, U | X, Y) <= I(X; Y_1)` and `I(Z; U) - 2 I(Z; U | X) <= I(X; X_1)`. Combine: `2 I(Z; U) - 3 I(Z; U | X) - I(Z; U | Y) <= I(X; X_1, Y_1) + I(X_1; Y_1)`. Two distinct Shannon ingredients close the chase: (a) *marginal equality* `I(X_1; Y_1) = I(X; Y)` (the (X_1, Y_1, Z, U) marginal of q coincides with the (X, Y, Z, U) marginal of p, per eq. 44); (b) *data processing* `I(X; X_1, Y_1) <= I(X; Z, U)` via the Markov chain (X_1, Y_1) - (Z, U) - X under q.
 - All steps are Shannon-type; the non-Shannon character enters only through the copy lemma.
-- **Checkpoint:** `theorem zhangYeung ... : delta Z U X Y mu <= (1/2) * I[X : Y; mu] + (1/4) * (I[X : (Z, U); mu] + I[Y : (Z, U); mu])` with all hypotheses explicit.
+- Prove (21) as the headline theorem, derive (22) by the X <-> Y swap, and (23) by averaging.
+- **Checkpoint:** `theorem zhangYeung ... : delta Z U X Y mu <= (1/2) * (I[X : Y; mu] + I[X : (Z, U); mu] + I[Z : U | X; mu] - I[Z : U | Y; mu])` with all hypotheses explicit; averaged corollary `delta Z U X Y mu <= (1/2) * I[X : Y; mu] + (1/4) * (I[X : (Z, U); mu] + I[Y : (Z, U); mu])` follows mechanically.
 
 ### M4: Theorem 4
 
 - `ZhangYeung/Theorem4.lean`: explicit counterexample.
-- Encode the paper's function F (p. 1443: F(empty)=0, F(X)=F(Y)=F(Z)=F(U)=2a, F(XY)=4a, F(XZ)=F(YZ)=F(ZU)=3a, F(XYZ)=F(XYU)=F(XZU)=F(YZU)=4a, F(XYZU)=4a) as `Finset (Fin 4) -> Real` parametrized by a > 0.
+- Encode the paper's function F (p. 1443: F(empty)=0, F(X)=F(Y)=F(Z)=F(U)=2a, F(XY)=4a, F(XU)=F(XZ)=F(YU)=F(YZ)=F(ZU)=3a, F(XYZ)=F(XYU)=F(XZU)=F(YZU)=4a, F(XYZU)=4a) as `Finset (Fin 4) -> Real` parametrized by a > 0. F is symmetric on all pairs except (X, Y), which takes 4a rather than 3a.
 - **Part (a), parallelizable:** Define the Shannon cone and prove F satisfies all 15 basic inequality constraints (`norm_num`/`linarith`).
 - **Part (b), requires M3:** Prove F violates the Zhang-Yeung inequality (direct arithmetic).
 - Conclude cl(Gamma*_4) strictly contained in Gamma_4; extend to n >= 4 via embedding.
@@ -225,8 +241,8 @@ M6 (polish)
 - `ZhangYeung/Theorem5.lean`: n+2-variable generalization.
 - For n+2 RVs U, Z, X_1, ..., X_n and any i in {1,...,n}:
   nI(U; Z) - sum_j I(U; Z | X_j) - nI(U; Z | X_i) <= I(X_i; U, Z) + sum_j H(X_j) - H(X_1, ..., X_n)
-- Same proof: one copy per X_j, induction on n.
-- **Checkpoint:** statement over `Fin n -> Omega -> S` with the correct bound.
+- **Note:** the paper omits the proof ("it can be proved using exactly the same idea used in the proof of Theorem 3 and an inductive argument", p. 1443). M5 therefore requires reconstructing the argument: one auxiliary copy per X_j, induction on n, and reassembly via the same marginal-equality + data-processing combination as M3. Budget accordingly.
+- **Checkpoint:** statement over `Fin n -> Omega -> S` with the correct bound; averaged variant (eq. 28) as corollary.
 
 ### M6: Polish and release
 
@@ -271,19 +287,21 @@ Mathlib's canonical `mutualInfo` namespace is in flux. **Mitigation:** design th
 Ranked by leverage:
 
 1. **Copy lemma upstream to Mathlib.** Single highest-impact follow-on; unlocks all non-Shannon formalization.
-2. **Zhang-Yeung 1997 conditional inequality** (IEEE TIT 43(6)). Simpler than 1998; warm-up.
+2. **Exact Theorem 3 with explicit slack (pp. 1445-1446).** The paper derives the exact remainder `R(X, Y, Z, U, X_1, Y_1) = (1/2) * [I(X; X_1 | U) + I(X; X_1 | Z) + I(Z; U | X X_1) + I(X_1; Y_1 | X) + I(X; Z U | X_1 Y_1) + I(X; Y_1 | U) + I(X; Y_1 | Z) + I(Z; U | X Y_1)]` that upgrades Theorem 3's `<=` to equality. A natural refinement once the copy lemma is in place; strengthens the formalization to an equality with a fully characterized remainder. Also yields the extremal F on p. 1446 that attains equality.
 3. **Dougherty-Freiling-Zeger 2006/2011 six inequalities** (arXiv:1104.3602). Mechanical once copy lemma exists.
 4. **ITIP certificate importer.** A Lean tactic consuming Farkas certificates to discharge Shannon-type subgoals.
 5. **Matus 2007 infinite family** (IEEE TIT 53). Non-polyhedrality of cl(Gamma*_4). Closure/limit argument.
 6. **Ingleton and Kinser inequalities, matroid connection.** Parallel stream.
 7. **Chan-Yeung 2002 group-theoretic reformulation** (IEEE TIT 48(7)). Alternative proof via subgroup-index inequalities.
-8. **Bridge to `shannon-entropy`.** Prove `entropyNat (toProbDist X mu) = H[X; mu]` connecting both projects.
+8. **Theorem 6 (inner bound on cl(Gamma*_4)).** The paper's ~5-page case analysis via seven constructions. Scope decision deliberately excluded this from S2; revisit once the outer-bound side is stable.
+9. **Bridge to `shannon-entropy`.** Prove `entropyNat (toProbDist X mu) = H[X; mu]` connecting both projects.
 
 ## 10. Critical Files (implementation targets)
 
 **New (this project):**
 - `ZhangYeung/CopyLemma.lean` (highest-leverage, Mathlib-ready)
 - `ZhangYeung/Delta.lean`
+- `ZhangYeung/Theorem2.lean` (warm-up)
 - `ZhangYeung/Theorem3.lean`
 - `ZhangYeung/Theorem4.lean`
 - `ZhangYeung/Theorem5.lean` (stretch)
