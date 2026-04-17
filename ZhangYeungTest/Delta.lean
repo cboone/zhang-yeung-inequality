@@ -56,7 +56,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 example {Z : Ω → S₁} {U : Ω → S₂} (hZ : Measurable Z) (hU : Measurable U)
     (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     delta Z U X Y μ = delta U Z X Y μ := by
-  simpa using delta_comm_main hZ hU X Y μ
+  simpa using delta_comm_main hZ hU μ
 
 example {Z : Ω → S₁} {U : Ω → S₂} {X : Ω → S₃} {Y : Ω → S₄}
     (hZ : Measurable Z) (hU : Measurable U) (hX : Measurable X) (hY : Measurable Y)
@@ -70,7 +70,7 @@ example {Z : Ω → S₁} {U : Ω → S₂} {X : Ω → S₃} {Y : Ω → S₄}
 example {Z : Ω → S₁} {U : Ω → S₂} (hZ : Measurable Z) (hU : Measurable U)
     (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     delta Z U X Y μ ≤ I[Z : U ; μ] := by
-  simpa using delta_le_mutualInfo hZ hU X Y μ
+  simpa using delta_le_mutualInfo hZ hU μ
 
 end FiniteAlphabet
 
