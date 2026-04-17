@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+"""Compare audited transcription against raw Mathpix output for structural drift.
+
+Strips: YAML frontmatter, chart placeholders, known formatting changes.
+Compares: word count, paragraph count, and tokens that should be common.
+"""
+import re, sys
+raw = open("references/extractions/zhangyeung1998.mathpix.md").read()
+aud = open("references/transcriptions/zhangyeung1998.md").read()
+
+# Strip YAML frontmatter from the audited version
+aud = re.sub(r"^---\n.*?\n---\n", "", aud, count=1, flags=re.DOTALL)
+
+# Strip chart placeholders added during audit
+aud2 = re.sub(r"> \*\(Atom chart omitted; see rendered PDF\.\)\*\n", "", aud)
+aud2 = re.sub(r"```\n.*?\n```\n", "", aud2, flags=re.DOTALL)
+
+# Strip image-reference lines from raw
+raw2 = re.sub(r"!\[\]\(https://cdn\.mathpix\.com/[^)]+\)\n", "", raw)
+
+def stats(s, name):
+    words = len(s.split())
+    paragraphs = len([p for p in re.split(r"\n\n+", s) if p.strip()])
+    math_tags = len(re.findall(r"\\tag\{\d+\}", s))
+    return f"{name}: {words} words, {paragraphs} paragraphs, {math_tags} tag{{N}}"
+
+print(stats(raw2, "raw   (sans images)"))
+print(stats(aud2, "audit (sans frontmatter, charts)"))
+
+# Key tokens that should be preserved
+keys = [
+    r"\bTheorem [1-6]\b", r"\bLemma [1-4]\b", r"\bConstruction [1-7]\b",
+    r"\bPropositon [12]\b", r"\bDefinition [12]\b",
+    r"\\Omega", r"\\Delta", r"\\Gamma", r"\\alpha", r"\\beta", r"\\gamma",
+    r"\\tag\{\d+\}",
+]
+print("\nToken counts (audit vs raw):")
+for k in keys:
+    r = len(re.findall(k, raw2))
+    a = len(re.findall(k, aud2))
+    diff = a - r
+    flag = "" if abs(diff) <= 3 else "  ← drift"
+    print(f"  {k:<30} raw={r:>4}  audit={a:>4}  diff={diff:+d}{flag}")
+
+# Look for sections that are markedly shorter
+raw_lines = raw2.split("\n")
+aud_lines = aud2.split("\n")
+print(f"\nLine counts: raw={len(raw_lines)}, audit={len(aud_lines)}, diff={len(aud_lines) - len(raw_lines)}")
