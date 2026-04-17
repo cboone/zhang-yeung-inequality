@@ -970,6 +970,38 @@ private lemma phat_sum_eq_one
 
 /-! ### Δ-to-log-ratio identities -/
 
+/-- **Entropy as a 4-tuple weighted log sum.** For a measurable `F : Ω' → α` and a measurable projection `proj : α → β`, `H[proj ∘ F ; μ]` can be written as a sum over the full range of `F` weighted by `(μ.map F).real`. This follows from `entropy_eq_sum` (a sum over the projected range) by fibrewise decomposition along `proj`, using `sum_filter_map_real_eq_map_comp` to identify the fibre sum of `μ.map F` with `(μ.map (proj ∘ F)).real {b}`. Used to lift each of the eleven entropy terms in the expansion of `delta Z U X Y μ` to a common 4-tuple weighted sum. -/
+private lemma entropy_eq_sum_joint
+    {α β : Type*}
+    [Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]
+    [Fintype β] [MeasurableSpace β] [MeasurableSingletonClass β] [DecidableEq β]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    (F : Ω' → α) (proj : α → β)
+    (hF : Measurable F) (hproj : Measurable proj)
+    (μ : Measure Ω') [IsProbabilityMeasure μ] :
+    H[fun ω => proj (F ω) ; μ]
+      = -∑ t : α, (μ.map F).real {t}
+          * Real.log ((μ.map (fun ω => proj (F ω))).real {proj t}) := by
+  have hcomp : Measurable (fun ω => proj (F ω)) := hproj.comp hF
+  have hA : (μ.map (fun ω => proj (F ω))) ((Finset.univ : Finset β) : Set β)ᶜ = 0 := by simp
+  rw [entropy_eq_sum_finset hA]
+  -- Goal: (∑ b : β, negMulLog (p_f b)) = -∑ t : α, p_F(t) * log (p_f (π t))
+  simp_rw [Real.negMulLog, neg_mul]
+  rw [Finset.sum_neg_distrib]
+  congr 1
+  classical
+  rw [← Finset.sum_fiberwise (Finset.univ : Finset α) proj
+      (fun t => (μ.map F).real {t} * Real.log ((μ.map (fun ω => proj (F ω))).real {proj t}))]
+  refine Finset.sum_congr rfl fun b _ => ?_
+  rw [show (∑ t ∈ (Finset.univ : Finset α).filter (fun t => proj t = b),
+              (μ.map F).real {t} * Real.log ((μ.map (fun ω => proj (F ω))).real {proj t}))
+         = (∑ t ∈ (Finset.univ : Finset α).filter (fun t => proj t = b), (μ.map F).real {t})
+           * Real.log ((μ.map (fun ω => proj (F ω))).real {b}) from by
+      rw [Finset.sum_mul]
+      refine Finset.sum_congr rfl fun t ht => ?_
+      rw [(Finset.mem_filter.mp ht).2]]
+  rw [sum_filter_map_real_eq_map_comp hF hproj μ b]
+
 /-- **`Δ` as a weighted-log sum.** The identity `Δ(Z, U | X, Y) = ∑_{x,y,z,u} p(x,y,z,u) · log (p̂(x,y,z,u) / p̃(x,y,z,u))` obtained by expanding each of `I[Z:U]`, `I[Z:U|X]`, `I[Z:U|Y]` via `entropy_eq_sum_finset` over the 4-tuple marginal and combining the eleven `negMulLog` contributions. The right-hand side is the raw form of Zhang-Yeung 1997's eq. (41). -/
 private lemma delta_eq_sum_log_ratio
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
