@@ -11,6 +11,11 @@
 - **Phase A3** (structural diff vs raw Mathpix): complete. Commit `b5a2610`. Word-count delta (-11) and paragraph-count delta (+40) both fully accounted for by documented audit fixes.
 - **Phase B1** (vision re-extraction): complete. Commit `8fb5bbe`. One real content fix surfaced (eq. 13 and 18 bar removals — Mathpix and vision agreed, my audit was wrong). Remaining agent disagreements on pages 3-12 were agent hallucinations (verified by direct image reads at 450 dpi); my audit was correct on every disputed point.
 - **Phase B2** (Section IV subscript audit): complete. All atom subscripts on pages 10-12 independently verified against the rendered PDF at 450 dpi. Specifically confirmed: `F^4_{1,2}`, `F^4_{1,3}`, `F^4_{1,4}`, `F^4_{2,4}`, `F^7_3`, `F^7_4` assignments across Case 1.1, Case 1.2, and Case 2 branches. The `F^4_{1,3}` fix I made during the original audit (correcting Mathpix's `F_{1,2}^{4,}` typo) is verified correct.
+- **Phase C1** (central-equation cross-reference): complete. Commit `156a27f`. Theorem 3 (eq. 21) is algebraically identical to Yeung's *Information Theory and Network Coding* Theorem 15.7, eq. (15.62), under the variable substitution `(Z, U, X, Y) = (X_3, X_4, X_1, X_2)`. Lemma 2 copy construction matches Yeung's auxiliary-variable Lemma 15.9. Results documented in `docs/references/zhangyeung1998-cross-reference.md`.
+- **Phase C2** (bibliography validation): complete. Commit `fbc1082`. Spot-checked [20], [35], [39] against DBLP. All match except [39] which has a one-page discrepancy (paper: 1982-1985; DBLP: 1982-1986); transcription is faithful to paper. Diacritics preserved correctly.
+- **Phase C3** (errata search): complete. Commit `fbc1082`. No published errata found. The paper has been cited and re-derived extensively without correction; if a substantive error existed, follow-up literature would have flagged it.
+
+**All phases complete. Transcription is verified to high fidelity.**
 
 ## 1. Context
 

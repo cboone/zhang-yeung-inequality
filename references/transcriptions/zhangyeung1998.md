@@ -13,6 +13,12 @@ source: >
   (`references/extractions/zhangyeung1998.mathpix.md`), audited page by page
   against the rendered PDF images and corrected where Mathpix introduced OCR
   errors. See `references/README.md` for the extraction pipeline.
+verification:
+  status: verified
+  last_audited: 2026-04-16
+  phases_completed: [A1, A2, A3, B1, B2, C1, C2, C3]
+  cross_reference: docs/references/zhangyeung1998-cross-reference.md
+  plan: docs/plans/done/2026-04-16-transcription-verification.md
 ---
 
 1440 &nbsp;&nbsp;&nbsp;&nbsp; IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
