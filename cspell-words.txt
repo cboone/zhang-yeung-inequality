@@ -14,6 +14,7 @@ checkdecls
 Citip
 codomain
 codomains
+comap
 Combin
 combinatorially
 Comput
