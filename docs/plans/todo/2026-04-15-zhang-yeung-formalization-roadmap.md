@@ -6,6 +6,7 @@
 **Source PDF:** `references/papers/zhangyeung1998.pdf`
 
 **Resolved decisions:**
+
 - **Scope:** S2 + Theorem 5 (stretch). Theorems 3, 4 as core; Theorem 5 (n+2-variable generalization) as stretch.
 - **Dependency:** Permanent PFR dependency for Shannon entropy primitives. Pinned rev in `lakefile.toml`; upgrades are deliberate, not scheduled.
 - **Blueprint:** No. Lean-only.
@@ -50,6 +51,7 @@ Already upstream and directly usable (verified 2026-04-15):
 A substantial Lean 4 formalization (~1,888 lines, 10 modules) of Shannon's 1948 finite-alphabet characterization theorem. **Lean 4.29.0 / Mathlib 4.29.0**, matching our target version.
 
 **Provides:**
+
 - `ProbDist alpha`: bundled type for probability distributions on `Fintype alpha`.
 - `entropyNat` (`-Sum p log p`) and `entropyBase b p` (arbitrary base).
 - `condEntropy`, `mutualInfo` (definitions; key lemmas for pairs).
@@ -59,6 +61,7 @@ A substantial Lean 4 formalization (~1,888 lines, 10 modules) of Shannon's 1948 
 - Shannon's uniqueness theorem: `entropyNat_unique`.
 
 **Gaps relevant to Zhang-Yeung:**
+
 - No conditional mutual information `I(X;Y|Z)`.
 - No data processing inequality.
 - No submodularity in the general 3+-variable form.
@@ -116,6 +119,7 @@ Depend on PFR via `lakefile.toml` at a pinned rev. Import only `PFR.ForMathlib.E
 ### What we are building
 
 **Core (S2):**
+
 - **Theorem 2 (warm-up; Zhang-Yeung 1997 conditional inequality, restated from [39] as Theorem 2 of the paper):** Under I(X; Y) = I(X; Y | Z) = 0, I(X; Y | Z, U) <= I(Z; U | X, Y) + I(X; Y | U). Uses a single auxiliary copy (a degenerate form of the M2 construction); serves as a warm-up that exercises the construction machinery before the two-copy argument.
 - **Lemma 2 / copy construction (copy lemma):** The highest-leverage artifact. Standalone, reusable, Mathlib-ready. Bundles the auxiliary distribution of eq. (44) and the Delta-identity of Lemma 2 (eq. 45).
 - **Theorem 3 (Zhang-Yeung inequality):** For four discrete RVs X, Y, Z, U, paper's equation (21):
@@ -124,6 +128,7 @@ Depend on PFR via `lakefile.toml` at a pinned rev. Import only `PFR.ForMathlib.E
 - **Theorem 4 (Shannon is incomplete):** Explicit witness function F in Gamma_4 \ tilde{Gamma}_4, proving cl(Gamma*_n) != Gamma_n for n >= 4.
 
 **Stretch (Theorem 5):**
+
 - n+2-variable generalization. Same copy-lemma strategy with induction on n.
 
 ## 5. File Layout
@@ -253,24 +258,31 @@ M6 (polish)
 ## 7. Key Risks and Unknowns
 
 ### 7.1 PFR API churn (moderate)
+
 PFR is under active upstreaming. Function names and namespaces may change. **Mitigation:** pin the rev; document the pin; treat upgrades as deliberate work scheduled alongside feature milestones.
 
 ### 7.2 Copy-lemma measurability bookkeeping (moderate-high)
+
 The conceptual content of Lemma 2 is elementary, but the Lean proof needs to discharge measurability/standard-Borel/sigma-finite side conditions at each step. Finite RVs make standard Borel trivial but do not make `Kernel.compProd` go through without work. **Mitigation:** specialize to `Fintype` initially; generalize later.
 
 ### 7.3 PFR build weight (moderate)
+
 PFR brings Ruzsa distance, tau functional, group-theoretic entropy, and more. Build times may be substantial. **Mitigation:** Mathlib cache from `lake exe cache get` and the CI elan/lake caches keep incremental builds fast; PFR itself compiles once per dependency-rev bump.
 
 ### 7.4 Log-base conventions (low)
+
 The paper uses log base 2, base 3, and natural log interchangeably. Mathlib's `negMulLog` uses natural log. **Mitigation:** state all inequalities in log-base-agnostic form; base only matters in Theorem 4's explicit numerical check, where it cancels.
 
 ### 7.5 `IdentDistrib` vs joint-distribution equality (low-moderate)
+
 The paper freely says "(X_1, Y_1) has the same distribution as (X, Y)." Lean's `IdentDistrib` is the right tool, but we need *joint* identity. **Mitigation:** work with tuples `(X, Z, U)` and `(X_1, Z, U)` as `IdentDistrib` pairs throughout.
 
 ### 7.6 Copy lemma Mathlib readiness (low-moderate)
+
 Mathlib's canonical `mutualInfo` namespace is in flux. **Mitigation:** design the copy lemma for eventual upstream, but don't submit the PR until a stable target API exists.
 
 ### 7.7 Lean/PFR version alignment (low)
+
 `shannon-entropy` uses Lean 4.29.0. PFR may use a different version. **Mitigation:** check PFR's `lean-toolchain` at M0; if mismatched, pin the closest compatible rev.
 
 ## 8. Verification Plan
@@ -299,6 +311,7 @@ Ranked by leverage:
 ## 10. Critical Files (implementation targets)
 
 **New (this project):**
+
 - `ZhangYeung/CopyLemma.lean` (highest-leverage, Mathlib-ready)
 - `ZhangYeung/Delta.lean`
 - `ZhangYeung/Theorem2.lean` (warm-up)
@@ -307,6 +320,7 @@ Ranked by leverage:
 - `ZhangYeung/Theorem5.lean` (stretch)
 
 **External (depend on, do not modify):**
+
 - `PFR/ForMathlib/Entropy/Basic.lean` (entropy, condEntropy, basic Shannon inequalities)
 - `PFR/ForMathlib/Entropy/MutualInfo.lean` (mutualInfo, condMutualInfo)
 - `Mathlib/Probability/Kernel/CondDistrib.lean` (condDistrib)
