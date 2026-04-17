@@ -29,7 +29,7 @@ The proof rests on the copy lemma, which identifies the inequality as genuinely 
 | M5        | Theorem 5 (stretch goal)                 | planned     |
 | M6        | Polish and release                       | planned     |
 
-M1.5 is in progress: the public `ZhangYeung.theorem2` statement is wired, the Shannon-algebra reduction to `Δ(Z, U | X, Y) ≤ 0` under the hypotheses `I[X:Y] = I[X:Y|Z] = 0` is proved without `sorry`, and the API regression tests for the theorem land. The one remaining obligation is the non-Shannon core `theorem2_delta_le_zero`, which by the [@zhangyeung1997] argument follows from `Real.sum_mul_log_div_leq` applied to the auxiliary `p̃` and `p̂` distributions described in that helper's docstring. Closing it requires formalizing the full 4-tuple joint-PMF algebra; downstream milestones may assume the public theorem holds.
+M1.5 is in progress: the public `ZhangYeung.theorem2` statement is wired, the Shannon-algebra reduction to `Δ(Z, U | X, Y) ≤ 0` under the hypotheses `I[X:Y] = I[X:Y|Z] = 0` is proved without `sorry`, `theorem2_delta_le_zero` is assembled end-to-end around `Real.sum_mul_log_div_leq` applied to the auxiliary `p̃` and `p̂` distributions, and the API regression tests for the theorem land. Three scaffolded non-Shannon sub-lemmas still carry localized `sorry`s: `phat_sum_eq_one`, `delta_eq_sum_log_ratio`, and `sum_joint_eq_sum_ptilde`. As in the [@zhangyeung1997] argument, closing them requires formalizing the full 4-tuple joint-PMF algebra; `theorem2` should not be treated as fully proved until all three close, but each closes independently of the others.
 
 The full roadmap is in [`docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md`](docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md).
 
@@ -45,7 +45,7 @@ The full roadmap is in [`docs/plans/todo/2026-04-15-zhang-yeung-formalization-ro
 - [`ZhangYeung.lean`](ZhangYeung.lean) — project entrypoint; re-exports `ZhangYeung.Prelude`, `ZhangYeung.Delta`, and `ZhangYeung.Theorem2`.
 - [`ZhangYeung/Prelude.lean`](ZhangYeung/Prelude.lean) — import surface for PFR's entropy API.
 - [`ZhangYeung/Delta.lean`](ZhangYeung/Delta.lean) — M1 delta quantity and equational lemmas (`delta_def`, `delta_comm_cond`, `delta_comm_main`, `delta_self`, `delta_eq_entropy`, `form21_iff`, `form22_iff`, `form23_iff`, `form23_of_form21_form22`, `delta_le_mutualInfo`).
-- [`ZhangYeung/Theorem2.lean`](ZhangYeung/Theorem2.lean) — M1.5 Zhang-Yeung conditional information inequality (`theorem2`), factored into a Shannon-algebra reduction (complete) and a non-Shannon KL-divergence core (one localized `sorry`).
+- [`ZhangYeung/Theorem2.lean`](ZhangYeung/Theorem2.lean) — M1.5 Zhang-Yeung conditional information inequality (`theorem2`), factored into a Shannon-algebra reduction (complete) and a scaffolded non-Shannon KL-divergence core with three remaining sub-lemma obligations: `phat_sum_eq_one`, `delta_eq_sum_log_ratio`, and `sum_joint_eq_sum_ptilde`.
 - [`ZhangYeungTest.lean`](ZhangYeungTest.lean) + [`ZhangYeungTest/Delta.lean`](ZhangYeungTest/Delta.lean) + [`ZhangYeungTest/Theorem2.lean`](ZhangYeungTest/Theorem2.lean) — compile-time API regression tests for each module.
 
 ## Build and Verify

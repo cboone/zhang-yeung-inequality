@@ -7,6 +7,18 @@ milestone: M1.5
 depends_on: M1 (`ZhangYeung/Delta.lean`, merged into `main` via PR #4)
 ---
 
+## Status update (2026-04-17): implementation supersedes the design below
+
+The implementation in `ZhangYeung/Theorem2.lean` does **not** follow the single-copy construction this plan was written around. Instead of building a copy variable via `condDistrib`/`Kernel.comap` on an extended probability space and then running a Shannon chase against tuple-level `IdentDistrib` facts, the landed proof takes the [@zhangyeung1997] **auxiliary-PMF + KL-divergence** route: it defines two auxiliary distributions `p̃` and `p̂` on `S₁ × S₂ × S₃ × S₄`, proves that both are PMFs (with `phat_sum_eq_one` using the two hypotheses `I[X:Y] = 0` and `I[X:Y|Z] = 0`), and applies `Real.sum_mul_log_div_leq` (PFR's log-sum inequality) to obtain `Δ(Z, U | X, Y) ≤ 0` as `-KL(p̃ ‖ p̂)`.
+
+Concrete consequences for this document:
+
+- The discussion of `condDistrib`, `Kernel.comap`, `map_compProd_condDistrib`, the `StandardBorelSpace`/`Nonempty` inference risk (§7.1), and the conditional-`IdentDistrib` transport worry (§7.3) does **not** apply to the landed proof; none of those APIs are used in `ZhangYeung/Theorem2.lean`. The single-copy construction material starting at "Design: the single-copy construction" (Candidates A and B, the `aux_measure`/`aux_identDistrib`/`aux_condIndep` lemma skeleton, and the associated sequencing) is **superseded** and kept only for historical intuition.
+- The remaining proof debt on M1.5 is in `ZhangYeung/Theorem2.lean` itself: three scaffolded non-Shannon sub-lemmas carry localized `sorry`s -- `phat_sum_eq_one`, `delta_eq_sum_log_ratio`, and `sum_joint_eq_sum_ptilde` -- each of which closes independently of the others. See that file's "Current state" docstring paragraph for the authoritative list.
+- The Theorem 2 signature and the file/test layout committed in this branch match what this plan proposed, so those sections remain accurate.
+
+The rest of this document is preserved as-is for historical context: future work on closing the remaining `sorry`s should be guided by the KL-divergence scaffolding in `ZhangYeung/Theorem2.lean`, not by the copy-construction blueprint below.
+
 ## Context
 
 **Primary reference:** `references/transcriptions/zhangyeung1998.md` (verified 2026-04-16); citation below uses equation numbers from that transcription.
