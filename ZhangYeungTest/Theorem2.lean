@@ -32,9 +32,9 @@ example
 
 /- Downstream API usage: from Theorem 2 plus the extra vanishing hypothesis
 `I[Z : U | ⟨X, Y⟩ ; μ] = 0`, deduce `I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[X : Y | U ; μ]`.
-This closes via `theorem2` as a black box, `condMutualInfo_nonneg`, and
-`linarith`. It exercises the theorem's role as a pluggable inequality in a
-larger Shannon chase. -/
+This closes by applying `theorem2` as a black box and then combining the
+resulting inequality with `h₃` via `linarith`. It exercises the theorem's role
+as a pluggable inequality in a larger Shannon chase. -/
 example
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y)

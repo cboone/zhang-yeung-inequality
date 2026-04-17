@@ -152,11 +152,11 @@ let κ : Kernel (S₃ × S₄) S₂ := condDistrib Y π μ
 -- Pull κ back along π. Two routes exist at the pin: `Kernel.comap κ π hπ`
 -- (direct), or composing with a deterministic kernel via `⊗ₘ`. Pick whichever
 -- makes the downstream aux_identDistrib lemma shorter.
-let κΩ : Kernel Ω S₂ := Kernel.comap κ π (hZ.prod_mk hU)
+let κΩ : Kernel Ω S₂ := Kernel.comap κ π (hZ.prodMk hU)
 let ν : Measure (Ω × S₂) := μ ⊗ₘ κΩ
 ```
 
-Advantages: with the pullback expressed via `Kernel.comap`, the needed first-marginal and copied-variable marginal identities come from `map_compProd_condDistrib`, `Measure.fst_compProd`, and `Kernel.comap` map lemmas. The pair measurability `hZ.prod_mk hU` discharges the side condition on $\pi$.
+Advantages: with the pullback expressed via `Kernel.comap`, the needed first-marginal and copied-variable marginal identities come from `map_compProd_condDistrib`, `Measure.fst_compProd`, and `Kernel.comap` map lemmas. The pair measurability `hZ.prodMk hU` discharges the side condition on $\pi$.
 
 Disadvantages: the target inequality (17) does not obviously dissolve after plugging the $Y_1$-based facts in. The chase requires at least one creative step beyond the identities that the construction immediately supplies.
 
@@ -202,14 +202,14 @@ Design notes:
 - **No notation.** Defer any `ZY[X; Y | Z, U]`-style notation decision until M3, same rationale as M1.
 - **`IsProbabilityMeasure`.** Required for `condMutualInfo_eq_zero` and the `condDistrib` identities. The hypothesis is explicit so the theorem is usable off the default measure. Inside the proof, `IsProbabilityMeasure.toIsZeroOrProbabilityMeasure` (instance) lifts to the weaker hypothesis PFR's `..._eq_zero` lemmas actually require.
 - **Variable sort.** `S₁, S₂, S₃, S₄` carry `(X, Y, Z, U)` here; `Delta.lean` uses the same `S₁ .. S₄` names for `(Z, U, X, Y)`. Keep them module-local; no cross-module variable reuse, so the naming clash across modules is harmless.
-- **Pair measurability.** The conditional mutual information terms `I[X : Y | ⟨Z, U⟩ ; μ]` and `I[Z : U | ⟨X, Y⟩ ; μ]` need `Measurable (fun ω => (Z ω, U ω))` and `Measurable (fun ω => (X ω, Y ω))`. Discharge with `hZ.prod_mk hU` (that is, `Measurable.prod_mk`); same idiom used in the Candidate A sketch for the pullback $\pi$.
+- **Pair measurability.** The conditional mutual information terms `I[X : Y | ⟨Z, U⟩ ; μ]` and `I[Z : U | ⟨X, Y⟩ ; μ]` need `Measurable (fun ω => (Z ω, U ω))` and `Measurable (fun ω => (X ω, Y ω))`. Discharge with `hZ.prodMk hU` (that is, `Measurable.prodMk`); same idiom used in the Candidate A sketch for the pullback $\pi$.
 - **Private helpers with `omit`.** `Delta.lean` uses `omit [Fintype S₃] [Fintype S₄] [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄] in` above lemmas whose proofs do not need the full instance bundle. `theorem2` itself will need every instance, but `aux_measure`, `aux_identDistrib`, and `aux_condIndep` may not touch all four codomains symmetrically; mirror the `omit` pattern where it applies, both for readability and to keep PFR's instance search focused.
 
 ### Lemma-level skeleton
 
 Inside `Theorem2.lean`, the proof decomposes naturally into four private-ish building blocks. Use `private` or `section`-scoped `lemma`s --- not `theorem`s --- so only `theorem2` is exported.
 
-1. **`aux_measure` (private).** The extended measure is built from $\kappa := \mathrm{condDistrib}\, Y \, \langle Z, U\rangle\, \mu$ by pulling that kernel back along $\pi : \Omega \to S_3 \times S_4$ with `Kernel.comap κ π (hZ.prod_mk hU)`, then forming $\nu := \mu \otimes_m \kappa_\Omega$. If `Kernel.comap` proves awkward in practice, the deterministic-kernel-composition route is an equivalent alternative at this pin. Bundle the `Nonempty`/`StandardBorelSpace` side conditions on `S₂` at this lemma (see §7.1 for how those are actually supplied); propagate to downstream building blocks only if needed.
+1. **`aux_measure` (private).** The extended measure is built from $\kappa := \mathrm{condDistrib}\, Y \, \langle Z, U\rangle\, \mu$ by pulling that kernel back along $\pi : \Omega \to S_3 \times S_4$ with `Kernel.comap κ π (hZ.prodMk hU)`, then forming $\nu := \mu \otimes_m \kappa_\Omega$. If `Kernel.comap` proves awkward in practice, the deterministic-kernel-composition route is an equivalent alternative at this pin. Bundle the `Nonempty`/`StandardBorelSpace` side conditions on `S₂` at this lemma (see §7.1 for how those are actually supplied); propagate to downstream building blocks only if needed.
 1. **`aux_identDistrib` (private).** Prove only the tuple-law identities the chase actually needs. At minimum, $(Y_1, Z, U)$ under $\nu$ is identically distributed to $(Y, Z, U)$ under $\mu$, and $(X, Z, U)$ under $\nu$ (viewing $X$ pulled back through $\mathrm{fst}$) is identically distributed to $(X, Z, U)$ under $\mu$. Use those to transport one-sided entropy or mutual-information terms whose entropy expansions depend only on these tuples. Do **not** plan around transporting mixed terms involving both $X$ and $Y_1$ by `IdentDistrib`; those belong on the $\nu$ side of the proof and are handled via `aux_condIndep` plus the Shannon chase.
 1. **`aux_condIndep` (private).** $I[X : Y_1 \mid \langle Z, U\rangle ; \nu] = 0$, via the `condMutualInfo_eq_zero`/`CondIndepFun` bridge applied to the kernel-level construction.
 1. **`theorem2`.** The Shannon-inequality chase: start from the hypotheses and the auxiliary facts, apply Shannon basics (`chain_rule`, submodularity, nonnegativity), close with `linarith`.
