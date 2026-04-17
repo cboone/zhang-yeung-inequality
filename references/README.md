@@ -26,3 +26,4 @@ PDF extraction tools, the Mathpix submission script, verification helpers (Pando
 | `zhangyeung1998` | Zhang and Yeung, *On Characterization of Entropy Function via Information Inequalities*, IEEE TIT 44(4), 1998 | [zhangyeung1998.md](transcriptions/zhangyeung1998.md) |
 | `zhangyeung1997` | Zhang and Yeung, *A Non-Shannon Type Conditional Inequality of Information Quantities*, IEEE TIT 43(6), 1997 | Bibliography only (not formalized) |
 | `yeung1997framework` | Yeung, *A Framework for Linear Information Inequalities*, IEEE TIT 43, 1997 | Bibliography only (context for $\Gamma_n$, $\Gamma^*_n$) |
+| `yeung2008` | Yeung, *Information Theory and Network Coding*, Springer, 2008 | Bibliography only (cross-reference for Theorem 3 and the copy lemma) |
