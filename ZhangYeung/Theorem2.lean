@@ -665,7 +665,7 @@ private lemma ptilde_sum_eq_one
     exact hSingletonSum
   exact hCollapse
 
-/-- **`p̂` is a probability distribution under the hypotheses of Theorem 2.** Collapses by summing over `z` first (using `I[X:Y|Z] = 0` ⇒ `p(x, y, z) = p(x, z) p(y, z) / p(z)`), then using `I[X:Y] = 0` ⇒ `p(x, y) = p(x) p(y)` to cancel the single-variable denominators, then summing over `x, y, u`. -/
+/-- **`p̂` is a probability distribution under the hypotheses of Theorem 2.** Collapses by summing over `z` first (using `I[X:Y|Z] = 0` ⇒ `p(x, y, z) · p(z) = p(x, z) · p(y, z)`), then using `I[X:Y] = 0` ⇒ `p(x, y) = p(x) · p(y)` to cancel the single-variable denominators, then summing over `x, y, u`. -/
 private lemma phat_sum_eq_one
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
