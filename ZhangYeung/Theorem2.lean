@@ -151,6 +151,34 @@ private lemma sum_map_triple_first
       (fun y _ => hf (measurableSet_singleton y))]
   simp
 
+/-- Marginal summation, third variant: summing the triple joint over the *third* coordinate recovers the marginal of `(f, g)`. -/
+private lemma sum_map_triple_third
+    {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    [Fintype γ] [MeasurableSpace γ] [MeasurableSingletonClass γ]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
+    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (b : β) :
+    ∑ c : γ, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
+      = (μ.map (fun ω => (f ω, g ω))).real {(a, b)} := by
+  have hfgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
+  have hfg : Measurable (fun ω => (f ω, g ω)) := hf.prodMk hg
+  simp_rw [map_measureReal_apply hfgh (measurableSet_singleton _),
+           map_measureReal_apply hfg (measurableSet_singleton _)]
+  have preimage_eq : ∀ c : γ,
+      (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
+        = h ⁻¹' {c} ∩ ((fun ω => (f ω, g ω))⁻¹' {(a, b)}) := by
+    intro c; ext ω; simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq,
+      Set.mem_inter_iff]; tauto
+  simp_rw [preimage_eq]
+  simp_rw [show ∀ c : γ, μ.real (h ⁻¹' {c} ∩ (fun ω => (f ω, g ω))⁻¹' {(a, b)})
+      = (μ.restrict ((fun ω => (f ω, g ω))⁻¹' {(a, b)})).real (h ⁻¹' {c}) from
+    fun c => (measureReal_restrict_apply (hh (measurableSet_singleton c))).symm]
+  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset γ)
+      (fun y _ => hh (measurableSet_singleton y))]
+  simp
+
 /-- Marginal summation, second variant: summing the triple joint over the *second* coordinate recovers the marginal of `(f, h)`. -/
 private lemma sum_map_triple_second
     {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
