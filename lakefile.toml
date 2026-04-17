@@ -1,7 +1,8 @@
 name = "ZhangYeung"
 version = "0.1.0"
-defaultTargets = ["ZhangYeung", "ZhangYeungTest"]
+defaultTargets = ["ZhangYeung"]
 lintDriver = "batteries/runLinter"
+testDriver = "ZhangYeungTest"
 
 [leanOptions]
 autoImplicit = false

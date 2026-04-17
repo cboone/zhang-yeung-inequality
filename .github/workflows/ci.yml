@@ -28,3 +28,7 @@ jobs:
           path: ~/.elan
           key: elan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}
       - uses: leanprover/lean-action@c544e89643240c6b398f14a431bcdc6309e36b3e # v1
+      - name: Lean lint
+        run: lake lint
+      - name: Lean test
+        run: lake test

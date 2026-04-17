@@ -32,6 +32,8 @@
     // PDF library and BibTeX source: not human-edited markdown
     "references/papers/**",
     "references/papers.bib",
+    // Verbatim paper transcriptions: not hand-edited to conform to markdownlint
+    "references/transcriptions/**",
     // Historical plan snapshots
     "docs/plans/done/**"
   ]
