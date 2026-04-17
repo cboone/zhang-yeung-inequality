@@ -1,4 +1,4 @@
-# zhang-yeung-inequality
+# The Zhang-Yeung Inequality
 
 A Lean 4 formalization of the Zhang-Yeung conditional information inequality, a non-Shannon-type bound on Shannon entropy that cannot be derived from the Shannon inequalities alone.
 
@@ -82,9 +82,9 @@ Primary sources and transcriptions live in [`references/`](references/). The pap
 
 Additional entries are listed in [`references/README.md`](references/README.md).
 
-## AI Assistance
+## AI Statement
 
-This project was developed with substantial assistance from Claude (Anthropic). Claude contributed to proof development, code structure, and documentation throughout the formalization effort.
+This formalization is being completed with substantial assistance from Opus 4.6 + 4.7 and GPT 5.4, through `claude` and `opencode`, and GitHub Copilot.
 
 ## License
 
