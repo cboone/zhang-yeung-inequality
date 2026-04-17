@@ -89,6 +89,7 @@ nonneg
 nonnegativity
 olean
 oleans
+opencode
 Pandoc
 Papoulis
 parallelizable
