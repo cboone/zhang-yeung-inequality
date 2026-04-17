@@ -100,6 +100,7 @@ setopt
 sgouezel
 Shannon
 simpa
+smul
 subadditivity
 subgoals
 submodularity
@@ -110,6 +111,7 @@ Teor
 teorth
 Theor
 Tropicalization
+typeclass
 typeclasses
 upstreamed
 upstreaming

@@ -27,19 +27,19 @@ example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (μ : Measure Ω) 
 example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     (2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U | X ; μ] - I[Z : U | Y ; μ]) ↔
       (2 * I[Z : U ; μ] - 3 * I[Z : U | X ; μ] - I[Z : U | Y ; μ] ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ]) := by
-  simpa using form21_iff Z U X Y μ
+  simpa using delta_form21_iff Z U X Y μ
 
 example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     (2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U | X ; μ] + I[Z : U | Y ; μ]) ↔
       (2 * I[Z : U ; μ] - I[Z : U | X ; μ] - 3 * I[Z : U | Y ; μ] ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ]) := by
-  simpa using form22_iff Z U X Y μ
+  simpa using delta_form22_iff Z U X Y μ
 
 example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω)
     (h21 : 2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U | X ; μ] - I[Z : U | Y ; μ])
     (h22 : 2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U | X ; μ] + I[Z : U | Y ; μ]) :
     delta Z U X Y μ ≤ (1 / 2) * I[X : Y ; μ] + (1 / 4) * (I[X : ⟨Z, U⟩ ; μ] + I[Y : ⟨Z, U⟩ ; μ]) := by
-  apply (form23_iff Z U X Y μ).mp
-  exact form23_of_form21_form22 h21 h22
+  apply (delta_form23_iff Z U X Y μ).mp
+  exact delta_form23_of_form21_form22 h21 h22
 
 end PureAlgebra
 
@@ -56,7 +56,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 example {Z : Ω → S₁} {U : Ω → S₂} (hZ : Measurable Z) (hU : Measurable U)
     (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     delta Z U X Y μ = delta U Z X Y μ := by
-  simpa using delta_comm_main hZ hU X Y μ
+  simpa using delta_comm_main hZ hU μ
 
 example {Z : Ω → S₁} {U : Ω → S₂} {X : Ω → S₃} {Y : Ω → S₄}
     (hZ : Measurable Z) (hU : Measurable U) (hX : Measurable X) (hY : Measurable Y)
@@ -70,7 +70,7 @@ example {Z : Ω → S₁} {U : Ω → S₂} {X : Ω → S₃} {Y : Ω → S₄}
 example {Z : Ω → S₁} {U : Ω → S₂} (hZ : Measurable Z) (hU : Measurable U)
     (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     delta Z U X Y μ ≤ I[Z : U ; μ] := by
-  simpa using delta_le_mutualInfo hZ hU X Y μ
+  simpa using delta_le_mutualInfo hZ hU μ
 
 end FiniteAlphabet
 
