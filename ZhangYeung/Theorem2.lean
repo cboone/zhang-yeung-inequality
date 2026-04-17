@@ -292,6 +292,46 @@ private lemma measureReal_map_triple_le_map_pair_13
   simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
   exact ⟨hω.1, hω.2.2⟩
 
+omit [Fintype S₁] [Fintype S₃] [Fintype S₄] in
+/-- **`p̃` marginal over `y` is `pXZU`.** Summing `p̃(x, y, z, u)` over `y ∈ S₂` gives `pXZU(x, z, u)`. This matches `pJoint`'s corresponding marginal over `y`, and is one of the 11 marginal-match facts behind `sum_joint_eq_sum_ptilde`. -/
+private lemma sum_ptilde_over_y
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (x : S₁) (z : S₃) (u : S₄) :
+    (∑ y : S₂, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map (fun ω => (X ω, Z ω, U ω))).real {(x, z, u)} := by
+  simp only [ptilde]
+  rw [← Finset.sum_div, ← Finset.mul_sum]
+  rw [sum_map_triple_first hY hZ hU μ z u]
+  set a := (μ.map (fun ω => (X ω, Z ω, U ω))).real {(x, z, u)}
+  set b := (μ.map (fun ω => (Z ω, U ω))).real {(z, u)}
+  by_cases hb : b = 0
+  · have h_le : a ≤ b := measureReal_map_pair_le_map_snd hX (hZ.prodMk hU) μ x (z, u)
+    have ha : a = 0 := le_antisymm (hb ▸ h_le) measureReal_nonneg
+    simp [ha, hb]
+  · field_simp
+
+omit [Fintype S₂] [Fintype S₃] [Fintype S₄] in
+/-- **`p̃` marginal over `x` is `pYZU`.** Symmetric to `sum_ptilde_over_y`. -/
+private lemma sum_ptilde_over_x
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (y : S₂) (z : S₃) (u : S₄) :
+    (∑ x : S₁, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map (fun ω => (Y ω, Z ω, U ω))).real {(y, z, u)} := by
+  simp only [ptilde]
+  rw [← Finset.sum_div]
+  simp_rw [mul_comm _ ((μ.map (fun ω => (Y ω, Z ω, U ω))).real {(y, z, u)})]
+  rw [← Finset.mul_sum]
+  rw [sum_map_triple_first hX hZ hU μ z u]
+  set a := (μ.map (fun ω => (Y ω, Z ω, U ω))).real {(y, z, u)}
+  set b := (μ.map (fun ω => (Z ω, U ω))).real {(z, u)}
+  by_cases hb : b = 0
+  · have h_le : a ≤ b := measureReal_map_pair_le_map_snd hY (hZ.prodMk hU) μ y (z, u)
+    have ha : a = 0 := le_antisymm (hb ▸ h_le) measureReal_nonneg
+    simp [ha, hb]
+  · field_simp
+
 omit [Fintype S₃] [Fintype S₄] in
 /-- **Inner fiber sum.** For each fixed `(z, u)`, the fibre sum of `p̃` over `(x, y)` collapses to `p(z, u)`. This is the core computation of `ptilde_sum_eq_one`: the marginal identities supply `∑_x p(x, z, u) = p(z, u)` and `∑_y p(y, z, u) = p(z, u)`, factoring the inner product-of-sums out of the division. -/
 private lemma ptilde_fibre_sum
