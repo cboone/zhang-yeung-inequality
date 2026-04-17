@@ -69,8 +69,29 @@ Tang's form is essentially a symmetrized/rescaled variant used in the Dougherty-
 - Lemma 2 copy construction: matches Yeung 2008 auxiliary-variable construction and Lemma 15.9. ✓
 - Copy lemma modern restatement: matches Tang 2020 Lemma 3.1 under variable renaming. ✓
 
-Sources:
+## Bibliography validation (Phase C2)
+
+Spot-checked the most at-risk entries (diacritics, volume/page accuracy) against DBLP:
+
+| Ref | Transcription | DBLP | Status |
+|---|---|---|---|
+| [20] | Matúš and Studený, Combin. Prob. Comput. 4 (1995), pp. 269-278 | Matúš and Studený, Combin. Prob. Comput. 4 (1995), pp. 269-278, DOI 10.1017/S0963548300001644 | ✓ match |
+| [35] | Yeung, IEEE TIT 43 (Nov. 1997), pp. 1924-1934 | Yeung, IEEE TIT 43 (Nov. 1997), pp. 1924-1934, DOI 10.1109/18.641556 | ✓ match |
+| [39] | Zhang & Yeung, IEEE TIT 43 (Nov. 1997), pp. 1982-**1985** | Zhang & Yeung, IEEE TIT 43 (Nov. 1997), pp. 1982-**1986** | paper-vs-DBLP discrepancy; transcription faithful to paper |
+
+The [39] one-page discrepancy (paper prints 1982-1985, DBLP has 1982-1986) is inherent to the paper. For a faithful transcription, we preserve what the paper printed.
+
+Diacritics verified correct on Csiszár, Körner, Matúš, Studený.
+
+## Errata search (Phase C3)
+
+Searched IEEE Xplore, Google Scholar, and the Zhang-Yeung-follow-up literature for any published corrigendum or erratum to the 1998 paper. No errata located. The paper has been heavily cited and re-derived; if a substantive error existed, follow-up papers (Matúš, Csirmaz, Dougherty-Freiling-Zeger) would have flagged it. None do — they treat Theorems 3-5 as correct as stated.
+
+## Sources
 
 - [Yeung, *Information Theory and Network Coding*, PDF draft](https://iest2.ie.cuhk.edu.hk/~whyeung/post/draft2.pdf)
 - [Tang, *The Copy Lemma and Non-Shannon Information Inequalities* (2020 REU)](https://lsa.umich.edu/content/dam/math-assets/math-document/reu-documents/ugradreu/2020/Tang,%20Michael_2020%20REU%20Paper.pdf)
 - [Dougherty, Freiling, Zeger, *Non-Shannon Information Inequalities in Four Random Variables* (arXiv:1104.3602)](https://arxiv.org/abs/1104.3602)
+- [DBLP search for Matúš-Studený](https://dblp.org/search/publ/api?q=Matus+Studeny+Conditional+independences+four+random&format=json)
+- [DBLP search for Yeung framework paper](https://dblp.org/search/publ/api?q=Yeung+framework+linear+information+inequalities&format=json)
+- [DBLP search for Zhang-Yeung 1997](https://dblp.org/search/publ/api?q=Zhang+Yeung+non-Shannon+conditional&format=json)
