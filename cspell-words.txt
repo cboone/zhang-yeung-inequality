@@ -15,6 +15,7 @@ Citip
 codomain
 codomains
 comap
+congr
 Combin
 combinatorially
 Comput
@@ -81,6 +82,8 @@ olean
 oleans
 opencode
 Pandoc
+phat
+ptilde
 parallelizable
 PFR
 polyhedrality
@@ -93,6 +96,7 @@ psitip
 Pulikkoonattu
 readlink
 representability
+reweights
 Rocq
 Romashchenko
 Ruzsa
@@ -108,6 +112,7 @@ smul
 subadditivity
 subgoals
 submodularity
+summands
 Symp
 symm
 Tahar
