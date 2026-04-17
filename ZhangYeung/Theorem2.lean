@@ -180,6 +180,7 @@ private lemma sum_map_triple_second
       (fun y _ => hg (measurableSet_singleton y))]
   simp
 
+omit [Fintype S₃] [Fintype S₄] in
 /-- **Inner fiber sum.** For each fixed `(z, u)`, the fibre sum of `p̃` over `(x, y)` collapses to `p(z, u)`. This is the core computation of `ptilde_sum_eq_one`: the marginal identities supply `∑_x p(x, z, u) = p(z, u)` and `∑_y p(y, z, u) = p(z, u)`, factoring the inner product-of-sums out of the division. -/
 private lemma ptilde_fibre_sum
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
@@ -202,7 +203,7 @@ private lemma ptilde_fibre_sum
   · simp [hc]
   · field_simp
 
-/-- **`p̃` is a probability distribution.** This is the unconditional half of the Zhang-Yeung auxiliary-distribution argument: `∑_{x,y,z,u} p(x,z,u) p(y,z,u) / p(z,u) = 1` for any probability measure. The proof flattens the 4-tuple sum, reorders to bring `(z, u)` out front, then applies `ptilde_fibre_sum` and collapses the outer `∑_{z,u} p(z, u) = 1` via the probability-measure property of the pushforward `μ.map ⟨Z, U⟩`. -/
+/-- **`p̃` is a probability distribution.** This is the unconditional half of the Zhang-Yeung auxiliary-distribution argument: `∑_{x,y,z,u} p(x,z,u) p(y,z,u) / p(z,u) = 1` for any probability measure. The proof reshapes the 4-tuple sum via a product re-associate-and-swap `Equiv`, applies `ptilde_fibre_sum` on each `(z, u)` fibre, and collapses the outer `∑_{z,u} p(z, u) = 1` via the probability-measure property of the pushforward `μ.map ⟨Z, U⟩`. -/
 private lemma ptilde_sum_eq_one
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
