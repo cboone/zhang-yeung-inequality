@@ -1,6 +1,7 @@
 adhesive
 aemeasurable
 Affeldt
+antisymm
 AITIP
 APAP
 Appl
@@ -50,6 +51,7 @@ hardwrapped
 hardwrapping
 Hasan
 hfgh
+hphat
 Hoelzl
 Indep
 infotheo
@@ -99,8 +101,10 @@ proofwidgets
 psitip
 Pulikkoonattu
 readlink
+rcases
 representability
 reweights
+rintro
 Rocq
 Romashchenko
 Ruzsa
