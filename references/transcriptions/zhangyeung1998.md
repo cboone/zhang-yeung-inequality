@@ -17,8 +17,6 @@ source: >
 
 1440 &nbsp;&nbsp;&nbsp;&nbsp; IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. 44, NO. 4, JULY 1998
 
-# On Characterization of Entropy Function via Information Inequalities
-
 Zhen Zhang, *Senior Member, IEEE*, and Raymond W. Yeung, *Senior Member, IEEE*
 
 *Abstract—*Given $n$ discrete random variables $\Omega = \{X_1, \cdots, X_n\}$, associated with any subset $\alpha$ of $\{1, 2, \cdots, n\}$, there is a joint entropy $H(X_\alpha)$ where $X_\alpha = \{X_i : i \in \alpha\}$. This can be viewed as a function defined on $2^{\{1, 2, \cdots, n\}}$ taking values in $[0, +\infty)$. We call this function the entropy function of $\Omega$. The nonnegativity of the joint entropies implies that this function is nonnegative; the nonnegativity of the conditional joint entropies implies that this function is nondecreasing; and the nonnegativity of the conditional mutual informations implies that this function has the following property: for any two subsets $\alpha$ and $\beta$ of $\{1, 2, \cdots, n\}$
@@ -38,6 +36,7 @@ Z. Zhang is with the Department of Electrical Engineering–Systems, Communicati
 R. W. Yeung is with the Department of Information Engineering, the Chinese University of Hong Kong, Shatin, N.T., Hong Kong, China (e-mail: whyeung@ie.cuhk.edu.hk).
 
 Publisher Item Identifier S 0018-9448(98)03630-X.
+
 all joint entropies, conditional entropies, mutual informations, and conditional mutual informations involving some of these random variables. For any subset $\alpha$ of $\mathcal{N}_{n}=\{1, \cdots, n\}$, let
 
 $$
@@ -1288,42 +1287,80 @@ The authors are grateful to the two referees. Their detailed comments and sugges
 ## References
 
 [1] N. M. Abramson, Information Theory and Coding. New York: McGraw-Hill, 1963.
+
 [2] L. L. Campbell, "Entropy as a measure," IEEE Trans. Inform. Theory, vol. IT-11, pp. 112-114, Jan. 1965.
+
 [3] I. Csiszár and J. Körner, Information Theory: Coding Theorem for Discrete Memoryless Systems. New York: Academic, and Budapest, Hungary: Akademiai Kiado, 1981.
+
 [4] A. P. Dawid, "Conditional independence in statistical theory (with discussion)," J. Roy. Statist. Soc., Ser. B, vol. 41, pp. 1-31.
+
 [5] S. Fujishige, "Polymatroidal dependence structure of a set of random variables," Inform. Contr., vol. 39, pp. 55-72, 1978.
+
 [6] T. Kawabata and R. W. Yeung, "The structure of the $I$-measure of a Markov chain," IEEE Trans. Inform. Theory, vol. 38, pp. 1146-1149, 1992.
+
 [7] T. S. Han, "Linear dependence structure of the entropy space," Inform. Contr., vol. 29, pp. 337-368.
+
 [8] ——, "Nonnegative entropy measures of multivariate symmetric correlations," Inform. Contr., vol. 36, pp. 133-156, 1978.
+
 [9] ——, "A uniqueness of Shannon's information distance and related nonnegativity problems," J. Comb., Inform. Syst. Sci., vol. 6, pp. 320-321, 1981.
+
 [10] G.-d. Hu, "On the amount of information," Teor. Veroyatnost. i Primenen., vol. 4, pp. 447-455, 1962, in Russian.
+
 [11] F. Matúš, private communication.
+
 [12] F. J. MacWilliams and N. J. A. Sloane, The Theory of Error Correcting Codes. Amsterdam, The Netherlands: North-Holland, Elsevier Science B.V., 1977.
+
 [13] M. Matúš, "Abstract functional dependency structures," Theor. Comput. Sci., vol. 81, pp. 117-126, 1991.
+
 [14] ——, "On equivalence of Markov properties over undirected graphs," J. Appl. Probab., vol. 29, pp. 745-749, 1992.
+
 [15] ——, "Ascending and descending conditional independence relations," in Trans. 11th Prague Conf. Information Theory, Statistical Decision Functions and Random Processes, vol. B. Prague, Czechoslovakia: Academia, pp. 181-200, 1992.
+
 [16] ——, "Probabilistic conditional independence structures and matroid theory: Background," Int. J. Gen. Syst., vol. 22, pp. 185-196.
+
 [17] ——, "Extreme convex set functions with many nonnegative differences," Discr. Math., vol. 135, pp. 177-191, 1994.
+
 [18] F. Matúš, "Conditional independences among four random variables II," Combin., Prob. Comput., vol. 4, pp. 407-417, 1995.
+
 [19] ——, "Conditional independence structures examined via minors," Ann. Math., Artificial Intell., vol. 21, pp. 99-128, 1997.
+
 [20] F. Matúš and M. Studený, "Conditional independences among four random variables I," Combin., Prob. Comput., vol. 4, pp. 269-278, 1995.
+
 [21] W. J. McGill, "Multivariate information transmission," in Trans. Prof. Group Inform. Theory, 1954 Symp. Information Theory, vol. PGIT-4, 1955, pp. 93-111.
+
 [22] A. Papoulis, Probability, Random Variables and Stochastic Processes, 2nd ed. New York: McGraw-Hill, 1984.
+
 [23] J. Pearl, Probabilistic Reasoning in Intelligent Systems. San Mateo, CA: Morgan Kaufman, 1988.
+
 [24] An Introduction to Information Theory. New York: McGraw-Hill, 1961.
+
 [25] M. Studený, "Attempts at axiomatic description of conditional independence," in Proc. Workshop on Uncertainty Processing in Expert Systems, supplement to Kybernetika, vol. 25, nos. 1-3, pp. 65-72, 1989.
+
 [26] ——, "Multiinformation and the problem of characterization of conditional independence relations," Probl. Contr. Inform. Theory, vol. 18, pp. 3-16, 1989.
+
 [27] ——, "Conditional independence relations have no finite complete characterization," in Trans. 11th Prague Conf. Information Theory, Statistical Decision Functions and Random Processes, vol. B. Prague, Czechoslovaka: Academia, pp. 377-396, 1992.
+
 [28] ——, "Structural semigraphoids," Int. J. Gen. Syst., vol. 22, no. 2, pp. 207-217, 1994.
+
 [29] ——, "Descriptions of structures of stochastic independence by means of faces and imsets (in three parts)," Int. J. Gen. Syst., vol. 23, pp. 123-137, pp. 201-219, pp. 323-341, 1994/1995.
+
 [30] T. Tsujishita, "On triple mutual information," Adv. Appl. Math., vol. 16, pp. 269-274, 1995.
+
 [31] S. Watanabe, "A study of ergodicity and redundancy on intersymbol correlation of finite range," in Trans. 1954 Symp. Inform. Theory (Cambridge, MA, Sept. 15-17, 1954), p. 85.
+
 [32] ——, "Information theoretical analysis of multivariate correlation," IBM J., pp. 66-81, 1960.
+
 [33] D. J. A. Welsh, Matroid Theory. New York: Academic 1976.
+
 [34] R. W. Yeung, "A new outlook on Shannon's information measures," IEEE Trans. Inform. Theory, vol. 37, pp. 466-474, 1991.
+
 [35] ——, "A framework for linear information inequalities," IEEE Trans. Inform. Theory, vol. 43, pp. 1924-1934, Nov. 1997.
+
 [36] R. W. Yeung, T. T. Lee, and Z. Ye, "An information-theoretic characterization of Markov random fields and its applications," IEEE Trans. Inform. Theory, submitted for publication.
+
 [37] R. W. Yeung and Z. Zhang, "Distributed source coding for satellite communication," IEEE Trans. Inform. Theory, submitted for publication.
+
 [38] R. W. Yeung and Y.-O. Yan, "Information theoretic inequality prover." [Online] Available: http://www.ie.cuhk.edu.hk/ITIP or http://it.ucsd.edu/~whyeung (mirror site).
+
 [39] Z. Zhang and R. W. Yeung, "A non-Shannon type conditional inequality of information quantities," IEEE Trans. Inform. Theory, vol. 43, pp. 1982-1985, Nov. 1997.
 
