@@ -48,6 +48,7 @@ Groebner
 hardwrapped
 hardwrapping
 Hasan
+hfgh
 Hoelzl
 Indep
 infotheo
@@ -83,7 +84,9 @@ oleans
 opencode
 Pandoc
 phat
+preimage
 ptilde
+pushforward
 parallelizable
 PFR
 polyhedrality
@@ -115,6 +118,7 @@ submodularity
 summands
 Symp
 symm
+tauto
 Tahar
 Taplo
 Teor

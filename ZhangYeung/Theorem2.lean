@@ -121,7 +121,66 @@ private noncomputable def pJoint
     S₁ × S₂ × S₃ × S₄ → ℝ := fun t =>
   (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
 
-/-- **`p̃` is a probability distribution.** This is the unconditional half of the Zhang-Yeung auxiliary-distribution argument: `∑_{x,y,z,u} p(x,z,u) p(y,z,u) / p(z,u) = 1` for any probability measure. The proof groups the sum by `(z, u)`, applies marginal identities `∑_x p(x, z, u) = p(z, u)` and `∑_y p(y, z, u) = p(z, u)` on each fibre, and collapses to `∑_{z,u} p(z, u) = 1`. -/
+/-- **Marginal summation.** For a triple-valued joint `(f, g, h) : Ω → α × β × γ` with `α` finite and discrete, summing the real joint PMF over the first coordinate recovers the two-coordinate marginal PMF `(g, h)`. This is the Fintype-level `Prod.snd`-pushforward fact used in the `ptilde`/`phat` sum arguments. -/
+private lemma sum_map_triple_first
+    {α β γ : Type*} [Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    [MeasurableSpace γ] [MeasurableSingletonClass γ]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
+    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (b : β) (c : γ) :
+    ∑ a : α, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
+      = (μ.map (fun ω => (g ω, h ω))).real {(b, c)} := by
+  have hfgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
+  have hgh : Measurable (fun ω => (g ω, h ω)) := hg.prodMk hh
+  simp_rw [map_measureReal_apply hfgh (measurableSet_singleton _),
+           map_measureReal_apply hgh (measurableSet_singleton _)]
+  have preimage_eq : ∀ a : α,
+      (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
+        = f ⁻¹' {a} ∩ (fun ω => (g ω, h ω))⁻¹' {(b, c)} := by
+    intro a; ext ω; simp
+  simp_rw [preimage_eq]
+  have hA : MeasurableSet ((fun ω => (g ω, h ω))⁻¹' {(b, c)}) :=
+    hgh (measurableSet_singleton _)
+  simp_rw [show ∀ a : α, μ.real (f ⁻¹' {a} ∩ (fun ω => (g ω, h ω))⁻¹' {(b, c)})
+      = (μ.restrict ((fun ω => (g ω, h ω))⁻¹' {(b, c)})).real (f ⁻¹' {a}) from
+    fun a => (measureReal_restrict_apply (hf (measurableSet_singleton a))).symm]
+  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset α)
+      (fun y _ => hf (measurableSet_singleton y))]
+  simp
+
+/-- Marginal summation, second variant: summing the triple joint over the *second* coordinate recovers the marginal of `(f, h)`. -/
+private lemma sum_map_triple_second
+    {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
+    [Fintype β] [MeasurableSpace β] [MeasurableSingletonClass β]
+    [MeasurableSpace γ] [MeasurableSingletonClass γ]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
+    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (c : γ) :
+    ∑ b : β, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
+      = (μ.map (fun ω => (f ω, h ω))).real {(a, c)} := by
+  have hfgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
+  have hfh : Measurable (fun ω => (f ω, h ω)) := hf.prodMk hh
+  simp_rw [map_measureReal_apply hfgh (measurableSet_singleton _),
+           map_measureReal_apply hfh (measurableSet_singleton _)]
+  have preimage_eq : ∀ b : β,
+      (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
+        = g ⁻¹' {b} ∩ ((fun ω => (f ω, h ω))⁻¹' {(a, c)}) := by
+    intro b; ext ω; simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq,
+      Set.mem_inter_iff]; tauto
+  simp_rw [preimage_eq]
+  have hA : MeasurableSet ((fun ω => (f ω, h ω))⁻¹' {(a, c)}) :=
+    hfh (measurableSet_singleton _)
+  simp_rw [show ∀ b : β, μ.real (g ⁻¹' {b} ∩ (fun ω => (f ω, h ω))⁻¹' {(a, c)})
+      = (μ.restrict ((fun ω => (f ω, h ω))⁻¹' {(a, c)})).real (g ⁻¹' {b}) from
+    fun b => (measureReal_restrict_apply (hg (measurableSet_singleton b))).symm]
+  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset β)
+      (fun y _ => hg (measurableSet_singleton y))]
+  simp
+
+/-- **`p̃` is a probability distribution.** This is the unconditional half of the Zhang-Yeung auxiliary-distribution argument: `∑_{x,y,z,u} p(x,z,u) p(y,z,u) / p(z,u) = 1` for any probability measure. The proof groups the sum by `(z, u)`, applies marginal identities `∑_x p(x, z, u) = p(z, u)` and `∑_y p(y, z, u) = p(z, u)` on each fibre, and collapses to `∑_{z,u} p(z, u) = 1`. The two marginal identities are provided by `sum_map_triple_first`. -/
 private lemma ptilde_sum_eq_one
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
