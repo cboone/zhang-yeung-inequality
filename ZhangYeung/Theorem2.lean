@@ -665,7 +665,119 @@ private lemma ptilde_sum_eq_one
     exact hSingletonSum
   exact hCollapse
 
-/-- **`p̂` is a probability distribution under the hypotheses of Theorem 2.** Collapses by summing over `z` first (using `I[X:Y|Z] = 0` ⇒ `p(x, y, z) · p(z) = p(x, z) · p(y, z)`), then using `I[X:Y] = 0` ⇒ `p(x, y) = p(x) · p(y)` to cancel the single-variable denominators, then summing over `x, y, u`. -/
+/-- **CondIndepFun at singletons: the pointwise product formula.** The conditional analogue of `indepFun_map_pair_real_singleton`. Under `CondIndepFun f g h μ` with a probability measure, the three-way marginal factorizes as `p(a, b, c) · p(c) = p(a, c) · p(b, c)`. The zero-measure branch (when `p(c) = 0`) closes via the `measureReal_map_pair_le_map_snd` bound; the positive branch unpacks `CondIndepFun` at `c` via `ae_iff_of_countable`, applies the unconditional product formula on the fibre `(μ[|h ← c])`, and multiplies through by `p(c)` in ENNReal to clear the two conditional denominators. -/
+private lemma condIndepFun_map_triple_real_singleton
+    {α β γ : Type*}
+    [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    [Fintype γ] [MeasurableSpace γ] [MeasurableSingletonClass γ]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
+    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
+    {μ : Measure Ω'} [IsProbabilityMeasure μ]
+    (h_cond : CondIndepFun f g h μ) (a : α) (b : β) (c : γ) :
+    (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)} * (μ.map h).real {c}
+      = (μ.map (fun ω => (f ω, h ω))).real {(a, c)}
+        * (μ.map (fun ω => (g ω, h ω))).real {(b, c)} := by
+  by_cases hc_zero : (μ.map h).real {c} = 0
+  · rw [hc_zero, mul_zero,
+        le_antisymm (hc_zero ▸ measureReal_map_pair_le_map_snd hf hh μ a c) measureReal_nonneg,
+        zero_mul]
+  · -- Positive case.
+    have h_map_c_ne : (μ.map h) {c} ≠ 0 := fun heq => hc_zero (by
+      rw [measureReal_def, heq]; rfl)
+    have h_h_pre_ne : μ (h ⁻¹' {c}) ≠ 0 := by
+      rw [← Measure.map_apply hh (measurableSet_singleton c)]; exact h_map_c_ne
+    have h_h_pre_top : μ (h ⁻¹' {c}) ≠ ⊤ := measure_ne_top _ _
+    have h_Xinv_ne : (μ (h ⁻¹' {c}))⁻¹ ≠ 0 := ENNReal.inv_ne_zero.mpr h_h_pre_top
+    have h_Xinv_top : (μ (h ⁻¹' {c}))⁻¹ ≠ ⊤ := ENNReal.inv_ne_top.mpr h_h_pre_ne
+    have h_cancel : μ (h ⁻¹' {c}) * (μ (h ⁻¹' {c}))⁻¹ = 1 :=
+      ENNReal.mul_inv_cancel h_h_pre_ne h_h_pre_top
+    -- Extract IndepFun on the conditional.
+    have h_cond' : ∀ᵐ z ∂(μ.map h), IndepFun f g (μ[|h ← z]) := h_cond
+    rw [ae_iff_of_countable] at h_cond'
+    have h_indep : IndepFun f g (μ[|h ← c]) := h_cond' c h_map_c_ne
+    have h_prod_cond : (μ[|h ← c]) (f ⁻¹' {a} ∩ g ⁻¹' {b})
+        = (μ[|h ← c]) (f ⁻¹' {a}) * (μ[|h ← c]) (g ⁻¹' {b}) :=
+      (indepFun_iff_measure_inter_preimage_eq_mul).mp h_indep {a} {b}
+        (measurableSet_singleton a) (measurableSet_singleton b)
+    simp_rw [cond_apply (hh (measurableSet_singleton c))] at h_prod_cond
+    -- `h_prod_cond : X⁻¹ * μ(h⁻¹{c} ∩ (f⁻¹{a} ∩ g⁻¹{b}))
+    --                = X⁻¹ * μ(h⁻¹{c} ∩ f⁻¹{a}) * (X⁻¹ * μ(h⁻¹{c} ∩ g⁻¹{b}))`
+    -- Rearrange the right-hand side via `mul_mul_mul_comm`, then cancel `X⁻¹` on the left.
+    rw [mul_mul_mul_comm, mul_assoc] at h_prod_cond
+    -- Now `h_prod_cond : X⁻¹ * P = X⁻¹ * (X⁻¹ * (F * G))`. Multiply both by `X` twice.
+    have h_step1 : μ (h ⁻¹' {c} ∩ (f ⁻¹' {a} ∩ g ⁻¹' {b}))
+        = (μ (h ⁻¹' {c}))⁻¹ * (μ (h ⁻¹' {c} ∩ f ⁻¹' {a}) * μ (h ⁻¹' {c} ∩ g ⁻¹' {b})) := by
+      have := congrArg (fun y => μ (h ⁻¹' {c}) * y) h_prod_cond
+      simp only at this
+      rw [← mul_assoc (μ (h ⁻¹' {c})) _ (μ (h ⁻¹' {c} ∩ (f ⁻¹' {a} ∩ g ⁻¹' {b}))),
+          h_cancel, one_mul,
+          ← mul_assoc (μ (h ⁻¹' {c})) _ (_ * (_ * _)),
+          h_cancel, one_mul] at this
+      exact this
+    -- `h_step1 : P = X⁻¹ * (F * G)`. Multiply by `X` to clear.
+    have h_step2 : μ (h ⁻¹' {c}) * μ (h ⁻¹' {c} ∩ (f ⁻¹' {a} ∩ g ⁻¹' {b}))
+        = μ (h ⁻¹' {c} ∩ f ⁻¹' {a}) * μ (h ⁻¹' {c} ∩ g ⁻¹' {b}) := by
+      rw [h_step1, ← mul_assoc, h_cancel, one_mul]
+    -- Translate to target form.
+    have h_T_eq : (fun ω => (f ω, g ω, h ω)) ⁻¹' {(a, b, c)}
+        = h ⁻¹' {c} ∩ (f ⁻¹' {a} ∩ g ⁻¹' {b}) := by
+      ext ω
+      simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.mem_inter_iff, Prod.mk.injEq]
+      tauto
+    have h_A_eq : (fun ω => (f ω, h ω)) ⁻¹' {(a, c)} = h ⁻¹' {c} ∩ f ⁻¹' {a} := by
+      ext ω
+      simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.mem_inter_iff, Prod.mk.injEq]
+      tauto
+    have h_B_eq : (fun ω => (g ω, h ω)) ⁻¹' {(b, c)} = h ⁻¹' {c} ∩ g ⁻¹' {b} := by
+      ext ω
+      simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.mem_inter_iff, Prod.mk.injEq]
+      tauto
+    rw [map_measureReal_apply (hf.prodMk (hg.prodMk hh)) (measurableSet_singleton _),
+        map_measureReal_apply (hf.prodMk hh) (measurableSet_singleton _),
+        map_measureReal_apply (hg.prodMk hh) (measurableSet_singleton _),
+        map_measureReal_apply hh (measurableSet_singleton _),
+        h_T_eq, h_A_eq, h_B_eq]
+    -- Convert ENNReal → Real.
+    rw [show μ.real (h ⁻¹' {c} ∩ (f ⁻¹' {a} ∩ g ⁻¹' {b}))
+          = (μ (h ⁻¹' {c} ∩ (f ⁻¹' {a} ∩ g ⁻¹' {b}))).toReal from rfl,
+        show μ.real (h ⁻¹' {c}) = (μ (h ⁻¹' {c})).toReal from rfl,
+        show μ.real (h ⁻¹' {c} ∩ f ⁻¹' {a}) = (μ (h ⁻¹' {c} ∩ f ⁻¹' {a})).toReal from rfl,
+        show μ.real (h ⁻¹' {c} ∩ g ⁻¹' {b}) = (μ (h ⁻¹' {c} ∩ g ⁻¹' {b})).toReal from rfl]
+    rw [← ENNReal.toReal_mul, ← ENNReal.toReal_mul, mul_comm (μ (h ⁻¹' {c} ∩ _)) _]
+    exact congrArg ENNReal.toReal h_step2
+
+/-- **Pointwise conditional factorization of `p̃`-style fibre.** Under `CondIndepFun f g h μ` (with `μ` a probability measure on a Fintype `h`-codomain), the "normalized pair" `(μ.map ⟨f, h⟩).real {(a, c)} · (μ.map ⟨g, h⟩).real {(b, c)} / (μ.map h).real {c}` equals the triple marginal `(μ.map ⟨f, g, h⟩).real {(a, b, c)}`. On the null support of `(μ.map h).real {c}`, both sides vanish (via the pair/triple marginal bounds). -/
+private lemma condIndep_normalized_pair_eq_triple
+    {α β γ : Type*}
+    [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    [Fintype γ] [MeasurableSpace γ] [MeasurableSingletonClass γ]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
+    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
+    {μ : Measure Ω'} [IsProbabilityMeasure μ]
+    (h_cond : CondIndepFun f g h μ) (a : α) (b : β) (c : γ) :
+    (μ.map (fun ω => (f ω, h ω))).real {(a, c)}
+        * (μ.map (fun ω => (g ω, h ω))).real {(b, c)} / (μ.map h).real {c}
+      = (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)} := by
+  by_cases hc_zero : (μ.map h).real {c} = 0
+  · rw [hc_zero, div_zero]
+    have h_fgh_le : (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
+        ≤ (μ.map h).real {c} := by
+      rw [map_measureReal_apply (hf.prodMk (hg.prodMk hh)) (measurableSet_singleton _),
+          map_measureReal_apply hh (measurableSet_singleton _)]
+      apply measureReal_mono _ (measure_ne_top _ _)
+      intro ω hω
+      simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
+      exact hω.2.2
+    exact (le_antisymm (hc_zero ▸ h_fgh_le) measureReal_nonneg).symm
+  · have h_prod := condIndepFun_map_triple_real_singleton hf hg hh h_cond a b c
+    rw [div_eq_iff hc_zero]
+    linarith
+
+/-- **`p̂` is a probability distribution under the hypotheses of Theorem 2.** Collapses by summing over `z` first (using `I[X:Y|Z] = 0` ⇒ `p(x, y, z) · p(z) = p(x, z) · p(y, z)` via `condIndep_normalized_pair_eq_triple`), then using `I[X:Y] = 0` ⇒ `p(x, y) = p(x) · p(y)` (via `indepFun_map_pair_real_singleton`) to cancel the single-variable denominators, then summing over `x, y, u`. The telescoping uses the `condIndepFun_map_triple_real_singleton` helper above. -/
 private lemma phat_sum_eq_one
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
