@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions for zhang-yeung-inequality
 
-For full project conventions, see AGENTS.md in the repository root.
+For full project conventions, see AGENTS.md in the repository root. For rules scoped to Lean source files, see `.github/lean.instructions.md` (applied to `**/*.lean` via the `applyTo` frontmatter).
 
 ## PR Review
 

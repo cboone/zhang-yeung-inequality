@@ -89,4 +89,6 @@ Two workflows under `.github/workflows/`:
 - `lean-toolchain` — pinned Lean version.
 - `Makefile` — build, lint, test, and check targets.
 - `bin/bootstrap-worktree` — zsh bootstrap script.
+- `.github/copilot-instructions.md` — general GitHub Copilot PR-review guidance.
+- `.github/lean.instructions.md` — Copilot PR-review rules scoped to `**/*.lean` (entrypoint manifest pattern, no line-length limit, single-line comment paragraphs, vendored-deps exclusion).
 - `references/papers/zhangyeung1998.pdf` and `references/transcriptions/zhangyeung1998.md` — primary source.
