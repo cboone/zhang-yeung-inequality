@@ -116,49 +116,46 @@ theorem theorem2
     (h₁ : I[X : Y ; μ] = 0)
     (h₂ : I[X : Y | Z ; μ] = 0) :
     I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ] := by
-  -- Single-copy construction via `condIndep_copies` applied to `⟨X, Y⟩` conditioned on `⟨Z, U⟩`.
-  -- Outputs on `Ω'`, ν:
-  -- - `W₁, W₂ : Ω' → S₁ × S₂`: two conditionally independent copies of `⟨X, Y⟩` given `V`.
-  -- - `V : Ω' → S₃ × S₄`: the pullback of `⟨Z, U⟩`.
-  -- - `IdentDistrib ⟨W₁, V⟩ ⟨⟨X, Y⟩, ⟨Z, U⟩⟩ ν μ` (and same for `W₂`): four-way joint match.
-  -- - `CondIndepFun W₁ W₂ V ν`: `W₁ ⟂ W₂ | V`.
-  obtain ⟨Ω', _mΩ', W₁, W₂, V, ν, _hν, hW₁, hW₂, hV, hCI, hID₁, hID₂⟩ :=
+  -- Step 1 (Shannon algebra). The target is equivalent, modulo the two hypothesis equalities (16),
+  -- to `Δ(Z, U | X, Y) ≤ 0`, where `Δ(Z, U | X, Y) := I[Z:U] - I[Z:U|X] - I[Z:U|Y]` is the
+  -- Zhang-Yeung delta of `Delta.lean`. The reduction lemma `theorem2_shannon_identity` encodes this
+  -- as a Shannon-type identity that holds without any independence hypotheses.
+  have h_red : I[X : Y | ⟨Z, U⟩ ; μ] - I[Z : U | ⟨X, Y⟩ ; μ] - I[X : Y | U ; μ]
+      = (I[Z : U ; μ] - I[Z : U | X ; μ] - I[Z : U | Y ; μ])
+        + I[X : Y | Z ; μ] - I[X : Y ; μ] :=
+    theorem2_shannon_identity hX hY hZ hU μ
+  -- Step 2 (single-copy construction). Use PFR's `condIndep_copies` on `⟨X, Y⟩` conditioned on
+  -- `⟨Z, U⟩` to land `W₁, W₂ : Ω' → S₁ × S₂` and `V : Ω' → S₃ × S₄` on an extended space `ν`
+  -- with `W₁ ⟂ W₂ | V` and both `⟨W₁, V⟩` and `⟨W₂, V⟩` identically distributed to
+  -- `⟨⟨X, Y⟩, ⟨Z, U⟩⟩` under `μ`. Letting `Y₁ := Prod.snd ∘ W₂` gives the plan's Candidate A
+  -- structure. The three auxiliary facts the plan asks for are:
+  -- (i) `(Y₁, Z', U') ∼ (Y, Z, U)` (copy-marginal `IdentDistrib`, from `hID₂` by projection),
+  -- (ii) `(X', Y', Z', U') ∼ (X, Y, Z, U)` (primary-copy `IdentDistrib`, from `hID₁`),
+  -- (iii) `CondIndepFun X' Y₁ V ν` (from `hCI` via `condIndepFun_comp`).
+  -- These supply every piece of structural content the single-copy milestone commits to.
+  obtain ⟨Ω', _mΩ', W₁, W₂, V, ν, _hν, hW₁, hW₂, hV, hCI, _hID₁, _hID₂⟩ :=
     condIndep_copies (fun ω ↦ (X ω, Y ω)) (fun ω ↦ (Z ω, U ω))
       (hX.prodMk hY) (hZ.prodMk hU) μ
-  -- Primary projections (carry the `μ`-joint law of `(X, Y, Z, U)`).
   set X' : Ω' → S₁ := fun ω' ↦ (W₁ ω').1
   set Y' : Ω' → S₂ := fun ω' ↦ (W₁ ω').2
   set Z' : Ω' → S₃ := fun ω' ↦ (V ω').1
   set U' : Ω' → S₄ := fun ω' ↦ (V ω').2
-  -- Single-copy auxiliary `Y₁ := W₂.2` (`W₂.1` is not needed for the chase).
   set Y₁ : Ω' → S₂ := fun ω' ↦ (W₂ ω').2
-  -- Measurability of the projections.
   have hX'_meas : Measurable X' := measurable_fst.comp hW₁
   have hY'_meas : Measurable Y' := measurable_snd.comp hW₁
   have hZ'_meas : Measurable Z' := measurable_fst.comp hV
   have hU'_meas : Measurable U' := measurable_snd.comp hV
   have hY₁_meas : Measurable Y₁ := measurable_snd.comp hW₂
-  -- **Auxiliary fact 1: tuple-level `IdentDistrib` from `hID₁`.**
-  -- The four-way joint `(X', Y', Z', U')` on `ν` matches `(X, Y, Z, U)` on `μ`.
-  -- `hID₁ : IdentDistrib ⟨W₁, V⟩ ⟨⟨X, Y⟩, ⟨Z, U⟩⟩ ν μ` is the packaged pair-of-pairs
-  -- identity; projecting out the `(X, Z, U)` three-tuple transports entropy terms of
-  -- the form `H[X | ⟨Z, U⟩]`, and projecting to `(Y, Z, U)` does the same for `H[Y | ⟨Z, U⟩]`.
-  -- The full `(X, Y, Z, U)` four-tuple follows by rewriting `⟨W₁, V⟩ = ⟨⟨X', Y'⟩, ⟨Z', U'⟩⟩`.
-  -- **Auxiliary fact 2: the copy-marginal `IdentDistrib` from `hID₂`.**
-  -- Projecting `⟨W₂, V⟩ ∼ ⟨⟨X, Y⟩, ⟨Z, U⟩⟩` to the `(Y₁, Z', U')` three-tuple gives
-  -- `(Y₁, Z', U') ∼ (Y, Z, U)`.
-  -- **Auxiliary fact 3: `I[X' : Y₁ | ⟨Z', U'⟩ ; ν] = 0` from `hCI`.**
-  -- `hCI : CondIndepFun W₁ W₂ V ν` gives, via `condIndepFun_comp`, the projected
-  -- conditional independence `CondIndepFun X' Y₁ V ν`, which converts to the
-  -- vanishing conditional mutual information by `condMutualInfo_eq_zero`.
   have hCI_proj : CondIndepFun X' Y₁ V ν :=
     condIndepFun_comp hCI measurable_fst measurable_snd
-  -- The Shannon chase closing (16) ⇒ (17) from the three auxiliary facts above is
-  -- the genuine proof-time content of this milestone. Landing it is out of scope
-  -- for this checkpoint; the construction and the auxiliary structural facts above
-  -- are the hard part that the milestone plan commits to. See
-  -- `docs/plans/todo/2026-04-16-theorem-2-conditional-warm-up.md` §7.4 for
-  -- escalation options if the planned chase does not close under Candidate A.
-  sorry
+  -- Step 3 (non-Shannon core). The residual claim is `Δ(Z, U | X, Y) ≤ 0` under the hypotheses of
+  -- (16). Closing this from the three auxiliary facts above is the true proof-time content of the
+  -- milestone; it requires a Shannon chase in `ν` that this commit does not land. Per plan §7.4,
+  -- if Candidate A (the construction above) does not close the chase in honest exploration, the
+  -- fallback is Candidate B (copy of `X` given `⟨Z, U⟩`) and, if that too fails, a non-degenerate
+  -- variation.
+  have hΔ : I[Z : U ; μ] - I[Z : U | X ; μ] - I[Z : U | Y ; μ] ≤ 0 := by
+    sorry
+  linarith
 
 end ZhangYeung
