@@ -128,12 +128,12 @@ No changes to `ZhangYeung/Prelude.lean`, `ZhangYeung/Delta.lean`, or `lakefile.t
 
 The core technical content of Theorem 2 is an auxiliary random variable $W$ on an extended probability space, constructed from the original $(X, Y, Z, U)$, such that:
 
-1. **Marginal equality.** Some tuple that includes $W$ has the same distribution on the extended space as a corresponding tuple that includes the $W$-analogue does on the original space; equivalently, there is an `IdentDistrib` pair that transports entropy/mutual-information terms between the two sides.
+1. **Marginal equality.** The specific tuples that appear in the entropy expansions used in the chase have matching laws across the original and extended spaces. The plan should ask for exactly those tuple-level `IdentDistrib` facts, not for a vague "copy variable has the right marginal" surrogate.
 1. **Conditional independence.** $W$ is conditionally independent of some subset of $\{X, Y, Z, U\}$ given another subset, in a way that translates (via `condMutualInfo_eq_zero`) into a zero conditional mutual information term usable inside the Shannon-inequality chase.
 
 The chase that follows --- built from Shannon-type identities, `condMutualInfo_nonneg`, the two hypotheses `I[X : Y ; μ] = 0` and `I[X : Y | Z ; μ] = 0`, and the two facts above --- should discharge the target inequality (17) with `linarith` as the last tactic.
 
-The paper does not spell out the construction; neither does the 1998 transcription. Two candidate constructions cover the natural single-copy degenerations of M3's two-copy $q(x, y, z, u, x_1, y_1) := p(x, y, z, u) \, p(x_1, y_1 \mid z, u)$. Pick one at step 3 of the sequencing below; if the chase does not close under the chosen construction, fall back to the other.
+The paper does not spell out the construction; neither does the 1998 transcription. Two candidate constructions cover the natural single-copy degenerations of M3's two-copy $q(x, y, z, u, x_1, y_1) := p(x, y, z, u) \, p(x_1, y_1 \mid z, u)$. Pick one at the construction-selection step in the sequencing below; if the chase does not close under the chosen construction, fall back to the other.
 
 ### Candidate A: copy of $Y$ given $(Z, U)$
 
@@ -142,16 +142,21 @@ Define $q(x, y, z, u, y_1) := p(x, y, z, u) \, p(y_1 \mid z, u)$. Under $q$:
 - **Marginal equality:** the $(Y_1, Z, U)$ marginal equals the $(Y, Z, U)$ marginal.
 - **Conditional independence:** $Y_1 \perp (X, Y) \mid (Z, U)$; in particular $I(Y ; Y_1 \mid Z, U) = I(X ; Y_1 \mid Z, U) = 0$.
 
+These are the immediate structural facts. They do **not** by themselves justify transporting arbitrary mixed terms involving both $X$ and $Y_1$ back to $\mu$; such terms should be handled directly on the auxiliary measure $\nu$, with `aux_condIndep` providing the key zero term.
+
 Lean construction (sketch):
 
 ```lean
--- extended sample space Ω × S₂
--- (S₂ is the codomain of Y)
-let κ : Kernel (S₃ × S₄) S₂ := condDistrib Y (fun ω => (Z ω, U ω)) μ
-let ν : Measure (Ω × S₂) := μ ⊗ₘ Kernel.comap κ (fun ω => (Z ω, U ω))
+let π : Ω → S₃ × S₄ := fun ω => (Z ω, U ω)
+let κ : Kernel (S₃ × S₄) S₂ := condDistrib Y π μ
+-- realize the pullback of κ along π using the actual mathlib API available
+-- at the pinned revision (deterministic-kernel composition or an equivalent
+-- `Kernel.comapRight` route), rather than assuming a literal `Kernel.comap`
+let κΩ : Kernel Ω S₂ := ...
+let ν : Measure (Ω × S₂) := μ ⊗ₘ κΩ
 ```
 
-Advantages: the needed marginal and conditional-independence facts fall out directly from `compProd_map_condDistrib` and the kernel-compose lemmas.
+Advantages: once the pullback kernel is expressed with the actual pinned mathlib combinators, the needed first-marginal and copied-variable marginal identities should come from `compProd_map_condDistrib`, `Measure.fst_compProd`, and related map lemmas. Do not assume the proof is literally one rewrite from a non-existent `Kernel.comap` API.
 
 Disadvantages: the target inequality (17) does not obviously dissolve after plugging the $Y_1$-based facts in. The chase requires at least one creative step beyond the identities that the construction immediately supplies.
 
@@ -202,8 +207,8 @@ Design notes:
 
 Inside `Theorem2.lean`, the proof decomposes naturally into four private-ish building blocks. Use `private` or `section`-scoped `lemma`s --- not `theorem`s --- so only `theorem2` is exported.
 
-1. **`aux_measure` (private).** The extended measure $\nu := \mu \otimes_m (\kappa \circ \pi)$ where $\kappa := \mathrm{condDistrib}\, Y \, \langle Z, U\rangle\, \mu$ and $\pi : \Omega \to S_3 \times S_4$ is the $(Z, U)$ projection. Bundle the `Nonempty`/`StandardBorelSpace` side conditions on `S₂` at this lemma; propagate to downstream building blocks only if needed.
-1. **`aux_identDistrib` (private).** The `IdentDistrib` facts the chase needs: $(Y_1, Z, U)$ under $\nu$ is identically distributed to $(Y, Z, U)$ under $\mu$, and $(X, Z, U)$ under $\nu$ (viewing $X$ pulled back through $\mathrm{fst}$) is identically distributed to $(X, Z, U)$ under $\mu$. Transport to the required information-identity lemmas using `IdentDistrib.mutualInfo_eq` and the conditional-mutual-information analogue.
+1. **`aux_measure` (private).** The extended measure is built from $\kappa := \mathrm{condDistrib}\, Y \, \langle Z, U\rangle\, \mu$ by pulling that kernel back along $\pi : \Omega \to S_3 \times S_4$, then forming $\nu := \mu \otimes_m \kappa_\Omega$. In Lean, use the actual pullback combinator available at the pinned mathlib revision (deterministic-kernel composition or an equivalent `Kernel.comapRight` route), not an assumed `Kernel.comap` API. Bundle the `Nonempty`/`StandardBorelSpace` side conditions on `S₂` at this lemma; propagate to downstream building blocks only if needed.
+1. **`aux_identDistrib` (private).** Prove only the tuple-law identities the chase actually needs. At minimum, $(Y_1, Z, U)$ under $\nu$ is identically distributed to $(Y, Z, U)$ under $\mu$, and $(X, Z, U)$ under $\nu$ (viewing $X$ pulled back through $\mathrm{fst}$) is identically distributed to $(X, Z, U)$ under $\mu$. Use those to transport one-sided entropy or mutual-information terms whose entropy expansions depend only on these tuples. Do **not** plan around transporting mixed terms involving both $X$ and $Y_1$ by `IdentDistrib`; those belong on the $\nu$ side of the proof and are handled via `aux_condIndep` plus the Shannon chase.
 1. **`aux_condIndep` (private).** $I[X : Y_1 \mid \langle Z, U\rangle ; \nu] = 0$, via the `condMutualInfo_eq_zero`/`CondIndepFun` bridge applied to the kernel-level construction.
 1. **`theorem2`.** The Shannon-inequality chase: start from the hypotheses and the auxiliary facts, apply Shannon basics (`chain_rule`, submodularity, nonnegativity), close with `linarith`.
 
@@ -212,17 +217,16 @@ The total proof is expected to be roughly 60-120 lines. If it runs to 200+, stop
 ## Sequencing inside M1.5
 
 1. **Bootstrap verification.** Run `bin/bootstrap-worktree`; confirm `make check` passes on the tip of `formalize/1.5-theorem-2` with M1 in place. Halt on any failure; investigate before writing new code.
-1. **Create `ZhangYeung/Theorem2.lean` with module docstring and imports.** Imports are: `ZhangYeung.Prelude`, `Mathlib.Probability.Kernel.CondDistrib`, `Mathlib.Probability.IdentDistrib`, `PFR.ForMathlib.ConditionalIndependence`. Add the shared `variable` block with the finite-alphabet assumptions. Stub `theorem theorem2` with `sorry`. Confirm the file compiles --- this proves the signature, the variable block, and the imports are internally consistent before any real proof work.
+1. **Create `ZhangYeung/Theorem2.lean` with module docstring and imports, and immediately wire `ZhangYeung.lean` to re-export it.** Imports are: `ZhangYeung.Prelude`, `Mathlib.Probability.Kernel.CondDistrib`, `Mathlib.Probability.IdentDistrib`, `PFR.ForMathlib.ConditionalIndependence`. Add the shared `variable` block with the finite-alphabet assumptions. Stub `theorem theorem2` with `sorry`. Confirm `lake build ZhangYeung.Theorem2` and `lake build ZhangYeung` both compile --- this proves the signature, the variable block, the imports, and the public re-export are internally consistent before any real proof work.
 1. **Commit the skeleton** as `feat: scaffold theorem 2 module with sorry stub`.
-1. **Resolve the `StandardBorelSpace`/`Nonempty` question on Fintype codomains.** Write a one-line example or `by exact?` probe to confirm Mathlib provides (or does not provide) a `StandardBorelSpace` instance for a `Fintype` codomain with `MeasurableSingletonClass` and the default discrete `MeasurableSpace`. If it does, proceed. If not, pick the fallback (see "Risks" §7.1).
-1. **Pick a construction (A or B above)**; open a short note in-file documenting the choice. Proceed with Candidate A unless step 4's outcome forces B.
+1. **Confirm the `StandardBorelSpace`/`Nonempty` inference path on Fintype codomains.** Write a one-line example or `by exact?` probe to confirm instance search reaches Mathlib's discrete-countable `StandardBorelSpace` instance in the theorem's actual hypothesis shape. If it does, proceed. If not, pick the fallback (see "Risks" §7.1).
+1. **Pick a construction (A or B above)**; open a short note in-file documenting the choice. Proceed with Candidate A unless the early proof work shows that Candidate B is the better fit.
 1. **Land `aux_measure`.** Define the extended measure and prove it is a probability measure (required for `condMutualInfo_eq_zero` downstream). Expect this to use `Measure.compProd` properties plus `IsMarkovKernel`-ness of `condDistrib`.
-1. **Land `aux_identDistrib`.** Prove the two `IdentDistrib` facts directly via `compProd_map_condDistrib` and `Measure.map` manipulation; transport them to `I[... ; ν] = I[... ; μ]` identities via `IdentDistrib.mutualInfo_eq`. Keep conditional-mutual-info transport in-file if PFR does not expose it; see "Risks" §7.3.
+1. **Land `aux_identDistrib`.** Prove the exact tuple-level `IdentDistrib` facts the chase uses directly via `compProd_map_condDistrib`, `Measure.fst_compProd`, and `Measure.map` manipulation. Transport only the one-sided entropy or mutual-information identities that really follow from those tuple laws. Keep any needed conditional-mutual-info transport local and specialized; see "Risks" §7.3.
 1. **Land `aux_condIndep`.** Prove `I[X : Y₁ | ⟨Z, U⟩ ; ν] = 0` by going through `condMutualInfo_eq_zero` and the structural conditional-independence of the copied variable.
-1. **Land `theorem2`.** Run the Shannon chase. The two hypothesis equalities become `IndepFun X Y μ` and `CondIndepFun X Y Z μ` via the `... _eq_zero` iffs, and those in turn give Shannon identities (for instance, the unconditional `I[X : Y ; μ] = 0` gives `H[⟨X, Y⟩ ; μ] = H[X ; μ] + H[Y ; μ]`). Combine with the auxiliary facts, close with `linarith`. If the chase does not close, backtrack to step 5 and try Candidate B.
+1. **Land `theorem2`.** Run the Shannon chase. The two hypothesis equalities become `IndepFun X Y μ` and `CondIndepFun X Y Z μ` via the `... _eq_zero` iffs, and those in turn give Shannon identities (for instance, the unconditional `I[X : Y ; μ] = 0` gives `H[⟨X, Y⟩ ; μ] = H[X ; μ] + H[Y ; μ]`). Combine with the auxiliary facts, close with `linarith`. If the chase does not close, backtrack to the construction-selection step and try Candidate B.
 1. **Commit the core proof** as `feat: prove Theorem 2 (Zhang-Yeung 1997 conditional inequality)`.
-1. **Add `ZhangYeungTest/Theorem2.lean`** with API regression tests (see Verification §8 below). Commit as `test: add API regression tests for theorem 2`.
-1. **Update `ZhangYeung.lean`** to re-export `ZhangYeung.Theorem2`, and **`ZhangYeungTest.lean`** to re-export the matching test module. Commit as `chore: wire theorem 2 into entrypoints`.
+1. **Add `ZhangYeungTest/Theorem2.lean` and update `ZhangYeungTest.lean` in the same change.** The test module must import only `ZhangYeung`, and it should start being exercised by `lake test` the moment it lands. Commit as `test: add API regression tests for theorem 2`.
 1. **Update `CLAUDE.md`'s Module Layout section** with a one-line entry for `ZhangYeung/Theorem2.lean` and its test. Commit as `docs: document theorem 2 module in CLAUDE.md`.
 1. **Run `make check`.** Fix any lint or build failures before opening the PR.
 1. **Open the PR.** Title `feat: prove Theorem 2 (Zhang-Yeung 1997 conditional warm-up)`; body links this plan and the roadmap.
@@ -231,15 +235,15 @@ Commit at each numbered step; keep commits small and conventional-commit-styled.
 
 ## Open questions and known risks
 
-### 7.1: `StandardBorelSpace` on Fintype codomains (moderate)
+### 7.1: `StandardBorelSpace` on Fintype codomains (low)
 
-`condDistrib` requires `[StandardBorelSpace β] [Nonempty β]` on the codomain of the variable being copied. Mathlib provides `StandardBorelSpace` for standard concrete types (`ℝ`, `PolishSpace` + `BorelSpace`, etc.) but it is not immediately obvious whether the default discrete `MeasurableSpace` on a `Fintype` type carries a `StandardBorelSpace` instance.
+`condDistrib` requires `[StandardBorelSpace β] [Nonempty β]` on the codomain of the variable being copied. At the pinned Mathlib revision, countable discrete measurable spaces do carry `StandardBorelSpace`, so the finite-alphabet/default-discrete situation should be covered. The remaining implementation question is narrower: confirm that instance search reaches that path from the theorem's actual hypothesis shape, rather than assuming it silently works.
 
 **Mitigation paths** (try in order):
 
-1. `by exact?`/`Lean.Elab` probe: does `[Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]` already imply `StandardBorelSpace α` in Mathlib?
-1. If not, look for `Mathlib.MeasureTheory.Constructions.BorelSpace.Basic` or `Mathlib.Topology.MetricSpace.Polish` entries that bridge discrete Fintype types.
-1. If still not, fall back to `ProbabilityTheory.condKernelCountable` or an explicit PMF-based single-copy construction that bypasses `condDistrib` entirely. For Fintype codomains, `PMF.bind` plus `PMF.toMeasure` is a clean alternative, and PFR has precedent for `PMF`-level constructions elsewhere.
+1. `by exact?`/`Lean.Elab` probe: confirm that `[Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]` is enough for the intended `condDistrib` call in this module.
+1. If inference fails, make the missing discrete-countable path explicit locally rather than redesigning the theorem statement prematurely.
+1. If that still fails, fall back to `ProbabilityTheory.Kernel.condKernelCountable` or an explicit PMF-based single-copy construction that bypasses `condDistrib` entirely. For Fintype codomains, `PMF.bind` plus `PMF.toMeasure` is a clean alternative, and PFR has precedent for `PMF`-level constructions elsewhere.
 
 Budget up to half a day for this; if unresolved, park M1.5 and escalate rather than forcing `sorry`s.
 
@@ -251,13 +255,13 @@ If converting hypotheses via these iffs becomes verbose in practice, introduce a
 
 ### 7.3: Conditional-mutual-info transport under `IdentDistrib` (moderate)
 
-PFR exposes `IdentDistrib.entropy_congr` and `IdentDistrib.mutualInfo_eq`, but a dedicated conditional analogue `IdentDistrib (⟨X, Z⟩, ⟨Y, Z⟩) ... → I[X : Y | Z ; μ] = I[X' : Y' | Z' ; ν]` may not be published under a stable name. Options, in descending order of preference:
+PFR exposes `IdentDistrib.entropy_congr` and `IdentDistrib.mutualInfo_eq`, but a dedicated conditional analogue `IdentDistrib (⟨X, Z⟩, ⟨Y, Z⟩) ... → I[X : Y | Z ; μ] = I[X' : Y' | Z' ; ν]` may not be published under a stable name. The plan should not rely on such a lemma for mixed original-copy terms unless the corresponding tuple laws are actually available. Options, in descending order of preference:
 
 1. **Find it in PFR.** Grep `condMutualInfo`/`condEntropy` congruence lemmas; PFR is active enough that such a lemma likely exists under a slightly different name.
-1. **Derive it in-file.** Expand `condMutualInfo` via `condMutualInfo_eq` (which PFR exposes --- see `Delta.lean`'s `delta_eq_entropy` for precedent), then apply `IdentDistrib.entropy_congr` to each summand and reassemble. This is approximately ten lines.
-1. **Specialize to what M1.5 actually needs.** If only one shape of transport is required, a direct proof against that shape can be shorter than a general lemma.
+1. **Derive it in-file, but only for an attainable tuple-law shape.** Expand `condMutualInfo` via `condMutualInfo_eq` (which PFR exposes --- see `Delta.lean`'s `delta_eq_entropy` for precedent), then apply `IdentDistrib.entropy_congr` to each summand and reassemble.
+1. **Avoid the transport altogether.** If a target term involves both an original variable and its copy, prefer proving the needed identity or inequality directly on $\nu$ via `aux_condIndep` and Shannon algebra instead of forcing an `IdentDistrib` route.
 
-Prefer option 2 if option 1 fails: it keeps the chase local and avoids introducing a public lemma that belongs in Mathlib.
+Prefer option 3 whenever the tuple laws are one-sided and the mixed transport would only complicate the proof. Use option 2 only for the specific conditional-mutual-information transports that truly arise from the available `IdentDistrib` facts.
 
 ### 7.4: Picking the right single-copy construction (moderate)
 
@@ -267,7 +271,7 @@ If after a full day of searching the chase still does not close under any of the
 
 ### 7.5: `condDistrib` and probability-measure preservation (low)
 
-`μ ⊗ₘ condDistrib Y X μ = μ.map (fun ω ↦ (X ω, Y ω))` (lemma `compProd_map_condDistrib`). When we extend this to $\mu \otimes_m (\kappa \circ \pi)$ where $\pi$ is a measurable projection, the resulting measure is a probability measure on $\Omega \times S_W$ and its first marginal is $\mu$. Both facts are required for the chase and should fall out directly from Mathlib's `IsMarkovKernel`/`IsProbabilityMeasure` instance chains, but confirm them early rather than assuming.
+`μ ⊗ₘ condDistrib Y X μ = μ.map (fun ω ↦ (X ω, Y ω))` (lemma `compProd_map_condDistrib`). After expressing the pullback kernel along $\pi : \Omega \to S_3 \times S_4$ using the actual pinned Mathlib combinators, the resulting measure on $\Omega \times S_W$ should still have first marginal $\mu$ and preserve total mass. Both facts are required for the chase. Expect to prove them with `Measure.fst_compProd`, `Measure.compProd_apply_univ`, and map-congruence lemmas, not by assuming the abstract notation $\kappa \circ \pi$ already matches a library API.
 
 ### 7.6: Namespace pollution (low)
 
@@ -292,6 +296,8 @@ Per the roadmap checkpoint: "theorem with all hypotheses explicit, discharged by
 1. One compile-time check that the theorem statement type-checks with concrete `Fin n` codomains --- smoke test that the `Fintype`/`MeasurableSingletonClass` side conditions are supplied by the default instances.
 
 Each `example` lives inside `namespace ZhangYeungTest` with `open ZhangYeung`, following the pattern `ZhangYeungTest/Delta.lean` established.
+
+Land this file in the same commit as the `ZhangYeungTest.lean` import so `lake test` actually exercises it.
 
 Out-of-scope for M1.5 (documented here so M2/M3 can pick them up):
 
