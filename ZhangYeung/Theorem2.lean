@@ -203,13 +203,39 @@ private lemma ptilde_fibre_sum
   · simp [hc]
   · field_simp
 
-/-- **`p̃` is a probability distribution.** This is the unconditional half of the Zhang-Yeung auxiliary-distribution argument: `∑_{x,y,z,u} p(x,z,u) p(y,z,u) / p(z,u) = 1` for any probability measure. The proof reshapes the 4-tuple sum via a product re-associate-and-swap `Equiv`, applies `ptilde_fibre_sum` on each `(z, u)` fibre, and collapses the outer `∑_{z,u} p(z, u) = 1` via the probability-measure property of the pushforward `μ.map ⟨Z, U⟩`. -/
+/-- **`p̃` is a probability distribution.** This is the unconditional half of the Zhang-Yeung auxiliary-distribution argument: `∑_{x,y,z,u} p(x,z,u) p(y,z,u) / p(z,u) = 1` for any probability measure. The proof reshapes the 4-tuple sum via an `Equiv` `S₃ × S₄ × S₁ × S₂ ≃ S₁ × S₂ × S₃ × S₄`, uses `ptilde_fibre_sum` to collapse each `(z, u)` fibre, and reassembles the outer `∑_{z,u} p(z, u) = 1` via the probability-measure property of the pushforward `μ.map ⟨Z, U⟩`. -/
 private lemma ptilde_sum_eq_one
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ] :
     ∑ t : S₁ × S₂ × S₃ × S₄, ptilde X Y Z U μ t = 1 := by
-  sorry
+  have hZU_meas : Measurable (fun ω => (Z ω, U ω)) := hZ.prodMk hU
+  haveI : IsProbabilityMeasure (μ.map (fun ω => (Z ω, U ω))) :=
+    Measure.isProbabilityMeasure_map hZU_meas.aemeasurable
+  let e : S₃ × S₄ × S₁ × S₂ ≃ S₁ × S₂ × S₃ × S₄ :=
+    { toFun := fun ⟨z, u, x, y⟩ => (x, y, z, u)
+      invFun := fun ⟨x, y, z, u⟩ => (z, u, x, y)
+      left_inv := fun ⟨_, _, _, _⟩ => rfl
+      right_inv := fun ⟨_, _, _, _⟩ => rfl }
+  rw [← Equiv.sum_comp e (ptilde X Y Z U μ)]
+  simp_rw [Fintype.sum_prod_type]
+  have hFibre : ∀ z : S₃, ∀ u : S₄,
+      (∑ x : S₁, ∑ y : S₂, ptilde X Y Z U μ (e (z, u, x, y)))
+        = (μ.map (fun ω => (Z ω, U ω))).real {(z, u)} :=
+    fun z u => ptilde_fibre_sum hX hY hZ hU μ z u
+  simp_rw [hFibre]
+  -- Goal: ∑ z, ∑ u, (μ.map ⟨Z, U⟩).real {(z, u)} = 1.
+  have hSingletonSum : (∑ p : S₃ × S₄, (μ.map (fun ω => (Z ω, U ω))).real {p}) = 1 := by
+    rw [sum_measureReal_singleton (Finset.univ : Finset (S₃ × S₄))]
+    simp
+  have hCollapse :
+      (∑ z : S₃, ∑ u : S₄, (μ.map (fun ω => (Z ω, U ω))).real {(z, u)}) = 1 := by
+    rw [show (∑ z : S₃, ∑ u : S₄, (μ.map (fun ω => (Z ω, U ω))).real {(z, u)})
+          = ∑ p : S₃ × S₄, (μ.map (fun ω => (Z ω, U ω))).real {p} from
+        (Fintype.sum_prod_type
+          (fun p : S₃ × S₄ => (μ.map (fun ω => (Z ω, U ω))).real {p})).symm]
+    exact hSingletonSum
+  exact hCollapse
 
 /-- **`p̂` is a probability distribution under the hypotheses of Theorem 2.** Collapses by summing over `z` first (using `I[X:Y|Z] = 0` ⇒ `p(x, y, z) = p(x, z) p(y, z) / p(z)`), then using `I[X:Y] = 0` ⇒ `p(x, y) = p(x) p(y)` to cancel the single-variable denominators, then summing over `x, y, u`. -/
 private lemma phat_sum_eq_one
