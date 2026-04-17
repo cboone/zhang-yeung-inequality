@@ -8,7 +8,7 @@ The central object is the Zhang-Yeung delta,
 Δ(Z, U | X, Y) := I(Z ; U) - I(Z ; U | X) - I(Z ; U | Y),
 ```
 
-and the main theorem (Theorem 3 of Zhang and Yeung 1998) is the upper bound
+and the main theorem (Theorem 3 of [Zhang and Yeung 1998](https://doi.org/10.1109/18.705560)) is the upper bound
 
 ```text
 Δ(Z, U | X, Y) ≤ (1/2) · I(X ; Y) + (1/4) · (I(X ; Z,U) + I(Y ; Z,U)).
@@ -35,7 +35,7 @@ The full roadmap is in [`docs/plans/todo/2026-04-15-zhang-yeung-formalization-ro
 
 - Finite-alphabet, real-valued probability distributions.
 - Built on top of PFR's entropy API (`H[X]`, `I[X:Y]`, `I[X:Y|Z]`) from [teorth/pfr](https://github.com/teorth/pfr), pinned in `lakefile.toml`.
-- Measurability and finite-range side conditions expressed via Mathlib's `[MeasurableSpace]`, `[Fintype]`, and `[MeasurableSingletonClass]` typeclasses.
+- Measurability and finite-range side conditions expressed via [Mathlib](https://github.com/leanprover-community/mathlib4)'s [`[MeasurableSpace]`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/MeasurableSpace/Defs.html#MeasurableSpace), [`[Fintype]`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Fintype/Defs.html#Fintype), and [`[MeasurableSingletonClass]`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/MeasurableSpace/Defs.html#MeasurableSingletonClass) typeclasses.
 - Deferred: infinite alphabets, computable entropy, upstream push of the copy lemma into PFR or Mathlib.
 
 ## Module Layout
@@ -68,23 +68,23 @@ See [`AGENTS.md`](AGENTS.md) for the full command reference and [`CONTRIBUTING.m
 
 ## Dependencies
 
-- Lean 4 toolchain, pinned in [`lean-toolchain`](lean-toolchain).
-- Lake (bundled with Lean).
+- [Lean 4](https://lean-lang.org/) toolchain, pinned in [`lean-toolchain`](lean-toolchain).
+- [Lake](https://github.com/leanprover/lean4/blob/master/src/lake/README.md) (bundled with Lean).
 - [PFR](https://github.com/teorth/pfr), pinned by Git revision in [`lakefile.toml`](lakefile.toml). PFR supplies the entropy API used throughout.
-- Mathlib (via PFR), downloaded as prebuilt artifacts by the bootstrap script. Never built from source in CI or in a fresh worktree.
+- [Mathlib](https://github.com/leanprover-community/mathlib4) (via PFR), downloaded as prebuilt artifacts by the bootstrap script. Never built from source in CI or in a fresh worktree.
 
 ## References
 
 Primary sources and transcriptions live in [`references/`](references/). The paper being formalized and the principal background text:
 
-- Zhang and Yeung (1998). _On characterization of entropy function via information inequalities_. IEEE Transactions on Information Theory 44(4). ([`references/papers/zhangyeung1998.pdf`](references/papers/zhangyeung1998.pdf); verified transcription at [`references/transcriptions/zhangyeung1998.md`](references/transcriptions/zhangyeung1998.md).)
-- Yeung (2008). _Information Theory and Network Coding_. Springer. (Cross-reference for Theorem 3 and the copy lemma.)
+- Zhang and Yeung (1998). _On characterization of entropy function via information inequalities_. IEEE Transactions on Information Theory 44(4). [DOI: 10.1109/18.705560](https://doi.org/10.1109/18.705560). ([`references/papers/zhangyeung1998.pdf`](references/papers/zhangyeung1998.pdf); verified transcription at [`references/transcriptions/zhangyeung1998.md`](references/transcriptions/zhangyeung1998.md).)
+- Yeung (2008). _Information Theory and Network Coding_. Springer. [DOI: 10.1007/978-0-387-79234-7](https://doi.org/10.1007/978-0-387-79234-7). (Cross-reference for Theorem 3 and the copy lemma.)
 
 Additional entries are listed in [`references/README.md`](references/README.md).
 
 ## AI Statement
 
-This formalization is being completed with substantial assistance from Opus 4.6 + 4.7 and GPT 5.4, through `claude` and `opencode`, and GitHub Copilot.
+This formalization is being completed with substantial assistance from Opus 4.6 + 4.7 and GPT 5.4, through [`claude`](https://claude.com/claude-code) and [`opencode`](https://opencode.ai), and [GitHub Copilot](https://github.com/features/copilot).
 
 ## License
 
