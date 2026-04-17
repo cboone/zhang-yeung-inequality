@@ -181,6 +181,30 @@ private lemma sum_map_triple_second
       (fun y _ => hg (measurableSet_singleton y))]
   simp
 
+/-- **Marginal-swap (fiberwise rearrangement).** If two weight functions `f, g : α → ℝ` agree on every fibre of a projection `proj : α → β` (i.e., share the same `proj`-marginal), then their weighted sums of any `proj`-composed function agree. This is the abstract kernel of the 11-factor marginal-swap argument used in `sum_joint_eq_sum_ptilde`. -/
+private lemma sum_mul_proj_eq_of_marginal_eq
+    {α β : Type*} [Fintype α] [Fintype β] [DecidableEq β]
+    (f g : α → ℝ) (proj : α → β) (φ : β → ℝ)
+    (h_marg : ∀ b : β, (∑ a ∈ Finset.univ.filter (fun a => proj a = b), f a)
+                     = (∑ a ∈ Finset.univ.filter (fun a => proj a = b), g a)) :
+    ∑ a : α, f a * φ (proj a) = ∑ a : α, g a * φ (proj a) := by
+  conv_lhs => rw [← Finset.sum_fiberwise (s := Finset.univ) (g := proj)
+    (f := fun a => f a * φ (proj a))]
+  conv_rhs => rw [← Finset.sum_fiberwise (s := Finset.univ) (g := proj)
+    (f := fun a => g a * φ (proj a))]
+  refine Finset.sum_congr rfl fun b _ => ?_
+  have hf : (∑ a ∈ Finset.univ.filter (fun a => proj a = b), f a * φ (proj a))
+      = (∑ a ∈ Finset.univ.filter (fun a => proj a = b), f a) * φ b := by
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun a ha => ?_
+    rw [(Finset.mem_filter.mp ha).2]
+  have hg : (∑ a ∈ Finset.univ.filter (fun a => proj a = b), g a * φ (proj a))
+      = (∑ a ∈ Finset.univ.filter (fun a => proj a = b), g a) * φ b := by
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun a ha => ?_
+    rw [(Finset.mem_filter.mp ha).2]
+  rw [hf, hg, h_marg]
+
 /-- **IndepFun product formula.** If `f, g` are independent, the joint singleton mass factors: `(μ.map ⟨f, g⟩).real {(a, b)} = (μ.map f).real {a} * (μ.map g).real {b}`. This extracts the product identity from `IndepFun.measure_inter_preimage_eq_mul` in the shape used by `phat_sum_eq_one`. -/
 private lemma indepFun_map_pair_real_singleton
     {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]

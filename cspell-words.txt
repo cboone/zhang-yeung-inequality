@@ -21,6 +21,7 @@ congr
 Combin
 combinatorially
 Comput
+conv
 cooldown
 Csirmaz
 Csirmaz's
@@ -35,6 +36,7 @@ dupuisf
 entropic
 extremal
 Farkas
+fiberwise
 fibrewise
 fibring
 finitary
