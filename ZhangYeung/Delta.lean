@@ -20,8 +20,8 @@ is the central quantity of the Zhang-Yeung conditional information inequality [@
 - `ZhangYeung.delta_comm_main`: the two measured arguments commute (uses `mutualInfo_comm` and `condMutualInfo_comm`).
 - `ZhangYeung.delta_self`: the case `X = Y`.
 - `ZhangYeung.delta_eq_entropy`: expansion into raw entropy terms.
-- `ZhangYeung.form21_iff`, `ZhangYeung.form22_iff`, `ZhangYeung.form23_iff`: iff-equivalences between the integer-scaled shape produced by a copy-lemma proof and the shape the paper states.
-- `ZhangYeung.form23_of_form21_form22`: the symmetric form (23) follows from (21) and (22) by averaging.
+- `ZhangYeung.delta_form21_iff`, `ZhangYeung.delta_form22_iff`, `ZhangYeung.delta_form23_iff`: iff-equivalences between the integer-scaled shape produced by a copy-lemma proof and the shape the paper states.
+- `ZhangYeung.delta_form23_of_form21_form22`: the symmetric form (23) follows from (21) and (22) by averaging.
 - `ZhangYeung.delta_le_mutualInfo`: `Δ ≤ I[Z : U]`, from nonnegativity of conditional mutual information.
 
 ## Implementation notes
@@ -29,6 +29,8 @@ is the central quantity of the Zhang-Yeung conditional information inequality [@
 The four codomains `S₁ S₂ S₃ S₄` of the random variables live under a shared finite-alphabet specialization `[Fintype Sᵢ]` + `[MeasurableSingletonClass Sᵢ]`. That specialization discharges PFR's discrete/countable side conditions uniformly (via `Fintype → Finite → Countable`) and supplies the `FiniteRange` obligations PFR's commutativity and entropy-expansion lemmas impose on the measured and conditioning variables. The `variable` block is staged: the definition and the purely algebraic lemmas only need `[MeasurableSpace Sᵢ]`; lemmas downstream of PFR's discrete API are collected after a later `variable` block introducing the `Fintype`/`MeasurableSingletonClass` instances.
 
 No notation `Δ[Z : U | X, Y ; μ]` is introduced; plain function application `delta Z U X Y μ` suffices for the uses anticipated in the current milestone. The decision to introduce notation is deferred until a later milestone whose proofs exercise `delta` heavily enough to warrant it.
+
+The `delta_self` lemma handles only the *literal* repeated-conditioner case `X = Y`. Bridging `Δ(Z, U | X, X₁)` where `X₁` is merely a copy of `X` requires a separate transport lemma for `condMutualInfo` (under the copy construction's `IdentDistrib` hypotheses), which is out of scope for this module.
 
 ## References
 
@@ -59,18 +61,18 @@ lemma delta_def (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω �
     delta Z U X Y μ
       = I[Z : U ; μ] - I[Z : U | X ; μ] - I[Z : U | Y ; μ] := rfl
 
-/-- Swapping the two conditioning arguments leaves `delta` unchanged; addition is commutative. -/
+/-- Swapping the two conditioning arguments leaves `delta` unchanged. -/
 lemma delta_comm_cond (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     delta Z U X Y μ = delta Z U Y X μ := by
   simp only [delta_def]; ring
 
-/-- The case `X = Y`: `Δ(Z, U | X, X) = I(Z; U) - 2·I(Z; U | X)`. This is the *literal* repeated-conditioner case; bridging `Δ(Z, U | X, X₁)` where `X₁` is merely a copy of `X` requires a separate transport lemma for `condMutualInfo` (under the copy construction's `IdentDistrib` hypotheses), which is out of scope for this module. -/
+/-- The case `X = Y`: `Δ(Z, U | X, X) = I(Z; U) - 2·I(Z; U | X)`. -/
 lemma delta_self (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (μ : Measure Ω) :
     delta Z U X X μ = I[Z : U ; μ] - 2 * I[Z : U | X ; μ] := by
   simp only [delta_def]; ring
 
 /-- Paper eq. (21): the inequality `2·Δ(Z, U | X, Y) ≤ I(X;Y) + I(X;ZU) + I(Z;U|X) - I(Z;U|Y)` is equivalent to the compact form `2·I(Z;U) - 3·I(Z;U|X) - I(Z;U|Y) ≤ I(X;Y) + I(X;ZU)`, which is the shape a copy-lemma proof naturally produces. -/
-lemma form21_iff
+lemma delta_form21_iff
     (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     2 * delta Z U X Y μ
         ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U | X ; μ] - I[Z : U | Y ; μ]
@@ -78,8 +80,8 @@ lemma form21_iff
           ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] := by
   constructor <;> intro h <;> linarith [delta_def Z U X Y μ]
 
-/-- Paper eq. (22): the `X ↔ Y` swap of `form21_iff`. -/
-lemma form22_iff
+/-- Paper eq. (22): the `X ↔ Y` swap of `delta_form21_iff`. -/
+lemma delta_form22_iff
     (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     2 * delta Z U X Y μ
         ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U | X ; μ] + I[Z : U | Y ; μ]
@@ -88,7 +90,7 @@ lemma form22_iff
   constructor <;> intro h <;> linarith [delta_def Z U X Y μ]
 
 /-- Paper eq. (23), the symmetric form of Theorem 3, follows from eqs. (21) and (22) by averaging. This lemma contains no measure-theoretic content; the inequalities (21) and (22) are the nontrivial inputs and are proved in a later milestone via the copy lemma. -/
-lemma form23_of_form21_form22
+lemma delta_form23_of_form21_form22
     {Z : Ω → S₁} {U : Ω → S₂} {X : Ω → S₃} {Y : Ω → S₄} {μ : Measure Ω}
     (h21 : 2 * delta Z U X Y μ
         ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U | X ; μ] - I[Z : U | Y ; μ])
@@ -98,8 +100,8 @@ lemma form23_of_form21_form22
       ≤ 2 * I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Y : ⟨Z, U⟩ ; μ] := by
   linarith
 
-/-- The integer-scaled conclusion of `form23_of_form21_form22` is equivalent to the paper's `1/2` and `1/4` statement. -/
-lemma form23_iff
+/-- The integer-scaled conclusion of `delta_form23_of_form21_form22` is equivalent to the paper's `1/2` and `1/4` statement. -/
+lemma delta_form23_iff
     (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     4 * delta Z U X Y μ
         ≤ 2 * I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Y : ⟨Z, U⟩ ; μ]
