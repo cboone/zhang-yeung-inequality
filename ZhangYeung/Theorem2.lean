@@ -181,6 +181,25 @@ private lemma sum_map_triple_second
       (fun y _ => hg (measurableSet_singleton y))]
   simp
 
+/-- **IndepFun product formula.** If `f, g` are independent, the joint singleton mass factors: `(μ.map ⟨f, g⟩).real {(a, b)} = (μ.map f).real {a} * (μ.map g).real {b}`. This extracts the product identity from `IndepFun.measure_inter_preimage_eq_mul` in the shape used by `phat_sum_eq_one`. -/
+private lemma indepFun_map_pair_real_singleton
+    {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    {Ω' : Type*} [MeasurableSpace Ω'] {f : Ω' → α} {g : Ω' → β}
+    (hf : Measurable f) (hg : Measurable g)
+    {μ : Measure Ω'} (h_indep : IndepFun f g μ) (a : α) (b : β) :
+    (μ.map (fun ω => (f ω, g ω))).real {(a, b)}
+      = (μ.map f).real {a} * (μ.map g).real {b} := by
+  rw [map_measureReal_apply (hf.prodMk hg) (measurableSet_singleton _),
+      map_measureReal_apply hf (measurableSet_singleton _),
+      map_measureReal_apply hg (measurableSet_singleton _)]
+  have h_pre : (fun ω => (f ω, g ω)) ⁻¹' {(a, b)} = f ⁻¹' {a} ∩ g ⁻¹' {b} := by
+    ext ω; simp
+  rw [h_pre, measureReal_def, measureReal_def, measureReal_def,
+      h_indep.measure_inter_preimage_eq_mul {a} {b}
+        (measurableSet_singleton a) (measurableSet_singleton b),
+      ENNReal.toReal_mul]
+
 /-- **Marginal bound.** The joint mass at a specific tuple is bounded by the marginal mass at any projection. This is the key fact behind the absolute-continuity claim `phat = 0 → ptilde = 0`. -/
 private lemma measureReal_map_pair_le_map_fst
     {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
