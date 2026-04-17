@@ -9,6 +9,8 @@ depends_on: M0 (branch `chore/scaffold-project`)
 
 ## Context
 
+**Primary reference:** `references/transcriptions/zhangyeung1998.md` (verified 2026-04-16); citations below use equation numbers from that transcription.
+
 The Zhang-Yeung roadmap (§6) decomposes the formalization into milestones M0-M6. M0 scaffolds the Lake project and imports PFR's entropy API; M1 introduces the central quantity of the paper.
 
 The **Zhang-Yeung delta** is

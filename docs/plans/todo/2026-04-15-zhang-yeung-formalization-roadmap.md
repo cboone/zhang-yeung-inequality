@@ -4,6 +4,7 @@
 **Target:** Lean 4 / Mathlib 4
 **Paper:** Zhang & Yeung, "On Characterization of Entropy Function via Information Inequalities," *IEEE TIT* 44(4), July 1998, pp. 1440-1452.
 **Source PDF:** `references/papers/zhangyeung1998.pdf`
+**Source transcription:** `references/transcriptions/zhangyeung1998.md` (verified 2026-04-16)
 
 **Resolved decisions:**
 

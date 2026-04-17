@@ -7,7 +7,7 @@ The Zhang-Yeung delta
 
   `Δ(Z, U | X, Y) := I(Z; U) - I(Z; U | X) - I(Z; U | Y)`
 
-is the central quantity of the Zhang-Yeung conditional information inequality [ZhangYeung1998]. The main theorem of the paper states an upper bound on this quantity; that bound is a non-Shannon information inequality whose proof rests on the copy lemma and lives in a later milestone. This module only captures the *equational* content: the definition, the symmetries induced by commutativity of mutual information, the expansion into raw entropy terms, and the linear-arithmetic interrelation of the three shapes in which the paper presents the main inequality (equations 21, 22, and 23).
+is the central quantity of the Zhang-Yeung conditional information inequality [@zhangyeung1998]. The main theorem of the paper states an upper bound on this quantity; that bound is a non-Shannon information inequality whose proof rests on the copy lemma and lives in a later milestone. This module only captures the *equational* content: the definition, the symmetries induced by commutativity of mutual information, the expansion into raw entropy terms, and the linear-arithmetic interrelation of the three shapes in which the paper presents the main inequality (equations 21, 22, and 23).
 
 ## Main definitions
 
@@ -32,7 +32,7 @@ No notation `Δ[Z : U | X, Y ; μ]` is introduced; plain function application `d
 
 ## References
 
-Zhang, Zhen and Yeung, Raymond W., "On characterization of entropy function via information inequalities", IEEE Trans. Inform. Theory 44 (1998), 1440-1452.
+* [@zhangyeung1998] -- see `references/transcriptions/zhangyeung1998.md` for a verbatim transcription of the paper's equations (20)-(23), verified 2026-04-16.
 
 ## Tags
 
