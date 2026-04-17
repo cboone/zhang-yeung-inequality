@@ -57,6 +57,7 @@ Hoelzl
 Indep
 infotheo
 Ingleton
+injective
 ISIT
 ITIP
 Kaced
@@ -119,6 +120,7 @@ sgouezel
 Shannon
 simpa
 smul
+sorries
 subadditivity
 subgoals
 submodularity

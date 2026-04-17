@@ -1,23 +1,180 @@
 ---
-title: "M1.5: Theorem 2 Conditional Warm-Up"
+title: "M1.5: Theorem 2 (Zhang-Yeung 1997 conditional inequality via KL divergence)"
 created: 2026-04-16
+updated: 2026-04-17
 branch: formalize/1.5-theorem-2
 roadmap: docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md
 milestone: M1.5
 depends_on: M1 (`ZhangYeung/Delta.lean`, merged into `main` via PR #4)
 ---
 
-## Status update (2026-04-17): implementation supersedes the design below
+## Status (2026-04-17): finishing via KL; reframing as standalone
 
-The implementation in `ZhangYeung/Theorem2.lean` does **not** follow the single-copy construction this plan was written around. Instead of building a copy variable via `condDistrib`/`Kernel.comap` on an extended probability space and then running a Shannon chase against tuple-level `IdentDistrib` facts, the landed proof takes the [@zhangyeung1997] **auxiliary-PMF + KL-divergence** route: it defines two auxiliary distributions `p̃` and `p̂` on `S₁ × S₂ × S₃ × S₄`, proves that both are PMFs (with `phat_sum_eq_one` using the two hypotheses `I[X:Y] = 0` and `I[X:Y|Z] = 0`), and applies `Real.sum_mul_log_div_leq` (PFR's log-sum inequality) to obtain `Δ(Z, U | X, Y) ≤ 0` as `-KL(p̃ ‖ p̂)`.
+This section supersedes the original single-copy-construction plan; see "Historical context (pre-pivot design)" at the bottom of the document for the pre-pivot design.
 
-Concrete consequences for this document:
+### What landed
 
-- The discussion of `condDistrib`, `Kernel.comap`, `map_compProd_condDistrib`, the `StandardBorelSpace`/`Nonempty` inference risk (§7.1), and the conditional-`IdentDistrib` transport worry (§7.3) does **not** apply to the landed proof; none of those APIs are used in `ZhangYeung/Theorem2.lean`. The single-copy construction material starting at "Design: the single-copy construction" (Candidates A and B, the `aux_measure`/`aux_identDistrib`/`aux_condIndep` lemma skeleton, and the associated sequencing) is **superseded** and kept only for historical intuition.
-- The remaining proof debt on M1.5 is in `ZhangYeung/Theorem2.lean` itself: three scaffolded non-Shannon sub-lemmas carry localized `sorry`s -- `phat_sum_eq_one`, `delta_eq_sum_log_ratio`, and `sum_joint_eq_sum_ptilde` -- each of which closes independently of the others. See that file's "Current state" docstring paragraph for the authoritative list.
-- The Theorem 2 signature and the file/test layout committed in this branch match what this plan proposed, so those sections remain accurate.
+The implementation in `ZhangYeung/Theorem2.lean` follows the [@zhangyeung1997, Theorem 3] auxiliary-PMF + KL-divergence argument, not the single-copy kernel construction the original plan was written around. The Shannon-algebra reduction `theorem2_shannon_identity` (target ⟺ `Δ(Z, U | X, Y) ≤ 0` under (16)) is closed. The `theorem2_delta_le_zero` assembly is wired end-to-end around `Real.sum_mul_log_div_leq` (the log-sum inequality), with the absolute-continuity side condition discharged inline via marginal-bound lemmas. `ptilde_sum_eq_one` is closed via a direct fibrewise computation. Eleven marginal-match helpers (covering the eleven factors of `p̂/p̃`), eight generic Fintype utilities (marginal summation for pairs and triples, marginal bounds, the `IndepFun` product formula, the fibrewise-swap helper `sum_mul_proj_eq_of_marginal_eq`), and the module-level variable block are all landed.
 
-The rest of this document is preserved as-is for historical context: future work on closing the remaining `sorry`s should be guided by the KL-divergence scaffolding in `ZhangYeung/Theorem2.lean`, not by the copy-construction blueprint below.
+### What remains
+
+Three scaffolded non-Shannon sub-lemmas carry localized `sorry`s:
+
+- `phat_sum_eq_one` (`∑ p̂ = 1` under the two hypotheses of (16)),
+- `delta_eq_sum_log_ratio` (`Δ = ∑ p · log(p̂/p̃)`, the 4-tuple entropy expansion),
+- `sum_joint_eq_sum_ptilde` (`∑ p · log(p̂/p̃) = ∑ p̃ · log(p̂/p̃)`, the 11-factor marginal-swap).
+
+Each closes independently. Routes for each are in "Finishing plan: close three KL sorries" below.
+
+### Reframing: Theorem 2 is not a warm-up
+
+The original plan framed M1.5 as "a warm-up for the unconditional result (M3, Theorem 3)" exercising "the same kernel-composition and identical-distribution bookkeeping." Three subsequent findings undercut this framing:
+
+1. **Paper structure.** Theorem 2 is stated in the 1998 paper's introduction (Section I, eqs. 16-17), cites [@zhangyeung1997] for the proof, and is never invoked in the proofs of Theorems 3, 4, 5, or 6. It functions as historical context motivating Conjecture 1 (the closure separation `\bar{Γ}_n^* ≠ Γ_n`), which Theorem 3 answers independently via the copy-lemma construction in §III. Nothing downstream on the roadmap depends on M1.5 as a mathematical prerequisite; removing M1.5 would break no subsequent milestone.
+2. **Kaced-Romashchenko (arXiv:1207.5742, IEEE TIT 2013).** This paper is the most careful published post-1997 treatment of the inequality. It classifies Theorem 2 as (ℐ1) in a family of essentially conditional inequalities. Theorem 3 + Claim 1 (loc. cit.) prove (ℐ1) is essentially conditional: no Lagrange combination `λ₁ I(A;B|C) + λ₂ I(A;B)` of the premises added to any unconditional Shannon-type inequality produces (ℐ1). Theorem 5 shows (ℐ1) fails on the closure `\bar{Γ}₄*` of the entropic region. Operational consequence: no pure copy-lemma + Shannon-chase argument can derive (ℐ1) purely from Shannon-type primitives. The 1997 KL route is effectively the only known route.
+3. **Previous in-branch evidence.** Commit `249da6d` landed the structural work for the original Candidate A via PFR's `condIndep_copies` (which, unanticipated by §7.1 of the pre-pivot plan, sidesteps `StandardBorelSpace` entirely). The Shannon chase closing (16) ⇒ (17) from the three auxiliary facts was never attempted; the subsequent commit `b3ab851` pivoted to the KL route before attempting it, describing the copy construction as "dead code for the closing chase." Kaced-Romashchenko confirm that this chase cannot close at all.
+
+Taken together, M1.5 is a **standalone formalization** of the first known non-Shannon-type conditional information inequality, with independent value as (a) the first formalization of any non-Shannon-type information inequality in any proof assistant (per the 2026-04-17 literature survey: none exists in Lean, Rocq/infotheo, Isabelle/HOL, HOL Light, or Mizar), and (b) insurance against M3 / Theorem 3 taking longer to land than budgeted. It is *not* a warm-up for M2's copy lemma; the copy-construction machinery M2 needs is disjoint from the KL machinery that discharges (16) ⇒ (17).
+
+### Plan from here
+
+1. Close the three sorries using the routes described in "Finishing plan" below.
+2. Update `Theorem2.lean`'s module docstring with the reframing and the linking note (see "Docstring updates").
+3. Run `make check`; confirm lint and test modules stay green.
+4. Land via PR framed as a standalone result, not as a warm-up.
+
+M2 copy-construction infrastructure is valuable, still wanted, and orthogonal; see "Out of scope: M2 copy-construction helpers" for the follow-up task.
+
+## Finishing plan: close three KL sorries
+
+### `phat_sum_eq_one`
+
+**Claim.** `∑ t : S₁ × S₂ × S₃ × S₄, phat X Y Z U μ t = 1`, under `I[X:Y;μ] = 0` and `I[X:Y|Z;μ] = 0`.
+
+**Route.** The 1997 paper's computation (p. 1986). Unfold `p̂`, collapse denominator factors pairwise using the two hypotheses, telescope the 4-tuple sum.
+
+Symbolically, on the support `{p(z) > 0, p(u) > 0, p(x) > 0, p(y) > 0}`:
+
+```text
+p̂(x, y, z, u) = p(x,z) p(x,u) p(y,z) p(y,u) / [p(z) p(u) p(x) p(y)]
+              = [p(x,z) p(y,z) / p(z)] · p(x,u) p(y,u) / [p(u) p(x) p(y)]
+              = p(x,y,z) · p(x,u) p(y,u) / [p(u) p(x) p(y)]         (h₂: CondIndepFun ⇒ p(x,y,z) = p(x,z) p(y,z) / p(z))
+              = p(x,y,z) · p(x,u) p(y,u) / [p(u) p(x,y)]            (h₁: IndepFun   ⇒ p(x,y) = p(x) p(y))
+```
+
+Then telescope:
+
+- `∑_z p̂(x, y, z, u) = p(x,y) · p(x,u) p(y,u) / [p(u) p(x,y)] = p(x,u) p(y,u) / p(u)` via `∑_z p(x,y,z) = p(x,y)`.
+- `∑_y p(x,u) p(y,u) / p(u) = p(x,u) · (∑_y p(y,u)) / p(u) = p(x,u) · p(u) / p(u) = p(x,u)`.
+- `∑_x p(x,u) = p(u)`.
+- `∑_u p(u) = 1`.
+
+**Helpers to add.**
+
+- **`condIndepFun_map_triple_real_singleton`** (new, generic): the conditional analogue of the existing `indepFun_map_pair_real_singleton`. Given `CondIndepFun f g h μ` with `μ` a probability measure and `(μ.map h).real {c} ≠ 0`:
+
+  ```text
+  (μ.map ⟨f, g, h⟩).real {(a, b, c)} · (μ.map h).real {c}
+    = (μ.map ⟨f, h⟩).real {(a, c)} · (μ.map ⟨g, h⟩).real {(b, c)}
+  ```
+
+  Proof sketch: unfold `CondIndepFun` to get fiberwise `IndepFun f g (μ[|h ← c])`, apply `IndepFun.measure_inter_preimage_eq_mul` on the fiber, and multiply by `(μ.map h).real {c}` to return to unconditional measures. PFR may expose a more direct route; grep `ForMathlib/ConditionalIndependence.lean` for `CondIndepFun.prod_singleton` or related before writing fresh.
+- **Support-split bookkeeping.** Follow the `ptilde_sum_eq_one` pattern: `by_cases` on the denominator factor; close the zero-measure branch via the already-landed marginal-bound lemmas (`measureReal_map_pair_le_map_fst`, `measureReal_map_triple_le_map_pair_12` etc.), which force the numerator to vanish when a denominator factor does.
+
+**Sequencing.** Land `condIndepFun_map_triple_real_singleton` first as a standalone helper in the "Generic finite-alphabet utilities" section. Then close `phat_sum_eq_one` by unfolding `phat`, applying the new helper + `indepFun_map_pair_real_singleton`, and telescoping the 4-tuple sum.
+
+### `delta_eq_sum_log_ratio`
+
+**Claim.** `delta Z U X Y μ = ∑ t, pJoint(t) · log (phat(t) / ptilde(t))`.
+
+**Route.** Expand the three mutual-information terms in `delta` via entropy:
+
+- `I[Z:U ; μ] = H[Z] + H[U] - H[⟨Z, U⟩]`
+- `I[Z:U | X ; μ] = H[⟨Z, X⟩] + H[⟨U, X⟩] - H[⟨⟨Z, U⟩, X⟩] - H[X]`
+- `I[Z:U | Y ; μ] = H[⟨Z, Y⟩] + H[⟨U, Y⟩] - H[⟨⟨Z, U⟩, Y⟩] - H[Y]`
+
+So
+
+```text
+delta = H[Z] + H[U] + H[⟨⟨Z,U⟩, X⟩] + H[⟨⟨Z,U⟩, Y⟩] + H[X] + H[Y]
+      − H[⟨Z, U⟩] − H[⟨Z, X⟩] − H[⟨U, X⟩] − H[⟨Z, Y⟩] − H[⟨U, Y⟩]
+```
+
+Each `H[f ; μ]` where `f` is a projection of `⟨X, Y, Z, U⟩` rewrites as `−∑_{(x,y,z,u)} p(x, y, z, u) · log p_f(f(x, y, z, u))` by the "lift to 4-tuple" identity `∑_a p_f(a) log p_f(a) = ∑_t p(t) log p_f(f(t))`, which follows from `Finset.sum_fiberwise` and the marginal-summation helpers already landed.
+
+Combining the eleven log contributions:
+
+```text
+delta = ∑_{(x,y,z,u)} p(x,y,z,u) · log [ p(x,z) p(x,u) p(y,z) p(y,u) p(z,u)
+                                        / (p(z) p(u) p(x) p(y) p(x,z,u) p(y,z,u)) ]
+      = ∑_{(x,y,z,u)} p(x,y,z,u) · log (p̂(x,y,z,u) / p̃(x,y,z,u))
+```
+
+**Helpers to add.**
+
+- **`entropy_eq_sum_joint_log_marg`** (new, generic, or grep for PFR equivalent first): for measurable `f : Ω → α` and `π : α → β` with appropriate singleton-class side conditions, `H[π ∘ f ; μ] = −∑_a (μ.map f).real {a} · Real.log ((μ.map (π ∘ f)).real {π(a)})`. Generalizes PFR's `entropy_eq_sum_negMulLog` from a single-variable entropy to a "lift to a larger joint" form. PFR may already have this; `entropy_eq_sum`, `entropy_eq_sum_finset`, and `entropy_comp_of_injective` are the likely neighborhoods to check first.
+- Care with `Real.log 0 = 0` / `Real.negMulLog 0 = 0` on zero-measure fibers.
+
+**Sequencing.** Land `entropy_eq_sum_joint_log_marg` first. Instantiate it for each of the eleven entropy terms (ten distinct projections, since `H[⟨Z, X⟩]` and `H[⟨X, Z⟩]` etc. are handled via `entropy_comm` already). Combine via arithmetic. The combinatorial identification of the 11 factors with the log-ratio structure is mechanical once the lift lemma is in place.
+
+### `sum_joint_eq_sum_ptilde`
+
+**Claim.** `∑ t, pJoint(t) · log (phat(t) / ptilde(t)) = ∑ t, ptilde(t) · log (phat(t) / ptilde(t))`.
+
+**Route.** Split `log(p̂/p̃)` into 11 additive contributions:
+
+- **Positive:** `log p(x,z)`, `log p(x,u)`, `log p(y,z)`, `log p(y,u)`, `log p(z,u)`.
+- **Negative:** `log p(z)`, `log p(u)`, `log p(x)`, `log p(y)`, `log p(x,z,u)`, `log p(y,z,u)`.
+
+For each contribution, apply `sum_mul_proj_eq_of_marginal_eq` (already landed at `Theorem2.lean:388+`) with `f := pJoint`, `g := ptilde`, the appropriate projection (e.g., `(x,y,z,u) ↦ (x,z)` for the `p(x,z)` factor), and the appropriate log-of-marginal as `φ`. The hypothesis `h_marg` for each call is supplied by one of the eleven already-landed marginal-match lemmas (`sum_ptilde_over_y`, `sum_ptilde_over_y_u`, `sum_ptilde_over_y_z_u`, etc.).
+
+**Helpers to add.** None beyond what's landed. Zero-measure handling piggybacks on Lean's `Real.log 0 = 0` convention plus the existing marginal-bound lemmas.
+
+**Sequencing.** Write the 11 applications of `sum_mul_proj_eq_of_marginal_eq` in sequence, sum them, and reassemble the log via `Real.log_mul` / `Real.log_div` where denominators are nonzero (zero-denominator branches close trivially via the log-zero convention). Use `ring` or term-by-term combination to finalize.
+
+## Docstring updates
+
+### Add the linking note
+
+Insert the following paragraph into the `## Implementation notes` section of `Theorem2.lean`'s module docstring, after the existing description of the KL-divergence argument:
+
+> **Connection to the 1998 copy construction.** The auxiliary PMF `p̃(x, y, z, u) := p(x, z, u) p(y, z, u) / p(z, u)` defined above is precisely the `(X', Y₁, Z', U')`-marginal of the extended probability measure `ν` that PFR's `ProbabilityTheory.condIndep_copies`, applied to `⟨X, Y⟩` conditioned on `⟨Z, U⟩`, would produce. Projecting the copy: set `X' := Prod.fst ∘ W₁`, `Y₁ := Prod.snd ∘ W₂`, `⟨Z', U'⟩ := V`; then the conditional independence `X' ⟂ Y₁ | ⟨Z', U'⟩` plus the marginal identities `(X', Z', U') ∼ (X, Z, U)` and `(Y₁, Z', U') ∼ (Y, Z, U)` force `p_ν(x, y, z, u) = p(x, z, u) p(y, z, u) / p(z, u) = p̃(x, y, z, u)`. So the 1997 KL proof and the 1998 two-copy copy-lemma framework reach the same object from two directions: the 1997 paper constructs `p̃` as a PMF and closes via `Real.sum_mul_log_div_leq`; the 1998 paper (Lemma 2 in §III, eq. 44-45) constructs `ν` via kernel composition and closes Theorem 3 (the unconditional inequality) via a Shannon chase on the copy joint. For Theorem 2 specifically, a pure copy + Shannon-chase close is ruled out: Kaced and Romashchenko (arXiv:1207.5742, Theorem 3 + Claim 1, Theorem 5) show this inequality is essentially conditional and fails on the closure of the entropic region, so no combination of basic Shannon inequalities plus Lagrange multiples of the premises can derive it. This module follows the 1997 KL route rather than attempting the copy-construction framing.
+
+### Reframe the module docstring opening
+
+Replace the current "single-auxiliary-distribution warm-up for the two-copy construction" framing (around the second paragraph of the module docstring) with a standalone-result framing. Draft:
+
+> This module formalizes the implication (16) ⇒ (17) on finite-alphabet random variables. It is a standalone formalization of the first known non-Shannon-type conditional information inequality, originally proved in [@zhangyeung1997, Theorem 3]. Kaced and Romashchenko classify it as (ℐ1) in their family of essentially conditional inequalities ([@kaced2013]): it holds on the set `Γ₄*` of constructible entropy functions but fails on its closure `\bar{Γ}₄*` (loc. cit., Theorem 5), so it is not derivable from the basic Shannon inequalities under any Lagrange combination of the hypotheses.
+
+### Update tags
+
+Append `essentially conditional inequality` to the `## Tags` line.
+
+### Add the Kaced-Romashchenko reference
+
+Extend `## References` with an entry for `[@kaced2013]` matching the format of the existing `[@zhangyeung1997]` and `[@zhangyeung1998]` entries: Kaced and Romashchenko, *Conditional Information Inequalities for Entropic and Almost Entropic Points*, IEEE Transactions on Information Theory 59(11), 2013, pp. 7149-7167 (arXiv:1207.5742). The entry should note that they classify the inequality as $(\mathcal{I}_1)$ and prove its essential-conditionality (Theorem 3 + Claim 1) and failure on the closure of the entropic region (Theorem 5).
+
+The BibTeX entry for `@kaced2013` is in `references/papers.bib`.
+
+## Out of scope: M2 copy-construction helpers
+
+The `condIndep_copies` invocation pattern, the `condIndepFun_comp` post-composition helper, projection measurability patterns, and `IdentDistrib` four-way-joint manipulation are valuable M2 prep but do not belong in `Theorem2.lean`'s KL proof. Commit `249da6d` landed most of this scaffolding before the pivot to KL; it is preserved in git history and directly recoverable.
+
+**Proposed follow-up task** (out of scope for this PR): open a separate milestone (either labeled "M1.75 copy helpers" or folded into M2 prep) that lands `ZhangYeung/CopyHelpers.lean` with:
+
+- `condIndepFun_comp` (`CondIndepFun` post-composition by measurable codomain functions).
+- A templated invocation of `condIndep_copies` on a pair `⟨X, Y⟩` conditioned on a pair `⟨Z, U⟩`, producing the four-way joint `IdentDistrib` and the projected `CondIndepFun`.
+- Projection measurability helpers for pair-valued random variables.
+
+Plus a matching `ZhangYeungTest/CopyHelpers.lean` exercising the API. Scope and namespace are decided when that task opens. This module feeds M2 directly and does not depend on Theorem 2's proof route.
+
+## Historical context (pre-pivot design, 2026-04-16)
+
+The remainder of this document is the original pre-pivot M1.5 plan. It describes a single-copy kernel construction (Candidates A and B via `condDistrib` / `Kernel.comap`, plus an `aux_measure` / `aux_identDistrib` / `aux_condIndep` lemma skeleton) that the landed implementation does not follow. Specific guidance on what is still accurate versus superseded:
+
+- **Accurate.** §Context (partial; see reframing in the 2026-04-17 status section above), §Paper equations this milestone formalizes, §Prerequisites, §Files, §Signature, and §Verification. The theorem statement, file layout, test layout, and `Fintype + MeasurableSingletonClass` codomain specialization all match the landed implementation.
+- **Superseded.** §PFR and Mathlib API surface used (the landed proof uses `Real.sum_mul_log_div_leq` and PFR's entropy API, not kernel composition), §Design: the single-copy construction, and §Sequencing inside M1.5.
+- **Superseded by empirical evidence.** §7.1 (StandardBorelSpace inference risk): PFR's `condIndep_copies` does not require `StandardBorelSpace` at the pin and is the right route for Fintype codomains; the §7.1 mitigation tree never had to be walked. §7.3 (conditional-MI `IdentDistrib` transport): not load-bearing for the KL route. §7.4 (picking the right single-copy construction): the Shannon chase for any single-copy construction is ruled out by Kaced-Romashchenko ([@kaced2013]); see the "Reframing" subsection of the 2026-04-17 status above.
 
 ## Context
 
