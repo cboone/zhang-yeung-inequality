@@ -105,6 +105,7 @@ subadditivity
 subgoals
 submodularity
 Symp
+symm
 Tahar
 Taplo
 Teor
