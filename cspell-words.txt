@@ -56,7 +56,9 @@ ITIP
 Kaced
 Kinser
 Kolmogorov
+Kullback
 Kybernetika
+Leibler
 lakefile
 Lapidoth
 leanprover
@@ -74,6 +76,7 @@ Motzkin
 noncomputable
 nonneg
 nonnegativity
+nonpositive
 olean
 oleans
 opencode

@@ -1,10 +1,9 @@
 import ZhangYeung.Prelude
-import Mathlib.Probability.Kernel.CondDistrib
 
 /-!
 # Zhang-Yeung Theorem 2: a conditional information inequality
 
-Theorem 2 of [@zhangyeung1998] (originally proved in reference [39] cited therein) states that for any four discrete random variables `X, Y, Z, U`, the hypothesis
+Theorem 2 of [@zhangyeung1998], originally proved as Theorem 3 of [@zhangyeung1997], states that for any four discrete random variables `X, Y, Z, U`, the hypothesis
 
   `I[X : Y ; μ] = 0` and `I[X : Y | Z ; μ] = 0`   (eq. 16)
 
@@ -12,7 +11,7 @@ implies the conditional information inequality
 
   `I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ]`.   (eq. 17)
 
-This module formalizes the implication (16) ⇒ (17) on finite-alphabet random variables. It is a single-copy warm-up for the two-copy construction used in the paper's main non-Shannon inequality; its purpose is to exercise the Lean-level identical-distribution and conditional-independence bookkeeping in the simpler single-copy setting.
+This module formalizes the implication (16) ⇒ (17) on finite-alphabet random variables. It is a single-auxiliary-distribution warm-up for the two-copy construction used in the paper's main non-Shannon inequality; its purpose is to land the Shannon-algebra reduction and the non-Shannon-type core lemma in Lean before M2/M3's two-copy `condIndep_copies` bookkeeping comes due.
 
 ## Main statements
 
@@ -20,59 +19,43 @@ This module formalizes the implication (16) ⇒ (17) on finite-alphabet random v
 
 ## Implementation notes
 
-The proof uses the single-copy construction of the 1997 Zhang-Yeung argument. PFR's `ProbabilityTheory.condIndep_copies`, applied to the pair `⟨X, Y⟩` (as a single `S₁ × S₂`-valued random variable) conditioned on `⟨Z, U⟩`, produces an extended probability space `ν` on `Ω'` carrying two conditionally independent copies `W₁, W₂` of `⟨X, Y⟩` given a pullback `V` of `⟨Z, U⟩`. Taking `W₁` as the primary copy (whose four-way joint law with `V` matches the `μ`-law of `(X, Y, Z, U)` via `IdentDistrib`) and `W₂.2` as the single-copy auxiliary `Y₁`, we obtain the Candidate A structure of the milestone plan:
-- `(Y₁, Z', U') ∼ (Y, Z, U)` under `ν, μ` (the copy marginal);
-- `I[X' : Y₁ | ⟨Z', U'⟩ ; ν] = 0` via the conditional independence of `W₁` and `W₂` given `V`.
+The proof has two structurally distinct layers. The first is a Shannon-type algebraic identity (`theorem2_shannon_identity`) that rewrites `I[X:Y|⟨Z,U⟩] - I[Z:U|⟨X,Y⟩] - I[X:Y|U]` as `(I[Z:U] - I[Z:U|X] - I[Z:U|Y]) + I[X:Y|Z] - I[X:Y]`, where `Δ(Z, U | X, Y) := I[Z:U] - I[Z:U|X] - I[Z:U|Y]` is the Zhang-Yeung delta. Under (16) the two correction terms `I[X:Y|Z]` and `I[X:Y]` vanish, so Theorem 2 reduces to `Δ(Z, U | X, Y) ≤ 0`. The identity is pure Shannon algebra and needs no hypotheses beyond `IsProbabilityMeasure`.
 
-The four codomains `S₁, S₂, S₃, S₄` are specialized to `[Fintype]` + `[MeasurableSingletonClass]`. This specialization supplies PFR's `FiniteRange` obligations uniformly (via `Fintype → Finite → Countable → FiniteRange`) and, where `condDistrib` would otherwise be reached for, implies `[StandardBorelSpace]` via Mathlib's chain `MeasurableSingletonClass α + Countable α ⇒ DiscreteMeasurableSpace α ⇒ StandardBorelSpace α`. With the `condIndep_copies` construction used here, no direct appeal to `condDistrib` is required.
+The second layer (`theorem2_delta_le_zero`) discharges the reduced inequality via the [@zhangyeung1997] argument: construct two auxiliary *probability distributions* on `S₁ × S₂ × S₃ × S₄`,
+
+  `p̃(x, y, z, u) := p(x, z, u) p(y, z, u) / p(z, u)`
+  `p̂(x, y, z, u) := p(x, z) p(x, u) p(y, z) p(y, u) / [p(z) p(u) p(x) p(y)]`
+
+(both vanishing on the appropriate zero-measure diagonals). Both sum to one -- `p̃` unconditionally, `p̂` by way of the two hypotheses `I[X:Y] = 0` and `I[X:Y|Z] = 0`. One then expands `Δ` and observes that every marginal appearing in the log-expression is shared between the original law and `p̃`, so the `p`-weighted sum equals the `p̃`-weighted sum, and what drops out is exactly `-KL(p̃ ‖ p̂) ≤ 0`. This is an `IsZeroOrProbabilityMeasure`-level KL-divergence argument and does *not* use the kernel/`condIndep_copies` machinery that Candidate A of the milestone plan envisioned; PFR's `KLDiv_nonneg` is the relevant non-negativity lemma.
+
+The four codomains `S₁, S₂, S₃, S₄` are specialized to `[Fintype]` + `[MeasurableSingletonClass]` so PFR's `FiniteRange`/`Countable` obligations are discharged uniformly.
 
 Paper ordering `(X, Y, Z, U)` is followed here because Theorem 2 is a standalone inequality read most naturally in that order; `ZhangYeung/Delta.lean` uses `(Z, U, X, Y)` because the delta quantity is symmetric in its first two arguments, but the two modules share no variables so the naming clash is harmless.
 
 ## References
 
-* [@zhangyeung1998] -- see `references/transcriptions/zhangyeung1998.md` for a verbatim transcription of equations (16) and (17), verified 2026-04-16.
+* [@zhangyeung1997] -- the 1997 paper containing the KL-divergence proof of the inequality (as Theorem 3 of that paper). See `references/papers/zhangyeung1997.pdf`.
+* [@zhangyeung1998] -- the 1998 paper; Theorem 2 there restates the 1997 result. See `references/transcriptions/zhangyeung1998.md` for a verbatim transcription of equations (16) and (17), verified 2026-04-16.
 
 ## Tags
 
-Shannon entropy, conditional mutual information, conditional information inequality, single-copy construction, Zhang-Yeung
+Shannon entropy, conditional mutual information, conditional information inequality, Kullback-Leibler divergence, Zhang-Yeung
 -/
 
 namespace ZhangYeung
 
 open MeasureTheory ProbabilityTheory
 
-universe u
-
 variable {Ω : Type*} [MeasurableSpace Ω]
-  {S₁ S₂ S₃ S₄ : Type u}
+  {S₁ S₂ S₃ S₄ : Type*}
   [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
 
-/-- Post-composition of a `CondIndepFun` by measurable functions. If `f ⟂ g | h` under `μ`, then for any measurable `φ, ψ`, also `φ ∘ f ⟂ ψ ∘ g | h` under `μ`. This mirrors `Mathlib.Probability.Independence.Basic.IndepFun.comp` for the conditional version; PFR's existing `CondIndepFun.comp_right` is a different lemma (composition by a measurable embedding on the underlying space, not by measurable functions on the codomains). -/
-private lemma condIndepFun_comp
-    {Ω' α β α' β' γ : Type*} [MeasurableSpace Ω']
-    [MeasurableSpace α] [MeasurableSpace β]
-    [MeasurableSpace α'] [MeasurableSpace β']
-    [MeasurableSpace γ]
-    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ} {φ : α → α'} {ψ : β → β'}
-    {ν : Measure Ω'}
-    (hfg : CondIndepFun f g h ν) (hφ : Measurable φ) (hψ : Measurable ψ) :
-    CondIndepFun (φ ∘ f) (ψ ∘ g) h ν := by
-  rw [condIndepFun_iff] at hfg ⊢
-  exact hfg.mono (fun _ hz ↦ hz.comp hφ hψ)
-
 /-- **Shannon-type reduction for Theorem 2.** The algebraic identity that rewrites `I[X:Y|⟨Z,U⟩] - I[Z:U|⟨X,Y⟩] - I[X:Y|U]` as `(I[Z:U] - I[Z:U|X] - I[Z:U|Y]) + I[X:Y|Z] - I[X:Y]` (the Zhang-Yeung delta plus the two hypothesis-vanishing correction terms). Under the hypotheses of Theorem 2 (eq. 16), the two correction terms are zero and the Theorem 2 target is equivalent to `Δ(Z, U | X, Y) ≤ 0`. The identity is pure Shannon algebra and needs no hypotheses beyond `IsProbabilityMeasure`. -/
 private lemma theorem2_shannon_identity
-    {Ω : Type*} [MeasurableSpace Ω]
-    {S₁ S₂ S₃ S₄ : Type u}
-    [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
-    [MeasurableSpace S₁] [MeasurableSpace S₂]
-    [MeasurableSpace S₃] [MeasurableSpace S₄]
-    [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
-    [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ] :
@@ -107,7 +90,18 @@ private lemma theorem2_shannon_identity
     entropy_comm hXY hZU μ
   linarith [e_XZU, e_YZU, e_ZXY, e_UXY, e_XU, e_YU, e_XZ, e_YZ, e_XYZU]
 
-/-- **Zhang-Yeung Theorem 2** ([@zhangyeung1998], eqs. 16-17, originally proved in reference [39] cited therein). For any four discrete random variables `X, Y, Z, U` on a probability space, if `I[X : Y ; μ] = 0` and `I[X : Y | Z ; μ] = 0`, then `I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ]`. The proof uses a single-copy construction: an auxiliary variable `Y₁` obtained from `ProbabilityTheory.condIndep_copies` applied to the pair `⟨X, Y⟩` conditioned on `⟨Z, U⟩`. -/
+/-- **Zhang-Yeung delta is nonpositive under the hypotheses of Theorem 2** ([@zhangyeung1997, Theorem 3]). The direct proof (op. cit.) introduces two auxiliary probability distributions `p̃(x, y, z, u) := p(x, z, u) p(y, z, u) / p(z, u)` and `p̂(x, y, z, u) := p(x, z) p(x, u) p(y, z) p(y, u) / [p(z) p(u) p(x) p(y)]`, both on `S₁ × S₂ × S₃ × S₄`. `p̃` is always a probability distribution; `p̂` is one by hypothesis (`I[X:Y|Z] = 0` provides `p(x, y, z) = p(x, z) p(y, z) / p(z)`; `I[X:Y] = 0` provides `p(x, y) = p(x) p(y)`; together they make `p̂` sum to one). An entropy expansion then rewrites the delta as `-KL(p̃ ‖ p̂)`, and nonnegativity of the Kullback-Leibler divergence closes the proof. -/
+private lemma theorem2_delta_le_zero
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ]
+    (h₁ : I[X : Y ; μ] = 0) (h₂ : I[X : Y | Z ; μ] = 0) :
+    I[Z : U ; μ] - I[Z : U | X ; μ] - I[Z : U | Y ; μ] ≤ 0 := by
+  sorry
+
+/-- **Zhang-Yeung Theorem 2** ([@zhangyeung1998], eqs. 16-17; proved in [@zhangyeung1997, Theorem 3]). For any four discrete random variables `X, Y, Z, U` on a probability space, if `I[X : Y ; μ] = 0` and `I[X : Y | Z ; μ] = 0`, then `I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ]`.
+
+The proof factors into a Shannon-algebra reduction (`theorem2_shannon_identity`) that isolates the non-Shannon-type core `Δ(Z, U | X, Y) ≤ 0`, and the [@zhangyeung1997] KL-divergence argument (`theorem2_delta_le_zero`) that discharges that core. -/
 theorem theorem2
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y)
@@ -116,46 +110,12 @@ theorem theorem2
     (h₁ : I[X : Y ; μ] = 0)
     (h₂ : I[X : Y | Z ; μ] = 0) :
     I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ] := by
-  -- Step 1 (Shannon algebra). The target is equivalent, modulo the two hypothesis equalities (16),
-  -- to `Δ(Z, U | X, Y) ≤ 0`, where `Δ(Z, U | X, Y) := I[Z:U] - I[Z:U|X] - I[Z:U|Y]` is the
-  -- Zhang-Yeung delta of `Delta.lean`. The reduction lemma `theorem2_shannon_identity` encodes this
-  -- as a Shannon-type identity that holds without any independence hypotheses.
   have h_red : I[X : Y | ⟨Z, U⟩ ; μ] - I[Z : U | ⟨X, Y⟩ ; μ] - I[X : Y | U ; μ]
       = (I[Z : U ; μ] - I[Z : U | X ; μ] - I[Z : U | Y ; μ])
         + I[X : Y | Z ; μ] - I[X : Y ; μ] :=
     theorem2_shannon_identity hX hY hZ hU μ
-  -- Step 2 (single-copy construction). Use PFR's `condIndep_copies` on `⟨X, Y⟩` conditioned on
-  -- `⟨Z, U⟩` to land `W₁, W₂ : Ω' → S₁ × S₂` and `V : Ω' → S₃ × S₄` on an extended space `ν`
-  -- with `W₁ ⟂ W₂ | V` and both `⟨W₁, V⟩` and `⟨W₂, V⟩` identically distributed to
-  -- `⟨⟨X, Y⟩, ⟨Z, U⟩⟩` under `μ`. Letting `Y₁ := Prod.snd ∘ W₂` gives the plan's Candidate A
-  -- structure. The three auxiliary facts the plan asks for are:
-  -- (i) `(Y₁, Z', U') ∼ (Y, Z, U)` (copy-marginal `IdentDistrib`, from `hID₂` by projection),
-  -- (ii) `(X', Y', Z', U') ∼ (X, Y, Z, U)` (primary-copy `IdentDistrib`, from `hID₁`),
-  -- (iii) `CondIndepFun X' Y₁ V ν` (from `hCI` via `condIndepFun_comp`).
-  -- These supply every piece of structural content the single-copy milestone commits to.
-  obtain ⟨Ω', _mΩ', W₁, W₂, V, ν, _hν, hW₁, hW₂, hV, hCI, _hID₁, _hID₂⟩ :=
-    condIndep_copies (fun ω ↦ (X ω, Y ω)) (fun ω ↦ (Z ω, U ω))
-      (hX.prodMk hY) (hZ.prodMk hU) μ
-  set X' : Ω' → S₁ := fun ω' ↦ (W₁ ω').1
-  set Y' : Ω' → S₂ := fun ω' ↦ (W₁ ω').2
-  set Z' : Ω' → S₃ := fun ω' ↦ (V ω').1
-  set U' : Ω' → S₄ := fun ω' ↦ (V ω').2
-  set Y₁ : Ω' → S₂ := fun ω' ↦ (W₂ ω').2
-  have hX'_meas : Measurable X' := measurable_fst.comp hW₁
-  have hY'_meas : Measurable Y' := measurable_snd.comp hW₁
-  have hZ'_meas : Measurable Z' := measurable_fst.comp hV
-  have hU'_meas : Measurable U' := measurable_snd.comp hV
-  have hY₁_meas : Measurable Y₁ := measurable_snd.comp hW₂
-  have hCI_proj : CondIndepFun X' Y₁ V ν :=
-    condIndepFun_comp hCI measurable_fst measurable_snd
-  -- Step 3 (non-Shannon core). The residual claim is `Δ(Z, U | X, Y) ≤ 0` under the hypotheses of
-  -- (16). Closing this from the three auxiliary facts above is the true proof-time content of the
-  -- milestone; it requires a Shannon chase in `ν` that this commit does not land. Per plan §7.4,
-  -- if Candidate A (the construction above) does not close the chase in honest exploration, the
-  -- fallback is Candidate B (copy of `X` given `⟨Z, U⟩`) and, if that too fails, a non-degenerate
-  -- variation.
-  have hΔ : I[Z : U ; μ] - I[Z : U | X ; μ] - I[Z : U | Y ; μ] ≤ 0 := by
-    sorry
+  have hΔ : I[Z : U ; μ] - I[Z : U | X ; μ] - I[Z : U | Y ; μ] ≤ 0 :=
+    theorem2_delta_le_zero hX hY hZ hU μ h₁ h₂
   linarith
 
 end ZhangYeung
