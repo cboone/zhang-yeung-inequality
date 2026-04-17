@@ -225,9 +225,9 @@ private lemma sum_map_triple_first
     (μ : Measure Ω') [IsFiniteMeasure μ] (b : β) (c : γ) :
     ∑ a : α, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
       = (μ.map (fun ω => (g ω, h ω))).real {(b, c)} := by
-  have hfgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
+  have h_fgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
   have hgh : Measurable (fun ω => (g ω, h ω)) := hg.prodMk hh
-  simp_rw [map_measureReal_apply hfgh (measurableSet_singleton _),
+  simp_rw [map_measureReal_apply h_fgh (measurableSet_singleton _),
            map_measureReal_apply hgh (measurableSet_singleton _)]
   have preimage_eq : ∀ a : α,
       (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
@@ -252,9 +252,9 @@ private lemma sum_map_triple_second
     (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (c : γ) :
     ∑ b : β, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
       = (μ.map (fun ω => (f ω, h ω))).real {(a, c)} := by
-  have hfgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
+  have h_fgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
   have hfh : Measurable (fun ω => (f ω, h ω)) := hf.prodMk hh
-  simp_rw [map_measureReal_apply hfgh (measurableSet_singleton _),
+  simp_rw [map_measureReal_apply h_fgh (measurableSet_singleton _),
            map_measureReal_apply hfh (measurableSet_singleton _)]
   have preimage_eq : ∀ b : β,
       (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
@@ -280,9 +280,9 @@ private lemma sum_map_triple_third
     (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) (b : β) :
     ∑ c : γ, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
       = (μ.map (fun ω => (f ω, g ω))).real {(a, b)} := by
-  have hfgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
+  have h_fgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
   have hfg : Measurable (fun ω => (f ω, g ω)) := hf.prodMk hg
-  simp_rw [map_measureReal_apply hfgh (measurableSet_singleton _),
+  simp_rw [map_measureReal_apply h_fgh (measurableSet_singleton _),
            map_measureReal_apply hfg (measurableSet_singleton _)]
   have preimage_eq : ∀ c : γ,
       (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
