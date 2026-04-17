@@ -6,7 +6,7 @@ venue: IEEE Transactions on Information Theory, Vol. 44, No. 4, pp. 1440-1452
 bibtex_key: zhangyeung1998
 bibliography: ../papers.bib
 doi: 10.1109/18.681320
-pdf: zhenzhang1998.pdf
+pdf: zhangyeung1998.pdf
 transcription_scope: full
 source: >
   Verbatim transcription of the source PDF, built from a Mathpix OCR

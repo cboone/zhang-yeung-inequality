@@ -3,7 +3,7 @@
 **Created:** 2026-04-15
 **Target:** Lean 4 / Mathlib 4
 **Paper:** Zhang & Yeung, "On Characterization of Entropy Function via Information Inequalities," *IEEE TIT* 44(4), July 1998, pp. 1440-1452.
-**Source PDF:** `/Users/ctm/Downloads/zhenzhang1998.pdf`
+**Source PDF:** `references/papers/zhangyeung1998.pdf`
 
 **Resolved decisions:**
 - **Scope:** S2 + Theorem 5 (stretch). Theorems 3, 4 as core; Theorem 5 (n+2-variable generalization) as stretch.
