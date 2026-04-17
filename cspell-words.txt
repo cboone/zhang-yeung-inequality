@@ -2,6 +2,7 @@ adhesive
 aemeasurable
 Affeldt
 antisymm
+bijective
 AITIP
 APAP
 Appl
@@ -29,6 +30,10 @@ Degenne's
 Diggavi
 Discr
 dists
+exfalso
+hcomp
+hproj
+irrefl
 Docstrings
 Dougherty
 dualizations
@@ -79,6 +84,7 @@ Matús
 Matúš
 Matveev
 minitip
+nbij
 Motzkin
 noncomputable
 nonneg
