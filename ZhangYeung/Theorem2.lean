@@ -777,14 +777,196 @@ private lemma condIndep_normalized_pair_eq_triple
     rw [div_eq_iff hc_zero]
     linarith
 
-/-- **`p̂` is a probability distribution under the hypotheses of Theorem 2.** Collapses by summing over `z` first (using `I[X:Y|Z] = 0` ⇒ `p(x, y, z) · p(z) = p(x, z) · p(y, z)` via `condIndep_normalized_pair_eq_triple`), then using `I[X:Y] = 0` ⇒ `p(x, y) = p(x) · p(y)` (via `indepFun_map_pair_real_singleton`) to cancel the single-variable denominators, then summing over `x, y, u`. The telescoping uses the `condIndepFun_map_triple_real_singleton` helper above. -/
+/-- **`p̂` is a probability distribution under the hypotheses of Theorem 2.** Collapses by summing over `z` first (using `I[X:Y|Z] = 0` ⇒ `p(x, y, z) · p(z) = p(x, z) · p(y, z)` via `condIndepFun_map_triple_real_singleton`), then using `I[X:Y] = 0` ⇒ `p(x, y) = p(x) · p(y)` (via `indepFun_map_pair_real_singleton`) to cancel the single-variable denominators, then summing over `x, y, u`. -/
 private lemma phat_sum_eq_one
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h₁ : I[X : Y ; μ] = 0) (h₂ : I[X : Y | Z ; μ] = 0) :
     ∑ t : S₁ × S₂ × S₃ × S₄, phat X Y Z U μ t = 1 := by
-  sorry
+  have h_indep : IndepFun X Y μ := (mutualInfo_eq_zero hX hY).mp h₁
+  have h_cond : CondIndepFun X Y Z μ := (condMutualInfo_eq_zero hX hY).mp h₂
+  -- **Pointwise identity (h_phat_mul).** `phat(x, y, z, u) * pZ pU pX pY = pXZ * pXU * pYZ * pYU`.
+  -- Clearing the denominator in the definition of phat (works universally via 0/0 = 0 and marginal bounds on the numerator).
+  have h_phat_mul : ∀ (x : S₁) (y : S₂) (z : S₃) (u : S₄),
+      phat X Y Z U μ (x, y, z, u)
+        * ((μ.map Z).real {z} * (μ.map U).real {u} * (μ.map X).real {x} * (μ.map Y).real {y})
+      = (μ.map (fun ω => (X ω, Z ω))).real {(x, z)}
+        * (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+        * (μ.map (fun ω => (Y ω, Z ω))).real {(y, z)}
+        * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)} := by
+    intros x y z u
+    by_cases hD : (μ.map Z).real {z} * (μ.map U).real {u} * (μ.map X).real {x} * (μ.map Y).real {y} = 0
+    · -- Denom = 0: need to show num = 0 using marginal bounds, then phat * 0 = 0 = num.
+      rw [hD, mul_zero]
+      have h_or : (μ.map Z).real {z} = 0 ∨ (μ.map U).real {u} = 0 ∨
+                  (μ.map X).real {x} = 0 ∨ (μ.map Y).real {y} = 0 := by
+        simp only [mul_eq_zero] at hD; tauto
+      rcases h_or with hZ0 | hU0 | hX0 | hY0
+      · have : (μ.map (fun ω => (X ω, Z ω))).real {(x, z)} = 0 :=
+          le_antisymm (hZ0 ▸ measureReal_map_pair_le_map_snd hX hZ μ x z) measureReal_nonneg
+        rw [this]; ring
+      · have : (μ.map (fun ω => (X ω, U ω))).real {(x, u)} = 0 :=
+          le_antisymm (hU0 ▸ measureReal_map_pair_le_map_snd hX hU μ x u) measureReal_nonneg
+        rw [this]; ring
+      · have : (μ.map (fun ω => (X ω, Z ω))).real {(x, z)} = 0 :=
+          le_antisymm (hX0 ▸ measureReal_map_pair_le_map_fst hX hZ μ x z) measureReal_nonneg
+        rw [this]; ring
+      · have : (μ.map (fun ω => (Y ω, Z ω))).real {(y, z)} = 0 :=
+          le_antisymm (hY0 ▸ measureReal_map_pair_le_map_fst hY hZ μ y z) measureReal_nonneg
+        rw [this]; ring
+    · -- Denom ≠ 0: cancel directly.
+      show phat X Y Z U μ (x, y, z, u) * _ = _
+      change (_ / _) * _ = _
+      rw [div_mul_cancel₀ _ hD]
+  -- **Pointwise identity (h_point).** Applying condIndepFun to the above:
+  -- `phat * pU pX pY = pXYZ * pXU * pYU`.
+  have h_point : ∀ (x : S₁) (y : S₂) (z : S₃) (u : S₄),
+      phat X Y Z U μ (x, y, z, u)
+        * ((μ.map U).real {u} * (μ.map X).real {x} * (μ.map Y).real {y})
+      = (μ.map (fun ω => (X ω, Y ω, Z ω))).real {(x, y, z)}
+        * (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+        * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)} := by
+    intros x y z u
+    have h_helper := condIndepFun_map_triple_real_singleton hX hY hZ h_cond x y z
+    -- h_helper : pXYZ * pZ = pXZ * pYZ. Multiply `h_phat_mul x y z u` identity through by pZ:
+    -- LHS * pZ (of h_point): phat * (pU pX pY) * pZ = phat * (pZ pU pX pY) = pXZ pXU pYZ pYU.
+    -- RHS * pZ (of h_point): pXYZ pXU pYU * pZ = (pXYZ pZ) * pXU pYU = (pXZ pYZ) pXU pYU = pXZ pXU pYZ pYU.
+    -- Both equal, so LHS = RHS after cancelling pZ (case: pZ > 0) or directly in pZ = 0 case.
+    by_cases hZ_zero : (μ.map Z).real {z} = 0
+    · have hphat_zero : phat X Y Z U μ (x, y, z, u) = 0 := by
+        unfold phat
+        simp [hZ_zero]
+      have hXYZ_zero : (μ.map (fun ω => (X ω, Y ω, Z ω))).real {(x, y, z)} = 0 := by
+        have h1 : (μ.map (fun ω => (X ω, Y ω, Z ω))).real {(x, y, z)}
+            ≤ (μ.map (fun ω => (X ω, Z ω))).real {(x, z)} :=
+          measureReal_map_triple_le_map_pair_13 hX hY hZ μ x y z
+        have h2 : (μ.map (fun ω => (X ω, Z ω))).real {(x, z)} ≤ (μ.map Z).real {z} :=
+          measureReal_map_pair_le_map_snd hX hZ μ x z
+        linarith [measureReal_nonneg (μ := μ.map (fun ω => (X ω, Y ω, Z ω))) (s := ({(x, y, z)} : Set _))]
+      rw [hphat_zero, zero_mul, hXYZ_zero, zero_mul, zero_mul]
+    · -- pZ > 0: multiply both sides by pZ and use h_phat_mul, h_helper.
+      have h_muled : (phat X Y Z U μ (x, y, z, u)
+          * ((μ.map U).real {u} * (μ.map X).real {x} * (μ.map Y).real {y})) * (μ.map Z).real {z}
+        = ((μ.map (fun ω => (X ω, Y ω, Z ω))).real {(x, y, z)}
+            * (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+            * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)}) * (μ.map Z).real {z} := by
+        have h_lhs : (phat X Y Z U μ (x, y, z, u)
+            * ((μ.map U).real {u} * (μ.map X).real {x} * (μ.map Y).real {y})) * (μ.map Z).real {z}
+          = phat X Y Z U μ (x, y, z, u)
+            * ((μ.map Z).real {z} * (μ.map U).real {u} * (μ.map X).real {x} * (μ.map Y).real {y}) := by
+          ring
+        rw [h_lhs, h_phat_mul x y z u]
+        have h_rhs : ((μ.map (fun ω => (X ω, Y ω, Z ω))).real {(x, y, z)}
+            * (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+            * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)}) * (μ.map Z).real {z}
+          = ((μ.map (fun ω => (X ω, Y ω, Z ω))).real {(x, y, z)} * (μ.map Z).real {z})
+            * ((μ.map (fun ω => (X ω, U ω))).real {(x, u)} * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)}) := by
+          ring
+        rw [h_rhs, h_helper]; ring
+      exact mul_right_cancel₀ hZ_zero h_muled
+  -- **Sum over z:** `∑ z, phat(x, y, z, u) = pXU(x, u) * pYU(y, u) / pU(u)`.
+  have h_indep_pair : ∀ x y, (μ.map (fun ω => (X ω, Y ω))).real {(x, y)}
+      = (μ.map X).real {x} * (μ.map Y).real {y} :=
+    fun x y => indepFun_map_pair_real_singleton hX hY h_indep x y
+  have h_sum_z : ∀ (x : S₁) (y : S₂) (u : S₄),
+      (∑ z : S₃, phat X Y Z U μ (x, y, z, u))
+        * ((μ.map U).real {u} * (μ.map X).real {x} * (μ.map Y).real {y})
+      = (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+        * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)}
+        * ((μ.map X).real {x} * (μ.map Y).real {y}) := by
+    intros x y u
+    rw [Finset.sum_mul]
+    simp_rw [h_point x y _ u]
+    rw [show (∑ z : S₃, (μ.map (fun ω => (X ω, Y ω, Z ω))).real {(x, y, z)}
+              * (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+              * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)})
+           = (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+             * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)}
+             * (∑ z : S₃, (μ.map (fun ω => (X ω, Y ω, Z ω))).real {(x, y, z)}) from by
+        rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun z _ => by ring]
+    rw [sum_map_triple_third hX hY hZ μ x y, h_indep_pair]
+  -- **Normalize.** `∑ z, phat(x, y, z, u) = pXU(x, u) * pYU(y, u) / pU(u)` even at zeros.
+  have h_sum_z_eq : ∀ (x : S₁) (y : S₂) (u : S₄),
+      (∑ z : S₃, phat X Y Z U μ (x, y, z, u))
+        = (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+          * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)}
+          / (μ.map U).real {u} := by
+    intros x y u
+    have h := h_sum_z x y u
+    by_cases hU_zero : (μ.map U).real {u} = 0
+    · have h_phat_zero : ∀ z, phat X Y Z U μ (x, y, z, u) = 0 := by
+        intro z; unfold phat; simp [hU_zero]
+      rw [Finset.sum_congr rfl (fun z _ => h_phat_zero z), Finset.sum_const_zero, hU_zero, div_zero]
+    by_cases hX_zero : (μ.map X).real {x} = 0
+    · have hXU_zero : (μ.map (fun ω => (X ω, U ω))).real {(x, u)} = 0 :=
+        le_antisymm (hX_zero ▸ measureReal_map_pair_le_map_fst hX hU μ x u) measureReal_nonneg
+      have h_phat_zero : ∀ z, phat X Y Z U μ (x, y, z, u) = 0 := by
+        intro z; unfold phat; simp [hX_zero]
+      rw [Finset.sum_congr rfl (fun z _ => h_phat_zero z), Finset.sum_const_zero, hXU_zero, zero_mul, zero_div]
+    by_cases hY_zero : (μ.map Y).real {y} = 0
+    · have hYU_zero : (μ.map (fun ω => (Y ω, U ω))).real {(y, u)} = 0 :=
+        le_antisymm (hY_zero ▸ measureReal_map_pair_le_map_fst hY hU μ y u) measureReal_nonneg
+      have h_phat_zero : ∀ z, phat X Y Z U μ (x, y, z, u) = 0 := by
+        intro z; unfold phat; simp [hY_zero]
+      rw [Finset.sum_congr rfl (fun z _ => h_phat_zero z), Finset.sum_const_zero, hYU_zero, mul_zero, zero_div]
+    -- All positive.
+    have h_denom_ne : (μ.map U).real {u} * (μ.map X).real {x} * (μ.map Y).real {y} ≠ 0 := by
+      intro heq; simp only [mul_eq_zero] at heq
+      rcases heq with (h | h) | h
+      exacts [hU_zero h, hX_zero h, hY_zero h]
+    have hXY_ne : (μ.map X).real {x} * (μ.map Y).real {y} ≠ 0 := by
+      intro heq; simp only [mul_eq_zero] at heq
+      rcases heq with h | h
+      exacts [hX_zero h, hY_zero h]
+    -- From h: (∑_z phat) * (pU pX pY) = pXU pYU * (pX pY)
+    -- Divide by (pU pX pY):
+    have h' : ∑ z, phat X Y Z U μ (x, y, z, u)
+            = (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+              * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)}
+              * ((μ.map X).real {x} * (μ.map Y).real {y})
+              / ((μ.map U).real {u} * (μ.map X).real {x} * (μ.map Y).real {y}) := by
+      rw [eq_div_iff h_denom_ne]; exact h
+    rw [h']
+    field_simp
+  -- **Outer telescope:** reshape the 4-tuple sum via an `Equiv`, collapse ∑_z
+  -- using h_sum_z_eq, then telescope ∑_y, ∑_x, ∑_u.
+  let e : S₄ × S₁ × S₂ × S₃ ≃ S₁ × S₂ × S₃ × S₄ :=
+    { toFun := fun ⟨u, x, y, z⟩ => (x, y, z, u)
+      invFun := fun ⟨x, y, z, u⟩ => (u, x, y, z)
+      left_inv := fun ⟨_, _, _, _⟩ => rfl
+      right_inv := fun ⟨_, _, _, _⟩ => rfl }
+  rw [← Equiv.sum_comp e (phat X Y Z U μ)]
+  show ∑ p : S₄ × S₁ × S₂ × S₃, phat X Y Z U μ (p.2.1, p.2.2.1, p.2.2.2, p.1) = 1
+  simp_rw [Fintype.sum_prod_type]
+  -- Goal: ∑ u, ∑ x, ∑ y, ∑ z, phat(x, y, z, u) = 1.
+  simp_rw [h_sum_z_eq]
+  -- Goal: ∑ u, ∑ x, ∑ y, pXU(x, u) * pYU(y, u) / pU(u) = 1.
+  -- ∑_y pYU(y, u) / pU = pU / pU = 1 (when pU > 0).
+  have h_sum_y : ∀ (x : S₁) (u : S₄),
+      (∑ y : S₂, (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+          * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)} / (μ.map U).real {u})
+        = (μ.map (fun ω => (X ω, U ω))).real {(x, u)} := by
+    intros x u
+    by_cases hU_zero : (μ.map U).real {u} = 0
+    · have hXU_zero : (μ.map (fun ω => (X ω, U ω))).real {(x, u)} = 0 :=
+        le_antisymm (hU_zero ▸ measureReal_map_pair_le_map_snd hX hU μ x u) measureReal_nonneg
+      simp [hXU_zero]
+    -- pU > 0. Factor out pXU/pU and use sum_map_pair_first on pYU to get pU.
+    rw [show (∑ y : S₂, (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
+                * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)} / (μ.map U).real {u})
+            = ((μ.map (fun ω => (X ω, U ω))).real {(x, u)} / (μ.map U).real {u})
+              * ∑ y : S₂, (μ.map (fun ω => (Y ω, U ω))).real {(y, u)} from by
+        rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun y _ => by ring]
+    rw [sum_map_pair_first hY hU μ u]
+    field_simp
+  simp_rw [h_sum_y]
+  -- Goal: ∑ u, ∑ x, pXU(x, u) = 1.
+  simp_rw [sum_map_pair_first hX hU μ]
+  -- Goal: ∑ u, pU u = 1.
+  haveI : IsProbabilityMeasure (μ.map U) := Measure.isProbabilityMeasure_map hU.aemeasurable
+  rw [sum_measureReal_singleton (Finset.univ : Finset S₄)]
+  simp
 
 /-! ### Δ-to-log-ratio identities -/
 
