@@ -2,7 +2,7 @@
 title: "Align Delta module citations with verified transcription"
 created: 2026-04-16
 branch: formalize/delta-equational-lemmas
-supersedes_refs: docs/plans/todo/2026-04-15-delta-equational-lemmas.md (M1 plan; still load-bearing, only citation wording changes)
+supersedes_refs: docs/plans/done/2026-04-15-delta-equational-lemmas.md (M1 plan; still load-bearing, only citation wording changes)
 ---
 
 ## Context
@@ -39,7 +39,7 @@ Changes:
 
 Rationale: one authoritative pointer at the verified transcription beats a handwritten duplicate of the bibliography. Future contributors checking whether `form2N_iff` matches the paper should land on the transcription directly.
 
-### 2. `docs/plans/todo/2026-04-15-delta-equational-lemmas.md` (M1 plan)
+### 2. `docs/plans/done/2026-04-15-delta-equational-lemmas.md` (M1 plan)
 
 The M1 plan currently cites the paper's equation numbers without pointing readers at the verified transcription. Add a one-line "Primary reference" note near the top (after the `## Context` section), for example:
 
@@ -71,7 +71,7 @@ on a new line immediately after the `**Source PDF:**` line. No other changes; th
 ## Critical files
 
 - `ZhangYeung/Delta.lean` (module docstring only; see section 1 above).
-- `docs/plans/todo/2026-04-15-delta-equational-lemmas.md` (single `Primary reference` line near the top; see section 2).
+- `docs/plans/done/2026-04-15-delta-equational-lemmas.md` (single `Primary reference` line near the top; see section 2).
 - `docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md` (single `Source transcription:` line in the preamble; see section 3).
 
 ## Verification

@@ -2,12 +2,12 @@
 
 Base: main (merge base: 75807782)
 Commits: 13
-Files changed: 8 (5 added, 3 modified, 0 deleted, 0 renamed)
+Files changed: 9 (6 added, 3 modified, 0 deleted, 0 renamed)
 Reviewed through: d7d6eda
 
 ### Summary
 
-Lands Milestone M1 of the Zhang-Yeung formalization: defines `ZhangYeung.delta` and nine equational lemmas capturing the algebraic content of the paper's equations (20)-(23), adds a sibling `ZhangYeungTest` library wired into `lake build` with compile-time API regression tests for every exported lemma, and updates the roadmap to codify milestone-level testing requirements. A follow-up pass realigns the module docstring and plan/roadmap prose to cite the verified transcription (`references/transcriptions/zhangyeung1998.md`, verified 2026-04-16) using the project-standard `[@zhangyeung1998]` form.
+Lands Milestone M1 of the Zhang-Yeung formalization: defines `ZhangYeung.delta` and ten equational lemmas capturing the algebraic content of the paper's equations (20)-(23), adds a sibling `ZhangYeungTest` library wired into `lake build` with compile-time API regression tests for every exported lemma, and updates the roadmap to codify milestone-level testing requirements. A follow-up pass realigns the module docstring and plan/roadmap prose to cite the verified transcription (`references/transcriptions/zhangyeung1998.md`, verified 2026-04-16) using the project-standard `[@zhangyeung1998]` form.
 
 ### Changes by Area
 
@@ -27,7 +27,7 @@ Lands Milestone M1 of the Zhang-Yeung formalization: defines `ZhangYeung.delta` 
 
 #### Documentation
 
-- `docs/plans/todo/2026-04-15-delta-equational-lemmas.md` (new, 324 lines): M1 plan. Written at branch start, tightened twice (`f918272` to state the finite-alphabet specialization up front; `bbff1fd` to add the verified-transcription primary-reference line).
+- `docs/plans/done/2026-04-15-delta-equational-lemmas.md` (new, 324 lines): M1 plan. Written at branch start, tightened twice (`f918272` to state the finite-alphabet specialization up front; `bbff1fd` to add the verified-transcription primary-reference line).
 - `docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md` (modified, +44/−5): adds a `Source transcription` line to the preamble, expands M0-M6 sections with explicit testing requirements, adds a milestone-level testing rule in §8, and extends the Critical Files inventory with the `ZhangYeungTest/` modules.
 - `docs/plans/done/2026-04-16-align-delta-with-verified-transcription.md` (new, 83 lines): the citation-alignment plan, moved to `done/` once applied.
 
@@ -38,7 +38,7 @@ Lands Milestone M1 of the Zhang-Yeung formalization: defines `ZhangYeung.delta` 
 - `ZhangYeung/Delta.lean`
 - `ZhangYeungTest.lean`
 - `ZhangYeungTest/Delta.lean`
-- `docs/plans/todo/2026-04-15-delta-equational-lemmas.md`
+- `docs/plans/done/2026-04-15-delta-equational-lemmas.md`
 - `docs/plans/done/2026-04-16-align-delta-with-verified-transcription.md`
 
 **Modified files (3):**
@@ -66,7 +66,7 @@ Lands Milestone M1 of the Zhang-Yeung formalization: defines `ZhangYeung.delta` 
 
 #### Overall progress
 
-- M1 plan (`docs/plans/todo/2026-04-15-delta-equational-lemmas.md`): **14/14 actionable items done (100%).**
+- M1 plan (`docs/plans/done/2026-04-15-delta-equational-lemmas.md`): **14/14 actionable items done (100%).**
 - Citation-alignment plan (`docs/plans/done/2026-04-16-align-delta-with-verified-transcription.md`): **3/3 edits done (100%).**
 
 #### Done items (M1)
