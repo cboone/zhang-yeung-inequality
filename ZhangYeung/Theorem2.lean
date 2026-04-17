@@ -30,7 +30,7 @@ The second layer (`theorem2_delta_le_zero`) discharges the reduced inequality vi
 
 (both vanishing on the appropriate zero-measure diagonals). Both sum to one -- `p̃` unconditionally, `p̂` by way of the two hypotheses `I[X:Y] = 0` and `I[X:Y|Z] = 0`. One then expands `Δ` and observes that every marginal appearing in the log-expression is shared between the original law and `p̃`, so the `p`-weighted sum equals the `p̃`-weighted sum, and what drops out is exactly `-KL(p̃ ‖ p̂) ≤ 0`. This is an `IsZeroOrProbabilityMeasure`-level KL-divergence argument and does *not* use the kernel/`condIndep_copies` machinery that Candidate A of the milestone plan envisioned; PFR's `KLDiv_nonneg` (and the underlying log-sum inequality `Real.sum_mul_log_div_leq`) is the relevant non-negativity lemma.
 
-**Current state:** The proof of `theorem2_delta_le_zero` is scaffolded into four named sub-lemmas, each with its own localized `sorry`: `ptilde_sum_eq_one`, `phat_sum_eq_one`, `delta_eq_sum_log_ratio`, and `sum_joint_eq_sum_ptilde`. The main proof threads them together with `Real.sum_mul_log_div_leq` so the non-Shannon core is isolated to these four claims. Progress closing each can land independently.
+**Current state:** `theorem2_delta_le_zero` is wired end-to-end, with the main proof body assembled around `Real.sum_mul_log_div_leq` and its absolute-continuity side condition (closed). `ptilde_sum_eq_one` is closed. Three scaffolded sub-lemmas remain `sorry`: `phat_sum_eq_one` (requires extracting `p(x,y) = p(x)p(y)` from `IndepFun X Y` and `p(x,y,z) = p(x,z)p(y,z)/p(z)` from `CondIndepFun X Y Z`), `delta_eq_sum_log_ratio` (entropy expansion over the 4-tuple space), and `sum_joint_eq_sum_ptilde` (the 11-factor marginal-swap observation). Each closes independently.
 
 The four codomains `S₁, S₂, S₃, S₄` are specialized to `[Fintype]` + `[MeasurableSingletonClass]` so PFR's `FiniteRange`/`Countable` obligations are discharged uniformly.
 
@@ -360,7 +360,7 @@ private lemma phat_nonneg
   unfold phat
   positivity
 
-/-- **Zhang-Yeung delta is nonpositive under the hypotheses of Theorem 2** ([@zhangyeung1997, Theorem 3]). The direct proof (op. cit.) introduces the auxiliary distributions `ptilde` and `phat` (defined above), expands `Δ` as `∑ p · log(p̂ / p̃)`, reweights via `sum_joint_eq_sum_ptilde` to `∑ p̃ · log(p̂ / p̃) = -KL(p̃ ‖ p̂)`, and closes by the log-sum inequality `Real.sum_mul_log_div_leq` applied to `p̃`, `p̂`. The four scaffolding sub-lemmas above capture every algebraic obligation of the argument. -/
+/-- **Zhang-Yeung delta is nonpositive under the hypotheses of Theorem 2** ([@zhangyeung1997, Theorem 3]). The direct proof (op. cit.) introduces the auxiliary distributions `ptilde` and `phat` (defined above), expands `Δ` as `∑ p · log(p̂ / p̃)`, reweights via `sum_joint_eq_sum_ptilde` to `∑ p̃ · log(p̂ / p̃) = -KL(p̃ ‖ p̂)`, and closes by the log-sum inequality `Real.sum_mul_log_div_leq` applied to `p̃`, `p̂`. The main proof body here is complete and wires `ptilde_sum_eq_one`, `phat_sum_eq_one`, `delta_eq_sum_log_ratio`, `sum_joint_eq_sum_ptilde`, plus the inline absolute-continuity claim, into the final inequality via `linarith`. -/
 private lemma theorem2_delta_le_zero
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
