@@ -411,6 +411,33 @@ private lemma sum_mul_proj_eq_of_marginal_eq
     rw [(Finset.mem_filter.mp ha).2]
   rw [hf, hg, h_marg]
 
+/-- **Pushforward marginal via fibre sum.** For a measurable `F : Ω' → α` and a measurable projection `proj : α → γ`, the sum of `(μ.map F).real {t}` over the fibre of `proj` at `b` equals the image-measure at `b` of the composite pushforward `proj ∘ F`. This is the generic "marginalize a pushforward by composing with a projection" identity, used to derive the pJoint fibre-sum identities for each of the eleven projections in `sum_joint_eq_sum_ptilde`. -/
+private lemma sum_filter_map_real_eq_map_comp
+    {α γ : Type*} [Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace γ] [MeasurableSingletonClass γ] [DecidableEq γ]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {F : Ω' → α} {proj : α → γ} (hF : Measurable F) (hproj : Measurable proj)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (b : γ) :
+    (∑ t ∈ (Finset.univ : Finset α).filter (fun t => proj t = b), (μ.map F).real {t})
+      = (μ.map (fun ω => proj (F ω))).real {b} := by
+  have hcomp : Measurable (fun ω => proj (F ω)) := hproj.comp hF
+  simp_rw [map_measureReal_apply hF (measurableSet_singleton _)]
+  rw [map_measureReal_apply hcomp (measurableSet_singleton _)]
+  have hUnion : (fun ω => proj (F ω)) ⁻¹' {b}
+      = ⋃ t ∈ (Finset.univ.filter (fun t : α => proj t = b) : Finset α), F ⁻¹' {t} := by
+    ext ω
+    simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.mem_iUnion,
+               Finset.mem_filter, Finset.mem_univ, true_and]
+    exact ⟨fun h => ⟨F ω, h, rfl⟩, fun ⟨_, ht, hωt⟩ => hωt ▸ ht⟩
+  rw [hUnion]
+  refine (measureReal_biUnion_finset ?_ ?_).symm
+  · rintro t₁ - t₂ - hne
+    rw [Function.onFun, Set.disjoint_left]
+    intro ω hω₁ hω₂
+    simp only [Set.mem_preimage, Set.mem_singleton_iff] at hω₁ hω₂
+    exact hne (hω₁.symm.trans hω₂)
+  · exact fun _ _ => hF (measurableSet_singleton _)
+
 /-! ### Marginal structure of `p̃`
 
 The eleven marginal-match facts: each of `p̃`'s projection-marginals agrees with `pJoint`'s. `ptilde_fibre_sum` handles the `(x, y)` fibre at the 2-tuple level; the rest cascade from `sum_ptilde_over_y`/`sum_ptilde_over_x` plus `sum_map_triple_*` / `sum_map_pair_*` to descend through the other projections. -/
@@ -660,6 +687,31 @@ private lemma delta_eq_sum_log_ratio
           pJoint X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t) := by
   sorry
 
+/-- **Marginal-swap helper.** Given a measurable projection `proj : S₁ × S₂ × S₃ × S₄ → γ` of the 4-tuple alphabet, and given that `p̃` agrees with the μ-pushforward of `proj ∘ ⟨X, Y, Z, U⟩` on every fibre, the sum of `pJoint · φ(proj ·)` equals the sum of `p̃ · φ(proj ·)` for any `φ`. The pJoint half of the filter-sum identity is automatic from `sum_filter_map_real_eq_map_comp` (since `pJoint` is a pushforward singleton value); the `p̃` half is the `h_pt_marg` hypothesis. This helper factors out the shared bookkeeping of the eleven projection-specific applications in `sum_joint_eq_sum_ptilde`. -/
+private lemma marg_swap_helper
+    {γ : Type*} [Fintype γ] [MeasurableSpace γ] [MeasurableSingletonClass γ] [DecidableEq γ]
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ]
+    (proj : S₁ × S₂ × S₃ × S₄ → γ) (hproj : Measurable proj) (φ : γ → ℝ)
+    (h_pt_marg : ∀ b : γ,
+        (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+            (fun t => proj t = b), ptilde X Y Z U μ t)
+          = (μ.map (fun ω => proj (X ω, Y ω, Z ω, U ω))).real {b}) :
+    ∑ t : S₁ × S₂ × S₃ × S₄, pJoint X Y Z U μ t * φ (proj t)
+      = ∑ t : S₁ × S₂ × S₃ × S₄, ptilde X Y Z U μ t * φ (proj t) := by
+  have hF : Measurable (fun ω => (X ω, Y ω, Z ω, U ω)) :=
+    hX.prodMk (hY.prodMk (hZ.prodMk hU))
+  refine sum_mul_proj_eq_of_marginal_eq (pJoint X Y Z U μ) (ptilde X Y Z U μ) proj φ ?_
+  intro b
+  have h_pJ : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+        (fun t => proj t = b), pJoint X Y Z U μ t)
+      = (μ.map (fun ω => proj (X ω, Y ω, Z ω, U ω))).real {b} := by
+    simp only [pJoint]
+    exact sum_filter_map_real_eq_map_comp hF hproj μ b
+  rw [h_pJ, h_pt_marg b]
+
+set_option maxHeartbeats 2400000 in
 /-- **Marginal swap.** Every factor appearing in the log-ratio `p̂ / p̃` is a marginal distribution common to `p` and `p̃` -- the full list is `{p(z,u), p(x,z), p(x,u), p(y,z), p(y,u), p(x,z,u), p(y,z,u), p(z), p(u), p(x), p(y)}`. The `p`-weighted sum therefore agrees with the `p̃`-weighted sum on each factor, and the eleven summands recombine to `∑ p̃ · log(p̂ / p̃)`. This is the key observation of [@zhangyeung1997] that converts Shannon-type quantities into the KL-divergence-amenable form. -/
 private lemma sum_joint_eq_sum_ptilde
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
@@ -669,7 +721,442 @@ private lemma sum_joint_eq_sum_ptilde
         pJoint X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t)
       = ∑ t : S₁ × S₂ × S₃ × S₄,
           ptilde X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t) := by
-  sorry
+  classical
+  -- Abbreviations for the eleven μ-marginals appearing in the log-ratio decomposition.
+  set pXZ  : S₁ × S₃        → ℝ := fun p => (μ.map (fun ω => (X ω, Z ω))).real {p}
+    with hpXZ_def
+  set pXU  : S₁ × S₄        → ℝ := fun p => (μ.map (fun ω => (X ω, U ω))).real {p}
+    with hpXU_def
+  set pYZ  : S₂ × S₃        → ℝ := fun p => (μ.map (fun ω => (Y ω, Z ω))).real {p}
+    with hpYZ_def
+  set pYU  : S₂ × S₄        → ℝ := fun p => (μ.map (fun ω => (Y ω, U ω))).real {p}
+    with hpYU_def
+  set pZU  : S₃ × S₄        → ℝ := fun p => (μ.map (fun ω => (Z ω, U ω))).real {p}
+    with hpZU_def
+  set pX   : S₁             → ℝ := fun x => (μ.map X).real {x}
+    with hpX_def
+  set pY   : S₂             → ℝ := fun y => (μ.map Y).real {y}
+    with hpY_def
+  set pZ   : S₃             → ℝ := fun z => (μ.map Z).real {z}
+    with hpZ_def
+  set pU   : S₄             → ℝ := fun u => (μ.map U).real {u}
+    with hpU_def
+  set pXZU : S₁ × S₃ × S₄   → ℝ := fun p => (μ.map (fun ω => (X ω, Z ω, U ω))).real {p}
+    with hpXZU_def
+  set pYZU : S₂ × S₃ × S₄   → ℝ := fun p => (μ.map (fun ω => (Y ω, Z ω, U ω))).real {p}
+    with hpYZU_def
+  -- The 11-term additive decomposition of `log (p̂ / p̃)` that holds on the common support.
+  set L : S₁ × S₂ × S₃ × S₄ → ℝ := fun t =>
+    Real.log (pXZ (t.1, t.2.2.1)) + Real.log (pXU (t.1, t.2.2.2))
+    + Real.log (pYZ (t.2.1, t.2.2.1)) + Real.log (pYU (t.2.1, t.2.2.2))
+    + Real.log (pZU t.2.2)
+    - Real.log (pZ t.2.2.1) - Real.log (pU t.2.2.2)
+    - Real.log (pX t.1) - Real.log (pY t.2.1)
+    - Real.log (pXZU (t.1, t.2.2)) - Real.log (pYZU (t.2.1, t.2.2))
+    with hL_def
+  -- Measurability of the full joint function and every projection we use.
+  have hF : Measurable (fun ω => (X ω, Y ω, Z ω, U ω)) :=
+    hX.prodMk (hY.prodMk (hZ.prodMk hU))
+  -- **Step 1.** Show the pointwise identity `log (p̂ / p̃) = L` on the support of `p̃`.
+  have h_log_eq_L : ∀ t : S₁ × S₂ × S₃ × S₄, 0 < ptilde X Y Z U μ t →
+      Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t) = L t := by
+    rintro ⟨x, y, z, u⟩ h_pt_pos
+    -- Extract positivity of the three triple marginals from `ptilde > 0`.
+    have h_ptilde_form : ptilde X Y Z U μ (x, y, z, u) = pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u) :=
+      rfl
+    rw [h_ptilde_form] at h_pt_pos
+    have hXZU_nn : 0 ≤ pXZU (x, z, u) := measureReal_nonneg
+    have hYZU_nn : 0 ≤ pYZU (y, z, u) := measureReal_nonneg
+    have hZU_nn : 0 ≤ pZU (z, u) := measureReal_nonneg
+    have hZU_pos : 0 < pZU (z, u) := by
+      rcases hZU_nn.lt_or_eq with h | h
+      · exact h
+      · exfalso; rw [← h] at h_pt_pos; simp at h_pt_pos
+    have hProd_pos : 0 < pXZU (x, z, u) * pYZU (y, z, u) := by
+      have := h_pt_pos
+      have h_num : pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u) > 0 := h_pt_pos
+      by_contra h_neg
+      push_neg at h_neg
+      have : pXZU (x, z, u) * pYZU (y, z, u) = 0 :=
+        le_antisymm h_neg (mul_nonneg hXZU_nn hYZU_nn)
+      rw [this, zero_div] at h_num
+      exact lt_irrefl _ h_num
+    have hXZU_pos : 0 < pXZU (x, z, u) := by
+      rcases (mul_pos_iff.mp hProd_pos) with ⟨hp1, _⟩ | ⟨hn1, _⟩
+      · exact hp1
+      · exact absurd hn1 ((not_lt.mpr) hXZU_nn)
+    have hYZU_pos : 0 < pYZU (y, z, u) := by
+      rcases (mul_pos_iff.mp hProd_pos) with ⟨_, hp2⟩ | ⟨_, hn2⟩
+      · exact hp2
+      · exact absurd hn2 ((not_lt.mpr) hYZU_nn)
+    -- From the triple marginals, derive positivity of all 11 factors.
+    have hXZ_pos : 0 < pXZ (x, z) := lt_of_lt_of_le hXZU_pos
+      (measureReal_map_triple_le_map_pair_12 hX hZ hU μ x z u)
+    have hXU_pos : 0 < pXU (x, u) := lt_of_lt_of_le hXZU_pos
+      (measureReal_map_triple_le_map_pair_13 hX hZ hU μ x z u)
+    have hYZ_pos : 0 < pYZ (y, z) := lt_of_lt_of_le hYZU_pos
+      (measureReal_map_triple_le_map_pair_12 hY hZ hU μ y z u)
+    have hYU_pos : 0 < pYU (y, u) := lt_of_lt_of_le hYZU_pos
+      (measureReal_map_triple_le_map_pair_13 hY hZ hU μ y z u)
+    have hX_pos : 0 < pX x := lt_of_lt_of_le hXZU_pos
+      (measureReal_map_pair_le_map_fst hX (hZ.prodMk hU) μ x (z, u))
+    have hY_pos : 0 < pY y := lt_of_lt_of_le hYZU_pos
+      (measureReal_map_pair_le_map_fst hY (hZ.prodMk hU) μ y (z, u))
+    have hZ_pos : 0 < pZ z := lt_of_lt_of_le hZU_pos
+      (measureReal_map_pair_le_map_fst hZ hU μ z u)
+    have hU_pos : 0 < pU u := lt_of_lt_of_le hZU_pos
+      (measureReal_map_pair_le_map_snd hZ hU μ z u)
+    -- Rewrite `p̂ / p̃` as a single fraction and take logs.
+    have hphat_form : phat X Y Z U μ (x, y, z, u)
+        = pXZ (x, z) * pXU (x, u) * pYZ (y, z) * pYU (y, u) / (pZ z * pU u * pX x * pY y) := rfl
+    rw [hphat_form, h_ptilde_form]
+    -- Combine the two fractions into a single one with positive denominator.
+    rw [show pXZ (x, z) * pXU (x, u) * pYZ (y, z) * pYU (y, u) / (pZ z * pU u * pX x * pY y)
+            / (pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u))
+          = pXZ (x, z) * pXU (x, u) * pYZ (y, z) * pYU (y, u) * pZU (z, u)
+            / (pZ z * pU u * pX x * pY y * pXZU (x, z, u) * pYZU (y, z, u)) from by
+        field_simp]
+    rw [Real.log_div (by positivity) (by positivity)]
+    rw [show pXZ (x, z) * pXU (x, u) * pYZ (y, z) * pYU (y, u) * pZU (z, u)
+          = pXZ (x, z) * (pXU (x, u) * (pYZ (y, z) * (pYU (y, u) * pZU (z, u)))) from by ring]
+    rw [Real.log_mul hXZ_pos.ne' (by positivity),
+        Real.log_mul hXU_pos.ne' (by positivity),
+        Real.log_mul hYZ_pos.ne' (by positivity),
+        Real.log_mul hYU_pos.ne' hZU_pos.ne']
+    rw [show pZ z * pU u * pX x * pY y * pXZU (x, z, u) * pYZU (y, z, u)
+          = pZ z * (pU u * (pX x * (pY y * (pXZU (x, z, u) * pYZU (y, z, u))))) from by ring]
+    rw [Real.log_mul hZ_pos.ne' (by positivity),
+        Real.log_mul hU_pos.ne' (by positivity),
+        Real.log_mul hX_pos.ne' (by positivity),
+        Real.log_mul hY_pos.ne' (by positivity),
+        Real.log_mul hXZU_pos.ne' hYZU_pos.ne']
+    show _ = L (x, y, z, u)
+    simp only [hL_def]
+    ring
+  -- **Step 2.** Pointwise: `pJoint t * log (p̂ / p̃) = pJoint t * L` and same for `p̃`.
+  -- Use that the support of `pJoint` is contained in the support of `p̃`.
+  have h_supp : ∀ t : S₁ × S₂ × S₃ × S₄,
+      0 < pJoint X Y Z U μ t → 0 < ptilde X Y Z U μ t := by
+    rintro ⟨x, y, z, u⟩ h_pJ
+    simp only [pJoint] at h_pJ
+    -- From pJoint > 0, all three triple marginals are positive (marginal bounds).
+    have hXZU_pos : 0 < pXZU (x, z, u) := by
+      apply lt_of_lt_of_le h_pJ
+      -- (μ.map ⟨X,Y,Z,U⟩).real {(x,y,z,u)} ≤ (μ.map ⟨X,⟨Z,U⟩⟩).real {(x, (z,u))}
+      -- Using the pair-projection marginal bound: view ⟨X,Y,Z,U⟩ as a pair ⟨X, ⟨Y, ⟨Z, U⟩⟩⟩
+      -- and drop the middle Y. Simpler: use iterated triple-marginal bound.
+      have h1 := measureReal_map_triple_le_map_pair_13 hX hY (hZ.prodMk hU) μ x y (z, u)
+      exact h1
+    have hYZU_pos : 0 < pYZU (y, z, u) := by
+      apply lt_of_lt_of_le h_pJ
+      -- View ⟨X, Y, Z, U⟩ as pair ⟨X, ⟨Y, Z, U⟩⟩ and drop the first coord.
+      exact measureReal_map_pair_le_map_snd hX (hY.prodMk (hZ.prodMk hU)) μ x (y, z, u)
+    have hZU_pos : 0 < pZU (z, u) :=
+      lt_of_lt_of_le hXZU_pos (measureReal_map_pair_le_map_snd hX (hZ.prodMk hU) μ x (z, u))
+    -- ptilde = pXZU * pYZU / pZU > 0.
+    show 0 < pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u)
+    exact div_pos (mul_pos hXZU_pos hYZU_pos) hZU_pos
+  have h_pJ_mul : ∀ t : S₁ × S₂ × S₃ × S₄,
+      pJoint X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t)
+        = pJoint X Y Z U μ t * L t := by
+    intro t
+    by_cases h : pJoint X Y Z U μ t = 0
+    · rw [h, zero_mul, zero_mul]
+    · have h_pos : 0 < pJoint X Y Z U μ t :=
+        lt_of_le_of_ne measureReal_nonneg (Ne.symm h)
+      rw [h_log_eq_L t (h_supp t h_pos)]
+  have h_pt_mul : ∀ t : S₁ × S₂ × S₃ × S₄,
+      ptilde X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t)
+        = ptilde X Y Z U μ t * L t := by
+    intro t
+    by_cases h : ptilde X Y Z U μ t = 0
+    · rw [h, zero_mul, zero_mul]
+    · have h_pos : 0 < ptilde X Y Z U μ t :=
+        lt_of_le_of_ne (ptilde_nonneg X Y Z U μ t) (Ne.symm h)
+      rw [h_log_eq_L t h_pos]
+  -- Rewrite both sums in L-form.
+  rw [Finset.sum_congr rfl (fun t _ => h_pJ_mul t)]
+  rw [Finset.sum_congr rfl (fun t _ => h_pt_mul t)]
+  -- **Step 3.** `∑ pJoint * L = ∑ ptilde * L` via 11 marginal-swap applications.
+  -- Each of the eleven log terms in `L` depends only on a projection of the 4-tuple;
+  -- `sum_mul_proj_eq_of_marginal_eq` closes the match once we verify that `pJoint` and
+  -- `p̃` agree on the corresponding fibre sums (i.e., share the μ-marginal at that projection).
+  -- `sum_filter_map_real_eq_map_comp` gives the pJoint side; a bijective reindex to the
+  -- nested form recorded in `sum_ptilde_over_*` / `ptilde_fibre_sum` gives the `p̃` side.
+  -- **Shared bookkeeping.** `F` := the full joint random variable `⟨X, Y, Z, U⟩`.
+  -- Abbreviations for the eleven μ-pushforward measures (as `.real` applied at a singleton).
+  -- Define the eleven marginal-swap identities, one per log term in L.
+  -- Each has shape `∑ t, pJoint(t) * log (marginal (proj t)) = ∑ t, ptilde(t) * log (...)`.
+  -- Step 3a: `log p(x, z)` term (projection: `(x, y, z, u) ↦ (x, z)`, complement: `(y, u)`).
+  have hEq_xz : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pXZ (t.1, t.2.2.1))
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pXZ (t.1, t.2.2.1)) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2.1)) (by measurability)
+      (fun p => Real.log (pXZ p))
+    rintro ⟨x, z⟩
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => (t.1, t.2.2.1) = (x, z)), ptilde X Y Z U μ t)
+        = ∑ p : S₂ × S₄, ptilde X Y Z U μ (x, p.1, z, p.2) := by
+      refine (Finset.sum_nbij' (fun p : S₂ × S₄ => (x, p.1, z, p.2))
+        (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2.2)) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · rintro ⟨_, _⟩ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
+        obtain ⟨rfl, rfl⟩ := ht
+        rfl
+      · intro _ _; rfl
+    rw [h_reindex, Fintype.sum_prod_type]
+    exact sum_ptilde_over_y_u hX hY hZ hU μ x z
+  -- Step 3b–3k: the remaining 10 projections follow the same template, factored through
+  -- the module-level `marg_swap_helper` that bundles the shared pJoint filter-sum argument.
+  -- 2-coordinate projections: (y, u), (y, z), (x, u), (x, z), (x, y)-complement → S₁×S₃, etc.
+  have hEq_xu : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pXU (t.1, t.2.2.2))
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pXU (t.1, t.2.2.2)) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2.2)) (by measurability)
+      (fun p => Real.log (pXU p))
+    rintro ⟨x, u⟩
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => (t.1, t.2.2.2) = (x, u)), ptilde X Y Z U μ t)
+        = ∑ p : S₂ × S₃, ptilde X Y Z U μ (x, p.1, p.2, u) := by
+      refine (Finset.sum_nbij' (fun p : S₂ × S₃ => (x, p.1, p.2, u))
+        (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2.1)) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · rintro ⟨_, _⟩ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
+        obtain ⟨rfl, rfl⟩ := ht
+        rfl
+      · intro _ _; rfl
+    rw [h_reindex, Fintype.sum_prod_type]
+    exact sum_ptilde_over_y_z hX hY hZ hU μ x u
+  have hEq_yz : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pYZ (t.2.1, t.2.2.1))
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pYZ (t.2.1, t.2.2.1)) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2.1)) (by measurability)
+      (fun p => Real.log (pYZ p))
+    rintro ⟨y, z⟩
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => (t.2.1, t.2.2.1) = (y, z)), ptilde X Y Z U μ t)
+        = ∑ p : S₁ × S₄, ptilde X Y Z U μ (p.1, y, z, p.2) := by
+      refine (Finset.sum_nbij' (fun p : S₁ × S₄ => (p.1, y, z, p.2))
+        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.2.2)) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · rintro ⟨_, _⟩ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
+        obtain ⟨rfl, rfl⟩ := ht
+        rfl
+      · intro _ _; rfl
+    rw [h_reindex, Fintype.sum_prod_type]
+    exact sum_ptilde_over_x_u hX hY hZ hU μ y z
+  have hEq_yu : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pYU (t.2.1, t.2.2.2))
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pYU (t.2.1, t.2.2.2)) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2.2)) (by measurability)
+      (fun p => Real.log (pYU p))
+    rintro ⟨y, u⟩
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => (t.2.1, t.2.2.2) = (y, u)), ptilde X Y Z U μ t)
+        = ∑ p : S₁ × S₃, ptilde X Y Z U μ (p.1, y, p.2, u) := by
+      refine (Finset.sum_nbij' (fun p : S₁ × S₃ => (p.1, y, p.2, u))
+        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.2.1)) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · rintro ⟨_, _⟩ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
+        obtain ⟨rfl, rfl⟩ := ht
+        rfl
+      · intro _ _; rfl
+    rw [h_reindex, Fintype.sum_prod_type]
+    exact sum_ptilde_over_x_z hX hY hZ hU μ y u
+  have hEq_zu : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pZU t.2.2)
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pZU t.2.2) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2) (by measurability)
+      (fun p => Real.log (pZU p))
+    rintro ⟨z, u⟩
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => t.2.2 = (z, u)), ptilde X Y Z U μ t)
+        = ∑ p : S₁ × S₂, ptilde X Y Z U μ (p.1, p.2, z, u) := by
+      refine (Finset.sum_nbij' (fun p : S₁ × S₂ => (p.1, p.2, z, u))
+        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.1)) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · rintro ⟨_, _⟩ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
+        obtain ⟨rfl, rfl⟩ := ht
+        rfl
+      · intro _ _; rfl
+    rw [h_reindex, Fintype.sum_prod_type]
+    -- Inner sum ∑ y ptilde(x, y, z, u) over y for each fixed x (via ptilde_fibre_sum)
+    simp only [ptilde]
+    exact ptilde_fibre_sum hX hY hZ hU μ z u
+  -- Single-coordinate projections.
+  have hEq_x : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pX t.1)
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pX t.1) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => t.1) measurable_fst
+      (fun x => Real.log (pX x))
+    intro x
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => t.1 = x), ptilde X Y Z U μ t)
+        = ∑ p : S₂ × S₃ × S₄, ptilde X Y Z U μ (x, p.1, p.2.1, p.2.2) := by
+      refine (Finset.sum_nbij' (fun p : S₂ × S₃ × S₄ => (x, p.1, p.2.1, p.2.2))
+        (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2.1, t.2.2.2)) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · rintro ⟨_, _, _⟩ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht
+        subst ht; rfl
+      · intro _ _; rfl
+    rw [h_reindex]
+    simp_rw [Fintype.sum_prod_type]
+    exact sum_ptilde_over_y_z_u hX hY hZ hU μ x
+  have hEq_y : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pY t.2.1)
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pY t.2.1) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.1) (measurable_fst.comp measurable_snd)
+      (fun y => Real.log (pY y))
+    intro y
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => t.2.1 = y), ptilde X Y Z U μ t)
+        = ∑ p : S₁ × S₃ × S₄, ptilde X Y Z U μ (p.1, y, p.2.1, p.2.2) := by
+      refine (Finset.sum_nbij' (fun p : S₁ × S₃ × S₄ => (p.1, y, p.2.1, p.2.2))
+        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.2.1, t.2.2.2)) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · rintro ⟨_, _, _⟩ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht
+        subst ht; rfl
+      · intro _ _; rfl
+    rw [h_reindex]
+    simp_rw [Fintype.sum_prod_type]
+    exact sum_ptilde_over_x_z_u hX hY hZ hU μ y
+  have hEq_z : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pZ t.2.2.1)
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pZ t.2.2.1) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2.1)
+      (measurable_fst.comp (measurable_snd.comp measurable_snd)) (fun z => Real.log (pZ z))
+    intro z
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => t.2.2.1 = z), ptilde X Y Z U μ t)
+        = ∑ p : S₁ × S₂ × S₄, ptilde X Y Z U μ (p.1, p.2.1, z, p.2.2) := by
+      refine (Finset.sum_nbij' (fun p : S₁ × S₂ × S₄ => (p.1, p.2.1, z, p.2.2))
+        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.1, t.2.2.2)) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · rintro ⟨_, _, _⟩ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht
+        subst ht; rfl
+      · intro _ _; rfl
+    rw [h_reindex]
+    simp_rw [Fintype.sum_prod_type]
+    exact sum_ptilde_over_x_y_u hX hY hZ hU μ z
+  have hEq_u : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pU t.2.2.2)
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pU t.2.2.2) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2.2)
+      (measurable_snd.comp (measurable_snd.comp measurable_snd)) (fun u => Real.log (pU u))
+    intro u
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => t.2.2.2 = u), ptilde X Y Z U μ t)
+        = ∑ p : S₁ × S₂ × S₃, ptilde X Y Z U μ (p.1, p.2.1, p.2.2, u) := by
+      refine (Finset.sum_nbij' (fun p : S₁ × S₂ × S₃ => (p.1, p.2.1, p.2.2, u))
+        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.1, t.2.2.1)) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · rintro ⟨_, _, _⟩ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht
+        subst ht; rfl
+      · intro _ _; rfl
+    rw [h_reindex]
+    simp_rw [Fintype.sum_prod_type]
+    exact sum_ptilde_over_x_y_z hX hY hZ hU μ u
+  -- 3-coordinate projections.
+  have hEq_xzu : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pXZU (t.1, t.2.2))
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pXZU (t.1, t.2.2)) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2)) (by measurability)
+      (fun p => Real.log (pXZU p))
+    rintro ⟨x, z, u⟩
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => (t.1, t.2.2) = (x, z, u)), ptilde X Y Z U μ t)
+        = ∑ y : S₂, ptilde X Y Z U μ (x, y, z, u) := by
+      refine (Finset.sum_nbij' (fun y : S₂ => (x, y, z, u))
+        (fun t : S₁ × S₂ × S₃ × S₄ => t.2.1) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · intro _ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
+        obtain ⟨rfl, rfl, rfl⟩ := ht
+        rfl
+      · intro _ _; rfl
+    rw [h_reindex]
+    exact sum_ptilde_over_y hX hY hZ hU μ x z u
+  have hEq_yzu : ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log (pYZU (t.2.1, t.2.2))
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log (pYZU (t.2.1, t.2.2)) := by
+    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2)) (by measurability)
+      (fun p => Real.log (pYZU p))
+    rintro ⟨y, z, u⟩
+    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+          (fun t => (t.2.1, t.2.2) = (y, z, u)), ptilde X Y Z U μ t)
+        = ∑ x : S₁, ptilde X Y Z U μ (x, y, z, u) := by
+      refine (Finset.sum_nbij' (fun x : S₁ => (x, y, z, u))
+        (fun t : S₁ × S₂ × S₃ × S₄ => t.1) ?_ ?_ ?_ ?_ ?_).symm
+      · intro _ _; simp [Finset.mem_filter]
+      · intro _ _; exact Finset.mem_univ _
+      · intro _ _; rfl
+      · rintro ⟨_, _, _, _⟩ ht
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
+        obtain ⟨rfl, rfl, rfl⟩ := ht
+        rfl
+      · intro _ _; rfl
+    rw [h_reindex]
+    exact sum_ptilde_over_x hX hY hZ hU μ y z u
+  -- **Step 4.** Combine the eleven `hEq_*` identities via the 11-term additive decomposition of L.
+  -- Distribute the multiplication pointwise and split the sum into eleven pieces.
+  have h_split : ∀ (w : S₁ × S₂ × S₃ × S₄ → ℝ),
+      (∑ t : S₁ × S₂ × S₃ × S₄, w t * L t)
+        = (∑ t, w t * Real.log (pXZ (t.1, t.2.2.1)))
+          + (∑ t, w t * Real.log (pXU (t.1, t.2.2.2)))
+          + (∑ t, w t * Real.log (pYZ (t.2.1, t.2.2.1)))
+          + (∑ t, w t * Real.log (pYU (t.2.1, t.2.2.2)))
+          + (∑ t, w t * Real.log (pZU t.2.2))
+          - (∑ t, w t * Real.log (pZ t.2.2.1))
+          - (∑ t, w t * Real.log (pU t.2.2.2))
+          - (∑ t, w t * Real.log (pX t.1))
+          - (∑ t, w t * Real.log (pY t.2.1))
+          - (∑ t, w t * Real.log (pXZU (t.1, t.2.2)))
+          - (∑ t, w t * Real.log (pYZU (t.2.1, t.2.2))) := fun w => by
+    simp only [hL_def, mul_add, mul_sub]
+    simp only [Finset.sum_add_distrib, Finset.sum_sub_distrib]
+  rw [h_split (pJoint X Y Z U μ), h_split (ptilde X Y Z U μ),
+      hEq_xz, hEq_xu, hEq_yz, hEq_yu, hEq_zu,
+      hEq_z, hEq_u, hEq_x, hEq_y, hEq_xzu, hEq_yzu]
 
 /-! ### Main proof -/
 
