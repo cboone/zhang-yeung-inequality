@@ -151,6 +151,57 @@ private lemma sum_map_triple_first
       (fun y _ => hf (measurableSet_singleton y))]
   simp
 
+/-- Marginal summation for pairs: summing the pair-joint over the *first* coordinate recovers the marginal of `g`. -/
+private lemma sum_map_pair_first
+    {α β : Type*} [Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]
+    [MeasurableSpace β] [MeasurableSingletonClass β]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β}
+    (hf : Measurable f) (hg : Measurable g)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (b : β) :
+    ∑ a : α, (μ.map (fun ω => (f ω, g ω))).real {(a, b)}
+      = (μ.map g).real {b} := by
+  have hfg : Measurable (fun ω => (f ω, g ω)) := hf.prodMk hg
+  simp_rw [map_measureReal_apply hfg (measurableSet_singleton _),
+           map_measureReal_apply hg (measurableSet_singleton _)]
+  have preimage_eq : ∀ a : α,
+      (fun ω => (f ω, g ω))⁻¹' {(a, b)}
+        = f ⁻¹' {a} ∩ (g ⁻¹' {b}) := by
+    intro a; ext ω; simp
+  simp_rw [preimage_eq]
+  simp_rw [show ∀ a : α, μ.real (f ⁻¹' {a} ∩ g ⁻¹' {b})
+      = (μ.restrict (g ⁻¹' {b})).real (f ⁻¹' {a}) from
+    fun a => (measureReal_restrict_apply (hf (measurableSet_singleton a))).symm]
+  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset α)
+      (fun y _ => hf (measurableSet_singleton y))]
+  simp
+
+/-- Marginal summation for pairs: summing the pair-joint over the *second* coordinate recovers the marginal of `f`. -/
+private lemma sum_map_pair_second
+    {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
+    [Fintype β] [MeasurableSpace β] [MeasurableSingletonClass β]
+    {Ω' : Type*} [MeasurableSpace Ω']
+    {f : Ω' → α} {g : Ω' → β}
+    (hf : Measurable f) (hg : Measurable g)
+    (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) :
+    ∑ b : β, (μ.map (fun ω => (f ω, g ω))).real {(a, b)}
+      = (μ.map f).real {a} := by
+  have hfg : Measurable (fun ω => (f ω, g ω)) := hf.prodMk hg
+  simp_rw [map_measureReal_apply hfg (measurableSet_singleton _),
+           map_measureReal_apply hf (measurableSet_singleton _)]
+  have preimage_eq : ∀ b : β,
+      (fun ω => (f ω, g ω))⁻¹' {(a, b)}
+        = g ⁻¹' {b} ∩ (f ⁻¹' {a}) := by
+    intro b; ext ω; simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq,
+      Set.mem_inter_iff]; tauto
+  simp_rw [preimage_eq]
+  simp_rw [show ∀ b : β, μ.real (g ⁻¹' {b} ∩ f ⁻¹' {a})
+      = (μ.restrict (f ⁻¹' {a})).real (g ⁻¹' {b}) from
+    fun b => (measureReal_restrict_apply (hg (measurableSet_singleton b))).symm]
+  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset β)
+      (fun y _ => hg (measurableSet_singleton y))]
+  simp
+
 /-- Marginal summation, third variant: summing the triple joint over the *third* coordinate recovers the marginal of `(f, g)`. -/
 private lemma sum_map_triple_third
     {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
@@ -430,6 +481,84 @@ private lemma ptilde_fibre_sum
   by_cases hc : c = 0
   · simp [hc]
   · field_simp
+
+omit [Fintype S₁] in
+/-- **`p̃` marginal over `(y, z, u)` is `pX`.** Derived from `sum_ptilde_over_y_z` and `sum_map_pair_second`. -/
+private lemma sum_ptilde_over_y_z_u
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (x : S₁) :
+    (∑ y : S₂, ∑ z : S₃, ∑ u : S₄, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map X).real {x} := by
+  have step1 : (∑ y : S₂, ∑ z : S₃, ∑ u : S₄, ptilde X Y Z U μ (x, y, z, u))
+      = ∑ y : S₂, ∑ u : S₄, ∑ z : S₃, ptilde X Y Z U μ (x, y, z, u) :=
+    Finset.sum_congr rfl fun _ _ => Finset.sum_comm
+  have step2 : (∑ y : S₂, ∑ u : S₄, ∑ z : S₃, ptilde X Y Z U μ (x, y, z, u))
+      = ∑ u : S₄, ∑ y : S₂, ∑ z : S₃, ptilde X Y Z U μ (x, y, z, u) :=
+    Finset.sum_comm
+  rw [step1, step2]
+  simp_rw [sum_ptilde_over_y_z hX hY hZ hU μ]
+  exact sum_map_pair_second hX hU μ x
+
+omit [Fintype S₂] in
+/-- **`p̃` marginal over `(x, z, u)` is `pY`.** Derived from `sum_ptilde_over_x_z` and `sum_map_pair_second`. -/
+private lemma sum_ptilde_over_x_z_u
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (y : S₂) :
+    (∑ x : S₁, ∑ z : S₃, ∑ u : S₄, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map Y).real {y} := by
+  have step1 : (∑ x : S₁, ∑ z : S₃, ∑ u : S₄, ptilde X Y Z U μ (x, y, z, u))
+      = ∑ x : S₁, ∑ u : S₄, ∑ z : S₃, ptilde X Y Z U μ (x, y, z, u) :=
+    Finset.sum_congr rfl fun _ _ => Finset.sum_comm
+  have step2 : (∑ x : S₁, ∑ u : S₄, ∑ z : S₃, ptilde X Y Z U μ (x, y, z, u))
+      = ∑ u : S₄, ∑ x : S₁, ∑ z : S₃, ptilde X Y Z U μ (x, y, z, u) :=
+    Finset.sum_comm
+  rw [step1, step2]
+  simp_rw [sum_ptilde_over_x_z hX hY hZ hU μ]
+  exact sum_map_pair_second hY hU μ y
+
+omit [Fintype S₃] in
+/-- **`p̃` marginal over `(x, y, u)` is `pZ`.** Derived from `ptilde_fibre_sum` and `sum_map_pair_first`. -/
+private lemma sum_ptilde_over_x_y_u
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (z : S₃) :
+    (∑ x : S₁, ∑ y : S₂, ∑ u : S₄, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map Z).real {z} := by
+  have step1 : (∑ x : S₁, ∑ y : S₂, ∑ u : S₄, ptilde X Y Z U μ (x, y, z, u))
+      = ∑ x : S₁, ∑ u : S₄, ∑ y : S₂, ptilde X Y Z U μ (x, y, z, u) :=
+    Finset.sum_congr rfl fun _ _ => Finset.sum_comm
+  have step2 : (∑ x : S₁, ∑ u : S₄, ∑ y : S₂, ptilde X Y Z U μ (x, y, z, u))
+      = ∑ u : S₄, ∑ x : S₁, ∑ y : S₂, ptilde X Y Z U μ (x, y, z, u) :=
+    Finset.sum_comm
+  rw [step1, step2]
+  have hFibre : ∀ u : S₄, (∑ x : S₁, ∑ y : S₂, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map (fun ω => (Z ω, U ω))).real {(z, u)} :=
+    fun u => ptilde_fibre_sum hX hY hZ hU μ z u
+  simp_rw [hFibre]
+  exact sum_map_pair_second hZ hU μ z
+
+omit [Fintype S₄] in
+/-- **`p̃` marginal over `(x, y, z)` is `pU`.** Derived from `ptilde_fibre_sum` and `sum_map_pair_first`. -/
+private lemma sum_ptilde_over_x_y_z
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsFiniteMeasure μ] (u : S₄) :
+    (∑ x : S₁, ∑ y : S₂, ∑ z : S₃, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map U).real {u} := by
+  have step1 : (∑ x : S₁, ∑ y : S₂, ∑ z : S₃, ptilde X Y Z U μ (x, y, z, u))
+      = ∑ x : S₁, ∑ z : S₃, ∑ y : S₂, ptilde X Y Z U μ (x, y, z, u) :=
+    Finset.sum_congr rfl fun _ _ => Finset.sum_comm
+  have step2 : (∑ x : S₁, ∑ z : S₃, ∑ y : S₂, ptilde X Y Z U μ (x, y, z, u))
+      = ∑ z : S₃, ∑ x : S₁, ∑ y : S₂, ptilde X Y Z U μ (x, y, z, u) :=
+    Finset.sum_comm
+  rw [step1, step2]
+  have hFibre : ∀ z : S₃, (∑ x : S₁, ∑ y : S₂, ptilde X Y Z U μ (x, y, z, u))
+      = (μ.map (fun ω => (Z ω, U ω))).real {(z, u)} :=
+    fun z => ptilde_fibre_sum hX hY hZ hU μ z u
+  simp_rw [hFibre]
+  exact sum_map_pair_first hZ hU μ u
 
 /-- **`p̃` is a probability distribution.** This is the unconditional half of the Zhang-Yeung auxiliary-distribution argument: `∑_{x,y,z,u} p(x,z,u) p(y,z,u) / p(z,u) = 1` for any probability measure. The proof reshapes the 4-tuple sum via an `Equiv` `S₃ × S₄ × S₁ × S₂ ≃ S₁ × S₂ × S₃ × S₄`, uses `ptilde_fibre_sum` to collapse each `(z, u)` fibre, and reassembles the outer `∑_{z,u} p(z, u) = 1` via the probability-measure property of the pushforward `μ.map ⟨Z, U⟩`. -/
 private lemma ptilde_sum_eq_one
