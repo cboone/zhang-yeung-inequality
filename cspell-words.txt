@@ -3,11 +3,15 @@ Ahlswede
 APAP
 batteries
 bibtex
+checkdecls
 Csiszár
+Docstrings
 Dougherty
 entropic
 Freiling
 frontmatter
+hardwrapped
+hardwrapping
 Ingleton
 Kaced
 Mathlib
