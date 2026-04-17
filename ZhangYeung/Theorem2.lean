@@ -32,7 +32,7 @@ The second layer (`theorem2_delta_le_zero`) discharges the reduced inequality vi
 
 **Connection to the 1998 copy construction.** The auxiliary PMF `p̃(x, y, z, u) := p(x, z, u) p(y, z, u) / p(z, u)` defined above is precisely the `(X', Y₁, Z', U')`-marginal of the extended probability measure `ν` that PFR's `ProbabilityTheory.condIndep_copies`, applied to `⟨X, Y⟩` conditioned on `⟨Z, U⟩`, would produce. Projecting the copy -- set `X' := Prod.fst ∘ W₁`, `Y₁ := Prod.snd ∘ W₂`, `⟨Z', U'⟩ := V` -- the conditional independence `X' ⟂ Y₁ | ⟨Z', U'⟩` plus the marginal identities `(X', Z', U') ∼ (X, Z, U)` and `(Y₁, Z', U') ∼ (Y, Z, U)` force `p_ν(x, y, z, u) = p(x, z, u) p(y, z, u) / p(z, u) = p̃(x, y, z, u)`. So the 1997 KL proof and the 1998 two-copy copy-lemma framework reach the same object from two directions: the 1997 paper constructs `p̃` as a PMF and closes via `Real.sum_mul_log_div_leq`; the 1998 paper (Lemma 2 in §III, eq. 44-45) constructs `ν` via kernel composition and closes Theorem 3 (the unconditional inequality) via a Shannon chase on the copy joint. For Theorem 2 specifically a pure copy + Shannon-chase close is ruled out: [@kaced2013, Theorem 3 + Claim 1, Theorem 5] show this inequality is essentially conditional and fails on the closure of the entropic region, so no combination of basic Shannon inequalities plus Lagrange multiples of the premises can derive it. This module follows the 1997 KL route rather than attempting the copy-construction framing.
 
-**Current state:** The implication (16) ⇒ (17) is fully proved (no `sorry`). `theorem2_delta_le_zero` is wired end-to-end, with the main proof body assembled around `Real.sum_mul_log_div_leq` and its absolute-continuity side condition (closed inline via marginal bounds). `ptilde_sum_eq_one`, `phat_sum_eq_one`, `sum_joint_eq_sum_ptilde`, and `delta_eq_sum_log_ratio` are all closed. The `phat_sum_eq_one` closure uses the module-level helpers `condIndepFun_map_triple_real_singleton` (extracting `p(x,y,z) · p(z) = p(x,z) · p(y,z)` from `CondIndepFun X Y Z`), `condIndep_normalized_pair_eq_triple`, and `indepFun_map_pair_real_singleton` (extracting `p(x,y) = p(x) · p(y)` from `IndepFun X Y`); the `sum_joint_eq_sum_ptilde` closure is the 11-factor marginal-swap closing argument, factored through the `marg_swap_helper` helper. The `delta_eq_sum_log_ratio` closure lifts each of the eleven entropy terms to a 4-tuple weighted sum via `entropy_eq_sum_joint`, combines via `sub_eq_add_neg` + `← Finset.sum_add_distrib` + `← Finset.sum_neg_distrib`, and closes via `ring` on the pointwise residual.
+**Current state:** The implication (16) ⇒ (17) is fully proved (no `sorry`). `theorem2_delta_le_zero` is wired end-to-end, with the main proof body assembled around `Real.sum_mul_log_div_leq` and its absolute-continuity side condition (closed inline via marginal bounds). `ptilde_sum_eq_one`, `phat_sum_eq_one`, `sum_joint_eq_sum_ptilde`, and `delta_eq_sum_log_ratio` are all closed.
 
 The file is organized into the following sections:
 
@@ -745,35 +745,6 @@ private lemma condIndepFun_map_triple_real_singleton
     rw [← ENNReal.toReal_mul, ← ENNReal.toReal_mul, mul_comm (μ (h ⁻¹' {c} ∩ _)) _]
     exact congrArg ENNReal.toReal h_step2
 
-/-- **Pointwise conditional factorization of `p̃`-style fibre.** Under `CondIndepFun f g h μ` (with `μ` a probability measure on a Fintype `h`-codomain), the "normalized pair" `(μ.map ⟨f, h⟩).real {(a, c)} · (μ.map ⟨g, h⟩).real {(b, c)} / (μ.map h).real {c}` equals the triple marginal `(μ.map ⟨f, g, h⟩).real {(a, b, c)}`. On the null support of `(μ.map h).real {c}`, both sides vanish (via the pair/triple marginal bounds). -/
-private lemma condIndep_normalized_pair_eq_triple
-    {α β γ : Type*}
-    [MeasurableSpace α] [MeasurableSingletonClass α]
-    [MeasurableSpace β] [MeasurableSingletonClass β]
-    [Fintype γ] [MeasurableSpace γ] [MeasurableSingletonClass γ]
-    {Ω' : Type*} [MeasurableSpace Ω']
-    {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
-    (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
-    {μ : Measure Ω'} [IsProbabilityMeasure μ]
-    (h_cond : CondIndepFun f g h μ) (a : α) (b : β) (c : γ) :
-    (μ.map (fun ω => (f ω, h ω))).real {(a, c)}
-        * (μ.map (fun ω => (g ω, h ω))).real {(b, c)} / (μ.map h).real {c}
-      = (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)} := by
-  by_cases hc_zero : (μ.map h).real {c} = 0
-  · rw [hc_zero, div_zero]
-    have h_fgh_le : (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
-        ≤ (μ.map h).real {c} := by
-      rw [map_measureReal_apply (hf.prodMk (hg.prodMk hh)) (measurableSet_singleton _),
-          map_measureReal_apply hh (measurableSet_singleton _)]
-      apply measureReal_mono _ (measure_ne_top _ _)
-      intro ω hω
-      simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
-      exact hω.2.2
-    exact (le_antisymm (hc_zero ▸ h_fgh_le) measureReal_nonneg).symm
-  · have h_prod := condIndepFun_map_triple_real_singleton hf hg hh h_cond a b c
-    rw [div_eq_iff hc_zero]
-    linarith
-
 /-- **`p̂` is a probability distribution under the hypotheses of Theorem 2.** Collapses by summing over `z` first (using `I[X:Y|Z] = 0` ⇒ `p(x, y, z) · p(z) = p(x, z) · p(y, z)` via `condIndepFun_map_triple_real_singleton`), then using `I[X:Y] = 0` ⇒ `p(x, y) = p(x) · p(y)` (via `indepFun_map_pair_real_singleton`) to cancel the single-variable denominators, then summing over `x, y, u`. -/
 private lemma phat_sum_eq_one
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
@@ -907,17 +878,10 @@ private lemma phat_sum_eq_one
       have h_phat_zero : ∀ z, phat X Y Z U μ (x, y, z, u) = 0 := by
         intro z; unfold phat; simp [hY_zero]
       rw [Finset.sum_congr rfl (fun z _ => h_phat_zero z), Finset.sum_const_zero, hYU_zero, mul_zero, zero_div]
-    -- All positive.
     have h_denom_ne : (μ.map U).real {u} * (μ.map X).real {x} * (μ.map Y).real {y} ≠ 0 := by
       intro heq; simp only [mul_eq_zero] at heq
       rcases heq with (h | h) | h
       exacts [hU_zero h, hX_zero h, hY_zero h]
-    have hXY_ne : (μ.map X).real {x} * (μ.map Y).real {y} ≠ 0 := by
-      intro heq; simp only [mul_eq_zero] at heq
-      rcases heq with h | h
-      exacts [hX_zero h, hY_zero h]
-    -- From h: (∑_z phat) * (pU pX pY) = pXU pYU * (pX pY)
-    -- Divide by (pU pX pY):
     have h' : ∑ z, phat X Y Z U μ (x, y, z, u)
             = (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
               * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)}
@@ -926,8 +890,6 @@ private lemma phat_sum_eq_one
       rw [eq_div_iff h_denom_ne]; exact h
     rw [h']
     field_simp
-  -- **Outer telescope:** reshape the 4-tuple sum via an `Equiv`, collapse ∑_z
-  -- using h_sum_z_eq, then telescope ∑_y, ∑_x, ∑_u.
   let e : S₄ × S₁ × S₂ × S₃ ≃ S₁ × S₂ × S₃ × S₄ :=
     { toFun := fun ⟨u, x, y, z⟩ => (x, y, z, u)
       invFun := fun ⟨x, y, z, u⟩ => (u, x, y, z)
@@ -935,11 +897,7 @@ private lemma phat_sum_eq_one
       right_inv := fun ⟨_, _, _, _⟩ => rfl }
   rw [← Equiv.sum_comp e (phat X Y Z U μ)]
   show ∑ p : S₄ × S₁ × S₂ × S₃, phat X Y Z U μ (p.2.1, p.2.2.1, p.2.2.2, p.1) = 1
-  simp_rw [Fintype.sum_prod_type]
-  -- Goal: ∑ u, ∑ x, ∑ y, ∑ z, phat(x, y, z, u) = 1.
-  simp_rw [h_sum_z_eq]
-  -- Goal: ∑ u, ∑ x, ∑ y, pXU(x, u) * pYU(y, u) / pU(u) = 1.
-  -- ∑_y pYU(y, u) / pU = pU / pU = 1 (when pU > 0).
+  simp_rw [Fintype.sum_prod_type, h_sum_z_eq]
   have h_sum_y : ∀ (x : S₁) (u : S₄),
       (∑ y : S₂, (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
           * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)} / (μ.map U).real {u})
@@ -949,7 +907,6 @@ private lemma phat_sum_eq_one
     · have hXU_zero : (μ.map (fun ω => (X ω, U ω))).real {(x, u)} = 0 :=
         le_antisymm (hU_zero ▸ measureReal_map_pair_le_map_snd hX hU μ x u) measureReal_nonneg
       simp [hXU_zero]
-    -- pU > 0. Factor out pXU/pU and use sum_map_pair_first on pYU to get pU.
     rw [show (∑ y : S₂, (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
                 * (μ.map (fun ω => (Y ω, U ω))).real {(y, u)} / (μ.map U).real {u})
             = ((μ.map (fun ω => (X ω, U ω))).real {(x, u)} / (μ.map U).real {u})
@@ -957,10 +914,7 @@ private lemma phat_sum_eq_one
         rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun y _ => by ring]
     rw [sum_map_pair_first hY hU μ u]
     field_simp
-  simp_rw [h_sum_y]
-  -- Goal: ∑ u, ∑ x, pXU(x, u) = 1.
-  simp_rw [sum_map_pair_first hX hU μ]
-  -- Goal: ∑ u, pU u = 1.
+  simp_rw [h_sum_y, sum_map_pair_first hX hU μ]
   haveI : IsProbabilityMeasure (μ.map U) := Measure.isProbabilityMeasure_map hU.aemeasurable
   rw [sum_measureReal_singleton (Finset.univ : Finset S₄)]
   simp
@@ -1089,12 +1043,10 @@ private lemma delta_eq_sum_log_ratio
       show _ = L (x, y, z, u)
       simp only [L]
       ring
-  -- Rewrite RHS as `∑ t, pJoint t * L t`.
   rw [show (∑ t : S₁ × S₂ × S₃ × S₄,
             pJoint X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t))
         = ∑ t, pJoint X Y Z U μ t * L t from
       Finset.sum_congr rfl fun t _ => h_pJ_log t]
-  -- Expand delta entropy-by-entropy, applying chain_rule and entropy_comm.
   rw [delta_eq_entropy hZ hU hX hY μ,
       chain_rule'' μ hZ hX, chain_rule'' μ hU hX, chain_rule'' μ (hZ.prodMk hU) hX,
       chain_rule'' μ hZ hY, chain_rule'' μ hU hY, chain_rule'' μ (hZ.prodMk hU) hY,
@@ -1102,9 +1054,6 @@ private lemma delta_eq_sum_log_ratio
       entropy_comm hZ hY μ, entropy_comm hU hY μ, entropy_comm (hZ.prodMk hU) hY μ]
   have hF : Measurable (fun ω => (X ω, Y ω, Z ω, U ω)) :=
     hX.prodMk (hY.prodMk (hZ.prodMk hU))
-  -- Lift each of the eleven entropies to a 4-tuple sum. Each `hH_*` uses
-  -- `entropy_eq_sum_joint` with a specific projection; Lean recognizes the
-  -- composed function as the original random variable via iota + eta reduction.
   have hHZ : H[Z ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
       (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
       * Real.log ((μ.map Z).real {t.2.2.1}) :=
@@ -1162,9 +1111,7 @@ private lemma delta_eq_sum_log_ratio
     entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2)) hF
       ((measurable_fst.comp measurable_snd).prodMk (measurable_snd.comp measurable_snd)) μ
   rw [hHZ, hHU, hHZU, hHX, hHY, hHXZ, hHXU, hHXZU, hHYZ, hHYU, hHYZU]
-  -- Now both sides are combinations of `-∑ t, pJoint * log(marginal at projection)`.
-  -- Convert all subtraction to `A + (-B)` so that `← sum_neg_distrib` and
-  -- `← sum_add_distrib` can combine every term into a single outer `∑ t`.
+  -- Normalize subtraction so `← sum_neg_distrib` + `← sum_add_distrib` can fold every term into one outer `∑ t`.
   simp_rw [sub_eq_add_neg, neg_add, neg_neg, ← Finset.sum_neg_distrib,
            ← Finset.sum_add_distrib]
   refine @Finset.sum_congr (S₁ × S₂ × S₃ × S₄) ℝ _ _ _ _ _ rfl ?_
@@ -1207,30 +1154,17 @@ private lemma sum_joint_eq_sum_ptilde
       = ∑ t : S₁ × S₂ × S₃ × S₄,
           ptilde X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t) := by
   classical
-  -- Abbreviations for the eleven μ-marginals appearing in the log-ratio decomposition.
   set pXZ  : S₁ × S₃        → ℝ := fun p => (μ.map (fun ω => (X ω, Z ω))).real {p}
-    with hpXZ_def
   set pXU  : S₁ × S₄        → ℝ := fun p => (μ.map (fun ω => (X ω, U ω))).real {p}
-    with hpXU_def
   set pYZ  : S₂ × S₃        → ℝ := fun p => (μ.map (fun ω => (Y ω, Z ω))).real {p}
-    with hpYZ_def
   set pYU  : S₂ × S₄        → ℝ := fun p => (μ.map (fun ω => (Y ω, U ω))).real {p}
-    with hpYU_def
   set pZU  : S₃ × S₄        → ℝ := fun p => (μ.map (fun ω => (Z ω, U ω))).real {p}
-    with hpZU_def
   set pX   : S₁             → ℝ := fun x => (μ.map X).real {x}
-    with hpX_def
   set pY   : S₂             → ℝ := fun y => (μ.map Y).real {y}
-    with hpY_def
   set pZ   : S₃             → ℝ := fun z => (μ.map Z).real {z}
-    with hpZ_def
   set pU   : S₄             → ℝ := fun u => (μ.map U).real {u}
-    with hpU_def
   set pXZU : S₁ × S₃ × S₄   → ℝ := fun p => (μ.map (fun ω => (X ω, Z ω, U ω))).real {p}
-    with hpXZU_def
   set pYZU : S₂ × S₃ × S₄   → ℝ := fun p => (μ.map (fun ω => (Y ω, Z ω, U ω))).real {p}
-    with hpYZU_def
-  -- The 11-term additive decomposition of `log (p̂ / p̃)` that holds on the common support.
   set L : S₁ × S₂ × S₃ × S₄ → ℝ := fun t =>
     Real.log (pXZ (t.1, t.2.2.1)) + Real.log (pXU (t.1, t.2.2.2))
     + Real.log (pYZ (t.2.1, t.2.2.1)) + Real.log (pYU (t.2.1, t.2.2.2))
@@ -1239,10 +1173,6 @@ private lemma sum_joint_eq_sum_ptilde
     - Real.log (pX t.1) - Real.log (pY t.2.1)
     - Real.log (pXZU (t.1, t.2.2)) - Real.log (pYZU (t.2.1, t.2.2))
     with hL_def
-  -- Measurability of the full joint function and every projection we use.
-  have hF : Measurable (fun ω => (X ω, Y ω, Z ω, U ω)) :=
-    hX.prodMk (hY.prodMk (hZ.prodMk hU))
-  -- **Step 1.** Show the pointwise identity `log (p̂ / p̃) = L` on the support of `p̃`.
   have h_log_eq_L : ∀ t : S₁ × S₂ × S₃ × S₄, 0 < ptilde X Y Z U μ t →
       Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t) = L t := by
     rintro ⟨x, y, z, u⟩ h_pt_pos
@@ -1258,7 +1188,6 @@ private lemma sum_joint_eq_sum_ptilde
       · exact h
       · exfalso; rw [← h] at h_pt_pos; simp at h_pt_pos
     have hProd_pos : 0 < pXZU (x, z, u) * pYZU (y, z, u) := by
-      have := h_pt_pos
       have h_num : pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u) > 0 := h_pt_pos
       by_contra h_neg
       push_neg at h_neg
@@ -1318,27 +1247,18 @@ private lemma sum_joint_eq_sum_ptilde
     show _ = L (x, y, z, u)
     simp only [hL_def]
     ring
-  -- **Step 2.** Pointwise: `pJoint t * log (p̂ / p̃) = pJoint t * L` and same for `p̃`.
-  -- Use that the support of `pJoint` is contained in the support of `p̃`.
   have h_supp : ∀ t : S₁ × S₂ × S₃ × S₄,
       0 < pJoint X Y Z U μ t → 0 < ptilde X Y Z U μ t := by
     rintro ⟨x, y, z, u⟩ h_pJ
     simp only [pJoint] at h_pJ
-    -- From pJoint > 0, all three triple marginals are positive (marginal bounds).
-    have hXZU_pos : 0 < pXZU (x, z, u) := by
-      apply lt_of_lt_of_le h_pJ
-      -- (μ.map ⟨X,Y,Z,U⟩).real {(x,y,z,u)} ≤ (μ.map ⟨X,⟨Z,U⟩⟩).real {(x, (z,u))}
-      -- Using the pair-projection marginal bound: view ⟨X,Y,Z,U⟩ as a pair ⟨X, ⟨Y, ⟨Z, U⟩⟩⟩
-      -- and drop the middle Y. Simpler: use iterated triple-marginal bound.
-      have h1 := measureReal_map_triple_le_map_pair_13 hX hY (hZ.prodMk hU) μ x y (z, u)
-      exact h1
-    have hYZU_pos : 0 < pYZU (y, z, u) := by
-      apply lt_of_lt_of_le h_pJ
-      -- View ⟨X, Y, Z, U⟩ as pair ⟨X, ⟨Y, Z, U⟩⟩ and drop the first coord.
-      exact measureReal_map_pair_le_map_snd hX (hY.prodMk (hZ.prodMk hU)) μ x (y, z, u)
+    have hXZU_pos : 0 < pXZU (x, z, u) :=
+      lt_of_lt_of_le h_pJ
+        (measureReal_map_triple_le_map_pair_13 hX hY (hZ.prodMk hU) μ x y (z, u))
+    have hYZU_pos : 0 < pYZU (y, z, u) :=
+      lt_of_lt_of_le h_pJ
+        (measureReal_map_pair_le_map_snd hX (hY.prodMk (hZ.prodMk hU)) μ x (y, z, u))
     have hZU_pos : 0 < pZU (z, u) :=
       lt_of_lt_of_le hXZU_pos (measureReal_map_pair_le_map_snd hX (hZ.prodMk hU) μ x (z, u))
-    -- ptilde = pXZU * pYZU / pZU > 0.
     show 0 < pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u)
     exact div_pos (mul_pos hXZU_pos hYZU_pos) hZU_pos
   have h_pJ_mul : ∀ t : S₁ × S₂ × S₃ × S₄,
@@ -1359,20 +1279,8 @@ private lemma sum_joint_eq_sum_ptilde
     · have h_pos : 0 < ptilde X Y Z U μ t :=
         lt_of_le_of_ne (ptilde_nonneg X Y Z U μ t) (Ne.symm h)
       rw [h_log_eq_L t h_pos]
-  -- Rewrite both sums in L-form.
   rw [Finset.sum_congr rfl (fun t _ => h_pJ_mul t)]
   rw [Finset.sum_congr rfl (fun t _ => h_pt_mul t)]
-  -- **Step 3.** `∑ pJoint * L = ∑ ptilde * L` via 11 marginal-swap applications.
-  -- Each of the eleven log terms in `L` depends only on a projection of the 4-tuple;
-  -- `sum_mul_proj_eq_of_marginal_eq` closes the match once we verify that `pJoint` and
-  -- `p̃` agree on the corresponding fibre sums (i.e., share the μ-marginal at that projection).
-  -- `sum_filter_map_real_eq_map_comp` gives the pJoint side; a bijective reindex to the
-  -- nested form recorded in `sum_ptilde_over_*` / `ptilde_fibre_sum` gives the `p̃` side.
-  -- **Shared bookkeeping.** `F` := the full joint random variable `⟨X, Y, Z, U⟩`.
-  -- Abbreviations for the eleven μ-pushforward measures (as `.real` applied at a singleton).
-  -- Define the eleven marginal-swap identities, one per log term in L.
-  -- Each has shape `∑ t, pJoint(t) * log (marginal (proj t)) = ∑ t, ptilde(t) * log (...)`.
-  -- Step 3a: `log p(x, z)` term (projection: `(x, y, z, u) ↦ (x, z)`, complement: `(y, u)`).
   have hEq_xz : ∑ t : S₁ × S₂ × S₃ × S₄,
         pJoint X Y Z U μ t * Real.log (pXZ (t.1, t.2.2.1))
       = ∑ t : S₁ × S₂ × S₃ × S₄,
@@ -1395,9 +1303,6 @@ private lemma sum_joint_eq_sum_ptilde
       · intro _ _; rfl
     rw [h_reindex, Fintype.sum_prod_type]
     exact sum_ptilde_over_y_u hX hY hZ hU μ x z
-  -- Step 3b–3k: the remaining 10 projections follow the same template, factored through
-  -- the module-level `marg_swap_helper` that bundles the shared pJoint filter-sum argument.
-  -- 2-coordinate projections: (y, u), (y, z), (x, u), (x, z), (x, y)-complement → S₁×S₃, etc.
   have hEq_xu : ∑ t : S₁ × S₂ × S₃ × S₄,
         pJoint X Y Z U μ t * Real.log (pXU (t.1, t.2.2.2))
       = ∑ t : S₁ × S₂ × S₃ × S₄,
@@ -1622,8 +1527,6 @@ private lemma sum_joint_eq_sum_ptilde
       · intro _ _; rfl
     rw [h_reindex]
     exact sum_ptilde_over_x hX hY hZ hU μ y z u
-  -- **Step 4.** Combine the eleven `hEq_*` identities via the 11-term additive decomposition of L.
-  -- Distribute the multiplication pointwise and split the sum into eleven pieces.
   have h_split : ∀ (w : S₁ × S₂ × S₃ × S₄ → ℝ),
       (∑ t : S₁ × S₂ × S₃ × S₄, w t * L t)
         = (∑ t, w t * Real.log (pXZ (t.1, t.2.2.1)))
@@ -1637,8 +1540,7 @@ private lemma sum_joint_eq_sum_ptilde
           - (∑ t, w t * Real.log (pY t.2.1))
           - (∑ t, w t * Real.log (pXZU (t.1, t.2.2)))
           - (∑ t, w t * Real.log (pYZU (t.2.1, t.2.2))) := fun w => by
-    simp only [hL_def, mul_add, mul_sub]
-    simp only [Finset.sum_add_distrib, Finset.sum_sub_distrib]
+    simp only [hL_def, mul_add, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib]
   rw [h_split (pJoint X Y Z U μ), h_split (ptilde X Y Z U μ),
       hEq_xz, hEq_xu, hEq_yz, hEq_yu, hEq_zu,
       hEq_z, hEq_u, hEq_x, hEq_y, hEq_xzu, hEq_yzu]
