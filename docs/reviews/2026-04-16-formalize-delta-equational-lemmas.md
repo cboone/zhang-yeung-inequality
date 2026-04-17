@@ -82,7 +82,7 @@ Lands Milestone M1 of the Zhang-Yeung formalization: defines `ZhangYeung.delta` 
 9. **Wire tests into default build** — `2529981` (lakefile update).
 10. **Bootstrap verification** — implicit, covered before branch start.
 11. **Commits are small and conventional-commit-styled** — every commit is `feat:`, `chore:`, `test:`, or `docs:`.
-12. **Plan tightening** — `f918272` pre-empted the "Finite/discrete codomain assumptions" risk by stating the finite-alphabet specialization up front.
+12. **Plan tightening** — `f918272` preempted the "Finite/discrete codomain assumptions" risk by stating the finite-alphabet specialization up front.
 13. **Roadmap testing requirements** — `3adcbde` extended the roadmap with milestone-level testing rules before the branch closed (not in the M1 plan, but a natural consequence of the M1 deliverables).
 14. **Citation alignment** — `0e0ae41` plans it; `bbff1fd` executes it.
 

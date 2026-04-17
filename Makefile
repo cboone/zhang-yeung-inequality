@@ -7,7 +7,7 @@ bootstrap: ## Bootstrap worktree (lake update, cache get, build)
 	bin/bootstrap-worktree
 
 _check-mathlib-cache:
-	@if [ ! -d "$(MATHLIB_BUILD_DIR)" ] || [ -z "$$(ls $(MATHLIB_BUILD_DIR)/Mathlib*.olean 2>/dev/null)" ]; then \
+	@if [ ! -d "$(MATHLIB_BUILD_DIR)" ] || { [ ! -f "$(MATHLIB_BUILD_DIR)/Mathlib.olean" ] && [ -z "$$(find $(MATHLIB_BUILD_DIR)/Mathlib -name '*.olean' -print -quit 2>/dev/null)" ]; }; then \
 		echo "Error: Mathlib prebuilt artifacts not found." >&2; \
 		echo "Run 'make bootstrap' or 'bin/bootstrap-worktree' first." >&2; \
 		exit 1; \

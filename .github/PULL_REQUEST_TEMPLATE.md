@@ -17,7 +17,7 @@ Fixes #
 
 ## Checklist
 
-- [ ] I have read the [CONTRIBUTING](../CONTRIBUTING.md) guide
+- [ ] I have read the [CONTRIBUTING](https://github.com/cboone/zhang-yeung-inequality/blob/main/CONTRIBUTING.md) guide
 - [ ] My code follows the project's style guidelines
 - [ ] I have added tests that prove my fix/feature works
 - [ ] All new and existing tests pass (`make check`)
