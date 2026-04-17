@@ -165,7 +165,7 @@ In [39], we proved the following results.
 
 $$
 \begin{equation*}
-\bar{\Gamma}_{2}^{*}=\Gamma_{2} \tag{13}
+\Gamma_{2}^{*}=\Gamma_{2} \tag{13}
 \end{equation*}
 $$
 
@@ -207,7 +207,7 @@ We also proved in [39] that this result implies
 
 $$
 \begin{equation*}
-\bar{\Gamma}_{n}^{*} \neq \Gamma_{n} . \tag{18}
+\Gamma_{n}^{*} \neq \Gamma_{n} . \tag{18}
 \end{equation*}
 $$
 
