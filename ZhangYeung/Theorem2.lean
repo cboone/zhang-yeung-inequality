@@ -172,20 +172,10 @@ private lemma sum_map_pair_first
     (μ : Measure Ω') [IsFiniteMeasure μ] (b : β) :
     ∑ a : α, (μ.map (fun ω => (f ω, g ω))).real {(a, b)}
       = (μ.map g).real {b} := by
-  have hfg : Measurable (fun ω => (f ω, g ω)) := hf.prodMk hg
-  simp_rw [map_measureReal_apply hfg (measurableSet_singleton _),
-           map_measureReal_apply hg (measurableSet_singleton _)]
-  have preimage_eq : ∀ a : α,
-      (fun ω => (f ω, g ω))⁻¹' {(a, b)}
-        = f ⁻¹' {a} ∩ (g ⁻¹' {b}) := by
-    intro a; ext ω; simp
-  simp_rw [preimage_eq]
-  simp_rw [show ∀ a : α, μ.real (f ⁻¹' {a} ∩ g ⁻¹' {b})
-      = (μ.restrict (g ⁻¹' {b})).real (f ⁻¹' {a}) from
-    fun a => (measureReal_restrict_apply (hf (measurableSet_singleton a))).symm]
-  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset α)
-      (fun y _ => hf (measurableSet_singleton y))]
-  simp
+  rw [show μ.map g = (μ.map (fun ω => (f ω, g ω))).map Prod.snd from
+        (Measure.map_map measurable_snd (hf.prodMk hg)).symm,
+      map_measureReal_apply measurable_snd (measurableSet_singleton b),
+      measureReal_preimage_snd_singleton_eq_sum]
 
 /-- Marginal summation for pairs: summing the pair-joint over the *second* coordinate recovers the marginal of `f`. -/
 private lemma sum_map_pair_second
@@ -197,21 +187,10 @@ private lemma sum_map_pair_second
     (μ : Measure Ω') [IsFiniteMeasure μ] (a : α) :
     ∑ b : β, (μ.map (fun ω => (f ω, g ω))).real {(a, b)}
       = (μ.map f).real {a} := by
-  have hfg : Measurable (fun ω => (f ω, g ω)) := hf.prodMk hg
-  simp_rw [map_measureReal_apply hfg (measurableSet_singleton _),
-           map_measureReal_apply hf (measurableSet_singleton _)]
-  have preimage_eq : ∀ b : β,
-      (fun ω => (f ω, g ω))⁻¹' {(a, b)}
-        = g ⁻¹' {b} ∩ (f ⁻¹' {a}) := by
-    intro b; ext ω; simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq,
-      Set.mem_inter_iff]; tauto
-  simp_rw [preimage_eq]
-  simp_rw [show ∀ b : β, μ.real (g ⁻¹' {b} ∩ f ⁻¹' {a})
-      = (μ.restrict (f ⁻¹' {a})).real (g ⁻¹' {b}) from
-    fun b => (measureReal_restrict_apply (hg (measurableSet_singleton b))).symm]
-  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset β)
-      (fun y _ => hg (measurableSet_singleton y))]
-  simp
+  rw [show μ.map f = (μ.map (fun ω => (f ω, g ω))).map Prod.fst from
+        (Measure.map_map measurable_fst (hf.prodMk hg)).symm,
+      map_measureReal_apply measurable_fst (measurableSet_singleton a),
+      measureReal_preimage_fst_singleton_eq_sum]
 
 /-- Marginal summation for triples: summing over the *first* coordinate recovers the `(g, h)` marginal. -/
 private lemma sum_map_triple_first
@@ -224,21 +203,11 @@ private lemma sum_map_triple_first
     (μ : Measure Ω') [IsFiniteMeasure μ] (b : β) (c : γ) :
     ∑ a : α, (μ.map (fun ω => (f ω, g ω, h ω))).real {(a, b, c)}
       = (μ.map (fun ω => (g ω, h ω))).real {(b, c)} := by
-  have h_fgh : Measurable (fun ω => (f ω, g ω, h ω)) := hf.prodMk (hg.prodMk hh)
-  have hgh : Measurable (fun ω => (g ω, h ω)) := hg.prodMk hh
-  simp_rw [map_measureReal_apply h_fgh (measurableSet_singleton _),
-           map_measureReal_apply hgh (measurableSet_singleton _)]
-  have preimage_eq : ∀ a : α,
-      (fun ω => (f ω, g ω, h ω))⁻¹' {(a, b, c)}
-        = f ⁻¹' {a} ∩ (fun ω => (g ω, h ω))⁻¹' {(b, c)} := by
-    intro a; ext ω; simp
-  simp_rw [preimage_eq]
-  simp_rw [show ∀ a : α, μ.real (f ⁻¹' {a} ∩ (fun ω => (g ω, h ω))⁻¹' {(b, c)})
-      = (μ.restrict ((fun ω => (g ω, h ω))⁻¹' {(b, c)})).real (f ⁻¹' {a}) from
-    fun a => (measureReal_restrict_apply (hf (measurableSet_singleton a))).symm]
-  rw [sum_measureReal_preimage_singleton (Finset.univ : Finset α)
-      (fun y _ => hf (measurableSet_singleton y))]
-  simp
+  rw [show (μ.map (fun ω => (g ω, h ω)))
+        = (μ.map (fun ω => (f ω, g ω, h ω))).map Prod.snd from
+        (Measure.map_map measurable_snd (hf.prodMk (hg.prodMk hh))).symm,
+      map_measureReal_apply measurable_snd (measurableSet_singleton (b, c)),
+      measureReal_preimage_snd_singleton_eq_sum]
 
 /-- Marginal summation for triples: summing over the *second* coordinate recovers the `(f, h)` marginal. -/
 private lemma sum_map_triple_second
@@ -364,24 +333,18 @@ private lemma measureReal_map_triple_le_map_pair_13
   simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
   exact ⟨hω.1, hω.2.2⟩
 
-/-- **IndepFun product formula.** If `f, g` are independent, the joint singleton mass factors: `(μ.map ⟨f, g⟩).real {(a, b)} = (μ.map f).real {a} * (μ.map g).real {b}`. This extracts the product identity from `IndepFun.measure_inter_preimage_eq_mul` in the shape used by `phat_sum_eq_one`. -/
+/-- **IndepFun product formula.** If `f, g` are independent, the joint singleton mass factors: `(μ.map ⟨f, g⟩).real {(a, b)} = (μ.map f).real {a} * (μ.map g).real {b}`. This is a `.real`-valued specialization of the `indepFun_iff_map_prod_eq_prod_map_map` characterization, used by `phat_sum_eq_one`. -/
 private lemma indepFun_map_pair_real_singleton
     {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
     [MeasurableSpace β] [MeasurableSingletonClass β]
     {Ω' : Type*} [MeasurableSpace Ω'] {f : Ω' → α} {g : Ω' → β}
     (hf : Measurable f) (hg : Measurable g)
-    {μ : Measure Ω'} (h_indep : IndepFun f g μ) (a : α) (b : β) :
+    {μ : Measure Ω'} [IsFiniteMeasure μ]
+    (h_indep : IndepFun f g μ) (a : α) (b : β) :
     (μ.map (fun ω => (f ω, g ω))).real {(a, b)}
       = (μ.map f).real {a} * (μ.map g).real {b} := by
-  rw [map_measureReal_apply (hf.prodMk hg) (measurableSet_singleton _),
-      map_measureReal_apply hf (measurableSet_singleton _),
-      map_measureReal_apply hg (measurableSet_singleton _)]
-  have h_pre : (fun ω => (f ω, g ω)) ⁻¹' {(a, b)} = f ⁻¹' {a} ∩ g ⁻¹' {b} := by
-    ext ω; simp
-  rw [h_pre, measureReal_def, measureReal_def, measureReal_def,
-      h_indep.measure_inter_preimage_eq_mul {a} {b}
-        (measurableSet_singleton a) (measurableSet_singleton b),
-      ENNReal.toReal_mul]
+  rw [(indepFun_iff_map_prod_eq_prod_map_map hf.aemeasurable hg.aemeasurable).mp h_indep,
+      Measure.prod_real_singleton]
 
 /-- **Fibrewise marginal-swap.** If two weight functions `f, g : α → ℝ` agree on every fibre of a projection `proj : α → β` (i.e., share the same `proj`-marginal), then their weighted sums of any `proj`-composed function agree. This is the abstract kernel of the 11-factor marginal-swap argument used in `sum_joint_eq_sum_ptilde`. -/
 private lemma sum_mul_proj_eq_of_marginal_eq
