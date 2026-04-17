@@ -1,4 +1,4 @@
-import ZhangYeung.Delta
+import ZhangYeung
 
 namespace ZhangYeungTest
 
