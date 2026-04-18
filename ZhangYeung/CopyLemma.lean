@@ -135,6 +135,18 @@ theorem copyLemma
       CondIndepFun (fun ω' => (X' ω', Y' ω'))
                    (fun ω' => (X₁ ω', Y₁ ω'))
                    (fun ω' => (Z' ω', U' ω')) ν := by
-  sorry
+  obtain ⟨Ω', mΩ', W₁, W₂, V, ν, hIsProb, hW₁, hW₂, hV, hCond, hIdent₁, hIdent₂⟩ :=
+    condIndep_copies (⟨X, Y⟩ : Ω → S₁ × S₂) (⟨Z, U⟩ : Ω → S₃ × S₄)
+      (hX.prodMk hY) (hZ.prodMk hU) μ
+  have hr : Measurable
+      (fun p : (S₁ × S₂) × (S₃ × S₄) => (p.1.1, p.1.2, p.2.1, p.2.2)) := by fun_prop
+  refine ⟨Ω', mΩ', ν, fun ω => (W₁ ω).1, fun ω => (W₁ ω).2,
+      fun ω => (W₂ ω).1, fun ω => (W₂ ω).2,
+      fun ω => (V ω).1, fun ω => (V ω).2,
+      hIsProb,
+      measurable_fst.comp hW₁, measurable_snd.comp hW₁,
+      measurable_fst.comp hW₂, measurable_snd.comp hW₂,
+      measurable_fst.comp hV, measurable_snd.comp hV,
+      hIdent₁.comp hr, hIdent₂.comp hr, hCond⟩
 
 end ZhangYeung
