@@ -125,6 +125,7 @@ All declarations live under `namespace ProbabilityTheory` unless noted. Line num
 - `IdentDistrib.mutualInfo_eq` (Basic.lean:691). Pair-form `IdentDistrib` → equal mutual informations. Used for the two marginal-equality transports of the chase.
 - `IdentDistrib.comp`, `.symm` (Mathlib `Probability/IdentDistrib.lean`). Used to project the 4-variable `hFirst`, `hSecond` into pair-level `IdentDistrib`s.
 - `CondIndepFun` (PFR `ForMathlib/ConditionalIndependence.lean:104`). Random-variable form.
+- `ent_of_cond_indep` (Basic.lean:1064). Packages `CondIndepFun X Y Z μ` into the entropy identity `H[⟨X, ⟨Y, Z⟩⟩ ; μ] = H[⟨X, Z⟩ ; μ] + H[⟨Y, Z⟩ ; μ] - H[Z ; μ]`; this is the shortest entry point for M3's data-processing helper.
 - M2's private `condIndepFun_comp` (currently at `ZhangYeung/CopyLemma.lean:58`). Used to project the copy's `CondIndepFun ⟨X', Y'⟩ ⟨X_1, Y_1⟩ ⟨Z', U'⟩ ν` to `CondIndepFun X' ⟨X_1, Y_1⟩ ⟨Z', U'⟩ ν` for the data-processing step. **Promotion trigger:** M3 is the second module to consume this helper; promote from `ZhangYeung/CopyLemma.lean` (private) to `ZhangYeung/Prelude.lean` (public under `ZhangYeung` namespace) in the same change. This matches the M2 plan's prediction ("if later milestones need them, promote to `ZhangYeung/Prelude.lean`", `ZhangYeung/CopyLemma.lean:34`; roadmap `docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md:247`).
 
 **From the current project:**
@@ -172,7 +173,7 @@ theorem zhangYeung_dual ... :
       ≤ (1/2) * (I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U | X ; μ] + I[Z : U | Y ; μ])
 ```
 
-Proof: apply `zhangYeung` with `X` and `Y` swapped, then use `mutualInfo_comm hY hX` to rewrite `I[Y : X ; μ] = I[X : Y ; μ]` and `linarith` to reorder terms and convert `2 * delta` via `delta_form22_iff`.
+Proof: apply `zhangYeung` with `X` and `Y` swapped, rewrite the left-hand side back to `delta Z U X Y μ` via `delta_comm_cond`, rewrite `I[Y : X ; μ] = I[X : Y ; μ]` via `mutualInfo_comm hY hX`, and close by `delta_form22_iff` + `linarith`.
 
 ### Averaged corollary: paper eq. (23)
 
@@ -291,15 +292,23 @@ private lemma mutualInfo_le_of_condIndepFun
     I[X : Y ; μ] ≤ I[X : Z ; μ]
 ```
 
-This is the data-processing inequality for the Markov chain $X \to Z \to Y$: if $X$ and $Y$ are conditionally independent given $Z$, then $I(X; Y) \le I(X; Z)$. PFR exposes three `data_processing`-flavored lemmas (`mutual_comp_le`, `mutual_comp_comp_le`, `condMutual_comp_comp_le` at `Basic.lean:1151`, `:1162`, `:1174`), all of which use the "post-composition reduces MI" form $I(f \circ X; Y) \le I(X; Y)$. None of them is the `CondIndepFun`-hypothesis form M3 needs. The shortest path is to prove the specific helper here.
+This is the data-processing inequality for the Markov chain $X \to Z \to Y$: if $X$ and $Y$ are conditionally independent given $Z$, then $I(X; Y) \le I(X; Z)$. PFR exposes three post-composition data-processing lemmas (`mutual_comp_le`, `mutual_comp_comp_le`, `condMutual_comp_comp_le` at `Basic.lean:1151`, `:1162`, `:1174`), and it also already exposes `ent_of_cond_indep` (Basic.lean:1064), which packages the entropy identity forced by `CondIndepFun`. None of the post-composition lemmas matches M3's hypothesis shape directly; the shortest path here is therefore to start from `ent_of_cond_indep` and finish the remaining entropy algebra locally.
 
-**Proof route.** Expand `I[X : Y | Z ; μ] = 0` through `condMutualInfo_eq` and `chain_rule''` into an H-term identity; combine with `entropy_triple_add_entropy_le` (PFR's submodularity `H[⟨X, ⟨Y, Z⟩⟩] + H[Z] ≤ H[⟨X, Z⟩] + H[⟨Y, Z⟩]` at `Basic.lean:1117`) applied with the arguments permuted so $Y$ is the "common" variable (`entropy_triple_add_entropy_le hX hZ hY`); align the resulting triple entropy $H[\langle X, \langle Z, Y \rangle \rangle]$ with the hypothesis's $H[\langle \langle X, Y \rangle, Z \rangle]$ via one `entropy_assoc` + `entropy_comp_of_injective` (with the inner-pair-swap bijection $(a, (c, b)) \mapsto (a, (b, c))$); close by `linarith`.
+**Proof route.** First invoke `ent_of_cond_indep hX hY hZ μ h` to obtain
+$$
+H[\langle X, \langle Y, Z \rangle \rangle ; \mu] = H[\langle X, Z \rangle ; \mu] + H[\langle Y, Z \rangle ; \mu] - H[Z ; \mu].
+$$
+Then apply `entropy_triple_add_entropy_le hX hZ hY`, so the shared variable is $Y$:
+$$
+H[\langle X, \langle Z, Y \rangle \rangle ; \mu] + H[Y ; \mu] \le H[\langle X, Y \rangle ; \mu] + H[\langle Z, Y \rangle ; \mu].
+$$
+Align the left triple entropy with the `ent_of_cond_indep` shape via a small inner-pair-swap lemma proved from `entropy_assoc` + `entropy_comp_of_injective`; rewrite `H[\langle Z, Y \rangle ; \mu]` to `H[\langle Y, Z \rangle ; \mu]` with `entropy_comm`; then expand `I[X : Y ; μ]` and `I[X : Z ; μ]` via `mutualInfo_def` and close by `linarith`.
 
-Budget ~20 tactic lines. The inner-pair-swap step is the only nontrivial piece; PFR does not expose a direct "entropy of a triple is invariant under inner-pair swap" lemma, but `entropy_comp_of_injective` (`Basic.lean:160`) closes it in one `change` + `exact`. See Risk §7.1 below for the fallback if the alignment proves awkward.
+Budget ~15-20 tactic lines. The only genuinely delicate step is still the inner-pair swap; `ent_of_cond_indep` removes the need to re-derive the conditional-independence entropy identity from `condMutualInfo_eq_zero` by hand. See Risk §7.1 below for the fallback if the alignment proves awkward.
 
-**Primitives used:** `condMutualInfo_eq_zero`, `condMutualInfo_eq`, `chain_rule''` (×3), `entropy_triple_add_entropy_le`, `entropy_comm`, `entropy_assoc`, `entropy_comp_of_injective`, `mutualInfo_def`.
+**Primitives used:** `ent_of_cond_indep`, `entropy_triple_add_entropy_le`, `entropy_comm`, `entropy_assoc`, `entropy_comp_of_injective`, `mutualInfo_def`.
 
-**Alternative route (fallback, see Risk §7.1).** Expand to conditional entropies instead: `condMutualInfo_eq'` gives `I[X : Y | Z] = H[X | Z] - H[X | ⟨Y, Z⟩]`, so the hypothesis yields `H[X | Z] = H[X | ⟨Y, Z⟩]`. Submodularity `entropy_submodular hX hZ hY : H[X | ⟨Z, Y⟩] ≤ H[X | Y]` gives the other side. Bridging `H[X | ⟨Y, Z⟩] = H[X | ⟨Z, Y⟩]` still requires an inner-pair swap, so this route has no advantage over the H-expansion route unless a third-party helper for that swap exists.
+**Alternative route (fallback, see Risk §7.1).** If `ent_of_cond_indep` does not rewrite cleanly at the desired triple shape, fall back to the direct entropy derivation from `condMutualInfo_eq_zero` / `condMutualInfo_eq` / `chain_rule''`. That route is longer but remains local and uses the same pair-swap lemma.
 
 ## File layout
 
@@ -346,22 +355,20 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
 
 1. **Bootstrap + pre-flight checks.** In the `3-theorem-3` worktree: `bin/bootstrap-worktree`; confirm `make check` is green with M1 + M1.5 + M2 on `main`. Then run two pre-flight experiments in a scratch `.lean` file (delete after):
 
-    1. **PFR primitives grep.** Confirm `entropy_assoc` (Basic.lean:343), `entropy_comp_of_injective` (:160), `entropy_triple_add_entropy_le` (:1117), `entropy_submodular` (:1087), `condMutualInfo_eq'` (:956), `condEntropy_comm` (:531) all exist at the currently-pinned PFR revision. These are the new-to-M3 primitives; the M2 audit already covered the rest.
+    1. **PFR primitives grep.** Confirm `entropy_assoc` (Basic.lean:343), `entropy_comp_of_injective` (:160), `ent_of_cond_indep` (:1064), `entropy_triple_add_entropy_le` (:1117), `entropy_submodular` (:1087), `condMutualInfo_eq'` (:956), `condEntropy_comm` (:531) all exist at the currently-pinned PFR revision. These are the new-to-M3 primitives; the M2 audit already covered the rest.
     1. **`IdentDistrib.comp` rehearsal.** Apply `IdentDistrib.comp` to an example `hFirst`-shaped 4-variable `IdentDistrib` with a two-line projection `(a, b, c, d) ↦ (a, (c, d))` and confirm the resulting `IdentDistrib.mutualInfo_eq` invocation elaborates cleanly. This validates the `measurable_pairXZU` measurability pattern before the real use site.
 
     Halt on any failure; investigate before writing new module code.
 
-1. **Promote `condIndepFun_comp` from `ZhangYeung/CopyLemma.lean` to `ZhangYeung/Prelude.lean`.** This is a non-API-breaking refactor: the signature stays identical, only the visibility and the file changes. In `Prelude.lean`, land the lemma as a plain `lemma ZhangYeung.condIndepFun_comp ...` (public, namespaced). In `CopyLemma.lean`, drop the private copy and replace its three call sites (`copyLemma_condMI_X_Y₁_vanishes`, `copyLemma_condMI_X_X₁_vanishes`, and the `condIndepFun_comp` uses in the file) with `ZhangYeung.condIndepFun_comp` calls. Adjust docstrings: the M2 "private helpers" note (`ZhangYeung/CopyLemma.lean:34`) becomes a "promoted-to-Prelude" retrospective. `make check` must stay green. Commit as `refactor: promote condIndepFun_comp to Prelude`.
+1. **Promote `condIndepFun_comp` from `ZhangYeung/CopyLemma.lean` to `ZhangYeung/Prelude.lean`.** This is a non-API-breaking refactor: the signature stays identical, only the visibility and the file changes. In `Prelude.lean`, land the lemma as a plain `lemma ZhangYeung.condIndepFun_comp ...` (public, namespaced). In `CopyLemma.lean`, drop the private copy and replace its two use sites (`copyLemma_condMI_X_Y₁_vanishes` and `copyLemma_condMI_X_X₁_vanishes`) with `ZhangYeung.condIndepFun_comp` calls. Adjust docstrings: the M2 "private helpers" note (`ZhangYeung/CopyLemma.lean:34`) becomes a "promoted-to-Prelude" retrospective. `make check` must stay green. Commit as `refactor: promote condIndepFun_comp to Prelude`.
 
     Note: `IdentDistrib.condMutualInfo_eq` stays `private` in `CopyLemma.lean`. Update the M2 policy comment there to reflect that only `condIndepFun_comp` was promoted.
 
-1. **Scaffold `ZhangYeung/Theorem3.lean` with module docstring, imports, and the three public theorems stubbed with `sorry`.** Wire `ZhangYeung.lean` to re-export the new module. Confirm `lake build ZhangYeung.Theorem3` and `lake build ZhangYeung` both compile. Commit as `feat: scaffold Theorem 3 module with sorry stubs`.
-
-1. **Scaffold `ZhangYeungTest/Theorem3.lean` with signature-pinning `example`s for `zhangYeung`, `zhangYeung_dual`, `zhangYeung_averaged`.** Each restates the theorem's statement verbatim against the public API. Wire `ZhangYeungTest.lean` to import it. Confirm `lake test` passes. Commit as `test: scaffold API regression tests for Theorem 3`.
+1. **Scaffold `ZhangYeung/Theorem3.lean` and `ZhangYeungTest/Theorem3.lean` in the same change.** Add the module docstring, imports, and the three public theorem stubs in `ZhangYeung/Theorem3.lean`, add the matching signature-pinning `example`s for `zhangYeung`, `zhangYeung_dual`, `zhangYeung_averaged` in `ZhangYeungTest/Theorem3.lean`, and wire both top-level re-export files (`ZhangYeung.lean`, `ZhangYeungTest.lean`). This keeps the repo aligned with the project rule that every public `ZhangYeung/` module lands with its matching `ZhangYeungTest/` module in the same change. Confirm `lake build ZhangYeung.Theorem3`, `lake build ZhangYeung`, and `lake test` all pass. Commit as `feat: scaffold Theorem 3 module and API tests`.
 
 1. **Land `mutualInfo_add_three_way_identity` as a private helper inside `section Helpers`.** Pure Shannon algebra, ~25 tactic lines following the M2 `delta_of_condMI_vanishes_eq` template. Commit as `feat(theorem3): prove three-way interaction identity`.
 
-1. **Land `mutualInfo_le_of_condIndepFun` as a private helper inside `section Helpers`.** ~20 tactic lines; the inner-pair-swap step via `entropy_comp_of_injective` is the delicate piece. If it does not close at the default heartbeat budget, apply the split-before-bump lesson (`feedback_lean_split_before_bump.md`): factor the pair-swap identity `H[⟨X, ⟨Z, Y⟩⟩ ; μ] = H[⟨⟨X, Y⟩, Z⟩ ; μ]` out as its own ~4-line private lemma, then close the main lemma over that helper. Commit as `feat(theorem3): prove data processing from CondIndepFun`.
+1. **Land `mutualInfo_le_of_condIndepFun` as a private helper inside `section Helpers`.** ~15-20 tactic lines. Start from PFR's `ent_of_cond_indep`, combine it with `entropy_triple_add_entropy_le`, and isolate the inner-pair-swap step via `entropy_comp_of_injective`. If the pair swap does not close cleanly inline, apply the split-before-bump lesson (`feedback_lean_split_before_bump.md`): factor `H[⟨X, ⟨Z, Y⟩⟩ ; μ] = H[⟨X, ⟨Y, Z⟩⟩ ; μ]` out as its own ~4-line private lemma, then close the main helper over that rewrite. Commit as `feat(theorem3): prove data processing from CondIndepFun`.
 
 1. **Land `measurable_pairXZU` and `measurable_pairXY` projection helpers.** Each is a two-line `fun_prop` proof. Together they are one commit: `feat(theorem3): add projection measurabilities for Theorem 3 chase`.
 
@@ -369,11 +376,11 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
 
 1. **Land `zhangYeung` as a public theorem.** One-line proof using `delta_form21_iff.mpr` applied to `zhangYeung_integer`, scaled by `linarith` to convert `2 * delta ≤ ...` to `delta ≤ (1/2) * ...`. Commit as `feat(theorem3): state Theorem 3 in the paper form`.
 
-1. **Land `zhangYeung_dual`.** Proof: apply `zhangYeung_integer` with `X, Y` swapped, rewrite `mutualInfo_comm hY hX`, and convert via `delta_form22_iff.mpr` + `linarith`. ~5 lines. Commit as `feat(theorem3): derive the X-Y dual of Theorem 3 (eq. 22)`.
+1. **Land `zhangYeung_dual`.** Proof: apply `zhangYeung_integer` with `X, Y` swapped, rewrite the left-hand side by `delta_comm_cond`, rewrite `mutualInfo_comm hY hX`, and convert via `delta_form22_iff.mpr` + `linarith`. ~5 lines. Commit as `feat(theorem3): derive the X-Y dual of Theorem 3 (eq. 22)`.
 
 1. **Land `zhangYeung_averaged`.** Proof: combine `zhangYeung` and `zhangYeung_dual` (scaled back to `2 * delta ≤ ...` form via `linarith`), apply `delta_form23_of_form21_form22`, then `delta_form23_iff.mp`. ~8 lines. Commit as `feat(theorem3): derive the averaged symmetric form (eq. 23)`.
 
-1. **Expand `ZhangYeungTest/Theorem3.lean` to cover the full public API.** Steps 4 and 9-11 have established signature-pinning `example`s for the three public theorems; expand with:
+1. **Expand `ZhangYeungTest/Theorem3.lean` to cover the full public API.** Step 3 and steps 8-10 have established the signature-pinning `example`s and public theorems; expand with:
     - An independent-variable smoke test: for `X, Y, Z, U : Ω → Fin 2` with all four mutually independent under `μ`, all MI terms on the RHS of (21) collapse to 0 and the bound reads `delta Z U X Y μ ≤ 0`, which is `delta_le_mutualInfo` combined with `I[Z:U] = 0`.
     - A theorem-application test deriving the averaged form (23) from the public `zhangYeung` and `zhangYeung_dual` theorems plus the M1 form-conversion machinery. This is a direct cross-check that `zhangYeung_averaged`'s proof route is reconstructible from the two asymmetric theorems alone.
     - A pinned downstream-usage example: given concrete `Fin n`-valued `X, Y, Z, U`, consume `zhangYeung` and conclude a witness `2 * delta Z U X Y μ ≤ _` bound, exercising the full M2-to-M3 universe handling.
@@ -386,18 +393,18 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
 
 1. **Open the PR.** Title: `feat: prove Theorem 3, the Zhang-Yeung inequality`. Body links this plan and the roadmap, summarizes the three public theorems (eq. 21 headline, eq. 22 dual, eq. 23 averaged), and calls out the `condIndepFun_comp` promotion as a prerequisite refactor.
 
-If the `zhangYeung_integer` proof in step 8 sprawls past 50 lines without closing, halt and reconsider: either split the chase into per-step sub-lemmas (one for the three-way interaction + CMI drop combined, one for the data-processing step, one for the final linarith), or rescope the two Shannon helpers to take weaker hypothesis signatures that better match what `copyLemma`'s `obtain` produces. Recap the precedent: M2's `delta_of_condMI_vanishes_eq` was budgeted for 30-40 lines and landed at 39; `zhangYeung_integer`'s body is a strictly easier chase because all the Shannon algebra is already encapsulated in the two helper lemmas.
+If the `zhangYeung_integer` proof in step 7 sprawls past 50 lines without closing, halt and reconsider: either split the chase into per-step sub-lemmas (one for the three-way interaction + CMI drop combined, one for the data-processing step, one for the final linarith), or rescope the two Shannon helpers to take weaker hypothesis signatures that better match what `copyLemma`'s `obtain` produces. Recap the precedent: M2's `delta_of_condMI_vanishes_eq` was budgeted for 30-40 lines and landed at 39; `zhangYeung_integer`'s body is a strictly easier chase because all the Shannon algebra is already encapsulated in the two helper lemmas.
 
 ## Open questions and known risks
 
 ### 7.1 Data-processing helper's inner-pair swap (low-moderate)
 
-The `mutualInfo_le_of_condIndepFun` helper's proof needs to align `H[⟨X, ⟨Z, Y⟩⟩ ; μ]` (from `entropy_triple_add_entropy_le hX hZ hY`) with `H[⟨⟨X, Y⟩, Z⟩ ; μ]` (from the hypothesis expansion `condMutualInfo_eq hX hY hZ` + `chain_rule''`). The alignment routes through `entropy_assoc` + `entropy_comp_of_injective` (with the inner-pair-swap bijection). The `entropy_comp_of_injective` call needs an explicit `change` + an injectivity proof for `(a, c, b) ↦ ((a, b), c)` or similar.
+The `mutualInfo_le_of_condIndepFun` helper now starts from PFR's `ent_of_cond_indep`, but it still needs to align `H[⟨X, ⟨Z, Y⟩⟩ ; μ]` (from `entropy_triple_add_entropy_le hX hZ hY`) with `H[⟨X, ⟨Y, Z⟩⟩ ; μ]` (the triple shape `ent_of_cond_indep` returns). That alignment still routes through `entropy_assoc` + `entropy_comp_of_injective` with the inner-pair-swap bijection, so the only real implementation risk is the same pair-swap elaboration.
 
 **Mitigation (try in order):**
 
-1. Land the pair-swap identity `H[⟨X, ⟨Z, Y⟩⟩ ; μ] = H[⟨⟨X, Y⟩, Z⟩ ; μ]` as its own ~4-line private lemma inside `section Helpers`. Proof route: `entropy_assoc` + `entropy_comp_of_injective`. Then the data-processing proof consumes it as a single `rw`.
-1. If the `entropy_comp_of_injective` invocation is awkward because of universe / elaboration issues, use the alternative route via `condMutualInfo_eq'` + `entropy_submodular` + the conditional-pair swap (see the "Alternative route" note in the `mutualInfo_le_of_condIndepFun` section above). The conditional-pair swap is the same shape (`H[X | ⟨Y, Z⟩] = H[X | ⟨Z, Y⟩]`) and has the same difficulty, but the surrounding arithmetic is simpler.
+1. Land the pair-swap identity `H[⟨X, ⟨Z, Y⟩⟩ ; μ] = H[⟨X, ⟨Y, Z⟩⟩ ; μ]` as its own ~4-line private lemma inside `section Helpers`. Proof route: `entropy_assoc` + `entropy_comp_of_injective`. Then the data-processing proof consumes it as a single `rw` between `entropy_triple_add_entropy_le` and `ent_of_cond_indep`.
+1. If the `entropy_comp_of_injective` invocation is awkward because of universe / elaboration issues, fall back to the longer direct proof route via `condMutualInfo_eq_zero` + `condMutualInfo_eq` + `chain_rule''`, reusing the same pair-swap lemma once the triple entropy is on the page.
 1. If both routes stall, factor out the pair-swap identity as a public lemma promoted to `ZhangYeung/Prelude.lean`. That lemma is generically useful for any future Shannon chase involving 4+ variables.
 
 ### 7.2 Universe bookkeeping (carried over from M2)
@@ -408,9 +415,9 @@ The `mutualInfo_le_of_condIndepFun` helper's proof needs to align `H[⟨X, ⟨Z,
 
 ### 7.3 `condIndepFun_comp` promotion mechanics (low)
 
-Promoting a `private` helper to a `public` namespaced lemma requires changing the visibility, updating all call sites, and ensuring no downstream module accidentally imported the private name via a qualified path. M2 does not import `condIndepFun_comp` from outside `ZhangYeung/CopyLemma.lean`, so the three internal call sites inside `CopyLemma.lean` are the complete set.
+Promoting a `private` helper to a `public` namespaced lemma requires changing the visibility, updating all call sites, and ensuring no downstream module accidentally imported the private name via a qualified path. M2 does not import `condIndepFun_comp` from outside `ZhangYeung/CopyLemma.lean`, and the current tree has two actual use sites inside `CopyLemma.lean` (`copyLemma_condMI_X_Y₁_vanishes` and `copyLemma_condMI_X_X₁_vanishes`).
 
-**Mitigation:** run `grep -n "condIndepFun_comp" ZhangYeung/ ZhangYeungTest/` before and after the refactor; both passes should return the same call-site count (three internal), confirming no new consumer has crept in.
+**Mitigation:** run `grep -n "condIndepFun_comp" ZhangYeung/ ZhangYeungTest/` before and after the refactor; confirm the only non-docstring use sites are still those same two internal `CopyLemma.lean` applications, with no new downstream consumer.
 
 ### 7.4 `measurable_pairXZU` vs M2's `measurable_projZUA` naming clash (low)
 
@@ -428,7 +435,7 @@ $$
 $$
 2\, I[Z:U;\mu] - I[Z:U|X;\mu] - 3\, I[Z:U|Y;\mu] \le I[X:Y;\mu] + I[Y:\langle Z, U \rangle;\mu].
 $$
-These are `linarith`-equivalent but differ in term order on both LHS and RHS (`I[Y:X]` vs `I[X:Y]`, `-3 I[Z:U|Y] - I[Z:U|X]` vs `-I[Z:U|X] - 3 I[Z:U|Y]`). A single `rw [mutualInfo_comm hY hX]` handles the RHS; `linarith` handles the LHS reordering inside the final close.
+These are `linarith`-equivalent but differ in three small ways: the swapped theorem first produces `delta Z U Y X μ`, which must be rewritten back to `delta Z U X Y μ` via `delta_comm_cond`; the RHS has `I[Y:X]` instead of `I[X:Y]`; and the conditional-MI terms appear in the opposite order. After the `delta_comm_cond` and `mutualInfo_comm hY hX` rewrites, `linarith` handles the remaining arithmetic reordering.
 
 **Mitigation:** if the term ordering proves fragile, state an auxiliary `zhangYeung_dual_integer` matching `delta_form22_iff`'s RHS shape literally and route the `delta_form22_iff.mpr` call through it. One extra line, no proof-style cost.
 
@@ -437,6 +444,7 @@ These are `linarith`-equivalent but differ in term order on both LHS and RHS (`I
 The chase has seven intermediate facts (two copy-lemma inequalities, one three-way identity, one CMI nonneg, one data processing, two marginal transports) closing via `linarith`. The default heartbeat budget is comfortable for a seven-term `linarith` closure. Risk is low.
 
 **Mitigation:** if the `linarith` closure hits the heartbeat limit, extract the integer bound as an intermediate `have` with the explicit arithmetic written out:
+
 ```lean
 have h_combined :
     2 * I[Z : U ; μ] - 3 * I[Z : U | X ; μ] - I[Z : U | Y ; μ]
@@ -463,7 +471,7 @@ Operationally:
 - `lake lint` passes (batteries linter via the `lintDriver`).
 - `make check` passes in full.
 
-**Test module contents** (`ZhangYeungTest/Theorem3.lean`, established incrementally in sequencing steps 4, 9-11, and 12):
+**Test module contents** (`ZhangYeungTest/Theorem3.lean`, established incrementally in sequencing steps 3 and 8-11):
 
 1. Signature-pinning `example` for each of the three public theorems (`zhangYeung`, `zhangYeung_dual`, `zhangYeung_averaged`). Snapshot against accidental drift in hypothesis order, universe bindings, or conclusion shape. Three `example`s.
 1. Independent-variable smoke test: for `X, Y, Z, U : Ω → Fin 2` with all four mutually independent under `μ`, the inequality collapses to `delta Z U X Y μ ≤ 0`, recoverable from `delta_le_mutualInfo` + `I[Z:U] = 0`. This is a sanity check that `zhangYeung` does not produce nontrivial bounds on trivially independent inputs.
@@ -472,7 +480,7 @@ Operationally:
 
 Each `example` lives inside `namespace ZhangYeungTest` with `open ZhangYeung`, following `ZhangYeungTest/Delta.lean`, `ZhangYeungTest/Theorem2.lean`, and `ZhangYeungTest/CopyLemma.lean`.
 
-Land these in the same commits as the corresponding public surface (signatures in step 4, integer form in step 8, public theorems in steps 9-11, smoke / application / downstream tests in step 12, same branch), so `lake test` exercises the public API continuously through the milestone.
+Land these in the same commits as the corresponding public surface (signatures in step 3, integer form in step 7, public theorems in steps 8-10, smoke / application / downstream tests in step 11, same branch), so `lake test` exercises the public API continuously through the milestone.
 
 **Out-of-scope for M3** (documented here so M4 and M5 can pick them up):
 
@@ -488,7 +496,7 @@ Land these in the same commits as the corresponding public surface (signatures i
 - `ZhangYeung/Theorem3.lean` (new).
 - `ZhangYeungTest/Theorem3.lean` (new).
 - `ZhangYeung/Prelude.lean` (modified: add `condIndepFun_comp` promoted from `CopyLemma.lean`).
-- `ZhangYeung/CopyLemma.lean` (modified: remove the private `condIndepFun_comp`, update three call sites to use the promoted version, adjust the helpers-section docstring).
+- `ZhangYeung/CopyLemma.lean` (modified: remove the private `condIndepFun_comp`, update its two internal use sites to use the promoted version, adjust the helpers-section docstring).
 - `ZhangYeung.lean` (modified, add one `import` line).
 - `ZhangYeungTest.lean` (modified, add one `import` line).
 - `AGENTS.md` / `CLAUDE.md` (modified, two-line addition under "Module Layout", plus a note on the `Prelude` change).
