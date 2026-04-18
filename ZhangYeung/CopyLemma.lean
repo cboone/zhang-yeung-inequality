@@ -171,15 +171,14 @@ theorem delta_of_condMI_vanishes_eq
         - I[B : C | ⟨A, D⟩ ; ν] := by
   have hBC : Measurable (fun ω => (B ω, C ω)) := hB.prodMk hC
   have hAD : Measurable (fun ω => (A ω, D ω)) := hA.prodMk hD
-  -- `ProbabilityTheory.condMutualInfo_eq` is fully qualified below because the `private IdentDistrib.condMutualInfo_eq` helper at the top of this file shadows PFR's `condMutualInfo_eq` via dot notation under `open ProbabilityTheory`.
   rw [delta_def,
       mutualInfo_def B C ν, mutualInfo_def A D ν,
-      ProbabilityTheory.condMutualInfo_eq hB hC hA ν,
-      ProbabilityTheory.condMutualInfo_eq hB hC hD ν,
-      ProbabilityTheory.condMutualInfo_eq hA hD hB ν,
-      ProbabilityTheory.condMutualInfo_eq hA hD hC ν,
-      ProbabilityTheory.condMutualInfo_eq hB hC hAD ν]
-  rw [ProbabilityTheory.condMutualInfo_eq hA hD hBC ν] at hVanish
+      condMutualInfo_eq hB hC hA ν,
+      condMutualInfo_eq hB hC hD ν,
+      condMutualInfo_eq hA hD hB ν,
+      condMutualInfo_eq hA hD hC ν,
+      condMutualInfo_eq hB hC hAD ν]
+  rw [condMutualInfo_eq hA hD hBC ν] at hVanish
   rw [chain_rule'' ν hB hA, chain_rule'' ν hC hA, chain_rule'' ν hBC hA,
       chain_rule'' ν hB hD, chain_rule'' ν hC hD, chain_rule'' ν hBC hD,
       chain_rule'' ν hA hB, chain_rule'' ν hD hB, chain_rule'' ν hAD hB,
