@@ -23,13 +23,15 @@ The proof rests on the copy lemma, which identifies the inequality as genuinely 
 | M0        | Project scaffolding                      | done        |
 | M1        | Delta equational lemmas                  | done        |
 | M1.5      | Theorem 2 (standalone conditional result)| done        |
-| M2        | The copy lemma                           | planned     |
+| M2        | The copy lemma                           | done        |
 | M3        | Theorem 3 (main inequality)              | planned     |
 | M4        | Theorem 4 (Shannon-cone separation)      | planned     |
 | M5        | Theorem 5 (stretch goal)                 | planned     |
 | M6        | Polish and release                       | planned     |
 
 M1.5 is complete: the public `ZhangYeung.theorem2` is fully proved with no `sorry`. The proof factors into (a) a Shannon-algebra reduction of the target inequality to `Δ(Z, U | X, Y) ≤ 0` under the hypotheses `I[X:Y] = I[X:Y|Z] = 0`, and (b) a non-Shannon closing argument via the [@zhangyeung1997] auxiliary `p̃`/`p̂` PMF construction and `Real.sum_mul_log_div_leq`. Kaced and Romashchenko [@kaced2013] classify this inequality as essentially conditional -- it fails on the closure of the entropic region, so no Lagrange combination of Shannon-type inequalities and the premises suffices, and the KL route is effectively the only known proof. To our knowledge this is the first formalization of any non-Shannon-type information inequality in any proof assistant.
+
+M2 is complete: the copy lemma of [@zhangyeung1998, §III eqs. 44-45] is formalized as the existential `copyLemma`, which wraps PFR's `ProbabilityTheory.condIndep_copies` on the pair `⟨X, Y⟩` conditioned on the shared variable `⟨Z, U⟩` and produces an extended law `ν` with a second conditionally-independent copy `(X₁, Y₁)` of `(X, Y)` over `(Z, U)`. Lemma 2 of the same paper (eq. 45) ships both as the abstract Shannon identity `delta_of_condMI_vanishes_eq`, which holds whenever a single conditional mutual information vanishes, and as six Zhang-Yeung-flavored corollaries specialized to the copy's projections: `copyLemma_delta_transport_Y_to_Y₁` and `copyLemma_delta_transport_X_to_X₁` transport `Δ` between `μ` and `ν`; `copyLemma_delta_identity_Y₁` and `copyLemma_delta_identity_X_X₁` instantiate Lemma 2 at the copy; and `copyLemma_delta_le_mutualInfo_Y₁` and `copyLemma_delta_le_mutualInfo_X_X₁` combine the identity with nonnegativity of the three conditional-mutual-information terms on its right-hand side to yield the two `Δ ≤ I(·;·)` inequalities that feed the Shannon chase for Theorem 3.
 
 The full roadmap is in [`docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md`](docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md).
 
@@ -42,11 +44,12 @@ The full roadmap is in [`docs/plans/todo/2026-04-15-zhang-yeung-formalization-ro
 
 ## Module Layout
 
-- [`ZhangYeung.lean`](ZhangYeung.lean) — project entrypoint; re-exports `ZhangYeung.Prelude`, `ZhangYeung.Delta`, and `ZhangYeung.Theorem2`.
+- [`ZhangYeung.lean`](ZhangYeung.lean) — project entrypoint; re-exports `ZhangYeung.CopyLemma`, `ZhangYeung.Delta`, `ZhangYeung.Prelude`, and `ZhangYeung.Theorem2`.
 - [`ZhangYeung/Prelude.lean`](ZhangYeung/Prelude.lean) — import surface for PFR's entropy API.
 - [`ZhangYeung/Delta.lean`](ZhangYeung/Delta.lean) — M1 delta quantity and equational lemmas (`delta_def`, `delta_comm_cond`, `delta_comm_main`, `delta_self`, `delta_eq_entropy`, `form21_iff`, `form22_iff`, `form23_iff`, `form23_of_form21_form22`, `delta_le_mutualInfo`).
 - [`ZhangYeung/Theorem2.lean`](ZhangYeung/Theorem2.lean) — M1.5 Zhang-Yeung conditional information inequality (`theorem2`), a standalone formalization of the first known non-Shannon-type conditional information inequality; factored into a Shannon-algebra reduction (`theorem2_shannon_identity`) and the KL-divergence core (`theorem2_delta_le_zero`) with supporting lemmas `ptilde_sum_eq_one`, `phat_sum_eq_one`, `delta_eq_sum_log_ratio`, `sum_joint_eq_sum_ptilde`.
-- [`ZhangYeungTest.lean`](ZhangYeungTest.lean) + [`ZhangYeungTest/Delta.lean`](ZhangYeungTest/Delta.lean) + [`ZhangYeungTest/Theorem2.lean`](ZhangYeungTest/Theorem2.lean) — compile-time API regression tests for each module.
+- [`ZhangYeung/CopyLemma.lean`](ZhangYeung/CopyLemma.lean): M2 Zhang-Yeung copy lemma (§III eqs. 44-45 of the 1998 paper); ships the `copyLemma` existential (a thin wrapper over PFR's `ProbabilityTheory.condIndep_copies`), the abstract Lemma 2 `delta_of_condMI_vanishes_eq`, and six copy-projection corollaries (`copyLemma_delta_transport_Y_to_Y₁`, `copyLemma_delta_transport_X_to_X₁`, `copyLemma_delta_identity_Y₁`, `copyLemma_delta_identity_X_X₁`, `copyLemma_delta_le_mutualInfo_Y₁`, `copyLemma_delta_le_mutualInfo_X_X₁`) covering the two delta transports, two delta identities, and two `Δ ≤ I(·;·)` inequalities feeding the Shannon chase for Theorem 3.
+- [`ZhangYeungTest.lean`](ZhangYeungTest.lean) + [`ZhangYeungTest/Delta.lean`](ZhangYeungTest/Delta.lean) + [`ZhangYeungTest/Theorem2.lean`](ZhangYeungTest/Theorem2.lean) + [`ZhangYeungTest/CopyLemma.lean`](ZhangYeungTest/CopyLemma.lean) — compile-time API regression tests for each module.
 
 ## Build and Verify
 
