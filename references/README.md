@@ -21,7 +21,7 @@ PDF extraction tools, the Mathpix submission script, verification helpers (Pando
 
 ## Current entries
 
-| Key | Paper | Transcription |
+| Key | Paper | Materials |
 | --- | --- | --- |
 | `zhangyeung1998` | Zhang and Yeung, *On Characterization of Entropy Function via Information Inequalities*, IEEE TIT 44(4), 1998 | [zhangyeung1998.md](transcriptions/zhangyeung1998.md) |
 | `zhangyeung1997` | Zhang and Yeung, *A Non-Shannon Type Conditional Inequality of Information Quantities*, IEEE TIT 43(6), 1997 | Source PDF at [zhangyeung1997.pdf](papers/zhangyeung1997.pdf); primary reference for the M1.5 Theorem 2 proof via KL divergence |
