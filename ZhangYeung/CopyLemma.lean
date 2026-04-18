@@ -318,6 +318,44 @@ private lemma copyLemma_condMI_X_X₁_vanishes
     (condIndepFun_comp (φ := Prod.fst) (ψ := Prod.fst)
       measurable_fst measurable_fst hCond)
 
+/-! ##### Lemma 2 Form B (specialized to the copy projections)
+
+`delta_of_condMI_vanishes_eq` applied to the copy's `(X', Y₁, Z', U')` and `(X', X₁, Z', U')` projections, with the vanishing-CMI hypothesis supplied by the projected conditional-independence facts. -/
+
+/-- **Lemma 2 Form B (primary).** The delta identity of Lemma 2 instantiated at the copy's `(X', Y₁, Z', U')` projections:
+
+  `Δ(Z', U' | X', Y₁) = I[X' : Y₁] - I[X' : Y₁ | Z'] - I[X' : Y₁ | U'] - I[Z' : U' | ⟨X', Y₁⟩]`
+
+under the copy measure `ν`. The vanishing-CMI hypothesis is derived from the main `CondIndepFun` by projecting each measured pair to one coordinate. -/
+theorem copyLemma_delta_identity_Y₁
+    (hX' : Measurable X') (hY₁ : Measurable Y₁)
+    (hZ' : Measurable Z') (hU' : Measurable U')
+    (hCond : CondIndepFun (fun ω' => (X' ω', Y' ω'))
+                          (fun ω' => (X₁ ω', Y₁ ω'))
+                          (fun ω' => (Z' ω', U' ω')) ν) :
+    delta Z' U' X' Y₁ ν
+      = I[X' : Y₁ ; ν] - I[X' : Y₁ | Z' ; ν] - I[X' : Y₁ | U' ; ν]
+        - I[Z' : U' | ⟨X', Y₁⟩ ; ν] :=
+  delta_of_condMI_vanishes_eq hX' hZ' hU' hY₁ ν
+    (copyLemma_condMI_X_Y₁_vanishes (Y' := Y') hX' hY₁ hCond)
+
+omit [Fintype S₂] [MeasurableSingletonClass S₂] in
+/-- **Lemma 2 Form B (symmetric).** The delta identity of Lemma 2 instantiated at the copy's `(X', X₁, Z', U')` projections, the `X ↔ X₁` swap of `copyLemma_delta_identity_Y₁`:
+
+  `Δ(Z', U' | X', X₁) = I[X' : X₁] - I[X' : X₁ | Z'] - I[X' : X₁ | U'] - I[Z' : U' | ⟨X', X₁⟩]`
+
+under the copy measure `ν`. -/
+theorem copyLemma_delta_identity_X_X₁
+    (hX' : Measurable X') (hX₁ : Measurable X₁) (hZ' : Measurable Z') (hU' : Measurable U')
+    (hCond : CondIndepFun (fun ω' => (X' ω', Y' ω'))
+                          (fun ω' => (X₁ ω', Y₁ ω'))
+                          (fun ω' => (Z' ω', U' ω')) ν) :
+    delta Z' U' X' X₁ ν
+      = I[X' : X₁ ; ν] - I[X' : X₁ | Z' ; ν] - I[X' : X₁ | U' ; ν]
+        - I[Z' : U' | ⟨X', X₁⟩ ; ν] :=
+  delta_of_condMI_vanishes_eq hX' hZ' hU' hX₁ ν
+    (copyLemma_condMI_X_X₁_vanishes (Y' := Y') (Y₁ := Y₁) hX' hX₁ hCond)
+
 end Finite
 
 end Consequences
