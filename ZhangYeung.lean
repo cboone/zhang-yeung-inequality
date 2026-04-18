@@ -1,4 +1,5 @@
 /- Zhang-Yeung inequality: a Lean 4 formalization of the Zhang-Yeung conditional information inequality for Shannon entropy. -/
+import ZhangYeung.CopyLemma
 import ZhangYeung.Delta
 import ZhangYeung.Prelude
 import ZhangYeung.Theorem2
