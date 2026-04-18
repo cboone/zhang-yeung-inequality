@@ -3,7 +3,7 @@ title: "Non-Shannon inequality discovery: a post-Zhang-Yeung research program"
 created: 2026-04-17
 status: exploratory
 scope: research program spanning multiple Lean milestones, external tooling, and publishable mathematical results. Not a single implementation plan.
-depends_on: M2 (copy lemma, `docs/plans/todo/2026-04-17-copy-lemma.md`); downstream, M3 (Zhang-Yeung 1998 full proof) and the DFZ/Matús formalizations catalogued in `docs/research/post-zhang-yeung-extension-survey.md`.
+depends_on: M2 (copy lemma, `docs/plans/done/2026-04-17-copy-lemma.md`); downstream, M3 (Zhang-Yeung 1998 full proof) and the DFZ/Matús formalizations catalogued in `docs/research/post-zhang-yeung-extension-survey.md`.
 ---
 
 ## Status
@@ -159,4 +159,4 @@ Parallel track: Track B phases 1 and 3 can complete alongside Track A phases 1-4
 - ITIP / Xitip / psitip / AITIP tool suite. See `docs/research/post-zhang-yeung-extension-survey.md` §5 for URLs.
 - This project's extension survey: `docs/research/post-zhang-yeung-extension-survey.md`.
 - This project's formalization roadmap: `docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md`.
-- M2 plan: `docs/plans/todo/2026-04-17-copy-lemma.md`.
+- M2 plan: `docs/plans/done/2026-04-17-copy-lemma.md`.
