@@ -420,6 +420,56 @@ theorem copyLemma_delta_transport_X_to_X₁
   rw [delta_def, delta_def]
   linarith [e1, e2, e3]
 
+/-- **Primary inequality form of Lemma 2.** Combining the Y-to-Y₁ delta transport with Form B and the nonnegativity of the three subtracted conditional mutual informations on the right of eq. (45) gives
+
+  `Δ(Z, U | X, Y) μ ≤ I[X' : Y₁ ; ν]`,
+
+the first of the two inequalities Theorem 3's proof opens with on paper line 683. -/
+theorem copyLemma_delta_le_mutualInfo_Y₁
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (hX' : Measurable X') (hY₁ : Measurable Y₁)
+    (hZ' : Measurable Z') (hU' : Measurable U')
+    (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
+                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+    (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
+                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+    (hCond : CondIndepFun (fun ω' => (X' ω', Y' ω'))
+                          (fun ω' => (X₁ ω', Y₁ ω'))
+                          (fun ω' => (Z' ω', U' ω')) ν) :
+    delta Z U X Y μ ≤ I[X' : Y₁ ; ν] := by
+  rw [copyLemma_delta_transport_Y_to_Y₁ hX hY hZ hU hX' hY₁ hZ' hU' hFirst hSecond,
+      copyLemma_delta_identity_Y₁ hX' hY₁ hZ' hU' hCond]
+  have h1 : 0 ≤ I[X' : Y₁ | Z' ; ν] := condMutualInfo_nonneg hX' hY₁
+  have h2 : 0 ≤ I[X' : Y₁ | U' ; ν] := condMutualInfo_nonneg hX' hY₁
+  have h3 : 0 ≤ I[Z' : U' | ⟨X', Y₁⟩ ; ν] := condMutualInfo_nonneg hZ' hU'
+  linarith
+
+omit [Fintype S₂] [MeasurableSingletonClass S₂] in
+/-- **Symmetric inequality form of Lemma 2.** The `X ↔ X₁` variant,
+
+  `I[Z : U ; μ] - 2·I[Z : U | X ; μ] ≤ I[X' : X₁ ; ν]`,
+
+the second of the two inequalities Theorem 3's proof opens with on paper line 689. -/
+theorem copyLemma_delta_le_mutualInfo_X_X₁
+    (hX : Measurable X) (hZ : Measurable Z) (hU : Measurable U)
+    (hX' : Measurable X') (hX₁ : Measurable X₁)
+    (hZ' : Measurable Z') (hU' : Measurable U')
+    (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
+                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+    (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
+                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+    (hCond : CondIndepFun (fun ω' => (X' ω', Y' ω'))
+                          (fun ω' => (X₁ ω', Y₁ ω'))
+                          (fun ω' => (Z' ω', U' ω')) ν) :
+    I[Z : U ; μ] - 2 * I[Z : U | X ; μ] ≤ I[X' : X₁ ; ν] := by
+  rw [← delta_self Z U X μ,
+      copyLemma_delta_transport_X_to_X₁ hX hZ hU hX' hX₁ hZ' hU' hFirst hSecond,
+      copyLemma_delta_identity_X_X₁ hX' hX₁ hZ' hU' hCond]
+  have h1 : 0 ≤ I[X' : X₁ | Z' ; ν] := condMutualInfo_nonneg hX' hX₁
+  have h2 : 0 ≤ I[X' : X₁ | U' ; ν] := condMutualInfo_nonneg hX' hX₁
+  have h3 : 0 ≤ I[Z' : U' | ⟨X', X₁⟩ ; ν] := condMutualInfo_nonneg hZ' hU'
+  linarith
+
 end Transport
 
 end Consequences
