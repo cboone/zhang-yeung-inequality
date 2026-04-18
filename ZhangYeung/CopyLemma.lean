@@ -149,6 +149,59 @@ theorem copyLemma
       measurable_fst.comp hV, measurable_snd.comp hV,
       hIdent₁.comp hr, hIdent₂.comp hr, hCond⟩
 
+/-! ### Lemma 2 (abstract Shannon identity) -/
+
+/-- **Lemma 2 (abstract form) of [@zhangyeung1998, §III, eq. 45].** For any four discrete random variables `A, B, C, D` on a probability space `(Ω, ν)` with `I[A : D | ⟨B, C⟩ ; ν] = 0`,
+
+  `Δ(B, C | A, D) = I[A : D] - I[A : D | B] - I[A : D | C] - I[B : C | ⟨A, D⟩]`.
+
+This is the paper's eq. (45) abstracted away from the copy construction: the identity holds whenever one conditional mutual information vanishes. The three subtracted conditional mutual informations on the right are each nonnegative, so this identity immediately implies the paper's inequality form `Δ(B, C | A, D) ≤ I[A : D]` via `linarith`. -/
+theorem delta_of_condMI_vanishes_eq
+    {Ω : Type*} [MeasurableSpace Ω]
+    {α β γ δ : Type*}
+    [Fintype α] [Fintype β] [Fintype γ] [Fintype δ]
+    [MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ] [MeasurableSpace δ]
+    [MeasurableSingletonClass α] [MeasurableSingletonClass β]
+    [MeasurableSingletonClass γ] [MeasurableSingletonClass δ]
+    {A : Ω → α} {B : Ω → β} {C : Ω → γ} {D : Ω → δ}
+    (hA : Measurable A) (hB : Measurable B) (hC : Measurable C) (hD : Measurable D)
+    (ν : Measure Ω) [IsProbabilityMeasure ν]
+    (hVanish : I[A : D | ⟨B, C⟩ ; ν] = 0) :
+    delta B C A D ν
+      = I[A : D ; ν] - I[A : D | B ; ν] - I[A : D | C ; ν]
+        - I[B : C | ⟨A, D⟩ ; ν] := by
+  have hBC : Measurable (fun ω => (B ω, C ω)) := hB.prodMk hC
+  have hAD : Measurable (fun ω => (A ω, D ω)) := hA.prodMk hD
+  rw [delta_def,
+      mutualInfo_def B C ν, mutualInfo_def A D ν,
+      ProbabilityTheory.condMutualInfo_eq hB hC hA ν,
+      ProbabilityTheory.condMutualInfo_eq hB hC hD ν,
+      ProbabilityTheory.condMutualInfo_eq hA hD hB ν,
+      ProbabilityTheory.condMutualInfo_eq hA hD hC ν,
+      ProbabilityTheory.condMutualInfo_eq hB hC hAD ν]
+  rw [ProbabilityTheory.condMutualInfo_eq hA hD hBC ν] at hVanish
+  rw [chain_rule'' ν hB hA, chain_rule'' ν hC hA, chain_rule'' ν hBC hA,
+      chain_rule'' ν hB hD, chain_rule'' ν hC hD, chain_rule'' ν hBC hD,
+      chain_rule'' ν hA hB, chain_rule'' ν hD hB, chain_rule'' ν hAD hB,
+      chain_rule'' ν hA hC, chain_rule'' ν hD hC, chain_rule'' ν hAD hC,
+      chain_rule'' ν hB hAD, chain_rule'' ν hC hAD, chain_rule'' ν hBC hAD]
+  rw [chain_rule'' ν hA hBC, chain_rule'' ν hD hBC, chain_rule'' ν hAD hBC] at hVanish
+  have e_BA : H[⟨B, A⟩ ; ν] = H[⟨A, B⟩ ; ν] := entropy_comm hB hA ν
+  have e_CA : H[⟨C, A⟩ ; ν] = H[⟨A, C⟩ ; ν] := entropy_comm hC hA ν
+  have e_BD : H[⟨B, D⟩ ; ν] = H[⟨D, B⟩ ; ν] := entropy_comm hB hD ν
+  have e_CD : H[⟨C, D⟩ ; ν] = H[⟨D, C⟩ ; ν] := entropy_comm hC hD ν
+  have e_ADB : H[⟨fun ω => (A ω, D ω), B⟩ ; ν] = H[⟨B, fun ω => (A ω, D ω)⟩ ; ν] :=
+    entropy_comm hAD hB ν
+  have e_ADC : H[⟨fun ω => (A ω, D ω), C⟩ ; ν] = H[⟨C, fun ω => (A ω, D ω)⟩ ; ν] :=
+    entropy_comm hAD hC ν
+  have e_ABC : H[⟨A, fun ω => (B ω, C ω)⟩ ; ν] = H[⟨fun ω => (B ω, C ω), A⟩ ; ν] :=
+    entropy_comm hA hBC ν
+  have e_DBC : H[⟨D, fun ω => (B ω, C ω)⟩ ; ν] = H[⟨fun ω => (B ω, C ω), D⟩ ; ν] :=
+    entropy_comm hD hBC ν
+  have e_ADBC : H[⟨fun ω => (A ω, D ω), fun ω => (B ω, C ω)⟩ ; ν]
+      = H[⟨fun ω => (B ω, C ω), fun ω => (A ω, D ω)⟩ ; ν] := entropy_comm hAD hBC ν
+  linarith [e_BA, e_CA, e_BD, e_CD, e_ADB, e_ADC, e_ABC, e_DBC, e_ADBC]
+
 /-! ### Consequences
 
 The lemmas in this section are parametrized on the outputs of `copyLemma`. A caller destructures `copyLemma` once via `obtain`, producing the eight structural hypotheses (six measurabilities, two 4-variable `IdentDistrib`s, one `CondIndepFun`), and applies these lemmas one by one. -/
