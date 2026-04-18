@@ -171,6 +171,7 @@ theorem delta_of_condMI_vanishes_eq
         - I[B : C | ⟨A, D⟩ ; ν] := by
   have hBC : Measurable (fun ω => (B ω, C ω)) := hB.prodMk hC
   have hAD : Measurable (fun ω => (A ω, D ω)) := hA.prodMk hD
+  -- `ProbabilityTheory.condMutualInfo_eq` is fully qualified below because the `private IdentDistrib.condMutualInfo_eq` helper at the top of this file shadows PFR's `condMutualInfo_eq` via dot notation under `open ProbabilityTheory`.
   rw [delta_def,
       mutualInfo_def B C ν, mutualInfo_def A D ν,
       ProbabilityTheory.condMutualInfo_eq hB hC hA ν,
