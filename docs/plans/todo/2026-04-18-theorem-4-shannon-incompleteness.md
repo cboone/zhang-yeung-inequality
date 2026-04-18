@@ -222,6 +222,8 @@ lemma entropyFn_quad :
       = H[⟨X 0, ⟨X 1, ⟨X 2, X 3⟩⟩⟩ ; μ]
 ```
 
+All per-subset bridge lemmas are stated under `[IsProbabilityMeasure μ]`. `entropyFn_empty` needs it because `H[·; μ]` of a constant random variable collapses to `log (μ Set.univ).toReal`, which is `0` only when `μ` is a probability measure; the other evaluations need it because PFR's `H[⟨·, ·⟩; μ]` and `H[·|·; μ]` API lemmas consumed downstream are themselves stated under probability normalization.
+
 Each of these is an entropy-of-tuple identity obtained by transporting across an `Equiv` between the subtype `{i // i ∈ α}` and the standard `Fin α.card`. In the current PFR pin, the concrete entropy transport tool exposed here is `entropy_comp_of_injective`; the plan should not assume an `IdentDistrib.entropy_eq` lemma that is not presently available. The pair version also uses `entropy_comm` to absorb the two possible orderings of `{i, j}`.
 
 For the bridge (Part (c)), the per-subset lemmas feed into a single permutation-indexed identity:
@@ -265,7 +267,7 @@ All declarations live under `namespace ProbabilityTheory` unless noted.
 - `Finset.union`, `Finset.inter`, `Finset.subset_iff`, `Finset.Singleton` (literal `{x}`), `Finset.insert` -- the primitive set operations consumed by `I_F`, `condI_F`, `delta_F`.
 - `Finset.card_empty`, `Finset.card_singleton`, `Finset.card_insert_of_not_mem` -- unfold cardinality on concrete literals.
 - `Rat.cast_le`, `Rat.cast_lt`, `Rat.cast_add`, `Rat.cast_mul` -- push the `ℚ`-valued witness through to `ℝ`.
-- `Equiv.Perm (Fin 4)`, `Equiv.swap`, `Equiv.Perm.mul_apply` -- permutation handling in `zhangYeungHolds` and the violation proof.
+- `Equiv.Perm (Fin 4)`, `Equiv.swap`, and the `Equiv.Perm` multiplication simp set (`Equiv` composition is `Equiv.trans`, so evaluation-at-a-point on `π * σ` normalizes through `Equiv.trans_apply` together with `Equiv.swap_apply_left`, `Equiv.swap_apply_right`, and `Equiv.swap_apply_of_ne_of_ne`) -- permutation handling in `zhangYeungHolds` and the violation proof.
 - `Fintype ((i : α) → S i.1)` for `α : Finset (Fin 4)` (via `Finset.Fintype.coeSort` + dependent `Pi.fintype`) -- required for the heterogeneous `entropyFn` to elaborate.
 - `MeasurableSpace.pi`, measurability of coordinate projections -- required for `Measurable (fun ω => fun i : α => X i.val ω)`.
 
@@ -446,7 +448,7 @@ theorem theorem4_closure :
         False
 ```
 
-This version states: F_witness is not the pointwise limit of any sequence of set functions in $\tilde{\Gamma}_4$ -- which, via `zhangYeungHolds_of_entropy`, implies it is not the pointwise limit of entropy functions. Proof: zhangYeungHolds is a finite conjunction of $\le$-inequalities, each preserved under pointwise limits; so the limit F satisfies zhangYeungHolds, contradicting `not_zhangYeungHolds_witness`. Budget ~15-30 tactic lines.
+This version is strictly stronger than "F_witness is not a pointwise limit of entropy functions": it quantifies over every sequence in $\tilde{\Gamma}_4$, not just over sequences of entropy functions, and the entropy sequences are a proper subset of $\tilde{\Gamma}_4$ sequences by `zhangYeungHolds_of_entropy`. So the closure statement proved at the $\tilde{\Gamma}_4$ level implies the paper's stated closure $\bar{\Gamma}^*_4 \neq \Gamma_4$ at $n = 4$, but does not require unwinding the $\Gamma^*_4$ definition. Reflect this widening in the theorem's docstring so a reader does not mistake it for the literal closure statement. Proof: zhangYeungHolds is a finite conjunction of $\le$-inequalities, each preserved under pointwise limits; so the limit F satisfies zhangYeungHolds, contradicting `not_zhangYeungHolds_witness`. Budget ~15-30 tactic lines.
 
 ### Optional stretch: n ≥ 4 extension
 
@@ -527,7 +529,7 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
 
     Halt on failure; investigate before writing module code.
 
-1. **Freeze the bridge representation before scaffolding.** Confirm in a scratch file that the public theorem statements will use the heterogeneous family `S : Fin 4 → Type u`, that `zhangYeungAt_entropyFn` can call M3's `zhangYeung` with explicit measurability hypotheses in the order `(hX (π 2)) (hX (π 3)) (hX (π 0)) (hX (π 1))`, and that the intended transport route is `entropy_comp_of_injective` plus the currently-exposed PFR transports. Only once those signatures are stable should the module surface be scaffolded.
+1. **Freeze the bridge representation before scaffolding.** Confirm in a scratch file that the public theorem statements will use the heterogeneous family `S : Fin 4 → Type u`, that `zhangYeungAt_entropyFn` can call M3's `zhangYeung` with explicit measurability hypotheses in the order `(hX (π 2)) (hX (π 3)) (hX (π 0)) (hX (π 1))`, and that the intended transport route is `entropy_comp_of_injective` plus the currently-exposed PFR transports. Also elaborate the `theorem4` signature once in that same scratch file (existential in `F`, then universe-polymorphic `∀ {Ω : Type u} ... {S : Fin 4 → Type u} ...`) to confirm Lean accepts the universe-variable binding inside the existential body before any proof obligation depends on it. Only once those signatures are stable should the module surface be scaffolded.
 
 1. **Scaffold `ZhangYeung/Theorem4.lean` and `ZhangYeungTest/Theorem4.lean` in the same change.** Add the module docstring, imports (`ZhangYeung.Theorem3` only), the empty `namespace ZhangYeung`, and `sorry` stubs for the core public surface listed in §The M4 theorems. Add signature-pinning `example`s in `ZhangYeungTest/Theorem4.lean` (one per public definition/theorem stub). Wire both top-level re-export files. Confirm `lake build ZhangYeung.Theorem4`, `lake build ZhangYeung`, `lake build ZhangYeungTest`, and `lake test` all pass. Commit as `feat: scaffold Theorem 4 module and API tests`.
 
@@ -566,7 +568,7 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
 
 1. **Update `AGENTS.md` (aka `CLAUDE.md`) Module Layout.** Add one line pointing to `ZhangYeung/Theorem4.lean` and one line pointing to `ZhangYeungTest/Theorem4.lean`. Amend the `ZhangYeung.lean` entrypoint bullet to include the new re-export. Commit as `docs: document Theorem 4 module in CLAUDE.md`.
 
-1. **Run `make check`.** Address any remaining lint or build issues; update `cspell-words.txt` with any new tokens ("counterexample", "tildeΓ", "submodular", "entropyFn"). Commit any cspell/lint adjustments as `chore: address lint feedback`.
+1. **Run `make check`.** Address any remaining lint or build issues; update `cspell-words.txt` with whatever new ASCII tokens cspell flags. Likely candidates are `entropyFn`, `submodular`, and `counterexample`; the $\tilde{\Gamma}_4$ rendering mixes Greek and ASCII, so cspell's tokenizer skips it and no entry is needed. Commit any cspell/lint adjustments as `chore: address lint feedback`.
 
 1. **Move the plan from `todo/` to `done/`** in the final commit. Commit as `chore: move completed M4 plan from todo to done`.
 
@@ -602,7 +604,7 @@ Part (c)'s per-subset lemmas (`entropyFn_empty` through `entropyFn_quad`) each r
 
 ### 11.3 Permutation-indexed bridge proof bookkeeping (moderate)
 
-`zhangYeungAt_entropyFn` unfolds into five `F`-evaluations and needs to rewrite each into a joint entropy. For a fixed permutation `π`, the five evaluations are at `{π 0}`, `{π 2, π 3}`, `{π 0, π 1}`, `{π 0, π 1, π 2}`, `{π 0, π 1, π 3}`, `{π 2}`, `{π 3}`, `{π 2, π 0, π 1}` — depending on which `zhangYeungAt` sub-expression we look at. The rewrite chain is long.
+`zhangYeungAt_entropyFn` unfolds into twelve distinct `F`-evaluations and needs to rewrite each into a joint entropy. For a fixed permutation `π` with `(i, j, k, l) = (π 0, π 1, π 2, π 3)`, the twelve evaluations decompose as: four singletons `{i}`, `{j}`, `{k}`, `{l}`; six pairs `{i, j}`, `{i, k}`, `{i, l}`, `{j, k}`, `{j, l}`, `{k, l}`; and two triples `{i, j, k}`, `{i, j, l}`. The quad `{i, j, k, l}` does not appear. The rewrite chain is long.
 
 **Mitigation:**
 
