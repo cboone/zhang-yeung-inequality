@@ -1,4 +1,5 @@
 adhesive
+ADBC
 aemeasurable
 Affeldt
 antisymm
@@ -27,7 +28,10 @@ cooldown
 Csirmaz
 Csirmaz's
 Degenne's
+derivability
+destructures
 Diggavi
+Distribs
 Discr
 dists
 exfalso
@@ -46,6 +50,7 @@ fibrewise
 fibring
 finitary
 Finset
+Frobenius
 Fintype
 formalizable
 Freiling
@@ -65,6 +70,7 @@ HXZU
 HYZU
 Indep
 infotheo
+informations
 Ingleton
 injective
 ISIT
@@ -84,12 +90,15 @@ Mathlib
 Mathpix
 matroid
 matroids
+measurabilities
+metaprogram
 Matús
 Matúš
 Matveev
 minitip
 nbij
 Motzkin
+nilpotent
 noncomputable
 nonneg
 nonnegativity
@@ -98,6 +107,7 @@ olean
 oleans
 opencode
 Pandoc
+parameterizations
 phat
 pointwise
 preimage
@@ -116,6 +126,7 @@ psitip
 Pulikkoonattu
 readlink
 rcases
+repackings
 reindexing
 representability
 reweights

@@ -113,8 +113,7 @@ theorem copyLemma
     {S₁ S₂ S₃ S₄ : Type u}
     [MeasurableSpace S₁] [MeasurableSpace S₂]
     [MeasurableSpace S₃] [MeasurableSpace S₄]
-    [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
-    [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
+    [Fintype S₃] [Fintype S₄]
     [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y)
