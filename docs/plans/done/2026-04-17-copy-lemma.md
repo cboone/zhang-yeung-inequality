@@ -7,9 +7,9 @@ milestone: M2
 depends_on: M1 (`ZhangYeung/Delta.lean`, merged into `main` via PR #4). This branch is currently based on `formalize/1.5-theorem-2` (Theorem 2 / M1.5), which has not yet merged into `main`. M1.5's proof is not a prerequisite for M2: M1.5's final proof took the 1997 KL route and exercises none of the kernel/`condIndep_copies` machinery M2 depends on. The M1.5 branch does, however, pin the same PFR revision and verifies the bootstrap script under the current toolchain; once M1.5 merges, rebase this branch onto `main` rather than keeping it stacked.
 ---
 
-## Status (2026-04-17): draft
+## Status (2026-04-17): complete
 
-Not yet started. `ZhangYeung/CopyLemma.lean`, `ZhangYeungTest/CopyLemma.lean`, and the associated re-exports from `ZhangYeung.lean` / `ZhangYeungTest.lean` do not exist on this branch.
+All 14 sequencing steps landed on `formalize/2-copy-lemma`. See the `Outcome` section at the end of this document.
 
 ## Context
 
@@ -602,3 +602,27 @@ Out-of-scope for M2 (documented here so M3 can pick them up):
 - `.lake/packages/mathlib/Mathlib/Probability/Independence/Basic.lean` (`IndepFun.comp` at line 799, the target-side post-composition lemma that `condIndepFun_comp` dispatches to fibrewise).
 
 Reference: the `write-lean-code` skill is authoritative for Lean naming and proof style; the `write-math` skill governs the module docstring and any mathematical prose inside comments; the `write-pandoc-markdown` skill governs this plan document.
+
+## Outcome (2026-04-17)
+
+All 14 sequencing steps landed across 14 commits on `formalize/2-copy-lemma` (`364a8b9` through `d9e622f`). `make check` green on every commit.
+
+**Public surface landed.** All eight theorems enumerated in the plan's `Public surface` section are in place: `copyLemma`, `delta_of_condMI_vanishes_eq`, `copyLemma_delta_transport_Y_to_Y₁`, `copyLemma_delta_transport_X_to_X₁`, `copyLemma_delta_identity_Y₁`, `copyLemma_delta_identity_X_X₁`, `copyLemma_delta_le_mutualInfo_Y₁`, `copyLemma_delta_le_mutualInfo_X_X₁`. `ZhangYeungTest/CopyLemma.lean` contains a signature-pin `example` for each, plus a concrete `Fin 2`-valued downstream-usage example and a Shannon-chase smoke test combining both inequality corollaries.
+
+**Private helpers landed.** The two generic helpers `condIndepFun_comp` and `IdentDistrib.condMutualInfo_eq` landed as `private` in `section Helpers`, three triple-level `IdentDistrib` helpers in `section TripleIdentDistribs`, and two conditional-MI vanishing lemmas in `section Finite`. Two measurable projection helpers (`projZUA`, `projZUB`) package the 4-tuple repackings into named definitions rather than lambdas to keep `fun_prop` on solid ground.
+
+**No `maxHeartbeats` bumps.** Risk §7.3 predicted the abstract Form A `delta_of_condMI_vanishes_eq` might need a bump; in practice, the proof closed in 39 tactic lines at default heartbeats on the first attempt, following the M1.5 `theorem2_shannon_identity` template (expand every MI/condMI to entropy, apply chain rule, align orderings with `entropy_comm`, close by `linarith`).
+
+**Three Lean/PFR notes that informed the final proofs.**
+
+1. PFR's `condMutualInfo_eq` is declared inside a file-scope `variable {μ : Measure Ω}` block *and* takes `(μ : Measure Ω)` as an explicit positional arg, so unqualified `condMutualInfo_eq hX hY hZ μ` type-checks only when the local namespace does not shadow the name. Inside `CopyLemma.lean`, the local private `IdentDistrib.condMutualInfo_eq` helper shadowed PFR's via `open ProbabilityTheory` + dot notation, so calls had to be fully qualified as `ProbabilityTheory.condMutualInfo_eq`. Noted here because it surprised the author, not because the helper name is wrong.
+
+2. `condIndepFun_comp (φ := Prod.fst) (ψ := Prod.snd) measurable_fst measurable_snd hCond` needed explicit named-implicit `(φ := Prod.fst)` / `(ψ := Prod.snd)` annotations: with only positional `measurable_fst measurable_snd`, Lean's bidirectional elaboration unified the return-type `CondIndepFun X' Y₁ _ _` with the parameter shape `CondIndepFun (φ ∘ f) (ψ ∘ g) k μ` by setting `φ := X'` and `f := id`, which then required `measurable_fst : Measurable X'` (wrong). Pinning `φ` and `ψ` explicitly sidestepped this.
+
+3. `copyLemma_delta_transport_X_to_X₁` could not use `rw [delta_def, delta_def, ..., IdentDistrib.condMutualInfo_eq hZ hU hX ..., IdentDistrib.condMutualInfo_eq hZ hU hX ...]` because both `rw` targets share the same LHS pattern `I[Z : U | X ; μ]` (the μ-side has `X` in both conditioner slots of `delta Z U X X μ`), so the first rewrite consumes both occurrences. Closing by `linarith` over the three `have` transport equalities sidestepped the ambiguity. `Y_to_Y₁` does not have this issue because the two conditioners are `X` and `Y`.
+
+**Linter feedback (landed in `d9e622f`).** `runLinter` flagged `Fintype S₁`, `Fintype S₂`, `MeasurableSingletonClass S₁`, `MeasurableSingletonClass S₂` as unused arguments in `copyLemma`'s signature: `condIndep_copies` only requires these on the shared-variable side (`S₃`, `S₄`); the `X`-`Y` pair side needs only `MeasurableSpace`. The four instances were dropped from the signature; the downstream corollaries supply their own `Fintype S₁`, `Fintype S₂` as needed. `cspell-words.txt` grew by eleven entries for the vocabulary introduced in the module docstring (`ADBC`, `derivability`, `destructures`, `Distribs`, `Frobenius`, `informations`, `measurabilities`, `metaprogram`, `nilpotent`, `parameterizations`, `repackings`).
+
+**Section-variable tuning.** The `omit [Fintype S₂] [MeasurableSingletonClass S₂] in` directive lands before the docstring (not between docstring and `lemma`) per the Mathlib convention. It suppresses the `unusedSectionVars` warning for `copyLemma_condMI_X_X₁_vanishes`, `copyLemma_delta_identity_X_X₁`, `copyLemma_delta_transport_X_to_X₁`, and `copyLemma_delta_le_mutualInfo_X_X₁` -- all `X_X₁`-flavored lemmas that reference `Y'` / `Y₁` only through the `CondIndepFun` hypothesis but do not exercise the `S₂` discrete-alphabet instances.
+
+**Final file sizes.** `ZhangYeung/CopyLemma.lean`: 476 lines. `ZhangYeungTest/CopyLemma.lean`: 224 lines.
