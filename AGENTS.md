@@ -38,15 +38,17 @@ The `make build` target also guards against this: it checks for Mathlib artifact
 
 ## Module Layout
 
-- `ZhangYeung.lean`: project entrypoint (re-exports `ZhangYeung.CopyLemma`, `ZhangYeung.Delta`, `ZhangYeung.Prelude`, and `ZhangYeung.Theorem2`)
-- `ZhangYeung/Prelude.lean`: import surface for PFR's entropy API
+- `ZhangYeung.lean`: project entrypoint (re-exports `ZhangYeung.CopyLemma`, `ZhangYeung.Delta`, `ZhangYeung.Prelude`, `ZhangYeung.Theorem2`, and `ZhangYeung.Theorem3`)
+- `ZhangYeung/Prelude.lean`: import surface for PFR's entropy API, plus the generic `ZhangYeung.condIndepFun_comp` helper (post-composition of PFR's random-variable-form `CondIndepFun` by measurable codomain functions, promoted from `ZhangYeung/CopyLemma.lean` in M3)
 - `ZhangYeung/Delta.lean`: M1 delta quantity and equational lemmas
 - `ZhangYeung/Theorem2.lean`: M1.5 Zhang-Yeung conditional information inequality (Theorem 2 of the 1998 paper, via a KL-divergence argument on auxiliary `p̃`/`p̂` PMFs)
 - `ZhangYeung/CopyLemma.lean`: M2 Zhang-Yeung copy lemma (§III eqs. 44-45 of the 1998 paper) -- `copyLemma` existential, abstract Lemma 2 `delta_of_condMI_vanishes_eq`, and the six copy-projection corollaries (two transports, two identities, two inequalities)
+- `ZhangYeung/Theorem3.lean`: M3 Zhang-Yeung inequality (Theorem 3 of the 1998 paper, §III eqs. 21-23) -- `zhangYeung` (eq. 21), `zhangYeung_dual` (eq. 22), and `zhangYeung_averaged` (eq. 23), proved by the Shannon chase on the copy joint and routed through the M1 form-conversion lemmas
 - `ZhangYeungTest.lean`: top-level re-export for Lean API tests
 - `ZhangYeungTest/Delta.lean`: compile-time API regression tests for the delta module
 - `ZhangYeungTest/Theorem2.lean`: compile-time API regression tests for the Theorem 2 module
 - `ZhangYeungTest/CopyLemma.lean`: compile-time API regression tests for the copy lemma module
+- `ZhangYeungTest/Theorem3.lean`: compile-time API regression tests for the Theorem 3 module
 
 ## Namespace Convention
 
