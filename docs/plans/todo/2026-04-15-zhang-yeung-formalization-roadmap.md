@@ -244,6 +244,7 @@ M6 (polish)
 - All steps are Shannon-type; the non-Shannon character enters only through the copy lemma.
 - Prove (21) as the headline theorem, derive (22) by the X <-> Y swap, and (23) by averaging.
 - **Testing:** `ZhangYeungTest/Theorem3.lean` should include an independent-variable smoke test and a theorem-application test that derives the averaged form (23) from the public theorem plus the M1 form-conversion lemmas.
+- **Prelude promotion:** M2 left two private helpers in `ZhangYeung/CopyLemma.lean` (`condIndepFun_comp` and `IdentDistrib.condMutualInfo_eq`) under a "promote to `ZhangYeung/Prelude.lean` when a second module needs them" policy. M3 is the likely first consumer; if `Theorem3.lean` references either helper, promote it to the prelude in the same change rather than importing it across modules privately.
 - **Checkpoint:** `theorem zhangYeung ... : delta Z U X Y mu <= (1/2) * (I[X : Y; mu] + I[X : (Z, U); mu] + I[Z : U | X; mu] - I[Z : U | Y; mu])` with all hypotheses explicit; averaged corollary `delta Z U X Y mu <= (1/2) * I[X : Y; mu] + (1/4) * (I[X : (Z, U); mu] + I[Y : (Z, U); mu])` follows mechanically, and the theorem test module builds.
 
 ### M4: Theorem 4
