@@ -69,6 +69,7 @@ hphat
 Hoelzl
 HXZU
 HYZU
+implicits
 Indep
 infotheo
 informations
