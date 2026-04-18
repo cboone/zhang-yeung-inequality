@@ -13,8 +13,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   {S₁ S₂ S₃ S₄ : Type u}
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
-  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
-  [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
+  [Fintype S₃] [Fintype S₄]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
 
 /- Pinned signature: re-state `copyLemma` verbatim, exercising the six
