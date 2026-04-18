@@ -174,6 +174,20 @@ Each commit stands alone and leaves `make check` green. If any step introduces a
 - `make check` is green on every commit of the four-commit sequence.
 - Total file length is expected to drop from 1651 lines to roughly 1150 to 1250 lines; no new public declarations added.
 
+## Outcome (2026-04-17)
+
+Commits A (90d813f), B (8513269), D (d2c2f9e) landed. Commit C was skipped.
+
+**Commit A: marginal helpers routed through Mathlib/PFR.** `sum_map_pair_first`, `sum_map_pair_second`, `sum_map_triple_first`, and `indepFun_map_pair_real_singleton` were reduced to two- or three-line proofs via `Measure.map_map` + `measureReal_preimage_{fst,snd}_singleton_eq_sum` + `indepFun_iff_map_prod_eq_prod_map_map` + `Measure.prod_real_singleton`. `sum_map_triple_second`, `sum_map_triple_third`, and the four marginal bound lemmas were left in place; a reshape-based replacement would have been a lateral move since Mathlib's `preimage_{fst,snd}_singleton_eq_sum` covers only 2-tuples directly. Net: 37 lines saved.
+
+**Commit B: eleven `hEq_*` blocks unified via `ptilde_filter_sum_eq_reindex`.** The new helper takes the embed/extract functions plus their three inversion properties and runs `Finset.sum_nbij'` once. Each of the eleven `hEq_*` bodies now reads as an `apply marg_swap_helper`, a destructure, a single `rw [ptilde_filter_sum_eq_reindex μ embed extract proj c h₁ h₂ h₃]`, and the existing `sum_ptilde_over_*` call. Net: 62 lines saved. File dropped to 1552 lines.
+
+**Commit C: skipped.** A survey of the file showed 99 call sites to the 2- and 3-coord `p*` abbreviations alone; hoisting them to module scope would either require passing `X Y Z U μ` explicitly at every call site (net worse) or restructuring both large proofs into a new section with `variable {X Y Z U}` + `(μ)` bindings. Either change exceeded the expected ~30-line savings. `L`'s body references the `p*` family, so hoisting only `L` would either inflate its body with direct `μ.map` expressions or force the `p*` hoist as well. The plan's own risk section ("`abbrev` vs `def` for `L`") flagged this tradeoff; in practice the call-site cost dominated. Recorded as not-worth-the-churn.
+
+**Commit D: one bump halved, one unchanged.** `delta_eq_sum_log_ratio` dropped from `3200000` to `1600000` (half). `sum_joint_eq_sum_ptilde` stayed at `2400000`: the `ptilde_filter_sum_eq_reindex` helper calls cost roughly what the inline `Finset.sum_nbij'` blocks did, because the helper takes three hypothesis arguments that re-elaborate at every call. Both bumps now carry a one-line WHY comment.
+
+Final file length: 1554 lines (from 1651). Net savings 97 lines, below the 400-to-500-line plan estimate but above the Commit-A-alone baseline. `make check` green on every commit.
+
 ## References
 
 - This plan's predecessor: `docs/plans/done/2026-04-16-theorem-2-conditional-warm-up.md` (the M1.5 plan that landed `Theorem2.lean`).
