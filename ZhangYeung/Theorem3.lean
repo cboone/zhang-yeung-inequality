@@ -67,7 +67,14 @@ private lemma mutualInfo_add_three_way_identity
     (μ : Measure Ω) [IsProbabilityMeasure μ] :
     I[X : Y ; μ] + I[X : Z ; μ]
       = I[X : ⟨Y, Z⟩ ; μ] + I[Y : Z ; μ] - I[Y : Z | X ; μ] := by
-  sorry
+  have hYZ : Measurable (fun ω => (Y ω, Z ω)) := hY.prodMk hZ
+  simp only [mutualInfo_def]
+  rw [condMutualInfo_eq hY hZ hX μ,
+      chain_rule'' μ hY hX, chain_rule'' μ hZ hX, chain_rule'' μ hYZ hX]
+  have e_XY : H[⟨X, Y⟩ ; μ] = H[⟨Y, X⟩ ; μ] := entropy_comm hX hY μ
+  have e_XZ : H[⟨X, Z⟩ ; μ] = H[⟨Z, X⟩ ; μ] := entropy_comm hX hZ μ
+  have e_X_YZ : H[⟨X, ⟨Y, Z⟩⟩ ; μ] = H[⟨⟨Y, Z⟩, X⟩ ; μ] := entropy_comm hX hYZ μ
+  linarith [e_XY, e_XZ, e_X_YZ]
 
 /-- Data processing for PFR's random-variable form of `CondIndepFun`: if `X` and `Y` are conditionally independent given `Z`, then `I[X : Y] ≤ I[X : Z]`. Consumed inside `zhangYeung_integer` at step 4 of the chase (paper line 708). -/
 private lemma mutualInfo_le_of_condIndepFun
