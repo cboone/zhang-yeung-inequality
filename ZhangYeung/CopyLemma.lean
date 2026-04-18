@@ -224,6 +224,49 @@ private lemma copyLemma_triple_XSecond
 
 end TripleIdentDistribs
 
+/-! #### Finite-alphabet consequences
+
+The lemmas below all require discrete/countable side conditions on the four codomains plus an `IsProbabilityMeasure` instance on the copy measure `ν`. -/
+
+section Finite
+
+variable {S₁ S₂ S₃ S₄ : Type*}
+  [MeasurableSpace S₁] [MeasurableSpace S₂]
+  [MeasurableSpace S₃] [MeasurableSpace S₄]
+  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
+  [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
+  {Ω' : Type*} [MeasurableSpace Ω']
+  {ν : Measure Ω'} [IsProbabilityMeasure ν]
+  {X' : Ω' → S₁} {Y' : Ω' → S₂}
+  {X₁ : Ω' → S₁} {Y₁ : Ω' → S₂}
+  {Z' : Ω' → S₃} {U' : Ω' → S₄}
+
+/-- `I[X' : Y₁ | ⟨Z', U'⟩ ; ν] = 0`: the conditional-MI vanishing fact the abstract Lemma 2 Form A consumes. Derived from the main `CondIndepFun` by projecting each measured pair to one coordinate (first-copy `X'`, second-copy `Y₁`). -/
+private lemma copyLemma_condMI_X_Y₁_vanishes
+    (hX' : Measurable X') (hY₁ : Measurable Y₁)
+    (hCond : CondIndepFun (fun ω' => (X' ω', Y' ω'))
+                          (fun ω' => (X₁ ω', Y₁ ω'))
+                          (fun ω' => (Z' ω', U' ω')) ν) :
+    I[X' : Y₁ | fun ω' => (Z' ω', U' ω') ; ν] = 0 :=
+  (condMutualInfo_eq_zero hX' hY₁).mpr
+    (condIndepFun_comp (φ := Prod.fst) (ψ := Prod.snd)
+      measurable_fst measurable_snd hCond)
+
+omit [Fintype S₂] [MeasurableSingletonClass S₂] in
+/-- `I[X' : X₁ | ⟨Z', U'⟩ ; ν] = 0`: the symmetric companion to `copyLemma_condMI_X_Y₁_vanishes` used by the `X ↔ X₁` variant of Lemma 2. Derived by projecting each measured pair to its first coordinate. -/
+private lemma copyLemma_condMI_X_X₁_vanishes
+    (hX' : Measurable X') (hX₁ : Measurable X₁)
+    (hCond : CondIndepFun (fun ω' => (X' ω', Y' ω'))
+                          (fun ω' => (X₁ ω', Y₁ ω'))
+                          (fun ω' => (Z' ω', U' ω')) ν) :
+    I[X' : X₁ | fun ω' => (Z' ω', U' ω') ; ν] = 0 :=
+  (condMutualInfo_eq_zero hX' hX₁).mpr
+    (condIndepFun_comp (φ := Prod.fst) (ψ := Prod.fst)
+      measurable_fst measurable_fst hCond)
+
+end Finite
+
 end Consequences
 
 end ZhangYeung
