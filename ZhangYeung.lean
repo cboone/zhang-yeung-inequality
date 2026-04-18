@@ -3,3 +3,4 @@ import ZhangYeung.CopyLemma
 import ZhangYeung.Delta
 import ZhangYeung.Prelude
 import ZhangYeung.Theorem2
+import ZhangYeung.Theorem3

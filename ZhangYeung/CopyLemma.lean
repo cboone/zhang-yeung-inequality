@@ -31,7 +31,7 @@ The four codomains `S₁, S₂, S₃, S₄` are bound at a common universe `u` b
 
 The derived corollaries (delta transports, delta identities, delta ≤ mutualInfo) live in their own `section Consequences` with a shared `variable` block packaging the eight relevant hypotheses (six measurabilities, two `IdentDistrib`s, one `CondIndepFun`). A caller of `copyLemma` produces these eight hypotheses with one `obtain`, then applies the corollaries as black-box Shannon identities.
 
-Two generic helpers used by the module -- `condIndepFun_comp` (post-composition of `CondIndepFun` on its two measured coordinates) and `IdentDistrib.condMutualInfo_eq` (conditional-mutual-information transport under a three-variable `IdentDistrib`) -- are kept `private` here. If later milestones need them, promote to `ZhangYeung/Prelude.lean` at that point.
+`ZhangYeung.condIndepFun_comp` (post-composition of `CondIndepFun` on its two measured coordinates) was promoted to `ZhangYeung/Prelude.lean` when M3 became its second consumer. `IdentDistrib.condMutualInfo_eq` (conditional-mutual-information transport under a three-variable `IdentDistrib`) is still `private` here; M3 does not need it, but a later milestone that transports a conditional mutual information across the copy law could motivate promotion.
 
 ## References
 
@@ -50,22 +50,9 @@ universe u
 
 /-! ### Generic helpers
 
-Two primitives the main construction depends on: a target-side post-composition for PFR's random-variable form of `CondIndepFun` (Mathlib's `CondIndepFun.comp` uses the σ-algebra form and does not apply here), and a conditional-mutual-information transport lemma under a three-variable `IdentDistrib` (PFR exposes `IdentDistrib.mutualInfo_eq` and `IdentDistrib.condEntropy_eq` but not this conditional variant). Both helpers are `private` here; if later milestones need them, promote to `ZhangYeung/Prelude.lean`. -/
+One primitive the main construction depends on: a conditional-mutual-information transport lemma under a three-variable `IdentDistrib` (PFR exposes `IdentDistrib.mutualInfo_eq` and `IdentDistrib.condEntropy_eq` but not this conditional variant). It is `private` here; if a later milestone needs it, promote to `ZhangYeung/Prelude.lean`. The companion helper `ZhangYeung.condIndepFun_comp` (post-composition of `CondIndepFun` on its two measured coordinates) lives in `ZhangYeung/Prelude.lean`: it was promoted there when M3 became its second consumer. -/
 
 section Helpers
-
-/-- Post-composition of a `CondIndepFun` statement on its two measured coordinates by independent measurable functions `φ` and `ψ`. The conditioner `k` is unchanged. Proof: unfold via `condIndepFun_iff` to a fibrewise `∀ᵐ`-family of `IndepFun` statements, apply Mathlib's `IndepFun.comp` inside each fibre, and repackage. -/
-private lemma condIndepFun_comp
-    {Ω α α' β β' γ : Type*}
-    [MeasurableSpace Ω] [MeasurableSpace α] [MeasurableSpace α']
-    [MeasurableSpace β] [MeasurableSpace β'] [MeasurableSpace γ]
-    {μ : Measure Ω} {f : Ω → α} {g : Ω → β} {k : Ω → γ}
-    {φ : α → α'} {ψ : β → β'}
-    (hφ : Measurable φ) (hψ : Measurable ψ) (h : CondIndepFun f g k μ) :
-    CondIndepFun (φ ∘ f) (ψ ∘ g) k μ := by
-  rw [condIndepFun_iff] at h ⊢
-  filter_upwards [h] with z hfg
-  exact hfg.comp hφ hψ
 
 /-- Substituting variables for identically-distributed ones leaves the conditional mutual information unchanged. PFR's `IdentDistrib.condEntropy_eq` and `IdentDistrib.mutualInfo_eq` cover the `condEntropy` and `mutualInfo` cases respectively; this lemma combines the two to transport `condMutualInfo` under a three-variable `IdentDistrib` on the packed triple `⟨X, Y, Z⟩`. The three sub-`IdentDistrib`s for `⟨X, Z⟩`, `⟨Y, Z⟩`, and `⟨⟨X, Y⟩, Z⟩` are extracted from the triple by one `IdentDistrib.comp` with a measurable projection each. -/
 private lemma IdentDistrib.condMutualInfo_eq
@@ -307,7 +294,7 @@ private lemma copyLemma_condMI_X_Y₁_vanishes
                           (fun ω' => (Z' ω', U' ω')) ν) :
     I[X' : Y₁ | fun ω' => (Z' ω', U' ω') ; ν] = 0 :=
   (condMutualInfo_eq_zero hX' hY₁).mpr
-    (condIndepFun_comp (φ := Prod.fst) (ψ := Prod.snd)
+    (ZhangYeung.condIndepFun_comp (φ := Prod.fst) (ψ := Prod.snd)
       measurable_fst measurable_snd hCond)
 
 omit [Fintype S₂] [MeasurableSingletonClass S₂] in
@@ -319,7 +306,7 @@ private lemma copyLemma_condMI_X_X₁_vanishes
                           (fun ω' => (Z' ω', U' ω')) ν) :
     I[X' : X₁ | fun ω' => (Z' ω', U' ω') ; ν] = 0 :=
   (condMutualInfo_eq_zero hX' hX₁).mpr
-    (condIndepFun_comp (φ := Prod.fst) (ψ := Prod.fst)
+    (ZhangYeung.condIndepFun_comp (φ := Prod.fst) (ψ := Prod.fst)
       measurable_fst measurable_fst hCond)
 
 /-! ##### Lemma 2 Form B (specialized to the copy projections)
