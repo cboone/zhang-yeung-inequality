@@ -916,7 +916,8 @@ private lemma entropy_eq_sum_joint
       rw [(Finset.mem_filter.mp ht).2]]
   rw [sum_filter_map_real_eq_map_comp hF hproj μ b]
 
-set_option maxHeartbeats 3200000 in
+-- The eleven sequential entropy-lift rewrites (`hHZ … hHYZU`) plus the terminal 12-entry `rw` chain overshoot the default heartbeat budget.
+set_option maxHeartbeats 1600000 in
 /-- **`Δ` as a weighted-log sum.** The identity `Δ(Z, U | X, Y) = ∑_{x,y,z,u} p(x,y,z,u) · log (p̂(x,y,z,u) / p̃(x,y,z,u))` obtained by expanding each of `I[Z:U]`, `I[Z:U|X]`, `I[Z:U|Y]` via `entropy_eq_sum_joint` over the 4-tuple marginal and combining the eleven lifted contributions. The right-hand side is the raw form of Zhang-Yeung 1997's eq. (41). -/
 private lemma delta_eq_sum_log_ratio
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
@@ -1130,6 +1131,7 @@ private lemma ptilde_filter_sum_eq_reindex
     exact h_embed_extract t ht
   · intro _ _; rfl
 
+-- The eleven `ptilde_filter_sum_eq_reindex` applications each elaborate three hypothesis arguments against a freshly-constructed 4-tuple reindex; the aggregate exceeds the default budget.
 set_option maxHeartbeats 2400000 in
 /-- **Marginal swap.** Every factor appearing in the log-ratio `p̂ / p̃` is a marginal distribution common to `p` and `p̃` -- the full list is `{p(z,u), p(x,z), p(x,u), p(y,z), p(y,u), p(x,z,u), p(y,z,u), p(z), p(u), p(x), p(y)}`. The `p`-weighted sum therefore agrees with the `p̃`-weighted sum on each factor, and the eleven summands recombine to `∑ p̃ · log(p̂ / p̃)`. This is the key observation of [@zhangyeung1997] that converts Shannon-type quantities into the KL-divergence-amenable form. -/
 private lemma sum_joint_eq_sum_ptilde
