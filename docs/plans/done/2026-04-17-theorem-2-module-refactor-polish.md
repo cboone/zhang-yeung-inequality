@@ -188,6 +188,22 @@ Commits A (90d813f), B (8513269), D (d2c2f9e) landed. Commit C was skipped.
 
 Final file length: 1554 lines (from 1651). Net savings 97 lines, below the 400-to-500-line plan estimate but above the Commit-A-alone baseline. `make check` green on every commit.
 
+### Postscript (follow-up commit `aa1f3a2`)
+
+After Commit D landed, a brief user question about whether Mathlib's >800000-heartbeat tech-debt line could be cleared prompted a fifth commit that eliminated both surviving bumps entirely.
+
+**Mechanism.** Extract the eleven per-projection marginal-swap facts from `sum_joint_eq_sum_ptilde` into their own top-level `private lemma`s (`sum_joint_swap_proj_xz` … `sum_joint_swap_proj_yzu`). Because `set_option maxHeartbeats` is enforced *per declaration*, splitting the single large proof into twelve (eleven extracted + one slim combiner) gave each piece its own fresh 200000 budget. The slim combiner just invokes eleven pre-compiled closed terms, which elaborates nearly for free.
+
+**Result.**
+
+- `delta_eq_sum_log_ratio`: `1600000` → default `200000` (bump removed).
+- `sum_joint_eq_sum_ptilde`: `2400000` → default `200000` (bump removed).
+- Build time for `ZhangYeung.Theorem2`: ~70s → ~3.5s.
+- File size: 1554 → 1642 lines (+88 for the eleven extracted signatures).
+- No `set_option maxHeartbeats` anywhere in the module. Every declaration fits Mathlib's default budget.
+
+**Takeaway.** When a Lean declaration wants `maxHeartbeats` above the ~400000 soft threshold, *split into sub-lemmas first, optimize tactically second*. The four commits A/B/D above tactically shrank both proofs by ~100 lines, compressed ~240 lines of marginal-swap boilerplate, and routed helpers through Mathlib/PFR — all worthwhile, but they left bumps 8× and 12× over default. A single structural split did the work of those four commits on the heartbeat axis, confirming the Mathlib folklore that extraction is order-of-magnitude more effective than tactical tweaking.
+
 ## References
 
 - This plan's predecessor: `docs/plans/done/2026-04-16-theorem-2-conditional-warm-up.md` (the M1.5 plan that landed `Theorem2.lean`).
