@@ -162,7 +162,7 @@ private lemma phat_nonneg
 
 Pair and triple pushforward helpers -- marginal summation over each coordinate, pointwise marginal bounds, the `IndepFun` product formula, and the fibrewise-swap identity. All are stated generically (on abstract `Ω' / α / β / γ`) so they apply independently of this module's `X, Y, Z, U` variables. -/
 
-/-- Marginal summation for pairs: summing the pair-joint over the *first* coordinate recovers the marginal of `g`. -/
+/-- **Marginal summation for pairs (first coordinate).** `∑ₐ (μ.map ⟨f,g⟩).real {(a, b)} = (μ.map g).real {b}`: summing the joint pair-pushforward over `a` recovers the `g`-marginal at `b`. Proved by viewing `μ.map g` as the `Prod.snd`-pushforward of `μ.map ⟨f,g⟩` (via `Measure.map_map`) and then PFR's `measureReal_preimage_snd_singleton_eq_sum` (the `.real`-valued lift of Mathlib's sum-over-fibre identity). -/
 private lemma sum_map_pair_first
     {α β : Type*} [Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]
     [MeasurableSpace β] [MeasurableSingletonClass β]
@@ -177,7 +177,7 @@ private lemma sum_map_pair_first
       map_measureReal_apply measurable_snd (measurableSet_singleton b),
       measureReal_preimage_snd_singleton_eq_sum]
 
-/-- Marginal summation for pairs: summing the pair-joint over the *second* coordinate recovers the marginal of `f`. -/
+/-- **Marginal summation for pairs (second coordinate).** `∑_b (μ.map ⟨f,g⟩).real {(a, b)} = (μ.map f).real {a}`: symmetric to `sum_map_pair_first`, routed through `Measure.map_map` + `measureReal_preimage_fst_singleton_eq_sum`. -/
 private lemma sum_map_pair_second
     {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
     [Fintype β] [MeasurableSpace β] [MeasurableSingletonClass β]
@@ -192,7 +192,7 @@ private lemma sum_map_pair_second
       map_measureReal_apply measurable_fst (measurableSet_singleton a),
       measureReal_preimage_fst_singleton_eq_sum]
 
-/-- Marginal summation for triples: summing over the *first* coordinate recovers the `(g, h)` marginal. -/
+/-- **Marginal summation for triples (first coordinate).** `∑ₐ (μ.map ⟨f,g,h⟩).real {(a, b, c)} = (μ.map ⟨g,h⟩).real {(b, c)}`: viewing the triple pushforward as a measure on `α × (β × γ)`, this is `sum_map_pair_first` applied to the outer factorization. Routes through `Measure.map_map` + `measureReal_preimage_snd_singleton_eq_sum` at `(b, c)`. -/
 private lemma sum_map_triple_first
     {α β γ : Type*} [Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]
     [MeasurableSpace β] [MeasurableSingletonClass β]
@@ -209,7 +209,7 @@ private lemma sum_map_triple_first
       map_measureReal_apply measurable_snd (measurableSet_singleton (b, c)),
       measureReal_preimage_snd_singleton_eq_sum]
 
-/-- Marginal summation for triples: summing over the *second* coordinate recovers the `(f, h)` marginal. -/
+/-- **Marginal summation for triples (second coordinate).** `∑_b (μ.map ⟨f,g,h⟩).real {(a, b, c)} = (μ.map ⟨f,h⟩).real {(a, c)}`. Summing over the middle coordinate has no direct `preimage_*_singleton_eq_sum` on a 2-tuple, so this is kept as its own proof (via `map_measureReal_apply` + explicit preimage decomposition + `measureReal_restrict_apply`) rather than routed through a reshape. -/
 private lemma sum_map_triple_second
     {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
     [Fintype β] [MeasurableSpace β] [MeasurableSingletonClass β]
@@ -237,7 +237,7 @@ private lemma sum_map_triple_second
       (fun y _ => hg (measurableSet_singleton y))]
   simp
 
-/-- Marginal summation for triples: summing over the *third* coordinate recovers the `(f, g)` marginal. -/
+/-- **Marginal summation for triples (third coordinate).** `∑_c (μ.map ⟨f,g,h⟩).real {(a, b, c)} = (μ.map ⟨f,g⟩).real {(a, b)}`. Like `sum_map_triple_second`, summing over a non-outermost coordinate doesn't route cleanly through PFR's 2-tuple `preimage_*_singleton_eq_sum`, so proved directly. -/
 private lemma sum_map_triple_third
     {α β γ : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
     [MeasurableSpace β] [MeasurableSingletonClass β]
@@ -333,7 +333,7 @@ private lemma measureReal_map_triple_le_map_pair_13
   simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.mk.injEq] at hω ⊢
   exact ⟨hω.1, hω.2.2⟩
 
-/-- **IndepFun product formula.** If `f, g` are independent, the joint singleton mass factors: `(μ.map ⟨f, g⟩).real {(a, b)} = (μ.map f).real {a} * (μ.map g).real {b}`. This is a `.real`-valued specialization of the `indepFun_iff_map_prod_eq_prod_map_map` characterization, used by `phat_sum_eq_one`. -/
+/-- **IndepFun product formula.** If `f, g` are independent under `μ`, the joint singleton mass factors: `(μ.map ⟨f, g⟩).real {(a, b)} = (μ.map f).real {a} * (μ.map g).real {b}`. Proved by routing through two Mathlib/PFR lemmas: `indepFun_iff_map_prod_eq_prod_map_map` rewrites the joint pushforward as a product of marginals, and PFR's `Measure.prod_real_singleton` then distributes the `.real` singleton evaluation. Used by `phat_sum_eq_one` to discharge the `I[X:Y] = 0` step. -/
 private lemma indepFun_map_pair_real_singleton
     {α β : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
     [MeasurableSpace β] [MeasurableSingletonClass β]
@@ -1009,6 +1009,7 @@ private lemma delta_eq_sum_log_ratio
             pJoint X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t))
         = ∑ t, pJoint X Y Z U μ t * L t from
       Finset.sum_congr rfl fun t _ => h_pJ_log t]
+  -- Expand `Δ = I[Z:U] - I[Z:U|X] - I[Z:U|Y]` through `delta_eq_entropy` (from `ZhangYeung.Delta`), then unfold each `I[· : ·]` via PFR's `chain_rule''` (`I[A:B] = H[A] + H[B] - H[A, B]`) and symmetrize the remaining pair entropies via `entropy_comm` (`H[⟨A, B⟩] = H[⟨B, A⟩]`). The twelve rewrites leave a sum of single/pair/triple entropies that the eleven `entropy_eq_sum_joint` lifts below convert to a uniform 4-tuple weighted sum.
   rw [delta_eq_entropy hZ hU hX hY μ,
       chain_rule'' μ hZ hX, chain_rule'' μ hU hX, chain_rule'' μ (hZ.prodMk hU) hX,
       chain_rule'' μ hZ hY, chain_rule'' μ hU hY, chain_rule'' μ (hZ.prodMk hU) hY,
@@ -1016,6 +1017,7 @@ private lemma delta_eq_sum_log_ratio
       entropy_comm hZ hY μ, entropy_comm hU hY μ, entropy_comm (hZ.prodMk hU) hY μ]
   have hF : Measurable (fun ω => (X ω, Y ω, Z ω, U ω)) :=
     hX.prodMk (hY.prodMk (hZ.prodMk hU))
+  -- Each `hH*` rewrites a single-/pair-/triple-variable entropy `H[W]` as `-∑_t p(X,Y,Z,U)(t) · log p(W)(proj t)` over the full 4-tuple marginal, via `entropy_eq_sum_joint`. The projection argument differs per variable; Lean recognizes `proj ∘ F = W` through iota+eta reduction, so the output matches the LHS `H[W]` without extra coercion.
   have hHZ : H[Z ; μ] = -∑ t : S₁ × S₂ × S₃ × S₄,
       (μ.map (fun ω => (X ω, Y ω, Z ω, U ω))).real {t}
       * Real.log ((μ.map Z).real {t.2.2.1}) :=
@@ -1073,7 +1075,7 @@ private lemma delta_eq_sum_log_ratio
     entropy_eq_sum_joint _ (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2)) hF
       ((measurable_fst.comp measurable_snd).prodMk (measurable_snd.comp measurable_snd)) μ
   rw [hHZ, hHU, hHZU, hHX, hHY, hHXZ, hHXU, hHXZU, hHYZ, hHYU, hHYZU]
-  -- Normalize subtraction so `← sum_neg_distrib` + `← sum_add_distrib` can fold every term into one outer `∑ t`.
+  -- After the eleven rewrites the goal is a sum-of-sums shape `-∑ - (-∑) - ... = ∑ pJoint · L`. Normalize subtraction to `a + (-b)` form so `← Finset.sum_neg_distrib` and `← Finset.sum_add_distrib` can fold every outer summand into one `∑ t, <residual>`. The residual is then pointwise equal to `pJoint t * L t` by `ring` (recall `L` bundles the same eleven log-marginals that the entropy lifts produced).
   simp_rw [sub_eq_add_neg, neg_add, neg_neg, ← Finset.sum_neg_distrib,
            ← Finset.sum_add_distrib]
   refine @Finset.sum_congr (S₁ × S₂ × S₃ × S₄) ℝ _ _ _ _ _ rfl ?_
@@ -1131,7 +1133,7 @@ private lemma ptilde_filter_sum_eq_reindex
 
 /-! The eleven per-projection marginal-swap facts, each extracted as its own declaration so that each fits under the default `maxHeartbeats` budget; the aggregate `sum_joint_eq_sum_ptilde` below combines them. -/
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(x,z)` sums agree. -/
+/-- **Marginal swap at `log p(x,z)`.** The `pJoint`- and `p̃`-weighted sums of `log p(x,z)` agree because both `p` and `p̃` share the `(X, Z)`-marginal (one of the eleven factors in the log-ratio `log(p̂/p̃)` decomposition). Used eleven-fold in `sum_joint_eq_sum_ptilde`; extracted so its elaboration fits the default `maxHeartbeats` budget. -/
 private lemma sum_joint_swap_proj_xz
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1153,7 +1155,7 @@ private lemma sum_joint_swap_proj_xz
       Fintype.sum_prod_type]
   exact sum_ptilde_over_y_u hX hY hZ hU μ x z
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(x,u)` sums agree. -/
+/-- **Marginal swap at `log p(x,u)`.** The `pJoint`- and `p̃`-weighted sums of `log p(x,u)` agree because both distributions share the `(X, U)`-marginal. Sibling of `sum_joint_swap_proj_xz` for the `(X, U)` projection; see that lemma for context on the eleven-fold pattern. -/
 private lemma sum_joint_swap_proj_xu
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1175,7 +1177,7 @@ private lemma sum_joint_swap_proj_xu
       Fintype.sum_prod_type]
   exact sum_ptilde_over_y_z hX hY hZ hU μ x u
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(y,z)` sums agree. -/
+/-- **Marginal swap at `log p(y,z)`.** `pJoint`- and `p̃`-weighted sums of `log p(y,z)` agree via the shared `(Y, Z)`-marginal. Sibling of `sum_joint_swap_proj_xz`. -/
 private lemma sum_joint_swap_proj_yz
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1197,7 +1199,7 @@ private lemma sum_joint_swap_proj_yz
       Fintype.sum_prod_type]
   exact sum_ptilde_over_x_u hX hY hZ hU μ y z
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(y,u)` sums agree. -/
+/-- **Marginal swap at `log p(y,u)`.** `pJoint`- and `p̃`-weighted sums of `log p(y,u)` agree via the shared `(Y, U)`-marginal. Sibling of `sum_joint_swap_proj_xz`. -/
 private lemma sum_joint_swap_proj_yu
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1219,7 +1221,7 @@ private lemma sum_joint_swap_proj_yu
       Fintype.sum_prod_type]
   exact sum_ptilde_over_x_z hX hY hZ hU μ y u
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(z,u)` sums agree. -/
+/-- **Marginal swap at `log p(z,u)`.** `pJoint`- and `p̃`-weighted sums of `log p(z,u)` agree via the shared `(Z, U)`-marginal. The fibre sum of `p̃` here is `∑_{x,y} p̃(x,y,z,u) = p(z,u)` by `ptilde_fibre_sum`, which is the telescoping step that makes `p̃` a normalized law. -/
 private lemma sum_joint_swap_proj_zu
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1242,7 +1244,7 @@ private lemma sum_joint_swap_proj_zu
   simp only [ptilde]
   exact ptilde_fibre_sum hX hY hZ hU μ z u
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(x)` sums agree. -/
+/-- **Marginal swap at `log p(x)`.** `pJoint`- and `p̃`-weighted sums of `log p(x)` agree via the shared `X`-marginal. Sibling of `sum_joint_swap_proj_xz` (single-coordinate projection). -/
 private lemma sum_joint_swap_proj_x
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1263,7 +1265,7 @@ private lemma sum_joint_swap_proj_x
   simp_rw [Fintype.sum_prod_type]
   exact sum_ptilde_over_y_z_u hX hY hZ hU μ x
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(y)` sums agree. -/
+/-- **Marginal swap at `log p(y)`.** `pJoint`- and `p̃`-weighted sums of `log p(y)` agree via the shared `Y`-marginal. Sibling of `sum_joint_swap_proj_x`. -/
 private lemma sum_joint_swap_proj_y
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1284,7 +1286,7 @@ private lemma sum_joint_swap_proj_y
   simp_rw [Fintype.sum_prod_type]
   exact sum_ptilde_over_x_z_u hX hY hZ hU μ y
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(z)` sums agree. -/
+/-- **Marginal swap at `log p(z)`.** `pJoint`- and `p̃`-weighted sums of `log p(z)` agree via the shared `Z`-marginal. Sibling of `sum_joint_swap_proj_x`. -/
 private lemma sum_joint_swap_proj_z
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1306,7 +1308,7 @@ private lemma sum_joint_swap_proj_z
   simp_rw [Fintype.sum_prod_type]
   exact sum_ptilde_over_x_y_u hX hY hZ hU μ z
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(u)` sums agree. -/
+/-- **Marginal swap at `log p(u)`.** `pJoint`- and `p̃`-weighted sums of `log p(u)` agree via the shared `U`-marginal. Sibling of `sum_joint_swap_proj_x`. -/
 private lemma sum_joint_swap_proj_u
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1328,7 +1330,7 @@ private lemma sum_joint_swap_proj_u
   simp_rw [Fintype.sum_prod_type]
   exact sum_ptilde_over_x_y_z hX hY hZ hU μ u
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(x,z,u)` sums agree. -/
+/-- **Marginal swap at `log p(x,z,u)`.** `pJoint`- and `p̃`-weighted sums of `log p(x,z,u)` agree via the shared `(X, Z, U)`-marginal. The `p̃`-fibre sum here is `∑_y p̃(x,y,z,u) = p(x,z,u)` by `sum_ptilde_over_y`, which is immediate from `p̃`'s definition (the `Y` coordinate is never referenced). -/
 private lemma sum_joint_swap_proj_xzu
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1349,7 +1351,7 @@ private lemma sum_joint_swap_proj_xzu
           simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl, rfl⟩ := h; rfl)]
   exact sum_ptilde_over_y hX hY hZ hU μ x z u
 
-/-- `pJoint`-weighted vs `p̃`-weighted `log p(y,z,u)` sums agree. -/
+/-- **Marginal swap at `log p(y,z,u)`.** `pJoint`- and `p̃`-weighted sums of `log p(y,z,u)` agree via the shared `(Y, Z, U)`-marginal. Symmetric to `sum_joint_swap_proj_xzu`; the fibre sum here is `∑_x p̃(x,y,z,u) = p(y,z,u)` by `sum_ptilde_over_x`. -/
 private lemma sum_joint_swap_proj_yzu
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
@@ -1391,6 +1393,7 @@ private lemma sum_joint_eq_sum_ptilde
   set pU   : S₄             → ℝ := fun u => (μ.map U).real {u}
   set pXZU : S₁ × S₃ × S₄   → ℝ := fun p => (μ.map (fun ω => (X ω, Z ω, U ω))).real {p}
   set pYZU : S₂ × S₃ × S₄   → ℝ := fun p => (μ.map (fun ω => (Y ω, Z ω, U ω))).real {p}
+  -- `L t` is the additive decomposition of `log(p̂/p̃)(t)` on the support of `p̃`: five positive log-terms from `p̂`'s numerator (the pair-marginals and the `(Z,U)`-triple) minus six log-terms from the denominators. The eleven swap lemmas below act on each log-term separately, which is why this expansion is the key structural move.
   set L : S₁ × S₂ × S₃ × S₄ → ℝ := fun t =>
     Real.log (pXZ (t.1, t.2.2.1)) + Real.log (pXU (t.1, t.2.2.2))
     + Real.log (pYZ (t.2.1, t.2.2.1)) + Real.log (pYU (t.2.1, t.2.2.2))
@@ -1399,6 +1402,7 @@ private lemma sum_joint_eq_sum_ptilde
     - Real.log (pX t.1) - Real.log (pY t.2.1)
     - Real.log (pXZU (t.1, t.2.2)) - Real.log (pYZU (t.2.1, t.2.2))
     with hL_def
+  -- Pointwise `log(p̂/p̃) = L` on the support of `p̃`. The proof rewrites both sides as single fractions over a common positive denominator and applies `Real.log_div`/`Real.log_mul` repeatedly; the positivity of each of the eleven factors follows from `ptilde > 0` via the pair- and triple-marginal bounds.
   have h_log_eq_L : ∀ t : S₁ × S₂ × S₃ × S₄, 0 < ptilde X Y Z U μ t →
       Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t) = L t := by
     rintro ⟨x, y, z, u⟩ h_pt_pos
@@ -1473,6 +1477,7 @@ private lemma sum_joint_eq_sum_ptilde
     show _ = L (x, y, z, u)
     simp only [hL_def]
     ring
+  -- Absolute-continuity claim: the support of `pJoint` is contained in the support of `p̃`. This is what lets us transport the pointwise `h_log_eq_L` from "support of `p̃`" to "support of `pJoint`" in `h_pJ_mul` below. Follows from positivity of each triple marginal on the support.
   have h_supp : ∀ t : S₁ × S₂ × S₃ × S₄,
       0 < pJoint X Y Z U μ t → 0 < ptilde X Y Z U μ t := by
     rintro ⟨x, y, z, u⟩ h_pJ
@@ -1487,6 +1492,7 @@ private lemma sum_joint_eq_sum_ptilde
       lt_of_lt_of_le hXZU_pos (measureReal_map_pair_le_map_snd hX (hZ.prodMk hU) μ x (z, u))
     show 0 < pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u)
     exact div_pos (mul_pos hXZU_pos hYZU_pos) hZU_pos
+  -- Lift `h_log_eq_L` to a `pJoint`-weighted pointwise equality. On a zero of `pJoint`, both sides vanish; on the support, `h_supp` lets us invoke `h_log_eq_L`. The same pattern is repeated for `p̃` in `h_pt_mul` below.
   have h_pJ_mul : ∀ t : S₁ × S₂ × S₃ × S₄,
       pJoint X Y Z U μ t * Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t)
         = pJoint X Y Z U μ t * L t := by
@@ -1505,6 +1511,7 @@ private lemma sum_joint_eq_sum_ptilde
     · have h_pos : 0 < ptilde X Y Z U μ t :=
         lt_of_le_of_ne (ptilde_nonneg X Y Z U μ t) (Ne.symm h)
       rw [h_log_eq_L t h_pos]
+  -- Both sides of the target equality become `∑ t, · * L t` with the respective weight. With `L` additive in the eleven log-marginals, it remains to swap each of the eleven weighted sums of `log`-terms from `pJoint`-weighted to `p̃`-weighted — which is exactly what the eleven `sum_joint_swap_proj_*` lemmas above provide.
   rw [Finset.sum_congr rfl (fun t _ => h_pJ_mul t)]
   rw [Finset.sum_congr rfl (fun t _ => h_pt_mul t)]
   have hEq_xz := sum_joint_swap_proj_xz hX hY hZ hU μ
@@ -1518,6 +1525,7 @@ private lemma sum_joint_eq_sum_ptilde
   have hEq_u := sum_joint_swap_proj_u hX hY hZ hU μ
   have hEq_xzu := sum_joint_swap_proj_xzu hX hY hZ hU μ
   have hEq_yzu := sum_joint_swap_proj_yzu hX hY hZ hU μ
+  -- `h_split` is the purely-algebraic decomposition `∑ w · L = ∑ w · log(pXZ) + … - ∑ w · log(pYZU)`, abstracted over the weight `w`. Applying it twice (to `w = pJoint` and `w = p̃`) rewrites both sides of the goal into the 11-term additive shape where the `hEq_*` swaps apply term-by-term.
   have h_split : ∀ (w : S₁ × S₂ × S₃ × S₄ → ℝ),
       (∑ t : S₁ × S₂ × S₃ × S₄, w t * L t)
         = (∑ t, w t * Real.log (pXZ (t.1, t.2.2.1)))
@@ -1588,6 +1596,7 @@ private lemma theorem2_delta_le_zero
     · simp [hXZU]
     · simp [hYZU]
     · simp [hZU]
+  -- `Real.sum_mul_log_div_leq` is Mathlib's log-sum inequality for probability-weighted sums: for nonneg `a, b` with `b = 0 → a = 0` (absolute continuity), `(∑ a) · log((∑ a)/(∑ b)) ≤ ∑ a · log(a/b)`. Applied here with `a = p̃` and `b = p̂`, it yields the KL-divergence nonnegativity `KL(p̃ ‖ p̂) ≥ 0` modulo the `∑ = 1` normalizations.
   have h_log_sum : (∑ t ∈ s, ptilde X Y Z U μ t) *
       Real.log ((∑ t ∈ s, ptilde X Y Z U μ t) / (∑ t ∈ s, phat X Y Z U μ t))
         ≤ ∑ t ∈ s, ptilde X Y Z U μ t *
@@ -1610,6 +1619,7 @@ private lemma theorem2_delta_le_zero
       = ∑ t ∈ s, ptilde X Y Z U μ t *
           Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t) :=
     sum_joint_eq_sum_ptilde hX hY hZ hU μ
+  -- Flip the direction of the log-ratio: `∑ p̃ · log(p̂/p̃) = -∑ p̃ · log(p̃/p̂)`, i.e. `-KL(p̃ ‖ p̂)`. Pointwise this is `log(a/b) = -log(b/a)`, which needs `a, b > 0`. The two `by_cases` handle the pathological zeros (`p̃ = 0` trivially, `p̂ = 0` uses `log 0 = 0` by Lean's convention).
   have h_neg : ∑ t ∈ s, ptilde X Y Z U μ t *
         Real.log (phat X Y Z U μ t / ptilde X Y Z U μ t)
       = -(∑ t ∈ s, ptilde X Y Z U μ t *
