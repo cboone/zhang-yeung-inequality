@@ -140,7 +140,42 @@ private theorem zhangYeung_integer
     (μ : Measure Ω) [IsProbabilityMeasure μ] :
     2 * I[Z : U ; μ] - 3 * I[Z : U | X ; μ] - I[Z : U | Y ; μ]
       ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] := by
-  sorry
+  obtain ⟨Ω', _, ν, X', Y', X₁, Y₁, Z', U',
+      _, hX', _, hX₁, hY₁, hZ', hU', hFirst, hSecond, hCond⟩ :=
+    copyLemma hX hY hZ hU μ
+  -- Step 1: two copy-lemma inequalities (paper lines 683, 689).
+  have h1 : delta Z U X Y μ ≤ I[X' : Y₁ ; ν] :=
+    copyLemma_delta_le_mutualInfo_Y₁ hX hY hZ hU hX' hY₁ hZ' hU' hFirst hSecond hCond
+  have h2 : I[Z : U ; μ] - 2 * I[Z : U | X ; μ] ≤ I[X' : X₁ ; ν] :=
+    copyLemma_delta_le_mutualInfo_X_X₁ hX hZ hU hX' hX₁ hZ' hU' hFirst hSecond hCond
+  rw [delta_def] at h1
+  -- Step 2: three-way interaction identity on ν (paper line 700).
+  have h_three :
+      I[X' : X₁ ; ν] + I[X' : Y₁ ; ν]
+        = I[X' : ⟨X₁, Y₁⟩ ; ν] + I[X₁ : Y₁ ; ν] - I[X₁ : Y₁ | X' ; ν] :=
+    mutualInfo_add_three_way_identity hX' hX₁ hY₁ ν
+  -- Step 3: drop the nonneg CMI term.
+  have h_nonneg : 0 ≤ I[X₁ : Y₁ | X' ; ν] := condMutualInfo_nonneg hX₁ hY₁
+  -- Step 4: data processing (paper line 708).
+  have hCond_proj : CondIndepFun X' (fun ω' => (X₁ ω', Y₁ ω'))
+                      (fun ω' => (Z' ω', U' ω')) ν :=
+    ZhangYeung.condIndepFun_comp (φ := Prod.fst) (ψ := id)
+      measurable_fst measurable_id hCond
+  have h_dp : I[X' : ⟨X₁, Y₁⟩ ; ν] ≤ I[X' : ⟨Z', U'⟩ ; ν] :=
+    mutualInfo_le_of_condIndepFun hX' (hX₁.prodMk hY₁) (hZ'.prodMk hU') ν hCond_proj
+  -- Step 5: transport `I[X' : ⟨Z', U'⟩ ; ν] = I[X : ⟨Z, U⟩ ; μ]` via `hFirst`.
+  have hPairXZU : IdentDistrib
+      (fun ω' => (X' ω', (Z' ω', U' ω'))) (fun ω => (X ω, (Z ω, U ω))) ν μ :=
+    hFirst.comp measurable_pairXZU
+  have h_marg_XZU : I[X' : ⟨Z', U'⟩ ; ν] = I[X : ⟨Z, U⟩ ; μ] :=
+    hPairXZU.mutualInfo_eq
+  -- Step 6: transport `I[X₁ : Y₁ ; ν] = I[X : Y ; μ]` via `hSecond`.
+  have hPairXY : IdentDistrib
+      (fun ω' => (X₁ ω', Y₁ ω')) (fun ω => (X ω, Y ω)) ν μ :=
+    hSecond.comp measurable_pairXY
+  have h_marg_XY : I[X₁ : Y₁ ; ν] = I[X : Y ; μ] :=
+    hPairXY.mutualInfo_eq
+  linarith [h1, h2, h_three, h_nonneg, h_dp, h_marg_XZU, h_marg_XY]
 
 /-- **Theorem 3 of [@zhangyeung1998, §III, eq. 21]** -- the Zhang-Yeung inequality in the asymmetric form the copy-lemma proof naturally produces:
 
