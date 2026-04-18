@@ -62,6 +62,7 @@ Groebner
 hardwrapped
 hardwrapping
 Hasan
+heapsnapshot
 hembed
 hfibre
 hphat
