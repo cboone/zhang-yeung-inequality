@@ -48,6 +48,63 @@ open MeasureTheory ProbabilityTheory
 
 universe u
 
+/-! ### Generic helpers
+
+Two primitives the main construction depends on: a target-side post-composition for PFR's random-variable form of `CondIndepFun` (Mathlib's `CondIndepFun.comp` uses the σ-algebra form and does not apply here), and a conditional-mutual-information transport lemma under a three-variable `IdentDistrib` (PFR exposes `IdentDistrib.mutualInfo_eq` and `IdentDistrib.condEntropy_eq` but not this conditional variant). Both helpers are `private` here; if later milestones need them, promote to `ZhangYeung/Prelude.lean`. -/
+
+section Helpers
+
+/-- Post-composition of a `CondIndepFun` statement on its two measured coordinates by independent measurable functions `φ` and `ψ`. The conditioner `k` is unchanged. Proof: unfold via `condIndepFun_iff` to a fibrewise `∀ᵐ`-family of `IndepFun` statements, apply Mathlib's `IndepFun.comp` inside each fibre, and repackage. -/
+private lemma condIndepFun_comp
+    {Ω α α' β β' γ : Type*}
+    [MeasurableSpace Ω] [MeasurableSpace α] [MeasurableSpace α']
+    [MeasurableSpace β] [MeasurableSpace β'] [MeasurableSpace γ]
+    {μ : Measure Ω} {f : Ω → α} {g : Ω → β} {k : Ω → γ}
+    {φ : α → α'} {ψ : β → β'}
+    (hφ : Measurable φ) (hψ : Measurable ψ) (h : CondIndepFun f g k μ) :
+    CondIndepFun (φ ∘ f) (ψ ∘ g) k μ := by
+  rw [condIndepFun_iff] at h ⊢
+  filter_upwards [h] with z hfg
+  exact hfg.comp hφ hψ
+
+/-- Substituting variables for identically-distributed ones leaves the conditional mutual information unchanged. PFR's `IdentDistrib.condEntropy_eq` and `IdentDistrib.mutualInfo_eq` cover the `condEntropy` and `mutualInfo` cases respectively; this lemma combines the two to transport `condMutualInfo` under a three-variable `IdentDistrib` on the packed triple `⟨X, Y, Z⟩`. The three sub-`IdentDistrib`s for `⟨X, Z⟩`, `⟨Y, Z⟩`, and `⟨⟨X, Y⟩, Z⟩` are extracted from the triple by one `IdentDistrib.comp` with a measurable projection each. -/
+private lemma IdentDistrib.condMutualInfo_eq
+    {Ω Ω' : Type*} [MeasurableSpace Ω] [MeasurableSpace Ω']
+    {S T U : Type*}
+    [MeasurableSpace S] [MeasurableSpace T] [MeasurableSpace U]
+    [MeasurableSingletonClass S] [MeasurableSingletonClass T] [MeasurableSingletonClass U]
+    [Fintype S] [Fintype T] [Fintype U]
+    {μ : Measure Ω} {μ' : Measure Ω'}
+    [IsProbabilityMeasure μ] [IsProbabilityMeasure μ']
+    {X : Ω → S} {Y : Ω → T} {Z : Ω → U}
+    {X' : Ω' → S} {Y' : Ω' → T} {Z' : Ω' → U}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z)
+    (hX' : Measurable X') (hY' : Measurable Y') (hZ' : Measurable Z')
+    (h : IdentDistrib (fun ω => (X ω, Y ω, Z ω))
+                      (fun ω' => (X' ω', Y' ω', Z' ω')) μ μ') :
+    I[X : Y | Z ; μ] = I[X' : Y' | Z' ; μ'] := by
+  have hXZ : IdentDistrib (fun ω => (X ω, Z ω)) (fun ω' => (X' ω', Z' ω')) μ μ' :=
+    h.comp (measurable_fst.prodMk (measurable_snd.comp measurable_snd))
+  have hYZ : IdentDistrib (fun ω => (Y ω, Z ω)) (fun ω' => (Y' ω', Z' ω')) μ μ' :=
+    h.comp ((measurable_fst.comp measurable_snd).prodMk (measurable_snd.comp measurable_snd))
+  have hXYZ : IdentDistrib (fun ω => ((X ω, Y ω), Z ω))
+      (fun ω' => ((X' ω', Y' ω'), Z' ω')) μ μ' :=
+    h.comp ((measurable_fst.prodMk (measurable_fst.comp measurable_snd)).prodMk
+      (measurable_snd.comp measurable_snd))
+  have eHX : H[X | Z ; μ] = H[X' | Z' ; μ'] :=
+    IdentDistrib.condEntropy_eq hX hZ hX' hZ' hXZ
+  have eHY : H[Y | Z ; μ] = H[Y' | Z' ; μ'] :=
+    IdentDistrib.condEntropy_eq hY hZ hY' hZ' hYZ
+  have eHXY : H[⟨X, Y⟩ | Z ; μ] = H[⟨X', Y'⟩ | Z' ; μ'] :=
+    IdentDistrib.condEntropy_eq (hX.prodMk hY) hZ (hX'.prodMk hY') hZ' hXYZ
+  calc I[X : Y | Z ; μ]
+      = H[X | Z ; μ] + H[Y | Z ; μ] - H[⟨X, Y⟩ | Z ; μ] :=
+        ProbabilityTheory.condMutualInfo_eq hX hY hZ μ
+    _ = H[X' | Z' ; μ'] + H[Y' | Z' ; μ'] - H[⟨X', Y'⟩ | Z' ; μ'] := by rw [eHX, eHY, eHXY]
+    _ = I[X' : Y' | Z' ; μ'] := (ProbabilityTheory.condMutualInfo_eq hX' hY' hZ' μ').symm
+
+end Helpers
+
 /-! ### The main copy construction -/
 
 /-- **The Zhang-Yeung copy lemma** (eq. 44). Given four discrete random variables `X, Y, Z, U` on a probability space `(Ω, μ)`, there exists an extended probability space `(Ω', ν)` carrying six projected random variables `X', Y', X₁, Y₁, Z', U'` such that `(X', Y', Z', U')` and `(X₁, Y₁, Z', U')` each have the original joint law of `(X, Y, Z, U)` under `μ`, and the two pairs `(X', Y')` and `(X₁, Y₁)` are conditionally independent given the shared pair `(Z', U')`. This is a direct wrapper around `ProbabilityTheory.condIndep_copies` applied to `⟨X, Y⟩` conditioned on `⟨Z, U⟩`. -/
