@@ -87,7 +87,16 @@ private lemma mutualInfo_le_of_condIndepFun
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h : CondIndepFun X Y Z μ) :
     I[X : Y ; μ] ≤ I[X : Z ; μ] := by
-  sorry
+  have h_ent : H[⟨X, ⟨Y, Z⟩⟩ ; μ] = H[⟨X, Z⟩ ; μ] + H[⟨Y, Z⟩ ; μ] - H[Z ; μ] :=
+    ent_of_cond_indep μ hX hY hZ h
+  have h_sub : H[⟨X, ⟨Z, Y⟩⟩ ; μ] + H[Y ; μ] ≤ H[⟨X, Y⟩ ; μ] + H[⟨Z, Y⟩ ; μ] :=
+    entropy_triple_add_entropy_le μ hX hZ hY
+  have e_inner : H[⟨X, ⟨Z, Y⟩⟩ ; μ] = H[⟨X, ⟨Y, Z⟩⟩ ; μ] := by
+    rw [chain_rule' μ hX (hZ.prodMk hY), chain_rule' μ hX (hY.prodMk hZ),
+        condEntropy_comm hZ hY]
+  have e_ZY : H[⟨Z, Y⟩ ; μ] = H[⟨Y, Z⟩ ; μ] := entropy_comm hZ hY μ
+  simp only [mutualInfo_def]
+  linarith [h_ent, h_sub, e_inner, e_ZY]
 
 /-- Measurability of the `(a, b, c, d) ↦ (a, (c, d))` projection, extracting the `(X, ⟨Z, U⟩)` pair from a right-associated 4-tuple. Consumed by `zhangYeung_integer` for the first marginal-equality transport. -/
 private lemma measurable_pairXZU
