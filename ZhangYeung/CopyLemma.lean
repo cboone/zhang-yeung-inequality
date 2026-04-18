@@ -358,6 +358,70 @@ theorem copyLemma_delta_identity_X_X₁
 
 end Finite
 
+/-! #### Delta transport and inequality corollaries
+
+The lemmas in this section take both the original-law hypotheses (\`X, Y, Z, U\` on \`(Ω, μ)\`) and the copy-law outputs (\`X', Y', X₁, Y₁, Z', U'\` on \`(Ω', ν)\`) plus the structural facts \`hFirst, hSecond, hCond\`, and relate the \`Δ\` under \`μ\` to the \`Δ\` under \`ν\`. -/
+
+section Transport
+
+variable {Ω : Type*} [MeasurableSpace Ω]
+  {S₁ S₂ S₃ S₄ : Type*}
+  [MeasurableSpace S₁] [MeasurableSpace S₂]
+  [MeasurableSpace S₃] [MeasurableSpace S₄]
+  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
+  [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
+  {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+  {μ : Measure Ω} [IsProbabilityMeasure μ]
+  {Ω' : Type*} [MeasurableSpace Ω']
+  {ν : Measure Ω'} [IsProbabilityMeasure ν]
+  {X' : Ω' → S₁} {Y' : Ω' → S₂}
+  {X₁ : Ω' → S₁} {Y₁ : Ω' → S₂}
+  {Z' : Ω' → S₃} {U' : Ω' → S₄}
+
+/-- Bridge identity: `Δ(Z, U | X, Y) μ = Δ(Z', U' | X', Y₁) ν`. Each side of the delta expands into three mutual-information terms. `IdentDistrib.mutualInfo_eq` transports the unconditional `I[Z : U]`; `IdentDistrib.condMutualInfo_eq` transports the two conditional terms via the triple-level `IdentDistrib`s extracted from `hFirst` and `hSecond`. -/
+theorem copyLemma_delta_transport_Y_to_Y₁
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (hX' : Measurable X') (hY₁ : Measurable Y₁)
+    (hZ' : Measurable Z') (hU' : Measurable U')
+    (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
+                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+    (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
+                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
+    delta Z U X Y μ = delta Z' U' X' Y₁ ν := by
+  have h4to2 : Measurable (fun p : S₁ × S₂ × S₃ × S₄ => (p.2.2.1, p.2.2.2)) := by
+    fun_prop
+  have hZU : IdentDistrib (fun ω => (Z ω, U ω)) (fun ω' => (Z' ω', U' ω')) μ ν :=
+    hFirst.symm.comp h4to2
+  rw [delta_def, delta_def, hZU.mutualInfo_eq,
+      IdentDistrib.condMutualInfo_eq hZ hU hX hZ' hU' hX' (copyLemma_triple_XFirst hFirst),
+      IdentDistrib.condMutualInfo_eq hZ hU hY hZ' hU' hY₁ (copyLemma_triple_YSecond hSecond)]
+
+omit [Fintype S₂] [MeasurableSingletonClass S₂] in
+/-- Symmetric bridge identity: `Δ(Z, U | X, X) μ = Δ(Z', U' | X', X₁) ν`. Transports both conditional-MI terms via `copyLemma_triple_XFirst` and `copyLemma_triple_XSecond`. The μ-side has `X` in both conditioner slots, so the two transports target the same pattern syntactically; closing by `linarith` over the two transport equalities sidesteps the ambiguity `rw` would otherwise face. -/
+theorem copyLemma_delta_transport_X_to_X₁
+    (hX : Measurable X) (hZ : Measurable Z) (hU : Measurable U)
+    (hX' : Measurable X') (hX₁ : Measurable X₁)
+    (hZ' : Measurable Z') (hU' : Measurable U')
+    (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
+                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+    (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
+                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
+    delta Z U X X μ = delta Z' U' X' X₁ ν := by
+  have h4to2 : Measurable (fun p : S₁ × S₂ × S₃ × S₄ => (p.2.2.1, p.2.2.2)) := by
+    fun_prop
+  have hZU : IdentDistrib (fun ω => (Z ω, U ω)) (fun ω' => (Z' ω', U' ω')) μ ν :=
+    hFirst.symm.comp h4to2
+  have e1 : I[Z : U ; μ] = I[Z' : U' ; ν] := hZU.mutualInfo_eq
+  have e2 : I[Z : U | X ; μ] = I[Z' : U' | X' ; ν] :=
+    IdentDistrib.condMutualInfo_eq hZ hU hX hZ' hU' hX' (copyLemma_triple_XFirst hFirst)
+  have e3 : I[Z : U | X ; μ] = I[Z' : U' | X₁ ; ν] :=
+    IdentDistrib.condMutualInfo_eq hZ hU hX hZ' hU' hX₁ (copyLemma_triple_XSecond hSecond)
+  rw [delta_def, delta_def]
+  linarith [e1, e2, e3]
+
+end Transport
+
 end Consequences
 
 end ZhangYeung
