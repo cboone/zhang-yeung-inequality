@@ -190,7 +190,9 @@ theorem zhangYeung
     delta Z U X Y μ
       ≤ (1 / 2) * (I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ]
         + I[Z : U | X ; μ] - I[Z : U | Y ; μ]) := by
-  sorry
+  have h_int := zhangYeung_integer hX hY hZ hU μ
+  have h_delta := (delta_form21_iff Z U X Y μ).mpr h_int
+  linarith
 
 /-- **The `X ↔ Y` dual of Theorem 3** [@zhangyeung1998, §III, eq. 22]:
 
