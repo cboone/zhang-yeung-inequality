@@ -186,18 +186,9 @@ example {Ω : Type*} [MeasurableSpace Ω]
   exact ⟨Ω', _, ν, X', Y₁, hν,
     copyLemma_delta_le_mutualInfo_Y₁ hX hY hZ hU hX' hY₁ hZ' hU' hFirst hSecond hCond⟩
 
-/- Shannon-chase smoke test: both inequality corollaries together, plugged into
-M1's `delta_form21_iff` to package the combined estimate in the compact form
-expected downstream. The claim is that for concrete `Fin n`-valued random
-variables, the two copies produced by `copyLemma` witness
+/- Shannon-chase smoke test: combine the two copy-lemma inequality corollaries in one concrete `Fin n`-valued example. After `copyLemma` supplies the copies, `copyLemma_delta_le_mutualInfo_Y₁` gives `delta Z U X Y μ ≤ I[X' : Y₁ ; ν]` and `copyLemma_delta_le_mutualInfo_X_X₁` gives `I[Z : U ; μ] - 2 * I[Z : U | X ; μ] ≤ I[X' : X₁ ; ν]`; rewriting `delta` via `delta_def` and closing with `linarith` produces the summed bound `2 * I[Z : U ; μ] - 3 * I[Z : U | X ; μ] - I[Z : U | Y ; μ] ≤ I[X' : Y₁ ; ν] + I[X' : X₁ ; ν]`.
 
-  `2·I[Z : U] - 3·I[Z : U | X] - I[Z : U | Y] ≤ I[X' : Y₁ ; ν] + I[X' : X₁ ; ν] + I[X : ⟨Z, U⟩]`
-
-where the extra `I[X : ⟨Z, U⟩]` is the data-processing slack on the RHS of paper
-eq. (21) that a full Shannon chase would close. This is the M1-to-M2 bridge
-exercised concretely: `copyLemma_delta_le_mutualInfo_Y₁` alone does not produce
-paper eq. (21)'s shape, but combined with `delta_form21_iff` we recover the
-compact form M3 will consume. -/
+This exercises the two M2 inequality corollaries in a single Lean proof: no `delta_form21_iff` and no extra Shannon-chase slack term, just the direct sum once `delta` is unfolded. -/
 example {Ω : Type*} [MeasurableSpace Ω]
     {X : Ω → Fin 2} {Y : Ω → Fin 2} {Z : Ω → Fin 2} {U : Ω → Fin 2}
     (hX : Measurable X) (hY : Measurable Y)
