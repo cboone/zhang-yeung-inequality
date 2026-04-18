@@ -11,3 +11,6 @@
 
 # Agent state
 /.claude/
+
+# Debug artifacts (Node.js V8 heap dumps etc.)
+*.heapsnapshot
