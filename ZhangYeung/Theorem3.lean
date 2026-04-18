@@ -207,7 +207,10 @@ theorem zhangYeung_dual
     delta Z U X Y μ
       ≤ (1 / 2) * (I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ]
         - I[Z : U | X ; μ] + I[Z : U | Y ; μ]) := by
-  sorry
+  have h_int := zhangYeung_integer hY hX hZ hU μ
+  rw [mutualInfo_comm hY hX] at h_int
+  have h_delta := (delta_form22_iff Z U X Y μ).mpr (by linarith [h_int])
+  linarith
 
 /-- **The averaged symmetric form of Theorem 3** [@zhangyeung1998, §III, eq. 23]:
 
