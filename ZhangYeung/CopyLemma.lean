@@ -149,4 +149,81 @@ theorem copyLemma
       measurable_fst.comp hV, measurable_snd.comp hV,
       hIdent₁.comp hr, hIdent₂.comp hr, hCond⟩
 
+/-! ### Consequences
+
+The lemmas in this section are parametrized on the outputs of `copyLemma`. A caller destructures `copyLemma` once via `obtain`, producing the eight structural hypotheses (six measurabilities, two 4-variable `IdentDistrib`s, one `CondIndepFun`), and applies these lemmas one by one. -/
+
+section Consequences
+
+/-! #### Measurable projection helpers
+
+Measurable repackings of a right-associated 4-tuple `(a, b, c, d) : S₁ × S₂ × S₃ × S₄` into the three-variable shapes `IdentDistrib.condMutualInfo_eq` consumes. `projZUA` extracts `(c, d, a)` -- the `(Z, U, X)` triple; `projZUB` extracts `(c, d, b)` -- the `(Z, U, Y)` triple. -/
+
+/-- Repackage a right-associated 4-tuple `(a, b, c, d)` as `(c, d, a)`. -/
+private def projZUA {S₁ S₂ S₃ S₄ : Type*} (p : S₁ × S₂ × S₃ × S₄) : S₃ × S₄ × S₁ :=
+  (p.2.2.1, p.2.2.2, p.1)
+
+/-- Repackage a right-associated 4-tuple `(a, b, c, d)` as `(c, d, b)`. -/
+private def projZUB {S₁ S₂ S₃ S₄ : Type*} (p : S₁ × S₂ × S₃ × S₄) : S₃ × S₄ × S₂ :=
+  (p.2.2.1, p.2.2.2, p.2.1)
+
+private lemma measurable_projZUA {S₁ S₂ S₃ S₄ : Type*}
+    [MeasurableSpace S₁] [MeasurableSpace S₂] [MeasurableSpace S₃] [MeasurableSpace S₄] :
+    Measurable (projZUA : S₁ × S₂ × S₃ × S₄ → _) := by
+  unfold projZUA; fun_prop
+
+private lemma measurable_projZUB {S₁ S₂ S₃ S₄ : Type*}
+    [MeasurableSpace S₁] [MeasurableSpace S₂] [MeasurableSpace S₃] [MeasurableSpace S₄] :
+    Measurable (projZUB : S₁ × S₂ × S₃ × S₄ → _) := by
+  unfold projZUB; fun_prop
+
+/-! #### Triple-level `IdentDistrib` facts
+
+Each of the three triples extracted below feeds directly into `IdentDistrib.condMutualInfo_eq`. The `Fintype`/`MeasurableSingletonClass`/`IsProbabilityMeasure` side conditions are only needed by the downstream transport lemmas, so these triple facts live above the heavier instance block. -/
+
+section TripleIdentDistribs
+
+variable {Ω : Type*} [MeasurableSpace Ω]
+  {S₁ S₂ S₃ S₄ : Type*}
+  [MeasurableSpace S₁] [MeasurableSpace S₂]
+  [MeasurableSpace S₃] [MeasurableSpace S₄]
+  {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+  {μ : Measure Ω}
+  {Ω' : Type*} [MeasurableSpace Ω']
+  {ν : Measure Ω'}
+  {X' : Ω' → S₁} {Y' : Ω' → S₂}
+  {X₁ : Ω' → S₁} {Y₁ : Ω' → S₂}
+  {Z' : Ω' → S₃} {U' : Ω' → S₄}
+
+/-- Triple-level `IdentDistrib ⟨Z, U, X⟩ ~ ⟨Z', U', X'⟩ μ ν` extracted from the first-copy 4-variable `IdentDistrib`. The triple is packaged in the shape `IdentDistrib.condMutualInfo_eq` consumes to transport `I[Z:U|X]` under the first copy. -/
+private lemma copyLemma_triple_XFirst
+    (hFirst : IdentDistrib
+        (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
+        (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
+    IdentDistrib (fun ω  => (Z ω,  U ω,  X ω))
+                 (fun ω' => (Z' ω', U' ω', X' ω')) μ ν :=
+  hFirst.symm.comp measurable_projZUA
+
+/-- Triple-level `IdentDistrib ⟨Z, U, Y⟩ ~ ⟨Z', U', Y₁⟩ μ ν` extracted from the second-copy 4-variable `IdentDistrib`. Used by the Y_to_Y₁ delta transport for the `I[Z:U|Y]` term. -/
+private lemma copyLemma_triple_YSecond
+    (hSecond : IdentDistrib
+        (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
+        (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
+    IdentDistrib (fun ω  => (Z ω,  U ω,  Y ω))
+                 (fun ω' => (Z' ω', U' ω', Y₁ ω')) μ ν :=
+  hSecond.symm.comp measurable_projZUB
+
+/-- Triple-level `IdentDistrib ⟨Z, U, X⟩ ~ ⟨Z', U', X₁⟩ μ ν` extracted from the second-copy 4-variable `IdentDistrib`. Used by the symmetric X_to_X₁ delta transport. -/
+private lemma copyLemma_triple_XSecond
+    (hSecond : IdentDistrib
+        (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
+        (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
+    IdentDistrib (fun ω  => (Z ω,  U ω,  X ω))
+                 (fun ω' => (Z' ω', U' ω', X₁ ω')) μ ν :=
+  hSecond.symm.comp measurable_projZUA
+
+end TripleIdentDistribs
+
+end Consequences
+
 end ZhangYeung
