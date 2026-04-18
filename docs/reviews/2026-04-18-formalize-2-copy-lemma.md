@@ -32,9 +32,9 @@ Signature-pin `example` for each of the eight public theorems (one for `copyLemm
 1. Apply `copyLemma` then `copyLemma_delta_le_mutualInfo_Y₁` to close a `delta ≤ I[X' : Y₁]` inequality.
 2. Shannon-chase smoke test: combine both inequality corollaries to witness `2·I[Z:U] - 3·I[Z:U|X] - I[Z:U|Y] ≤ I[X':Y₁] + I[X':X₁]` via `linarith` on `delta_def`.
 
-Uncommitted change in this file: the `Signature` section variable block drops four instances (`[Fintype S₁]`, `[Fintype S₂]`, `[MeasurableSingletonClass S₁]`, `[MeasurableSingletonClass S₂]`) that `lake lint`'s unused-section-var detector would flag once the signature body itself only needs them on the S₃/S₄ side.
+The `Signature` section's variable block omits `[Fintype S₁]`, `[Fintype S₂]`, `[MeasurableSingletonClass S₁]`, and `[MeasurableSingletonClass S₂]` (landed in `270a469`); `lake lint`'s unused-section-var detector would otherwise flag them, since the signature body only exercises the S₃/S₄ side.
 
-Files: `ZhangYeungTest/CopyLemma.lean` (new, with trailing uncommitted lint cleanup).
+Files: `ZhangYeungTest/CopyLemma.lean` (new).
 
 #### Module wiring and docs
 
@@ -47,9 +47,9 @@ Files: `ZhangYeung.lean`, `ZhangYeungTest.lean`, `AGENTS.md`, `cspell-words.txt`
 #### Planning documents
 
 - `docs/plans/done/2026-04-17-copy-lemma.md` (628 lines): the M2 plan, authored incrementally across four commits (initial plan, discovery-program side plan, assumptions refinement, review-feedback reconciliation), then moved from `todo/` to `done/` once all 14 sequencing steps had landed. Contains a substantive `Outcome` section documenting the three proof-engineering notes that diverged from the plan, the linter feedback that trimmed `copyLemma`'s signature, and the `omit [...] in` pattern used to keep `lake lint` green.
-- `docs/plans/todo/2026-04-17-non-shannon-inequality-discovery-program.md` (162 lines): an exploratory research-program plan pointing at M2 (and beyond) as a dependency. Working-tree change updates its `depends_on` and end-of-file pointer from `todo/2026-04-17-copy-lemma.md` to `done/2026-04-17-copy-lemma.md` in step with the plan move.
+- `docs/plans/todo/2026-04-17-non-shannon-inequality-discovery-program.md` (162 lines): an exploratory research-program plan pointing at M2 (and beyond) as a dependency. Its `depends_on` entry and end-of-file pointer target `done/2026-04-17-copy-lemma.md` (updated in `af0a7d7`), matching the copy-lemma plan's move from `todo/` to `done/`.
 
-Files: `docs/plans/done/2026-04-17-copy-lemma.md` (new), `docs/plans/todo/2026-04-17-non-shannon-inequality-discovery-program.md` (new, with trailing uncommitted pointer update).
+Files: `docs/plans/done/2026-04-17-copy-lemma.md` (new), `docs/plans/todo/2026-04-17-non-shannon-inequality-discovery-program.md` (new).
 
 ### File Inventory
 
@@ -120,17 +120,17 @@ Files: `docs/plans/done/2026-04-17-copy-lemma.md` (new), `docs/plans/todo/2026-0
 
 - **Extra pre-plan commits.** Four commits predate the implementation proper: `cc0cb8a` (initial plan), `2b136c3` (discovery-program side plan), `8e0e0e5` (plan assumptions refinement), `8c32187` (plan review-feedback reconciliation). These are all planning artifacts, not implementation drift. The plan's sequencing step 1 includes bootstrap + pre-flight checks; no scratch `.lean` files from those pre-flights remained in the tree, consistent with the plan's "delete after" directive. **Assessment:** not problematic -- normal plan-evolution commits.
 - **Post-plan refactor.** `01e931e` (the HEAD commit) factors a duplicated measurability proof into `measurable_pairZU`. This is a lint/readability cleanup that landed after the plan's step 16 had already committed the final `make check` pass. **Assessment:** good incremental cleanup, correctly noted in the `Outcome` section.
-- **Side-plan addition.** `docs/plans/todo/2026-04-17-non-shannon-inequality-discovery-program.md` is not mentioned in the M2 plan's `Files` section; it was added in commit `2b136c3` during planning. It describes an exploratory post-M2 research program and does not depend on anything M2 delivers beyond the copy lemma's existence. **Assessment:** out-of-scope for the M2 deliverable but justified by the author's reasoning that it belongs in the repo as project direction; its `depends_on` pointer now correctly references the copy lemma in `done/` after the working-tree update.
+- **Side-plan addition.** `docs/plans/todo/2026-04-17-non-shannon-inequality-discovery-program.md` is not mentioned in the M2 plan's `Files` section; it was added in commit `2b136c3` during planning. It describes an exploratory post-M2 research program and does not depend on anything M2 delivers beyond the copy lemma's existence. **Assessment:** out-of-scope for the M2 deliverable but justified by the author's reasoning that it belongs in the repo as project direction; its `depends_on` pointer references the copy lemma in `done/`, matching the plan move.
 
 **Fidelity concerns:**
 
 - **`copyLemma_delta_transport_X_to_X₁` proof style.** The plan's step 12 ("Land the two delta-transport lemmas. Each is ~8-12 tactic lines: expand `delta_def` twice, transport the three MI terms via `IdentDistrib.mutualInfo_eq` ... and `IdentDistrib.condMutualInfo_eq` ..., close with `ring` or `linarith`") implies a symmetric proof structure across the two transports. In practice the X-to-X₁ variant could not use `rw [..., IdentDistrib.condMutualInfo_eq ..., IdentDistrib.condMutualInfo_eq ...]` because both rewrite targets share the LHS pattern `I[Z : U | X ; μ]` -- the μ-side has `X` in both conditioner slots of `delta Z U X X μ`, so the first `rw` consumes both occurrences. The proof closes via `have e1, e2, e3 : ...` facts fed to `linarith`. This is noted accurately in the plan's `Outcome` section point 3. **Assessment:** minor, well-documented fidelity gap -- implementation matches the intent but not the tactic-level template.
 - **`condIndepFun_comp` call sites need named implicits.** Per the `Outcome` section point 2, calls to `condIndepFun_comp` need explicit `(φ := Prod.fst) (ψ := Prod.snd)` annotations to defeat Lean's bidirectional elaboration, which otherwise unifies `φ := X'` with `f := id` and fails. The plan did not anticipate this. **Assessment:** fine -- discovered and handled, not papered over.
-- **Shadowing of PFR's `condMutualInfo_eq`.** Per the `Outcome` section point 1, the `private` `IdentDistrib.condMutualInfo_eq` helper shadows PFR's `condMutualInfo_eq` via `open ProbabilityTheory` + dot notation, forcing callers to fully qualify as `ProbabilityTheory.condMutualInfo_eq`. **Assessment:** local idiom noted and applied consistently, but this is the kind of thing that would be worth a brief inline comment at the first shadowed call site, since future readers may trip on it.
+- **Shadowing of PFR's `condMutualInfo_eq`.** Per the `Outcome` section point 1, the `private` `IdentDistrib.condMutualInfo_eq` helper shadows PFR's `condMutualInfo_eq` via `open ProbabilityTheory` + dot notation, forcing callers to fully qualify as `ProbabilityTheory.condMutualInfo_eq`. **Assessment:** local idiom noted and applied consistently; commit `2089d3c` added an inline comment at the first shadowed call site inside `delta_of_condMI_vanishes_eq`'s proof so future readers catch the shadowing without having to reach for the plan.
 
 ### Code Quality Assessment
 
-**Overall quality: ready to merge.** The code is clear, well-organized, consistent with the existing `ZhangYeung/Delta.lean` and `ZhangYeung/Theorem2.lean` conventions (same section structure, same docstring template, same namespace idiom), and has thorough test coverage. The implementation matches the plan's intent where it could and documents the three places it could not. No `sorry`, no `admit`, no `maxHeartbeats` bumps, no TODO/FIXME/HACK/XXX markers. Proofs are short and use Mathlib/PFR primitives directly rather than redundant scaffolding. The two working-tree items (the test-block lint cleanup and the plan pointer update) are small, correct, and should be committed before the PR merges.
+**Overall quality: ready to merge.** The code is clear, well-organized, consistent with the existing `ZhangYeung/Delta.lean` and `ZhangYeung/Theorem2.lean` conventions (same section structure, same docstring template, same namespace idiom), and has thorough test coverage. The implementation matches the plan's intent where it could and documents the three places it could not. No `sorry`, no `admit`, no `maxHeartbeats` bumps, no TODO/FIXME/HACK/XXX markers. Proofs are short and use Mathlib/PFR primitives directly rather than redundant scaffolding.
 
 **Strengths:**
 
@@ -140,14 +140,10 @@ Files: `docs/plans/done/2026-04-17-copy-lemma.md` (new), `docs/plans/todo/2026-0
 - **Clean refactor in `01e931e`.** Noticing the duplicated `h4to2` measurability proof across two transport lemmas and hoisting it to `measurable_pairZU` -- alongside the existing `measurable_projZUA` / `measurable_projZUB` helpers -- is the right instinct: three sibling projection measurabilities in one place beats two inlined copies plus one already-hoisted helper.
 - **Honest `Outcome` section.** The plan's final section calls out three proof-engineering divergences from the sketch and explains each one. That is the right level of post-hoc documentation: specific enough to be useful to a future reader, not so verbose that it replicates the proof body.
 
-**Issues to address (before merge):**
-
-1. **Commit the uncommitted test-file cleanup.** `ZhangYeungTest/CopyLemma.lean`'s `Signature` section drops four unused instances. This is a correct `lake lint` cleanup (matches the pattern applied to `copyLemma` itself in `3078d40`) and should land as a follow-up `chore: ...` commit rather than sit in the working tree through the PR.
-2. **Commit the discovery-program plan pointer update.** `docs/plans/todo/2026-04-17-non-shannon-inequality-discovery-program.md` updates `depends_on:` and the final "M2 plan:" pointer from `todo/2026-04-17-copy-lemma.md` to `done/2026-04-17-copy-lemma.md`, matching the plan move in `edb7133`. This is a one-line internal reference fix that ideally would have been part of `edb7133`; committing it now keeps the reference accurate.
-3. **Clean up or gitignore the two heap-snapshot files.** `server.heapsnapshot` and `tui.heapsnapshot` are sitting untracked in the worktree. They are almost certainly accidental debug artifacts; either `git clean` them locally or add `*.heapsnapshot` to the project `.gitignore` to avoid leaking them into a future commit.
+**Issues to address (before merge):** None. All three items flagged at review time have since landed on the branch: the test-file lint cleanup in `270a469`, the discovery-program plan pointer update in `af0a7d7`, and the heap-snapshot `.gitignore` entry in `3f117bc`.
 
 **Suggestions (non-blocking):**
 
-- **Consider adding a one-line inline comment** at the first use site of the shadowed `ProbabilityTheory.condMutualInfo_eq` call inside `delta_of_condMI_vanishes_eq`'s proof, noting the shadowing-via-`IdentDistrib.condMutualInfo_eq` subtlety. The `Outcome` section of the plan captures this, but plans rot; a single-line `--` comment at the proof noting the shadowing would survive longer. Not a blocker.
-- **When M3 lands**, revisit whether `condIndepFun_comp` and `IdentDistrib.condMutualInfo_eq` want promotion from `private` to `ZhangYeung/Prelude.lean`. The plan flags this as deferred work; the decision becomes concrete as soon as a second module needs either helper.
+- **Inline comment for the shadowed `ProbabilityTheory.condMutualInfo_eq`.** Addressed in `2089d3c`: a single-line `--` comment at the first shadowed call site inside `delta_of_condMI_vanishes_eq`'s proof notes the shadowing-via-`IdentDistrib.condMutualInfo_eq` subtlety, so future readers see it at the call site rather than having to consult the plan.
+- **When M3 lands**, revisit whether `condIndepFun_comp` and `IdentDistrib.condMutualInfo_eq` want promotion from `private` to `ZhangYeung/Prelude.lean`. Flagged in the roadmap in `68e4f1e` so the decision resurfaces when a second module needs either helper.
 - **The cspell-words additions include `Frobenius` and `nilpotent`**, which come from the adjacent discovery-program plan, not from `CopyLemma.lean`. These tokens are not strictly needed by the M2 deliverable; committing them alongside the M2 lint fix (`3078d40`) is harmless but blurs the commit's scope slightly. Not worth rewriting history for.
