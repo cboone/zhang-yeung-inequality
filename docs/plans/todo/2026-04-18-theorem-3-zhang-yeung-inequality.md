@@ -46,7 +46,7 @@ Equation (23) is the symmetric form Zhang-Yeung highlight as the paper's headlin
 
 - **Theorem 4 (Shannon is incomplete).** Parallelizable with M3 per roadmap §6; handled by Worktree B.
 - **Theorem 5 (n+2-variable generalization).** Stretch goal, roadmap §M5.
-- **Exact identity form with explicit slack $R(X, Y, Z, U, X_1, Y_1)$** (paper lines 711-768, eq. 50-51). Post-release extension ranked #2 on roadmap §9; would upgrade $\le$ to $=$ with a fully characterized remainder. Out of scope for M3 because the roadmap checkpoint targets the inequality (21), not the equality-with-remainder form.
+- **Exact identity form with explicit slack $R(X, Y, Z, U, X_1, Y_1)$** (paper p. 1446, transcription lines 711-768). Post-release extension ranked #2 on roadmap §9; would upgrade $\le$ to $=$ with a fully characterized remainder. Out of scope for M3 because the roadmap checkpoint targets the inequality (21), not the equality-with-remainder form.
 
 ## Paper proof (transcription, lines 680-709)
 
@@ -111,8 +111,8 @@ All declarations live under `namespace ProbabilityTheory` unless noted. Line num
 - `condMutualInfo_eq_zero : I[X : Y | Z ; μ] = 0 ↔ CondIndepFun X Y Z μ` (Basic.lean:1042). The bridge from the copy's `CondIndepFun` to an algebraic zero.
 - `condMutualInfo_nonneg : 0 ≤ I[X : Y | Z ; μ]` (Basic.lean:924).
 - `mutualInfo_nonneg : 0 ≤ I[X : Y ; μ]` (Basic.lean).
-- `chain_rule`, `chain_rule'`, `chain_rule''`: entropy chain rules (Basic.lean:546, :573, :579).
-- `cond_chain_rule`, `cond_chain_rule'`: conditional entropy chain rules (Basic.lean:617, :634).
+- `chain_rule'`, `chain_rule`, `chain_rule''`: entropy chain rules (Basic.lean:546, :573, :579).
+- `cond_chain_rule'`, `cond_chain_rule`: conditional entropy chain rules (Basic.lean:617, :634).
 - `entropy_comm : H[⟨X, Y⟩ ; μ] = H[⟨Y, X⟩ ; μ]` (Basic.lean, referenced throughout).
 - `entropy_assoc : H[⟨X, ⟨Y, Z⟩⟩ ; μ] = H[⟨⟨X, Y⟩, Z⟩ ; μ]` (Basic.lean:343). New to this module (M1/M1.5/M2 did not use it).
 - `entropy_comp_of_injective : Function.Injective f → H[f ∘ X ; μ] = H[X ; μ]` (Basic.lean:160). New to this module, used for the inner-pair-swap entropy identity inside the data-processing helper.
@@ -124,7 +124,7 @@ All declarations live under `namespace ProbabilityTheory` unless noted. Line num
 
 - `IdentDistrib.mutualInfo_eq` (Basic.lean:691). Pair-form `IdentDistrib` → equal mutual informations. Used for the two marginal-equality transports of the chase.
 - `IdentDistrib.comp`, `.symm` (Mathlib `Probability/IdentDistrib.lean`). Used to project the 4-variable `hFirst`, `hSecond` into pair-level `IdentDistrib`s.
-- `CondIndepFun` (PFR `ForMathlib/ConditionalIndependence.lean:104`). Random-variable form.
+- `CondIndepFun` (PFR `ForMathlib/ConditionalIndependence.lean:105`). Random-variable form.
 - `ent_of_cond_indep` (Basic.lean:1064). Packages `CondIndepFun X Y Z μ` into the entropy identity `H[⟨X, ⟨Y, Z⟩⟩ ; μ] = H[⟨X, Z⟩ ; μ] + H[⟨Y, Z⟩ ; μ] - H[Z ; μ]`; this is the shortest entry point for M3's data-processing helper.
 - M2's private `condIndepFun_comp` (currently at `ZhangYeung/CopyLemma.lean:58`). Used to project the copy's `CondIndepFun ⟨X', Y'⟩ ⟨X_1, Y_1⟩ ⟨Z', U'⟩ ν` to `CondIndepFun X' ⟨X_1, Y_1⟩ ⟨Z', U'⟩ ν` for the data-processing step. **Promotion trigger:** M3 is the second module to consume this helper; promote from `ZhangYeung/CopyLemma.lean` (private) to `ZhangYeung/Prelude.lean` (public under `ZhangYeung` namespace) in the same change. This matches the M2 plan's prediction ("if later milestones need them, promote to `ZhangYeung/Prelude.lean`", `ZhangYeung/CopyLemma.lean:34`; roadmap `docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md:247`).
 
@@ -508,7 +508,7 @@ Land these in the same commits as the corresponding public surface (signatures i
 - `ZhangYeung/Theorem2.lean` (M1.5 output; style precedent for Shannon-algebra identities).
 - `references/transcriptions/zhangyeung1998.md` (paper transcription; Theorem 3 statement on line 290, proof on lines 680-709, explicit remainder $R$ on lines 711-768).
 - `.lake/packages/pfr/PFR/ForMathlib/Entropy/Basic.lean` (all Shannon primitives listed in the "PFR and Mathlib API surface used" section).
-- `.lake/packages/pfr/PFR/ForMathlib/ConditionalIndependence.lean` (`CondIndepFun` at line 104; `condIndep_copies` at line 135).
+- `.lake/packages/pfr/PFR/ForMathlib/ConditionalIndependence.lean` (`CondIndepFun` at line 105; `condIndep_copies` at line 135).
 - `.lake/packages/mathlib/Mathlib/Probability/IdentDistrib.lean` (`IdentDistrib`, `IdentDistrib.comp`, `IdentDistrib.symm`).
 - `docs/plans/done/2026-04-17-copy-lemma.md` (M2 plan; source of the style precedent for this plan, and the policy comment about promoting `condIndepFun_comp` when M3 needs it).
 
