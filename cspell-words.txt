@@ -4,6 +4,7 @@ aemeasurable
 Affeldt
 antisymm
 bijective
+bijections
 AITIP
 APAP
 Appl
@@ -105,6 +106,7 @@ noncomputable
 nonneg
 nonnegativity
 nonpositive
+nontrivially
 olean
 oleans
 opencode
@@ -112,6 +114,7 @@ Pandoc
 parameterizations
 phat
 pointwise
+Powerset
 preimage
 ptilde
 pushforward
@@ -148,6 +151,7 @@ smul
 specialised
 sorries
 subadditivity
+submodular
 subgoals
 submodularity
 summands

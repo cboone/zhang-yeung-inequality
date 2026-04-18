@@ -15,8 +15,8 @@ M4's full content is four parts:
 
 - **Part (a):** Construct an explicit set function $F \in \Gamma_4$ (the witness from paper lines 368-377).
 - **Part (b):** Show $F$ violates the Zhang-Yeung inequality at the canonical labeling $(Z, U \mid X, Y) = (2, 3 \mid 0, 1)$, hence $F \notin \tilde{\Gamma}_4$.
-- **Part (c) (uses M3):** Bridge the M3 `zhangYeung` theorem to the set-function level, proving that the entropy function of any four discrete random variables lies in $\tilde{\Gamma}_4$.
-- **Part (d):** Close the proof of Theorem 4 by combining (a) + (b) + (c): $F$ lies in $\Gamma_4$ but is not the entropy function of any four discrete random variables. This is the headline `theorem4`.
+- **Part (c) (uses M3):** Bridge the M3 `zhangYeung` theorem to the set-function level, proving that the entropy function of any four discrete random variables, with possibly different finite codomains, lies in $\tilde{\Gamma}_4$.
+- **Part (d):** Close the proof of Theorem 4 by combining (a) + (b) + (c): $F$ lies in $\Gamma_4$ but is not the entropy function of any four discrete random variables, again allowing heterogeneous finite codomains. This is the headline `theorem4`.
 
 Parts (a) and (b) are pure set-function arithmetic over `Finset (Fin 4)`; no measure theory needed. Parts (c) and (d) close over M3 at the measure-theoretic level; (c) is the new measure-theoretic content of M4 and (d) is a contradiction argument.
 
@@ -88,7 +88,7 @@ For $a > 0$, $a \le a/2$ is false, so $F$ violates the Zhang-Yeung inequality at
 
 **The remaining link is the bridge.** Claims 1 and 2 establish $F \in \Gamma_4 \setminus \tilde{\Gamma}_4$. To upgrade this to $F \in \Gamma_4 \setminus (\text{entropy functions})$ -- the actual content of Theorem 4 -- we need:
 
-**Bridge claim (paper's application of Theorem 3):** for any four discrete random variables $X_0, X_1, X_2, X_3$, their entropy function $F_{\Omega} : \alpha \mapsto H[X_\alpha]$ lies in $\tilde{\Gamma}_4$.
+**Bridge claim (paper's application of Theorem 3):** for any four discrete random variables $X_0, X_1, X_2, X_3$, each with its own finite codomain if desired, their entropy function $F_{\Omega} : \alpha \mapsto H[X_\alpha]$ lies in $\tilde{\Gamma}_4$.
 
 The paper treats this as a direct restatement of Theorem 3 (the Zhang-Yeung inequality). In Lean this is a per-permutation application of M3's `zhangYeung`, wrapped into the set-function `zhangYeungAt` predicate by unfolding the latter into joint-entropy terms. This is the measure-theoretic content of M4.
 
@@ -122,7 +122,7 @@ Before starting M4, in the `m4-theorem-4` worktree: `bin/bootstrap-worktree`, th
 M4 introduces two new kinds of object relative to M1-M3:
 
 1. **Set functions** $F : 2^{\mathcal{N}_4} \to \mathbb{R}$. Lean encoding: `Finset (Fin 4) → ℝ` (or `Finset (Fin 4) → ℚ` for the witness). Used by Parts (a) + (b).
-1. **Set-function view of an entropy function.** Given RVs $X_0, X_1, X_2, X_3$, the entropy function $\alpha \mapsto H[X_\alpha]$ packaged as a `Finset (Fin 4) → ℝ`. This is the object the bridge (Part (c)) rewrites against M3's conclusion.
+1. **Set-function view of an entropy function.** Given RVs $X_0, X_1, X_2, X_3$, possibly with different finite codomains, package the entropy function $\alpha \mapsto H[X_\alpha]$ as a `Finset (Fin 4) → ℝ`. This is the object the bridge (Part (c)) rewrites against M3's conclusion.
 
 ### Why `Finset (Fin 4)` and not `Set (Fin 4)` or `ℕ`-bitmasks?
 
@@ -190,20 +190,23 @@ Quantifying over `Equiv.Perm (Fin 4)` matches paper eq. (25) literally: the perm
 
 ### Entropy function as a set function
 
-Given a family of random variables `X : Fin 4 → Ω → S` (a common codomain `S` for all four, discrete and finite-alphabet per M3's signature), define their entropy function on `Finset (Fin 4)`:
+The bridge should match M3's actual surface, not a stronger homogeneous special case. So M4 treats the four codomains as a family `S : Fin 4 → Type u`, with the random variables packaged as `X : ∀ i : Fin 4, Ω → S i`. For each `α : Finset (Fin 4)`, the joint codomain is the dependent finite product `(i : α) → S i.1`.
+
+Given such a family, define its entropy function on `Finset (Fin 4)`:
 
 ```lean
 /-- The entropy function of a four-variable family: for `α : Finset (Fin 4)`,
 `entropyFn X μ α` is the joint entropy `H[X_α ; μ]` where `X_α` is the tuple
 indexed by the elements of `α`. -/
 noncomputable def entropyFn
-    {Ω : Type u} [MeasurableSpace Ω]
-    {S : Type u} [MeasurableSpace S] [Fintype S] [MeasurableSingletonClass S]
-    (X : Fin 4 → Ω → S) (μ : Measure Ω) : Finset (Fin 4) → ℝ :=
-  fun α => H[(fun ω : Ω => fun i : α => X i.val ω) ; μ]
+    {Ω : Type*} [MeasurableSpace Ω]
+    {S : Fin 4 → Type u}
+    [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)] [∀ i, MeasurableSingletonClass (S i)]
+    (X : ∀ i : Fin 4, Ω → S i) (μ : Measure Ω) : Finset (Fin 4) → ℝ :=
+  fun α => H[(fun ω : Ω => fun i : α => X i.1 ω) ; μ]
 ```
 
-The type `{i : Fin 4 // i ∈ α}` is finite (a subtype of the finite `Fin 4`), so the joint `α → S` is a finite product, and PFR's `H[·; μ]` applies.
+The type `{i : Fin 4 // i ∈ α}` is finite (a subtype of the finite `Fin 4`), so the dependent joint product `(i : α) → S i.1` is still finite, and PFR's `H[·; μ]` applies.
 
 For the bridge (Part (c)) we need a collection of evaluation lemmas matching `entropyFn X μ α` to named joint entropies in PFR's pair/triple/tuple notation:
 
@@ -219,7 +222,7 @@ lemma entropyFn_quad :
       = H[⟨X 0, ⟨X 1, ⟨X 2, X 3⟩⟩⟩ ; μ]
 ```
 
-Each of these is an entropy-of-tuple identity obtained by transporting across an `Equiv` between the subtype `{i // i ∈ α}` and the standard `Fin α.card`. PFR exposes `IdentDistrib.entropy_eq` and Mathlib's `entropy_comp_of_injective` for this transport. The pair version also uses `entropy_comm` to absorb the two possible orderings of `{i, j}`.
+Each of these is an entropy-of-tuple identity obtained by transporting across an `Equiv` between the subtype `{i // i ∈ α}` and the standard `Fin α.card`. In the current PFR pin, the concrete entropy transport tool exposed here is `entropy_comp_of_injective`; the plan should not assume an `IdentDistrib.entropy_eq` lemma that is not presently available. The pair version also uses `entropy_comm` to absorb the two possible orderings of `{i, j}`.
 
 For the bridge (Part (c)), the per-subset lemmas feed into a single permutation-indexed identity:
 
@@ -234,7 +237,7 @@ proved by:
 1. Unfold `delta_F`, `I_F`, `condI_F` into `entropyFn` evaluations.
 1. Apply the per-subset bridge lemmas to rewrite each `entropyFn` evaluation as a joint entropy in PFR's pair/triple notation.
 1. Recognize the LHS as `delta (X (π 0)) (X (π 1)) (X (π 2)) (X (π 3)) μ` and the RHS as M3's RHS with the same labeling.
-1. Close by `zhangYeung` applied at that labeling (M3's headline theorem).
+1. Close by `zhangYeung (hX (π 2)) (hX (π 3)) (hX (π 0)) (hX (π 1)) μ`, matching M3's parameter order `X, Y, Z, U` against the set-function labeling `(i, j | k, l) = (π 0, π 1 | π 2, π 3)`.
 
 Budget ~30-60 tactic lines for the permutation-indexed bridge after the per-subset lemmas land. The per-subset lemmas are each ~5-10 tactic lines; there are 5-10 such lemmas depending on how aggressively we collapse across `Finset.insert` ordering permutations.
 
@@ -253,7 +256,7 @@ All declarations live under `namespace ProbabilityTheory` unless noted.
 - `mutualInfo_def`, `condMutualInfo_eq` -- to translate `I_F` and `condI_F` into entropy sums.
 - `entropy_comm : H[⟨X, Y⟩; μ] = H[⟨Y, X⟩; μ]` -- for the pair ordering in `entropyFn_pair`.
 - `entropy_comp_of_injective : Function.Injective f → H[f ∘ X; μ] = H[X; μ]` -- the transport tool for the per-subset lemmas. Given an equivalence `({i, j} : Finset (Fin 4)) ≃ Fin 2` (say), we compose with the underlying function and invoke this lemma.
-- `IdentDistrib.entropy_eq` -- an alternative transport, if `entropy_comp_of_injective` is awkward. Used in M3's proof of `mutualInfo_le_of_condIndepFun`; same pattern applies here.
+- `IdentDistrib.mutualInfo_eq`, `IdentDistrib.condEntropy_eq` -- transport lemmas that do exist in the current PFR pin. Useful once the bridge has been rewritten into mutual-information or conditional-entropy form, but not a drop-in replacement for a nonexistent `IdentDistrib.entropy_eq`.
 
 **From Mathlib (set-function calculus and decidability):**
 
@@ -263,7 +266,7 @@ All declarations live under `namespace ProbabilityTheory` unless noted.
 - `Finset.card_empty`, `Finset.card_singleton`, `Finset.card_insert_of_not_mem` -- unfold cardinality on concrete literals.
 - `Rat.cast_le`, `Rat.cast_lt`, `Rat.cast_add`, `Rat.cast_mul` -- push the `ℚ`-valued witness through to `ℝ`.
 - `Equiv.Perm (Fin 4)`, `Equiv.swap`, `Equiv.Perm.mul_apply` -- permutation handling in `zhangYeungHolds` and the violation proof.
-- `Fintype (α → S)` for `α : Finset (Fin 4)` (via `Finset.Fintype.coeSort` + `Pi.fintype`) -- required for `entropyFn` to elaborate.
+- `Fintype ((i : α) → S i.1)` for `α : Finset (Fin 4)` (via `Finset.Fintype.coeSort` + dependent `Pi.fintype`) -- required for the heterogeneous `entropyFn` to elaborate.
 - `MeasurableSpace.pi`, measurability of coordinate projections -- required for `Measurable (fun ω => fun i : α => X i.val ω)`.
 
 **For the optional `theorem4_closure` (stretch):**
@@ -280,7 +283,7 @@ Nothing in Mathlib currently packages $\Gamma_n$ or the submodular cone over `Fi
 
 ## The M4 theorems
 
-M4's public API consists of six definitions and five theorems, in dependency order:
+M4's core public surface is listed below by name, in dependency order. The plan should refer to these names directly rather than relying on a count, since support lemmas inside the bridge may remain private.
 
 ### Predicates (definitions)
 
@@ -338,9 +341,10 @@ Three-line proof combining Parts (a) and (b). This was the original roadmap chec
 
 ```lean
 section EntropyFnEvaluation
-variable {Ω : Type u} [MeasurableSpace Ω] {S : Type u}
-  [MeasurableSpace S] [Fintype S] [MeasurableSingletonClass S]
-  (X : Fin 4 → Ω → S) (μ : Measure Ω) [IsProbabilityMeasure μ]
+variable {Ω : Type*} [MeasurableSpace Ω]
+  {S : Fin 4 → Type u}
+  [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)] [∀ i, MeasurableSingletonClass (S i)]
+  (X : ∀ i : Fin 4, Ω → S i) (hX : ∀ i, Measurable (X i)) (μ : Measure Ω) [IsProbabilityMeasure μ]
 
 lemma entropyFn_empty : entropyFn X μ ∅ = 0
 lemma entropyFn_singleton (i : Fin 4) : entropyFn X μ {i} = H[X i ; μ]
@@ -357,7 +361,7 @@ end EntropyFnEvaluation
 
 Each `entropyFn_*` lemma is proved by transporting `H` across an `Equiv`:
 
-- For `entropyFn_singleton`: the subtype `{i // i ∈ ({i} : Finset (Fin 4))}` is equivalent to `Unit`, and the joint `Unit → S` is `S` (up to an `Equiv`).
+- For `entropyFn_singleton`: the subtype `{i // i ∈ ({i} : Finset (Fin 4))}` is equivalent to `Unit`, and the dependent joint `Unit → S i` collapses back to `S i` (up to an `Equiv`).
 - For `entropyFn_pair`: `{j // j ∈ ({i, k} : Finset (Fin 4))} ≃ Fin 2` for `i ≠ k`.
 - Similarly for triples and the 4-set.
 
@@ -373,7 +377,7 @@ lemma zhangYeungAt_entropyFn (π : Equiv.Perm (Fin 4)) :
   -- Rewrite each F-evaluation using entropyFn_* (accounting for permutation
   -- distinctness, which follows from `π.injective`).
   -- Recognize the LHS as `delta Z U X_mid Y μ` and the RHS as M3's RHS.
-  -- Close by `ZhangYeung.zhangYeung hZ hU hX_mid hY μ`.
+  -- Close by `ZhangYeung.zhangYeung (hX (π 2)) (hX (π 3)) (hX (π 0)) (hX (π 1)) μ`.
   sorry
 ```
 
@@ -383,7 +387,7 @@ Proof route: unfold, rewrite with the per-subset lemmas, pattern-match against M
 
 ```lean
 theorem zhangYeungHolds_of_entropy :
-    zhangYeungHolds (entropyFn X μ) := fun π => zhangYeungAt_entropyFn X μ π
+    zhangYeungHolds (entropyFn X μ) := fun π => zhangYeungAt_entropyFn X hX μ π
 ```
 
 One-line wrapper.
@@ -395,19 +399,21 @@ One-line wrapper.
 The Shannon outer bound Γ_4 strictly contains the set of entropy functions of
 four discrete random variables: there exists a set function F in Γ_4 that is
 not the entropy function of any four discrete random variables on any
-probability space. -/
+probability space, even allowing the four variables to have different finite
+codomains. -/
 theorem theorem4 :
     ∃ F : Finset (Fin 4) → ℝ,
       shannonCone F ∧
       ∀ {Ω : Type u} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ]
-        {S : Type u} [MeasurableSpace S] [Fintype S] [MeasurableSingletonClass S]
-        (X : Fin 4 → Ω → S) (_ : ∀ i, Measurable (X i)),
+        {S : Fin 4 → Type u}
+        [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)] [∀ i, MeasurableSingletonClass (S i)]
+        (X : ∀ i : Fin 4, Ω → S i) (_ : ∀ i, Measurable (X i)),
         F ≠ entropyFn X μ := by
   refine ⟨F_witness, shannonCone_of_witness, ?_⟩
   intro Ω _ μ _ S _ _ _ X hX heq
   apply not_zhangYeungHolds_witness
   rw [heq]
-  exact zhangYeungHolds_of_entropy X μ
+  exact zhangYeungHolds_of_entropy X hX μ
 ```
 
 Proof: combine `shannonCone_of_witness` + `not_zhangYeungHolds_witness` + `zhangYeungHolds_of_entropy` by contradiction. Five-line proof.
@@ -421,9 +427,10 @@ theorem theorem4_closure :
     ∃ F : Finset (Fin 4) → ℝ,
       shannonCone F ∧
       ∀ (X_seq : ℕ → (Σ' (Ω : Type u) (_ : MeasurableSpace Ω) (_ : Measure Ω)
-            (_ : IsProbabilityMeasure _) (S : Type u) (_ : MeasurableSpace S)
-            (_ : Fintype S) (_ : MeasurableSingletonClass S),
-            Fin 4 → Ω → S)),
+            (_ : IsProbabilityMeasure _) (S : Fin 4 → Type u)
+            (_ : ∀ i, MeasurableSpace (S i)) (_ : ∀ i, Fintype (S i))
+            (_ : ∀ i, MeasurableSingletonClass (S i)),
+            ∀ i : Fin 4, Ω → S i)),
         ¬ (∀ α : Finset (Fin 4),
              Filter.Tendsto (fun k => entropyFn (X_seq k).snd...snd α) ...)
 ```
@@ -508,7 +515,7 @@ AGENTS.md (aka CLAUDE.md)   # extend `## Module Layout` with two lines
 └── end ZhangYeung
 ```
 
-The module docstring follows the M3 template: opening paragraph stating role, `## Main definitions` listing the seven public defs, `## Main statements` listing `shannonCone_of_witness`, `not_zhangYeungHolds_witness`, `shannon_incomplete`, `zhangYeungHolds_of_entropy`, `theorem4` with one-sentence descriptions, `## Implementation notes` explaining the `ℚ → ℝ` cast, the `Equiv.Perm` choice, and the bridge-lemma approach, `## References` pointing at lines 358-388 of the transcription (Theorem 4 + witness) plus lines 339-355 ($\tilde{\Gamma}_4$ definition), and `## Tags`.
+The module docstring follows the M3 template: opening paragraph stating role, `## Main definitions` listing the exported names `I_F`, `condI_F`, `delta_F`, `shannonCone`, `zhangYeungAt`, `zhangYeungHolds`, `F_witness_ℚ`, `F_witness`, `entropyFn`, `## Main statements` listing `shannonCone_of_witness`, `not_zhangYeungHolds_witness`, `shannon_incomplete`, `zhangYeungAt_entropyFn`, `zhangYeungHolds_of_entropy`, `theorem4` with one-sentence descriptions, `## Implementation notes` explaining the `ℚ → ℝ` cast, the `Equiv.Perm` choice, the heterogeneous codomain family `S : Fin 4 → Type u`, and the bridge-lemma approach, `## References` pointing at lines 358-388 of the transcription (Theorem 4 + witness) plus lines 339-355 ($\tilde{\Gamma}_4$ definition), and `## Tags`.
 
 ## Sequencing: commits
 
@@ -516,11 +523,13 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
 
 1. **Bootstrap + pre-flight checks.** In the `m4-theorem-4` worktree: `bin/bootstrap-worktree`; confirm `make check` is green with M1 + M1.5 + M2 + M3 on `main`. Run one pre-flight experiment in a scratch `.lean` file (delete after):
 
-    - **`decide` performance rehearsal.** Instantiate a three-line toy `F : Finset (Fin 4) → ℚ` and run `example : ∀ α β : Finset (Fin 4), α ⊆ β → F α ≤ F β := by decide`. Confirm elaboration is under 3 seconds without a heartbeat bump. If it exceeds ~15 seconds, pivot the Shannon-cone proof to the fallback tactic pattern (cardinality case-split). Log the outcome in the step-2 commit message.
+    - **`decide` performance rehearsal.** Instantiate a three-line toy `F : Finset (Fin 4) → ℚ` and run `example : ∀ α β : Finset (Fin 4), α ⊆ β → F α ≤ F β := by decide`. Confirm elaboration is under 3 seconds without a heartbeat bump. If it exceeds ~15 seconds, pivot the Shannon-cone proof to the fallback tactic pattern (cardinality case-split). Log the outcome in the first implementation commit message.
 
     Halt on failure; investigate before writing module code.
 
-1. **Scaffold `ZhangYeung/Theorem4.lean` and `ZhangYeungTest/Theorem4.lean` in the same change.** Add the module docstring, imports (`ZhangYeung.Theorem3` only), the empty `namespace ZhangYeung`, and `sorry` stubs for the seven public definitions and five public theorems. Add signature-pinning `example`s in `ZhangYeungTest/Theorem4.lean` (one per public definition/theorem stub). Wire both top-level re-export files. Confirm `lake build ZhangYeung.Theorem4`, `lake build ZhangYeung`, `lake build ZhangYeungTest`, and `lake test` all pass. Commit as `feat: scaffold Theorem 4 module and API tests`.
+1. **Freeze the bridge representation before scaffolding.** Confirm in a scratch file that the public theorem statements will use the heterogeneous family `S : Fin 4 → Type u`, that `zhangYeungAt_entropyFn` can call M3's `zhangYeung` with explicit measurability hypotheses in the order `(hX (π 2)) (hX (π 3)) (hX (π 0)) (hX (π 1))`, and that the intended transport route is `entropy_comp_of_injective` plus the currently-exposed PFR transports. Only once those signatures are stable should the module surface be scaffolded.
+
+1. **Scaffold `ZhangYeung/Theorem4.lean` and `ZhangYeungTest/Theorem4.lean` in the same change.** Add the module docstring, imports (`ZhangYeung.Theorem3` only), the empty `namespace ZhangYeung`, and `sorry` stubs for the core public surface listed in §The M4 theorems. Add signature-pinning `example`s in `ZhangYeungTest/Theorem4.lean` (one per public definition/theorem stub). Wire both top-level re-export files. Confirm `lake build ZhangYeung.Theorem4`, `lake build ZhangYeung`, `lake build ZhangYeungTest`, and `lake test` all pass. Commit as `feat: scaffold Theorem 4 module and API tests`.
 
 1. **Land the set-function calculus: `I_F`, `condI_F`, `delta_F`.** Three one-line definitions. No lemmas (yet). Commit as `feat(theorem4): add set-function information-theoretic calculus`.
 
@@ -532,21 +541,21 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
 
 1. **Prove `not_zhangYeungHolds_witness` via permutation specialization + `norm_num`.** ~15-20 tactic lines, Part (b) complete. Specialize at `σ = Equiv.swap 0 2 * Equiv.swap 1 3`; reduce to concrete `ℝ` arithmetic using the witness evaluation. Commit as `feat(theorem4): prove witness violates Zhang-Yeung at the canonical labelling`.
 
-1. **Land `shannon_incomplete` (intermediate).** Three-line proof combining steps 6-7. Commit as `feat(theorem4): derive Γ_4 ⊋ tildeΓ_4 as shannon_incomplete`.
+1. **Land `shannon_incomplete` (intermediate).** Three-line proof combining `shannonCone_of_witness` and `not_zhangYeungHolds_witness`. Commit as `feat(theorem4): derive Γ_4 ⊋ tildeΓ_4 as shannon_incomplete`.
 
-1. **Land `entropyFn` and the per-subset bridge lemmas.** Start with `entropyFn_empty` (easy), then `entropyFn_singleton`, `entropyFn_pair`, `entropyFn_triple`, `entropyFn_quad`. Budget ~5-10 tactic lines each via `entropy_comp_of_injective` with explicit `Equiv`s. If any lemma elaborates awkwardly through the `Subtype` coercion, extract the `Equiv` as a named `private` definition and keep the bridge lemma's proof short. Split into 3-5 commits at logical boundaries (e.g., `feat(theorem4): entropyFn definition and empty/singleton bridge`, `feat(theorem4): pair/triple/quad bridge lemmas`).
+1. **Land `entropyFn` and the per-subset bridge lemmas.** Start with `entropyFn_empty` (easy), then `entropyFn_singleton`, `entropyFn_pair`, `entropyFn_triple`, `entropyFn_quad`. Bind the bridge over the heterogeneous family `S : Fin 4 → Type u` from the start so the public theorem statements match M3 and do not need restating later. Budget ~5-10 tactic lines each via `entropy_comp_of_injective` with explicit `Equiv`s. If any lemma elaborates awkwardly through the `Subtype` coercion, extract the `Equiv` as a named `private` definition and keep the bridge lemma's proof short. Split into 3-5 commits at logical boundaries (e.g., `feat(theorem4): entropyFn definition and empty/singleton bridge`, `feat(theorem4): pair/triple/quad bridge lemmas`).
 
 1. **Prove `zhangYeungAt_entropyFn` (permutation-indexed bridge).** Unfold + rewrite + close by M3's `zhangYeung`. Budget ~30-50 tactic lines. If the chase exceeds 75 lines, split the permutation-unfolding and the M3 closure into two sub-lemmas. Commit as `feat(theorem4): bridge set-function ZY from M3 at every permutation`.
 
 1. **Land `zhangYeungHolds_of_entropy`.** One-line wrapper. Commit as `feat(theorem4): derive tildeΓ_4 membership for all four-variable entropy functions`.
 
-1. **Prove `theorem4` (headline).** Five-line proof combining steps 6, 7, 11. Commit as `feat(theorem4): prove Theorem 4, Shannon incompleteness at n = 4`.
+1. **Prove `theorem4` (headline).** Five-line proof combining `shannonCone_of_witness`, `not_zhangYeungHolds_witness`, and `zhangYeungHolds_of_entropy`. Commit as `feat(theorem4): prove Theorem 4, Shannon incompleteness at n = 4`.
 
 1. **(Optional stretch) Land `theorem4_closure`.** ~15-30 tactic lines. If budget tight, skip and file as follow-up.
 
 1. **(Optional stretch) Land `shannon_incomplete_ge_four`.** ~20-40 tactic lines. If budget tight, skip.
 
-1. **Expand `ZhangYeungTest/Theorem4.lean` to cover the full public API.** Signatures were pinned in step 2; expand with:
+1. **Expand `ZhangYeungTest/Theorem4.lean` to cover the full public API.** Signatures were pinned during scaffolding; expand with:
     - A signature-pinning `example` for each public theorem: `shannonCone_of_witness`, `not_zhangYeungHolds_witness`, `shannon_incomplete`, `zhangYeungHolds_of_entropy`, `theorem4`.
     - A concrete-arithmetic test: evaluate `F_witness_ℚ` on each of the 16 subsets.
     - A theorem-application test: reconstruct the Zhang-Yeung violation from scratch using the public API (compute `delta_F F_witness 2 3 0 1` and the RHS, `linarith` the contradiction).
@@ -565,7 +574,7 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
 
 1. **Open the PR.** Title: `feat: prove Theorem 4, Shannon incompleteness`. Body links this plan and the roadmap, summarizes the public surface and the four parts, calls out the set-function/random-variable bridge as M4's new measure-theoretic content, and notes whether the optional stretches (closure, n ≥ 4) landed.
 
-**Abort/regroup gates.** If Part (c)'s bridge work (steps 9-11) sprawls past ~250 lines without closing cleanly, halt and reconsider: (i) promote the contingency of factoring `entropyFn` and per-subset lemmas into `ZhangYeung/EntropyFunction.lean`; or (ii) relax `zhangYeungHolds_of_entropy` to a single-labeling version (sufficient for `theorem4` at the canonical labeling) and file the all-permutations version as a follow-up.
+**Abort/regroup gates.** If Part (c)'s bridge work (the `entropyFn` block, `zhangYeungAt_entropyFn`, and `zhangYeungHolds_of_entropy`) sprawls past ~250 lines without closing cleanly, halt and reconsider: (i) promote the contingency of factoring `entropyFn` and per-subset lemmas into `ZhangYeung/EntropyFunction.lean`; or (ii) relax `zhangYeungHolds_of_entropy` to a single-labeling version (sufficient for `theorem4` at the canonical labeling) and file the all-permutations version as a follow-up.
 
 ## Open questions and known risks
 
@@ -575,20 +584,20 @@ Parts (a)'s Shannon-cone verification attempts `decide` on `∀ α β : Finset (
 
 **Mitigation (try in order):**
 
-1. Run the pre-flight rehearsal (sequencing step 1). If under 3 seconds, proceed.
+1. Run the pre-flight rehearsal from the bootstrap phase. If under 3 seconds, proceed.
 1. If in 3-30 seconds, split the three Shannon-cone clauses into three separate lemmas so each `decide` runs in its own heartbeat bucket. Per `feedback_lean_split_before_bump.md`, split before bumping; only bump if splitting alone does not help.
 1. If >30 seconds or hitting the reducer's stack limit, pivot to cardinality case-enumeration: `match α.card, β.card with` on the five-valued cardinality, then within each case `match α, β with` on the literal value. Budget ~60-100 lines in that fallback.
 1. Last resort: enumerate all 16 `Finset (Fin 4)` subsets as an explicit `List` and prove the cone conditions on the product of that list with itself. `List.forall₂_iff` + `decide` on a flat list of rational comparisons tends to be faster.
 
 ### 11.2 Per-subset bridge lemma boilerplate (moderate-high)
 
-Part (c)'s per-subset lemmas (`entropyFn_empty` through `entropyFn_quad`) each require an explicit `Equiv` between a `Finset`-indexed subtype and `Fin k`, plus an invocation of `entropy_comp_of_injective` or `IdentDistrib.entropy_eq`. Depending on how cleanly Mathlib's `Equiv` API handles the subtype, this can be ~5 lines per lemma or ~20 lines per lemma. Five lemmas × 20 lines = 100 lines; five lemmas × 5 lines = 25 lines.
+Part (c)'s per-subset lemmas (`entropyFn_empty` through `entropyFn_quad`) each require an explicit `Equiv` between a `Finset`-indexed subtype and `Fin k`, plus an invocation of `entropy_comp_of_injective` or a local transport helper proved on top of the currently-exposed PFR API. Depending on how cleanly Mathlib's `Equiv` API handles the subtype, this can be ~5 lines per lemma or ~20 lines per lemma. Five lemmas × 20 lines = 100 lines; five lemmas × 5 lines = 25 lines.
 
 **Mitigation:**
 
-1. Before writing the first lemma, grep Mathlib for existing `Equiv`s between `Subtype` and `Fin n` -- e.g. `Finset.equivFin`, `Fintype.equivFin`. These may collapse the equivalence construction to a one-liner.
-1. Share the `Equiv` construction across lemmas: if the pattern `{i, j} ≃ Fin 2` generalizes cleanly to `{i, j, k} ≃ Fin 3` via `Finset.equivFin`, factor the shared `Equiv` into a `private` helper and call uniformly.
-1. If `entropy_comp_of_injective` proves awkward (universe issues, implicit argument mess), fall back to `IdentDistrib.entropy_eq` via a manually constructed `IdentDistrib` between the two joint distributions.
+1. Before writing the first lemma, grep Mathlib for existing `Equiv`s between `Subtype` and `Fin n` -- for example, routes through `Fintype.equivFin` after equipping the subtype with its canonical `Fintype`. These may collapse the equivalence construction to a one-liner.
+1. Share the `Equiv` construction across lemmas: if the pattern `{i, j} ≃ Fin 2` generalizes cleanly to `{i, j, k} ≃ Fin 3`, factor the shared `Equiv` into a `private` helper and call uniformly.
+1. If `entropy_comp_of_injective` proves awkward (universe issues, implicit argument mess), do not assume an `IdentDistrib.entropy_eq` fallback exists. Instead, either (i) prove the needed entropy transport locally as a helper before using it, or (ii) rewrite the target through `mutualInfo_def` / conditional-entropy identities and use the transport lemmas that do exist in the current PFR pin.
 1. If any single per-subset lemma resists both routes, state the lemma in terms of a named local joint RV (`Y := fun ω => ⟨X i ω, X j ω⟩`) instead of a `⟨X i, X j⟩` packed tuple; this side-steps the subtype coercion at the cost of an extra variable.
 
 ### 11.3 Permutation-indexed bridge proof bookkeeping (moderate)
@@ -599,14 +608,14 @@ Part (c)'s per-subset lemmas (`entropyFn_empty` through `entropyFn_quad`) each r
 
 1. Introduce local abbreviations `Z := X (π 0)`, `U := X (π 1)`, `Xm := X (π 2)`, `Y := X (π 3)` at the top of the proof. This avoids re-writing `X (π 0)` at every invocation.
 1. Use `simp only [entropyFn_singleton, entropyFn_pair, ...]` to batch-apply the per-subset lemmas. The distinctness hypotheses propagate through `π.injective`.
-1. Close by `exact ZhangYeung.zhangYeung hZ hU hXm hY μ`; the tactic-level rewrites should leave a goal matching M3's conclusion exactly.
+1. Close by `exact ZhangYeung.zhangYeung (hX (π 2)) (hX (π 3)) (hX (π 0)) (hX (π 1)) μ`; the tactic-level rewrites should leave a goal matching M3's conclusion exactly.
 1. If the bookkeeping still sprawls, narrow `zhangYeungAt_entropyFn` to a single canonical labeling (trivially `π = 1`), prove `theorem4` at that one labeling, and file the all-permutations version as a follow-up. `theorem4` only needs one labeling to fail for `F_witness`; the bridge only needs one labeling to hold for `entropyFn`. The all-permutations form is cleaner but not strictly necessary.
 
 ### 11.4 Universe alignment with M3 (low-moderate)
 
-M3's `zhangYeung` binds codomains `S₁, S₂, S₃, S₄ : Type u` at a single universe. The bridge `entropyFn X μ` with `X : Fin 4 → Ω → S` and `S : Type u` inherits this universe constraint. `theorem4`'s signature must bind `S : Type u` and `X : Fin 4 → Ω → S` accordingly.
+M3's `zhangYeung` binds codomains `S₁, S₂, S₃, S₄ : Type u` at a single universe, but not at a single type. The bridge should therefore bind a family `S : Fin 4 → Type u` and `X : ∀ i : Fin 4, Ω → S i`, rather than collapsing prematurely to a common codomain. This keeps `theorem4` aligned with the current M3 API and avoids a later theorem restatement.
 
-**Mitigation:** fix the universe at `Type u` (inherited from M3) throughout M4. If a concrete caller at `Type 0` finds the `u` binding awkward, add a `ULift` shim or a `Type 0`-specialized wrapper as a follow-up. Not a blocker for M4.
+**Mitigation:** fix the codomain family at universe `Type u` throughout M4. If a future caller wants a homogeneous specialization, that can be derived as a corollary by taking `S` constant. Not a blocker for M4.
 
 ### 11.5 `zhangYeungHolds` over `Equiv.Perm (Fin 4)` (low)
 
@@ -619,7 +628,7 @@ def zhangYeungHolds (F : Finset (Fin 4) → ℝ) : Prop :=
   ∀ i j k l : Fin 4, ({i, j, k, l} : Finset (Fin 4)).card = 4 → zhangYeungAt F i j k l
 ```
 
-The `card = 4` hypothesis is `decide`-closable. This form makes the violation and the bridge both simpler at the cost of some paper-alignment. Make the choice once (at sequencing step 4) and stick with it; do not switch mid-milestone.
+The `card = 4` hypothesis is `decide`-closable. This form makes the violation and the bridge both simpler at the cost of some paper-alignment. Make the choice once during the early predicate-surface design and stick with it; do not switch mid-milestone.
 
 ### 11.6 Bridge sprawl into a separate module (moderate)
 
@@ -639,7 +648,7 @@ Same as M2-M3 risk. PFR is a permanent pinned dependency. M4 consumes M3's `zhan
 
 ## Verification
 
-Per the revised roadmap M4 checkpoint (see roadmap §M4 edits in this same change): three theorems land, along with their supporting public surface.
+Per the roadmap's current M4 checkpoint: three theorems land, along with their supporting public surface.
 
 - `theorem shannon_incomplete : ∃ F, shannonCone F ∧ ¬ zhangYeungHolds F` — Parts (a) + (b).
 - `theorem zhangYeungHolds_of_entropy` — Part (c), routes through M3.
@@ -654,7 +663,7 @@ Operationally:
 - `lake lint` passes (batteries linter via the `lintDriver`).
 - `make check` passes in full.
 
-**Test module contents** (`ZhangYeungTest/Theorem4.lean`, established incrementally in sequencing steps 2 and 15):
+**Test module contents** (`ZhangYeungTest/Theorem4.lean`, established incrementally during scaffolding and the final API-test expansion):
 
 1. Signature-pinning `example`s for each public definition (`I_F`, `condI_F`, `delta_F`, `shannonCone`, `zhangYeungAt`, `zhangYeungHolds`, `F_witness_ℚ`, `F_witness`, `entropyFn`) and each public theorem (`shannonCone_of_witness`, `not_zhangYeungHolds_witness`, `shannon_incomplete`, `zhangYeungAt_entropyFn`, `zhangYeungHolds_of_entropy`, `theorem4`). ~15 `example`s.
 1. Concrete-arithmetic witness evaluation: for each of the 16 `Finset (Fin 4)` subsets, assert the expected `F_witness_ℚ` value. Closes by per-subset `rfl`/`decide` or one `decide` over `Finset.univ`.
@@ -664,7 +673,7 @@ Operationally:
 
 Each `example` lives inside `namespace ZhangYeungTest` with `open ZhangYeung`, following the M1-M3 `ZhangYeungTest/` precedents.
 
-Land these in the same commits as the corresponding public surface (signatures in step 2, per-subset and theorem-application tests in step 15), so `lake test` exercises the public API continuously through the milestone.
+Land these in the same commits as the corresponding public surface (signatures during scaffolding, per-subset and theorem-application tests during the final API-test expansion), so `lake test` exercises the public API continuously through the milestone.
 
 **Out-of-scope for M4** (documented here so M5 and beyond can pick them up):
 
@@ -683,7 +692,7 @@ Land these in the same commits as the corresponding public surface (signatures i
 - `ZhangYeung.lean` (modified, add one `import` line).
 - `ZhangYeungTest.lean` (modified, add one `import` line).
 - `AGENTS.md` / `CLAUDE.md` (modified, two-line Module Layout addition + entrypoint manifest update).
-- `docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md` (modified, M4 section revised to reflect the full Theorem 4 scope; §6 parallelism analysis revised to note M3 has landed).
+- `docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md` (modify only if wording needs alignment with the corrected heterogeneous bridge and the current M3-ready execution order).
 
 **Potential new file (contingency per §File layout):**
 
