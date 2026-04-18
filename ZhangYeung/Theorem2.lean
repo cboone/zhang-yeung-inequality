@@ -1106,6 +1106,30 @@ private lemma marg_swap_helper
     exact sum_filter_map_real_eq_map_comp hF hproj μ b
   rw [h_pJ, h_pt_marg b]
 
+omit [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
+     [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄] in
+/-- **Filter-sum reindex of `p̃`.** Given a bijection between a subtype of the 4-tuple alphabet (those `t` satisfying `proj t = c`) and an index type `δ`, witnessed by `embed`/`extract` and their inversion properties, the fibre sum of `p̃` over `proj⁻¹{c}` rewrites as a direct sum over `δ`. Used in `sum_joint_eq_sum_ptilde` to match each of the eleven projection-specific `sum_ptilde_over_*` marginal lemmas. -/
+private lemma ptilde_filter_sum_eq_reindex
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄} (μ : Measure Ω)
+    {γ δ : Type*} [Fintype δ] [DecidableEq γ]
+    (embed : δ → S₁ × S₂ × S₃ × S₄) (extract : S₁ × S₂ × S₃ × S₄ → δ)
+    (proj : S₁ × S₂ × S₃ × S₄ → γ) (c : γ)
+    (h_proj_embed : ∀ d, proj (embed d) = c)
+    (h_extract_embed : ∀ d, extract (embed d) = d)
+    (h_embed_extract : ∀ t, proj t = c → embed (extract t) = t) :
+    (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
+        (fun t => proj t = c), ptilde X Y Z U μ t)
+      = ∑ d : δ, ptilde X Y Z U μ (embed d) := by
+  refine (Finset.sum_nbij' embed extract ?_ ?_ ?_ ?_ ?_).symm
+  · intro d _
+    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, h_proj_embed d⟩
+  · intro _ _; exact Finset.mem_univ _
+  · intro d _; exact h_extract_embed d
+  · intro t ht
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht
+    exact h_embed_extract t ht
+  · intro _ _; rfl
+
 set_option maxHeartbeats 2400000 in
 /-- **Marginal swap.** Every factor appearing in the log-ratio `p̂ / p̃` is a marginal distribution common to `p` and `p̃` -- the full list is `{p(z,u), p(x,z), p(x,u), p(y,z), p(y,u), p(x,z,u), p(y,z,u), p(z), p(u), p(x), p(y)}`. The `p`-weighted sum therefore agrees with the `p̃`-weighted sum on each factor, and the eleven summands recombine to `∑ p̃ · log(p̂ / p̃)`. This is the key observation of [@zhangyeung1997] that converts Shannon-type quantities into the KL-divergence-amenable form. -/
 private lemma sum_joint_eq_sum_ptilde
@@ -1251,20 +1275,13 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2.1)) (by measurability)
       (fun p => Real.log (pXZ p))
     rintro ⟨x, z⟩
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => (t.1, t.2.2.1) = (x, z)), ptilde X Y Z U μ t)
-        = ∑ p : S₂ × S₄, ptilde X Y Z U μ (x, p.1, z, p.2) := by
-      refine (Finset.sum_nbij' (fun p : S₂ × S₄ => (x, p.1, z, p.2))
-        (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2.2)) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · rintro ⟨_, _⟩ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
-        obtain ⟨rfl, rfl⟩ := ht
-        rfl
-      · intro _ _; rfl
-    rw [h_reindex, Fintype.sum_prod_type]
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun p : S₂ × S₄ => (x, p.1, z, p.2))
+          (fun t => (t.2.1, t.2.2.2)) _ (x, z)
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by
+            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
+        Fintype.sum_prod_type]
     exact sum_ptilde_over_y_u hX hY hZ hU μ x z
   have hEq_xu : ∑ t : S₁ × S₂ × S₃ × S₄,
         pJoint X Y Z U μ t * Real.log (pXU (t.1, t.2.2.2))
@@ -1273,20 +1290,13 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2.2)) (by measurability)
       (fun p => Real.log (pXU p))
     rintro ⟨x, u⟩
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => (t.1, t.2.2.2) = (x, u)), ptilde X Y Z U μ t)
-        = ∑ p : S₂ × S₃, ptilde X Y Z U μ (x, p.1, p.2, u) := by
-      refine (Finset.sum_nbij' (fun p : S₂ × S₃ => (x, p.1, p.2, u))
-        (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2.1)) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · rintro ⟨_, _⟩ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
-        obtain ⟨rfl, rfl⟩ := ht
-        rfl
-      · intro _ _; rfl
-    rw [h_reindex, Fintype.sum_prod_type]
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun p : S₂ × S₃ => (x, p.1, p.2, u))
+          (fun t => (t.2.1, t.2.2.1)) _ (x, u)
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by
+            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
+        Fintype.sum_prod_type]
     exact sum_ptilde_over_y_z hX hY hZ hU μ x u
   have hEq_yz : ∑ t : S₁ × S₂ × S₃ × S₄,
         pJoint X Y Z U μ t * Real.log (pYZ (t.2.1, t.2.2.1))
@@ -1295,20 +1305,13 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2.1)) (by measurability)
       (fun p => Real.log (pYZ p))
     rintro ⟨y, z⟩
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => (t.2.1, t.2.2.1) = (y, z)), ptilde X Y Z U μ t)
-        = ∑ p : S₁ × S₄, ptilde X Y Z U μ (p.1, y, z, p.2) := by
-      refine (Finset.sum_nbij' (fun p : S₁ × S₄ => (p.1, y, z, p.2))
-        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.2.2)) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · rintro ⟨_, _⟩ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
-        obtain ⟨rfl, rfl⟩ := ht
-        rfl
-      · intro _ _; rfl
-    rw [h_reindex, Fintype.sum_prod_type]
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun p : S₁ × S₄ => (p.1, y, z, p.2))
+          (fun t => (t.1, t.2.2.2)) _ (y, z)
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by
+            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
+        Fintype.sum_prod_type]
     exact sum_ptilde_over_x_u hX hY hZ hU μ y z
   have hEq_yu : ∑ t : S₁ × S₂ × S₃ × S₄,
         pJoint X Y Z U μ t * Real.log (pYU (t.2.1, t.2.2.2))
@@ -1317,20 +1320,13 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2.2)) (by measurability)
       (fun p => Real.log (pYU p))
     rintro ⟨y, u⟩
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => (t.2.1, t.2.2.2) = (y, u)), ptilde X Y Z U μ t)
-        = ∑ p : S₁ × S₃, ptilde X Y Z U μ (p.1, y, p.2, u) := by
-      refine (Finset.sum_nbij' (fun p : S₁ × S₃ => (p.1, y, p.2, u))
-        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.2.1)) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · rintro ⟨_, _⟩ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
-        obtain ⟨rfl, rfl⟩ := ht
-        rfl
-      · intro _ _; rfl
-    rw [h_reindex, Fintype.sum_prod_type]
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun p : S₁ × S₃ => (p.1, y, p.2, u))
+          (fun t => (t.1, t.2.2.1)) _ (y, u)
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by
+            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
+        Fintype.sum_prod_type]
     exact sum_ptilde_over_x_z hX hY hZ hU μ y u
   have hEq_zu : ∑ t : S₁ × S₂ × S₃ × S₄,
         pJoint X Y Z U μ t * Real.log (pZU t.2.2)
@@ -1339,24 +1335,15 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2) (by measurability)
       (fun p => Real.log (pZU p))
     rintro ⟨z, u⟩
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => t.2.2 = (z, u)), ptilde X Y Z U μ t)
-        = ∑ p : S₁ × S₂, ptilde X Y Z U μ (p.1, p.2, z, u) := by
-      refine (Finset.sum_nbij' (fun p : S₁ × S₂ => (p.1, p.2, z, u))
-        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.1)) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · rintro ⟨_, _⟩ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
-        obtain ⟨rfl, rfl⟩ := ht
-        rfl
-      · intro _ _; rfl
-    rw [h_reindex, Fintype.sum_prod_type]
-    -- Inner sum ∑ y ptilde(x, y, z, u) over y for each fixed x (via ptilde_fibre_sum)
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun p : S₁ × S₂ => (p.1, p.2, z, u))
+          (fun t => (t.1, t.2.1)) _ (z, u)
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by
+            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
+        Fintype.sum_prod_type]
     simp only [ptilde]
     exact ptilde_fibre_sum hX hY hZ hU μ z u
-  -- Single-coordinate projections.
   have hEq_x : ∑ t : S₁ × S₂ × S₃ × S₄,
         pJoint X Y Z U μ t * Real.log (pX t.1)
       = ∑ t : S₁ × S₂ × S₃ × S₄,
@@ -1364,19 +1351,11 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => t.1) measurable_fst
       (fun x => Real.log (pX x))
     intro x
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => t.1 = x), ptilde X Y Z U μ t)
-        = ∑ p : S₂ × S₃ × S₄, ptilde X Y Z U μ (x, p.1, p.2.1, p.2.2) := by
-      refine (Finset.sum_nbij' (fun p : S₂ × S₃ × S₄ => (x, p.1, p.2.1, p.2.2))
-        (fun t : S₁ × S₂ × S₃ × S₄ => (t.2.1, t.2.2.1, t.2.2.2)) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · rintro ⟨_, _, _⟩ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht
-        subst ht; rfl
-      · intro _ _; rfl
-    rw [h_reindex]
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun p : S₂ × S₃ × S₄ => (x, p.1, p.2.1, p.2.2))
+          (fun t => (t.2.1, t.2.2.1, t.2.2.2)) _ x
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
     simp_rw [Fintype.sum_prod_type]
     exact sum_ptilde_over_y_z_u hX hY hZ hU μ x
   have hEq_y : ∑ t : S₁ × S₂ × S₃ × S₄,
@@ -1386,19 +1365,11 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.1) (measurable_fst.comp measurable_snd)
       (fun y => Real.log (pY y))
     intro y
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => t.2.1 = y), ptilde X Y Z U μ t)
-        = ∑ p : S₁ × S₃ × S₄, ptilde X Y Z U μ (p.1, y, p.2.1, p.2.2) := by
-      refine (Finset.sum_nbij' (fun p : S₁ × S₃ × S₄ => (p.1, y, p.2.1, p.2.2))
-        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.2.1, t.2.2.2)) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · rintro ⟨_, _, _⟩ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht
-        subst ht; rfl
-      · intro _ _; rfl
-    rw [h_reindex]
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun p : S₁ × S₃ × S₄ => (p.1, y, p.2.1, p.2.2))
+          (fun t => (t.1, t.2.2.1, t.2.2.2)) _ y
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
     simp_rw [Fintype.sum_prod_type]
     exact sum_ptilde_over_x_z_u hX hY hZ hU μ y
   have hEq_z : ∑ t : S₁ × S₂ × S₃ × S₄,
@@ -1408,19 +1379,11 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2.1)
       (measurable_fst.comp (measurable_snd.comp measurable_snd)) (fun z => Real.log (pZ z))
     intro z
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => t.2.2.1 = z), ptilde X Y Z U μ t)
-        = ∑ p : S₁ × S₂ × S₄, ptilde X Y Z U μ (p.1, p.2.1, z, p.2.2) := by
-      refine (Finset.sum_nbij' (fun p : S₁ × S₂ × S₄ => (p.1, p.2.1, z, p.2.2))
-        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.1, t.2.2.2)) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · rintro ⟨_, _, _⟩ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht
-        subst ht; rfl
-      · intro _ _; rfl
-    rw [h_reindex]
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun p : S₁ × S₂ × S₄ => (p.1, p.2.1, z, p.2.2))
+          (fun t => (t.1, t.2.1, t.2.2.2)) _ z
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
     simp_rw [Fintype.sum_prod_type]
     exact sum_ptilde_over_x_y_u hX hY hZ hU μ z
   have hEq_u : ∑ t : S₁ × S₂ × S₃ × S₄,
@@ -1430,22 +1393,13 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2.2)
       (measurable_snd.comp (measurable_snd.comp measurable_snd)) (fun u => Real.log (pU u))
     intro u
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => t.2.2.2 = u), ptilde X Y Z U μ t)
-        = ∑ p : S₁ × S₂ × S₃, ptilde X Y Z U μ (p.1, p.2.1, p.2.2, u) := by
-      refine (Finset.sum_nbij' (fun p : S₁ × S₂ × S₃ => (p.1, p.2.1, p.2.2, u))
-        (fun t : S₁ × S₂ × S₃ × S₄ => (t.1, t.2.1, t.2.2.1)) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · rintro ⟨_, _, _⟩ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht
-        subst ht; rfl
-      · intro _ _; rfl
-    rw [h_reindex]
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun p : S₁ × S₂ × S₃ => (p.1, p.2.1, p.2.2, u))
+          (fun t => (t.1, t.2.1, t.2.2.1)) _ u
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
     simp_rw [Fintype.sum_prod_type]
     exact sum_ptilde_over_x_y_z hX hY hZ hU μ u
-  -- 3-coordinate projections.
   have hEq_xzu : ∑ t : S₁ × S₂ × S₃ × S₄,
         pJoint X Y Z U μ t * Real.log (pXZU (t.1, t.2.2))
       = ∑ t : S₁ × S₂ × S₃ × S₄,
@@ -1453,20 +1407,12 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2)) (by measurability)
       (fun p => Real.log (pXZU p))
     rintro ⟨x, z, u⟩
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => (t.1, t.2.2) = (x, z, u)), ptilde X Y Z U μ t)
-        = ∑ y : S₂, ptilde X Y Z U μ (x, y, z, u) := by
-      refine (Finset.sum_nbij' (fun y : S₂ => (x, y, z, u))
-        (fun t : S₁ × S₂ × S₃ × S₄ => t.2.1) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · intro _ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
-        obtain ⟨rfl, rfl, rfl⟩ := ht
-        rfl
-      · intro _ _; rfl
-    rw [h_reindex]
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun y : S₂ => (x, y, z, u))
+          (fun t => t.2.1) _ (x, z, u)
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by
+            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl, rfl⟩ := h; rfl)]
     exact sum_ptilde_over_y hX hY hZ hU μ x z u
   have hEq_yzu : ∑ t : S₁ × S₂ × S₃ × S₄,
         pJoint X Y Z U μ t * Real.log (pYZU (t.2.1, t.2.2))
@@ -1475,20 +1421,12 @@ private lemma sum_joint_eq_sum_ptilde
     apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2)) (by measurability)
       (fun p => Real.log (pYZU p))
     rintro ⟨y, z, u⟩
-    have h_reindex : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
-          (fun t => (t.2.1, t.2.2) = (y, z, u)), ptilde X Y Z U μ t)
-        = ∑ x : S₁, ptilde X Y Z U μ (x, y, z, u) := by
-      refine (Finset.sum_nbij' (fun x : S₁ => (x, y, z, u))
-        (fun t : S₁ × S₂ × S₃ × S₄ => t.1) ?_ ?_ ?_ ?_ ?_).symm
-      · intro _ _; simp [Finset.mem_filter]
-      · intro _ _; exact Finset.mem_univ _
-      · intro _ _; rfl
-      · rintro ⟨_, _, _, _⟩ ht
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.mk.injEq] at ht
-        obtain ⟨rfl, rfl, rfl⟩ := ht
-        rfl
-      · intro _ _; rfl
-    rw [h_reindex]
+    rw [ptilde_filter_sum_eq_reindex μ
+          (fun x : S₁ => (x, y, z, u))
+          (fun t => t.1) _ (y, z, u)
+          (fun _ => rfl) (fun _ => rfl)
+          (fun ⟨_, _, _, _⟩ h => by
+            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl, rfl⟩ := h; rfl)]
     exact sum_ptilde_over_x hX hY hZ hU μ y z u
   have h_split : ∀ (w : S₁ × S₂ × S₃ × S₄ → ℝ),
       (∑ t : S₁ × S₂ × S₃ × S₄, w t * L t)
