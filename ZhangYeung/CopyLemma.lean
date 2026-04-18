@@ -229,6 +229,11 @@ private lemma measurable_projZUB {S₁ S₂ S₃ S₄ : Type*}
     Measurable (projZUB : S₁ × S₂ × S₃ × S₄ → _) := by
   unfold projZUB; fun_prop
 
+/-- Measurability of the `(a, b, c, d) ↦ (c, d)` projection extracting the `(Z, U)` pair from a right-associated 4-tuple. Consumed by the two delta transport lemmas to build the pair-level `IdentDistrib ⟨Z, U⟩ ~ ⟨Z', U'⟩` from the 4-variable `hFirst` `IdentDistrib`. -/
+private lemma measurable_pairZU {S₁ S₂ S₃ S₄ : Type*}
+    [MeasurableSpace S₁] [MeasurableSpace S₂] [MeasurableSpace S₃] [MeasurableSpace S₄] :
+    Measurable (fun p : S₁ × S₂ × S₃ × S₄ => (p.2.2.1, p.2.2.2)) := by fun_prop
+
 /-! #### Triple-level `IdentDistrib` facts
 
 Each of the three triples extracted below feeds directly into `IdentDistrib.condMutualInfo_eq`. The `Fintype`/`MeasurableSingletonClass`/`IsProbabilityMeasure` side conditions are only needed by the downstream transport lemmas, so these triple facts live above the heavier instance block. -/
@@ -388,10 +393,8 @@ theorem copyLemma_delta_transport_Y_to_Y₁
     (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
                             (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
     delta Z U X Y μ = delta Z' U' X' Y₁ ν := by
-  have h4to2 : Measurable (fun p : S₁ × S₂ × S₃ × S₄ => (p.2.2.1, p.2.2.2)) := by
-    fun_prop
   have hZU : IdentDistrib (fun ω => (Z ω, U ω)) (fun ω' => (Z' ω', U' ω')) μ ν :=
-    hFirst.symm.comp h4to2
+    hFirst.symm.comp measurable_pairZU
   rw [delta_def, delta_def, hZU.mutualInfo_eq,
       IdentDistrib.condMutualInfo_eq hZ hU hX hZ' hU' hX' (copyLemma_triple_XFirst hFirst),
       IdentDistrib.condMutualInfo_eq hZ hU hY hZ' hU' hY₁ (copyLemma_triple_YSecond hSecond)]
@@ -407,10 +410,8 @@ theorem copyLemma_delta_transport_X_to_X₁
     (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
                             (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
     delta Z U X X μ = delta Z' U' X' X₁ ν := by
-  have h4to2 : Measurable (fun p : S₁ × S₂ × S₃ × S₄ => (p.2.2.1, p.2.2.2)) := by
-    fun_prop
   have hZU : IdentDistrib (fun ω => (Z ω, U ω)) (fun ω' => (Z' ω', U' ω')) μ ν :=
-    hFirst.symm.comp h4to2
+    hFirst.symm.comp measurable_pairZU
   have e1 : I[Z : U ; μ] = I[Z' : U' ; ν] := hZU.mutualInfo_eq
   have e2 : I[Z : U | X ; μ] = I[Z' : U' | X' ; ν] :=
     IdentDistrib.condMutualInfo_eq hZ hU hX hZ' hU' hX' (copyLemma_triple_XFirst hFirst)
