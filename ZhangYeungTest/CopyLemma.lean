@@ -45,4 +45,29 @@ example
 
 end Signature
 
+section LemmaTwoFormA
+
+variable {Ω : Type*} [MeasurableSpace Ω]
+  {α β γ δ : Type*}
+  [Fintype α] [Fintype β] [Fintype γ] [Fintype δ]
+  [MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ] [MeasurableSpace δ]
+  [MeasurableSingletonClass α] [MeasurableSingletonClass β]
+  [MeasurableSingletonClass γ] [MeasurableSingletonClass δ]
+
+/- Pinned signature: re-state `delta_of_condMI_vanishes_eq` verbatim. Pins the
+hypothesis order, the vanishing-CMI shape `I[A : D | ⟨B, C⟩ ; ν] = 0`, and the
+right-hand-side argument order `delta B C A D` vs `I[A : D] - I[A : D | B] -
+I[A : D | C] - I[B : C | ⟨A, D⟩]`. -/
+example
+    {A : Ω → α} {B : Ω → β} {C : Ω → γ} {D : Ω → δ}
+    (hA : Measurable A) (hB : Measurable B) (hC : Measurable C) (hD : Measurable D)
+    (ν : Measure Ω) [IsProbabilityMeasure ν]
+    (hVanish : I[A : D | ⟨B, C⟩ ; ν] = 0) :
+    delta B C A D ν
+      = I[A : D ; ν] - I[A : D | B ; ν] - I[A : D | C ; ν]
+        - I[B : C | ⟨A, D⟩ ; ν] :=
+  delta_of_condMI_vanishes_eq hA hB hC hD ν hVanish
+
+end LemmaTwoFormA
+
 end ZhangYeungTest
