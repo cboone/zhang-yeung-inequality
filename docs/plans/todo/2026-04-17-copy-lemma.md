@@ -33,7 +33,7 @@ Milestone M2 of the Zhang-Yeung roadmap (§6) formalizes the **copy lemma**: the
 
     where the left side is computed under $p$ and the right side under $q$. Equation (45) is an *identity*, not an inequality; the three subtracted conditional mutual informations on the right are each nonnegative, which is what Theorem 3's proof will eventually exploit.
 
-The copy lemma is the single highest-leverage artifact of the project (roadmap §1, §4, §10): non-Shannon information inequalities -- Theorem 3 here, and the larger families of Matus, Dougherty-Freiling-Zeger, Kinser, Chan-Yeung downstream -- all rest on the same two-copy construction. A clean, Mathlib-ready formalization of the copy lemma is the prerequisite for all of them.
+The copy lemma is the single highest-leverage artifact of the project (roadmap §1, §4, §10): non-Shannon information inequalities -- Theorem 3 here, and the larger families of Matus, Dougherty-Freiling-Zeger, Kinser, Chan-Yeung downstream -- all rest on the same two-copy construction. A clean, reusable formalization of the copy lemma is the prerequisite for all of them.
 
 Nothing in PFR or Mathlib currently packages eq. (44) or eq. (45) as a reusable artifact. Mathlib's `ProbabilityTheory.condIndep_copies` (pinned at PFR rev `80daaf1` in `PFR/ForMathlib/ConditionalIndependence.lean:135`) provides a *generic* two-copy existence result: given random variables $X : \Omega \to \alpha$ and $Y : \Omega \to \beta$, it produces an extended probability space $(\Omega', \nu)$ with two conditionally-independent copies $X_{1}, X_{2} : \Omega' \to \alpha$ and a shared $Y' : \Omega' \to \beta$ such that $(X_{1}, Y')$ and $(X_{2}, Y')$ each have the joint law of $(X, Y)$ under $\mu$. Specializing `condIndep_copies` to $\alpha = S_{1} \times S_{2}$ (the codomain of $\langle X, Y \rangle$) and $\beta = S_{3} \times S_{4}$ (the codomain of $\langle Z, U \rangle$) recovers precisely the paper's eq. (44) up to projection onto the six coordinates.
 
@@ -46,7 +46,7 @@ M1.5 did not need the kernel construction because Kaced-Romashchenko ([@kaced201
 ### Value of M2 landing before M3
 
 1. **Design-first before Shannon-chase-first.** M3's Theorem 3 proof is a six-step Shannon chase once the copy's structural facts are in hand (roadmap §6, M3 summary). Landing the copy structure and Lemma 2 separately forces us to commit early to a clean API -- which seven or eight structural lemmas M3 will cite by name, what their signatures are, which hypotheses they need. If M2 and M3 were combined, the Shannon chase would accrete copy-lemma scaffolding inline.
-2. **Mathlib-readiness.** The copy lemma is the single deliverable of this project that we expect to upstream. Landing it in its own module, with its own Mathlib-style signature and no Zhang-Yeung-specific naming (the projected coordinate names `X', Y', X_1, Y_1, Z', U'` are standard copy-lemma notation, not paper idioms), keeps the upstream door open. Lemma 2 is stated both in a Zhang-Yeung-flavored form (against the paper's $\Delta$) and in an abstract Shannon-identity form under a generic conditional-independence hypothesis.
+2. **Modularization before chase code.** The copy lemma is the one part of this project that may later be worth cleaning up for upstreaming, but M2 does not need to optimize for that today. Landing it in its own module, with a reasonably generic signature and no unnecessary Zhang-Yeung-specific naming (the projected coordinate names `X', Y', X_1, Y_1, Z', U'` are standard copy-lemma notation, not paper idioms), keeps later cleanup feasible without forcing the current branch to freeze an API too early. Lemma 2 is stated both in a Zhang-Yeung-flavored form (against the paper's $\Delta$) and in an abstract Shannon-identity form under a generic conditional-independence hypothesis.
 3. **Risk isolation.** The three structural uncertainties for M2 -- universe bookkeeping around `condIndep_copies`'s $\Omega' : \mathrm{Type}\, u$, PFR-vs-Mathlib `CondIndepFun` API mismatch, and the missing conditional-mutual-info `IdentDistrib` transport -- all resolve in M2 or fail here. M3 can assume they are resolved.
 
 ## Paper equations this milestone formalizes
@@ -69,7 +69,7 @@ where $\Delta(Z, U \mid X, Y)$ is computed under $p$ and the four terms on the r
 - a 4-way Shannon expansion $I(Z; U; X; Y_{1}) = I(X; Y_{1}) - I(X; Y_{1} \mid Z) - I(X; Y_{1} \mid U) + I(X; Y_{1} \mid Z, U)$;
 - the conditional-independence identity $I(X; Y_{1} \mid Z, U) = 0$, which is the structural fact (iii) of eq. (44).
 
-M2 formalizes (a) the construction of $q$ via `condIndep_copies`, (b) the three structural facts of eq. (44) in their `IdentDistrib` / `CondIndepFun` form, and (c) Lemma 2 as a named theorem under both the Zhang-Yeung $\Delta$ and a Mathlib-ready abstract Shannon-identity presentation.
+M2 formalizes (a) the construction of $q$ via `condIndep_copies`, (b) the three structural facts of eq. (44) in their `IdentDistrib` / `CondIndepFun` form, and (c) Lemma 2 as a named theorem under both the Zhang-Yeung $\Delta$ and a generic abstract Shannon-identity presentation.
 
 M2 does **not** formalize Theorem 3's inequality itself. The final Shannon chase that chains two applications of Lemma 2 through the data-processing inequality and `I[X_{1} : Y_{1}] = I[X : Y]` lives in M3.
 
@@ -183,7 +183,7 @@ No changes to `ZhangYeung/Prelude.lean`, `ZhangYeung/Delta.lean`, `ZhangYeung/Th
 
 ### What M2 must produce
 
-Concretely, the Mathlib-ready copy lemma is an existential statement that, given four measurable random variables $X, Y, Z, U$ on a probability space $(\Omega, \mu)$, produces an extended probability space $(\Omega', \nu)$ with six projected random variables $X', Y', X_{1}, Y_{1}, Z', U'$ such that:
+Concretely, the M2 copy lemma is an existential statement that, given four measurable random variables $X, Y, Z, U$ on a probability space $(\Omega, \mu)$, produces an extended probability space $(\Omega', \nu)$ with six projected random variables $X', Y', X_{1}, Y_{1}, Z', U'$ such that:
 
 1. **First-copy marginal equality.** $\langle X', Y', Z', U' \rangle$ under $\nu$ is identically distributed to $\langle X, Y, Z, U \rangle$ under $\mu$.
 2. **Second-copy marginal equality.** $\langle X_{1}, Y_{1}, Z', U' \rangle$ under $\nu$ is identically distributed to $\langle X, Y, Z, U \rangle$ under $\mu$.
@@ -214,11 +214,11 @@ The conditional-independence fact $\mathrm{CondIndepFun}\,\langle X', Y' \rangle
 
 ### Bundling the output
 
-Two presentations are plausible for `copyLemma` itself. Pick one; default below is (A).
+For M2, use presentation (A) first. If M3 becomes materially cleaner with bundled data, refactor freely and update the test module in the same change.
 
 **(A) Long existential, direct `condIndep_copies` transform.** Mirrors PFR's presentation of `condIndep_copies`: a single statement with one existential over $\Omega'$, its `MeasurableSpace`, $\nu$, and the six projected random variables, plus a conjunction of `IsProbabilityMeasure ν`, six measurabilities, two 4-variable `IdentDistrib`s, and one `CondIndepFun`. Users apply `obtain ⟨Ω', _, ν, X', Y', X₁, Y₁, Z', U', _, hX', hY', hX₁, hY₁, hZ', hU', ident_first, ident_second, hCond⟩ := copyLemma ...`
 
-Pros: one function, no new datatype, matches `condIndep_copies`'s idiom, minimal upstream-readiness concerns.
+Pros: one function, no new datatype, matches `condIndep_copies`'s idiom, minimal packaging overhead.
 
 Cons: long `obtain` patterns on every use site, no named fields.
 
@@ -228,7 +228,7 @@ Pros: readable downstream use, named fields are self-documenting, M3's Shannon c
 
 Cons: the `MeasurableSpace Ω'` and `IsProbabilityMeasure ν` fields cannot be plain structure fields without `@`-syntax plumbing (they are instance-class arguments elsewhere in the file); the structure has to either carry them explicitly or rely on `outParam` or bundled type-class juggling that complicates the API surface.
 
-**Recommendation: (A) for the main `copyLemma` theorem.** It matches `condIndep_copies`'s idiom and avoids instance-class plumbing that (B) forces. The cost is a 16-element `obtain` at the M3 call site, which is unaesthetic but not fragile. If M3's Shannon chase proves hard to read because of that destructuring, the refactor to (B) is a mechanical change that does not affect proofs.
+**Recommendation: start with (A) for the main `copyLemma` theorem.** It matches `condIndep_copies`'s idiom and avoids instance-class plumbing that (B) forces. The cost is a 16-element `obtain` at the M3 call site, which is unaesthetic but not fragile. If M3's Shannon chase proves hard to read because of that destructuring, refactor to (B) and update the API tests in the same change; no long-term stability commitment is intended here.
 
 ### Supporting corollaries under a local `variable` block
 
@@ -299,7 +299,7 @@ Design notes:
 - **Hypothesis form.** All four random variables are implicit; measurabilities are explicit positional arguments, mirroring `condIndep_copies`.
 - **Variable ordering in the signature.** `(X, Y, Z, U)` across the inputs -- the paper's reading order for eq. (44). Each output's coordinate order follows the tuple pattern `(X', Y', Z', U')` / `(X₁, Y₁, Z', U')` / `(⟨X', Y'⟩, ⟨X₁, Y₁⟩, ⟨Z', U'⟩)` so each name's ordinal in the pair matches the variable it projects from.
 - **No notation.** Defer any notation decision to M3 or later. Plain function application `copyLemma hX hY hZ hU μ` is fine; the `obtain` introduces names locally.
-- **No dependency on `ZhangYeung.delta`.** The main theorem is stated in pure PFR / Mathlib notation and does not reference `ZhangYeung.delta`. This is what makes it Mathlib-ready.
+- **No dependency on `ZhangYeung.delta`.** The main theorem is stated in pure PFR / Mathlib notation and does not reference `ZhangYeung.delta`. This keeps the construction generic and makes later cleanup or upstreaming easier if we ever want it.
 
 ### Lemma 2 (eq. 45) as a Shannon identity
 
@@ -331,7 +331,7 @@ Proof route: expand the LHS via `delta_def`, the four subtractors on the RHS via
 **Form B: Zhang-Yeung-flavored corollary.** Specialized to the copy construction's projections `(X', Y₁, Z', U')` with the already-projected `I[X' : Y₁ | ⟨Z', U'⟩ ; ν] = 0` (a derived corollary of the main `CondIndepFun`):
 
 ```lean
-lemma copyLemma_delta_identity (hX' : Measurable X') ... (hCond : CondIndepFun ...) :
+lemma copyLemma_delta_identity_Y₁ (hX' : Measurable X') ... (hCond : CondIndepFun ...) :
     ZhangYeung.delta Z' U' X' Y₁ ν
       = I[X' : Y₁ ; ν] - I[X' : Y₁ | Z' ; ν] - I[X' : Y₁ | U' ; ν]
         - I[Z' : U' | ⟨X', Y₁⟩ ; ν]
@@ -368,7 +368,7 @@ lemma copyLemma_delta_le_mutualInfo_Y₁
     ZhangYeung.delta Z U X Y μ ≤ I[X' : Y₁ ; ν]
 ```
 
-Proof: three lines. `rw [copyLemma_delta_transport_Y_to_Y₁, copyLemma_delta_identity]`, then `linarith [condMutualInfo_nonneg, condMutualInfo_nonneg, condMutualInfo_nonneg]` for the three subtracted nonnegative terms.
+Proof: three lines. `rw [copyLemma_delta_transport_Y_to_Y₁, copyLemma_delta_identity_Y₁]`, then `linarith [condMutualInfo_nonneg, condMutualInfo_nonneg, condMutualInfo_nonneg]` for the three subtracted nonnegative terms.
 
 This is precisely the first of the two inequalities Theorem 3's proof opens with ("From Lemma 2, we have $I(Z; U) - I(Z; U \mid X) - I(Z; U \mid Y) \le I(X; Y_{1})$", paper line 683). M3 will also want the symmetric application for $(X, X_{1})$; see the "Symmetric application" sub-section below.
 
@@ -385,7 +385,7 @@ via the two triple-level `IdentDistrib`s for $(X, Z, U) \sim (X', Z', U')$ and $
 Applying Lemma 2 Form A to $(A, B, C, D) = (X', Z', U', X_{1})$ with the conditional-independence fact $I[X' : X_{1} \mid \langle Z', U' \rangle ; \nu] = 0$ (derived from the main `CondIndepFun` by projecting each side to its first coordinate) gives
 
 ```lean
-lemma copyLemma_delta_le_mutualInfo_X₁
+lemma copyLemma_delta_le_mutualInfo_X_X₁
     (hX' hX₁ hZ' hU' hFirst hSecond hCond : ...) :
     I[Z : U ; μ] - 2 * I[Z : U | X ; μ] ≤ I[X' : X₁ ; ν]
 ```
@@ -410,7 +410,7 @@ Inside `ZhangYeung/CopyLemma.lean`, the proof decomposes naturally into the bloc
 ### Private helpers
 
 - `condIndepFun_comp` (generic): post-composition of `CondIndepFun` on the two measured coordinates. See "PFR and Mathlib API surface used" above for the statement.
-- `IdentDistrib.condMutualInfo_eq` (generic): conditional-mutual-information transport under a four-variable `IdentDistrib`. Private for now; promote to `ZhangYeung/Prelude.lean` or suggest upstream if other modules pick it up.
+- `IdentDistrib.condMutualInfo_eq` (generic): conditional-mutual-information transport under a four-variable `IdentDistrib`. Private for M2; if later modules need it, promote it to `ZhangYeung/Prelude.lean` or refactor at that point.
 - `copyLemma_triple_identDistrib_XZU` / `YZU` / `X₁ZU` / `Y₁ZU`: the four triple-level `IdentDistrib`s $(X, Z, U) \sim (X', Z', U')$, $(Y, Z, U) \sim (Y', Z', U')$, $(X, Z, U) \sim (X_{1}, Z', U')$, $(Y, Z, U) \sim (Y_{1}, Z', U')$. Each is a one-line `IdentDistrib.comp` of one of the two 4-variable `IdentDistrib`s with a (measurable) projection; a shared helper `proj_fst` / `proj_snd_fst` etc. may be useful if the four bodies repeat.
 - `copyLemma_condMI_X_Y₁_vanishes`: $I[X' : Y_{1} \mid \langle Z', U' \rangle ; \nu] = 0$. From the main `CondIndepFun` projected through `condIndepFun_comp`, then `condMutualInfo_eq_zero.mpr`.
 - `copyLemma_condMI_X_X₁_vanishes`: analogous for the symmetric application.
@@ -475,15 +475,15 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
 1. **Expand `ZhangYeungTest/CopyLemma.lean` to cover the public API.** The scaffold `example` from step 3 covers only the main theorem's signature; expand to cover:
     - The signature of `copyLemma` (already there from step 3).
     - The signature of `delta_of_condMI_vanishes_eq` (Form A).
-    - The signature of each of the four `copyLemma_delta_*` theorems.
-    - A downstream-usage `example`: given a concrete `Fin n`-valued $X, Y, Z, U$ setup, apply `copyLemma`, `obtain` the projection, apply `copyLemma_delta_le_mutualInfo_Y₁`, and conclude the compact inequality-form expected by the M1 delta scaffolding. This compile-time test catches signature drift between M2 and M3.
+    - The signature of each of the six `copyLemma_delta_*` theorems.
+    - A downstream-usage `example`: given a concrete `Fin n`-valued $X, Y, Z, U$ setup, apply `copyLemma`, `obtain` the projection, apply `copyLemma_delta_le_mutualInfo_Y₁`, and conclude the compact inequality-form expected by the M1 delta scaffolding. This compile-time test catches breakage in the current M2-to-M3 workflow; if the API is refactored later, update this example in the same change.
     - One smoke test that `copyLemma_delta_le_mutualInfo_Y₁` + `copyLemma_delta_le_mutualInfo_X_X₁` together prove $2 I(Z; U) - 3 I(Z; U \mid X) - I(Z; U \mid Y) \le I[X' : Y_{1} ; \nu] + I[X' : X_{1} ; \nu]$ by a pure-`linarith` step. This exercises the role M2 plays for M3's Shannon chase.
 
     Commit as `test: cover copy lemma API surface`.
 
 1. **Update `CLAUDE.md` Module Layout.** Add one line pointing to `ZhangYeung/CopyLemma.lean` and one line pointing to `ZhangYeungTest/CopyLemma.lean`. Commit as `docs: document copy lemma module in CLAUDE.md`.
 
-1. **Run `make check`.** Address any remaining lint or build issues, run the `lint-and-fix` skill, and cspell-update any newly-introduced tokens (likely `condIndepFun_comp`, `condMI`, `X_1`, `Y_1` if the source uses subscripted forms in docstrings). Commit any cspell / lint adjustments as `chore: address lint feedback`.
+1. **Run `make check`.** Address any remaining lint or build issues, and cspell-update any newly-introduced tokens (likely `condIndepFun_comp`, `condMI`, `X_1`, `Y_1` if the source uses subscripted forms in docstrings). Commit any cspell / lint adjustments as `chore: address lint feedback`.
 
 1. **Open the PR.** Title: `feat: prove the copy lemma (Zhang-Yeung 1998, §III, eqs. 44-45)`. Body links this plan and the roadmap, summarizes the three deliverables (copy structure, Lemma 2 identity, Lemma 2 inequality corollaries), and calls out the two generic helpers that may have future Mathlib interest (`condIndepFun_comp`, `IdentDistrib.condMutualInfo_eq`).
 
@@ -532,11 +532,11 @@ The helper's statement needs enough generality to cover the four-variable shape 
 
 ### 7.6 PFR API churn (low, documented)
 
-This project treats PFR as a permanent pinned dependency (roadmap §3). M2 may surface PFR API issues -- missing lemmas, awkward signatures -- that the M1.5 KL route sidestepped. Log them; do not attempt upstream fixes inside this PR.
+This project treats PFR as a permanent pinned dependency (roadmap §3). M2 may surface PFR API issues -- missing lemmas, awkward signatures -- that the M1.5 KL route sidestepped. Log them; any upstream cleanup is optional follow-up work, not part of this PR.
 
 ### 7.7 Namespace pollution (low)
 
-The `IdentDistrib.condMutualInfo_eq` helper is a candidate for upstreaming to PFR (or Mathlib). Keep it `private` inside `ZhangYeung/CopyLemma.lean` for now. If another Zhang-Yeung module wants to consume it, promote to `ZhangYeung/Prelude.lean`; don't rush to upstream. `condIndepFun_comp` is similarly a candidate for PFR upstreaming but is less natural-as-Mathlib because PFR's `CondIndepFun` form may or may not be Mathlib's chosen API post-merge.
+The `IdentDistrib.condMutualInfo_eq` helper is a candidate for later cleanup or upstreaming, but M2 does not need to decide that. Keep it `private` inside `ZhangYeung/CopyLemma.lean` for now. If another Zhang-Yeung module wants to consume it, promote it to `ZhangYeung/Prelude.lean` when that concrete need appears. `condIndepFun_comp` is in the same category.
 
 ## Verification
 
@@ -551,7 +551,7 @@ Per the roadmap M2 checkpoint: "compiles with all measure-theoretic side conditi
 
 **Test module contents** (`ZhangYeungTest/CopyLemma.lean`, established incrementally in sequencing steps 3 and 12):
 
-1. One `example` per public theorem restating the signature verbatim. This is the pinned-signature check, and catches silent drift in hypothesis order, universe bindings, or conclusion shape. Eight such `example`s for the eight public theorems enumerated in the "Public surface" section above.
+1. One `example` per public theorem restating the current signature verbatim. This is a snapshot test for the M2 branch, and catches accidental drift in hypothesis order, universe bindings, or conclusion shape while the module is under active construction. Eight such `example`s for the eight public theorems enumerated in the "Public surface" section above. If the API is intentionally refactored later, update these examples in the same change.
 1. One downstream-usage `example`: given concrete `Fin n`-valued $X, Y, Z, U$ on a probability space, apply `copyLemma`, `obtain` the projections, apply `copyLemma_delta_le_mutualInfo_Y₁` to close a `delta Z U X Y μ ≤ _`. Exercises the full flow M3 will follow.
 1. One Shannon-chase `example` exercising both inequality corollaries simultaneously: derive $2 I(Z; U) - 3 I(Z; U \mid X) - I(Z; U \mid Y) \le I[X' : Y_{1} ; \nu] + I[X' : X_{1} ; \nu]$ as a single `linarith` over the two copies' outputs. This is literally the first line of M3's Shannon chase, so if it doesn't type-check, the API is wrong.
 1. One concrete-`Fin` smoke test for the main theorem's signature. Confirms that the `Fintype` / `MeasurableSingletonClass` / universe side conditions elaborate cleanly on concrete types.
