@@ -38,13 +38,15 @@ The `make build` target also guards against this: it checks for Mathlib artifact
 
 ## Module Layout
 
-- `ZhangYeung.lean`: project entrypoint (re-exports `ZhangYeung.Prelude`, `ZhangYeung.Delta`, and `ZhangYeung.Theorem2`)
+- `ZhangYeung.lean`: project entrypoint (re-exports `ZhangYeung.CopyLemma`, `ZhangYeung.Delta`, `ZhangYeung.Prelude`, and `ZhangYeung.Theorem2`)
 - `ZhangYeung/Prelude.lean`: import surface for PFR's entropy API
 - `ZhangYeung/Delta.lean`: M1 delta quantity and equational lemmas
 - `ZhangYeung/Theorem2.lean`: M1.5 Zhang-Yeung conditional information inequality (Theorem 2 of the 1998 paper, via a KL-divergence argument on auxiliary `p̃`/`p̂` PMFs)
+- `ZhangYeung/CopyLemma.lean`: M2 Zhang-Yeung copy lemma (§III eqs. 44-45 of the 1998 paper) -- `copyLemma` existential, abstract Lemma 2 `delta_of_condMI_vanishes_eq`, and the six copy-projection corollaries (two transports, two identities, two inequalities)
 - `ZhangYeungTest.lean`: top-level re-export for Lean API tests
 - `ZhangYeungTest/Delta.lean`: compile-time API regression tests for the delta module
 - `ZhangYeungTest/Theorem2.lean`: compile-time API regression tests for the Theorem 2 module
+- `ZhangYeungTest/CopyLemma.lean`: compile-time API regression tests for the copy lemma module
 
 ## Namespace Convention
 
