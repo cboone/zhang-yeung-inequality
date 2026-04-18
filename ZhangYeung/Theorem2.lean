@@ -916,8 +916,6 @@ private lemma entropy_eq_sum_joint
       rw [(Finset.mem_filter.mp ht).2]]
   rw [sum_filter_map_real_eq_map_comp hF hproj μ b]
 
--- The eleven sequential entropy-lift rewrites (`hHZ … hHYZU`) plus the terminal 12-entry `rw` chain overshoot the default heartbeat budget.
-set_option maxHeartbeats 1600000 in
 /-- **`Δ` as a weighted-log sum.** The identity `Δ(Z, U | X, Y) = ∑_{x,y,z,u} p(x,y,z,u) · log (p̂(x,y,z,u) / p̃(x,y,z,u))` obtained by expanding each of `I[Z:U]`, `I[Z:U|X]`, `I[Z:U|Y]` via `entropy_eq_sum_joint` over the 4-tuple marginal and combining the eleven lifted contributions. The right-hand side is the raw form of Zhang-Yeung 1997's eq. (41). -/
 private lemma delta_eq_sum_log_ratio
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
@@ -1131,8 +1129,247 @@ private lemma ptilde_filter_sum_eq_reindex
     exact h_embed_extract t ht
   · intro _ _; rfl
 
--- The eleven `ptilde_filter_sum_eq_reindex` applications each elaborate three hypothesis arguments against a freshly-constructed 4-tuple reindex; the aggregate exceeds the default budget.
-set_option maxHeartbeats 2400000 in
+/-! The eleven per-projection marginal-swap facts, each extracted as its own declaration so that each fits under the default `maxHeartbeats` budget; the aggregate `sum_joint_eq_sum_ptilde` below combines them. -/
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(x,z)` sums agree. -/
+private lemma sum_joint_swap_proj_xz
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map (fun ω => (X ω, Z ω))).real {(t.1, t.2.2.1)})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map (fun ω => (X ω, Z ω))).real {(t.1, t.2.2.1)}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2.1)) (by measurability)
+    (fun p => Real.log ((μ.map (fun ω => (X ω, Z ω))).real {p}))
+  rintro ⟨x, z⟩
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun p : S₂ × S₄ => (x, p.1, z, p.2))
+        (fun t => (t.2.1, t.2.2.2)) _ (x, z)
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by
+          simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
+      Fintype.sum_prod_type]
+  exact sum_ptilde_over_y_u hX hY hZ hU μ x z
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(x,u)` sums agree. -/
+private lemma sum_joint_swap_proj_xu
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map (fun ω => (X ω, U ω))).real {(t.1, t.2.2.2)})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map (fun ω => (X ω, U ω))).real {(t.1, t.2.2.2)}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2.2)) (by measurability)
+    (fun p => Real.log ((μ.map (fun ω => (X ω, U ω))).real {p}))
+  rintro ⟨x, u⟩
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun p : S₂ × S₃ => (x, p.1, p.2, u))
+        (fun t => (t.2.1, t.2.2.1)) _ (x, u)
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by
+          simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
+      Fintype.sum_prod_type]
+  exact sum_ptilde_over_y_z hX hY hZ hU μ x u
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(y,z)` sums agree. -/
+private lemma sum_joint_swap_proj_yz
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map (fun ω => (Y ω, Z ω))).real {(t.2.1, t.2.2.1)})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map (fun ω => (Y ω, Z ω))).real {(t.2.1, t.2.2.1)}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2.1)) (by measurability)
+    (fun p => Real.log ((μ.map (fun ω => (Y ω, Z ω))).real {p}))
+  rintro ⟨y, z⟩
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun p : S₁ × S₄ => (p.1, y, z, p.2))
+        (fun t => (t.1, t.2.2.2)) _ (y, z)
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by
+          simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
+      Fintype.sum_prod_type]
+  exact sum_ptilde_over_x_u hX hY hZ hU μ y z
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(y,u)` sums agree. -/
+private lemma sum_joint_swap_proj_yu
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map (fun ω => (Y ω, U ω))).real {(t.2.1, t.2.2.2)})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map (fun ω => (Y ω, U ω))).real {(t.2.1, t.2.2.2)}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2.2)) (by measurability)
+    (fun p => Real.log ((μ.map (fun ω => (Y ω, U ω))).real {p}))
+  rintro ⟨y, u⟩
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun p : S₁ × S₃ => (p.1, y, p.2, u))
+        (fun t => (t.1, t.2.2.1)) _ (y, u)
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by
+          simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
+      Fintype.sum_prod_type]
+  exact sum_ptilde_over_x_z hX hY hZ hU μ y u
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(z,u)` sums agree. -/
+private lemma sum_joint_swap_proj_zu
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map (fun ω => (Z ω, U ω))).real {t.2.2})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map (fun ω => (Z ω, U ω))).real {t.2.2}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2) (by measurability)
+    (fun p => Real.log ((μ.map (fun ω => (Z ω, U ω))).real {p}))
+  rintro ⟨z, u⟩
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun p : S₁ × S₂ => (p.1, p.2, z, u))
+        (fun t => (t.1, t.2.1)) _ (z, u)
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by
+          simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
+      Fintype.sum_prod_type]
+  simp only [ptilde]
+  exact ptilde_fibre_sum hX hY hZ hU μ z u
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(x)` sums agree. -/
+private lemma sum_joint_swap_proj_x
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map X).real {t.1})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map X).real {t.1}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => t.1) measurable_fst
+    (fun x => Real.log ((μ.map X).real {x}))
+  intro x
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun p : S₂ × S₃ × S₄ => (x, p.1, p.2.1, p.2.2))
+        (fun t => (t.2.1, t.2.2.1, t.2.2.2)) _ x
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
+  simp_rw [Fintype.sum_prod_type]
+  exact sum_ptilde_over_y_z_u hX hY hZ hU μ x
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(y)` sums agree. -/
+private lemma sum_joint_swap_proj_y
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map Y).real {t.2.1})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map Y).real {t.2.1}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.1) (measurable_fst.comp measurable_snd)
+    (fun y => Real.log ((μ.map Y).real {y}))
+  intro y
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun p : S₁ × S₃ × S₄ => (p.1, y, p.2.1, p.2.2))
+        (fun t => (t.1, t.2.2.1, t.2.2.2)) _ y
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
+  simp_rw [Fintype.sum_prod_type]
+  exact sum_ptilde_over_x_z_u hX hY hZ hU μ y
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(z)` sums agree. -/
+private lemma sum_joint_swap_proj_z
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map Z).real {t.2.2.1})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map Z).real {t.2.2.1}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2.1)
+    (measurable_fst.comp (measurable_snd.comp measurable_snd))
+    (fun z => Real.log ((μ.map Z).real {z}))
+  intro z
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun p : S₁ × S₂ × S₄ => (p.1, p.2.1, z, p.2.2))
+        (fun t => (t.1, t.2.1, t.2.2.2)) _ z
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
+  simp_rw [Fintype.sum_prod_type]
+  exact sum_ptilde_over_x_y_u hX hY hZ hU μ z
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(u)` sums agree. -/
+private lemma sum_joint_swap_proj_u
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map U).real {t.2.2.2})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map U).real {t.2.2.2}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2.2)
+    (measurable_snd.comp (measurable_snd.comp measurable_snd))
+    (fun u => Real.log ((μ.map U).real {u}))
+  intro u
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun p : S₁ × S₂ × S₃ => (p.1, p.2.1, p.2.2, u))
+        (fun t => (t.1, t.2.1, t.2.2.1)) _ u
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
+  simp_rw [Fintype.sum_prod_type]
+  exact sum_ptilde_over_x_y_z hX hY hZ hU μ u
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(x,z,u)` sums agree. -/
+private lemma sum_joint_swap_proj_xzu
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map (fun ω => (X ω, Z ω, U ω))).real {(t.1, t.2.2)})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map (fun ω => (X ω, Z ω, U ω))).real {(t.1, t.2.2)}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2)) (by measurability)
+    (fun p => Real.log ((μ.map (fun ω => (X ω, Z ω, U ω))).real {p}))
+  rintro ⟨x, z, u⟩
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun y : S₂ => (x, y, z, u))
+        (fun t => t.2.1) _ (x, z, u)
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by
+          simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl, rfl⟩ := h; rfl)]
+  exact sum_ptilde_over_y hX hY hZ hU μ x z u
+
+/-- `pJoint`-weighted vs `p̃`-weighted `log p(y,z,u)` sums agree. -/
+private lemma sum_joint_swap_proj_yzu
+    {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    ∑ t : S₁ × S₂ × S₃ × S₄,
+        pJoint X Y Z U μ t * Real.log ((μ.map (fun ω => (Y ω, Z ω, U ω))).real {(t.2.1, t.2.2)})
+      = ∑ t : S₁ × S₂ × S₃ × S₄,
+        ptilde X Y Z U μ t * Real.log ((μ.map (fun ω => (Y ω, Z ω, U ω))).real {(t.2.1, t.2.2)}) := by
+  classical
+  apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2)) (by measurability)
+    (fun p => Real.log ((μ.map (fun ω => (Y ω, Z ω, U ω))).real {p}))
+  rintro ⟨y, z, u⟩
+  rw [ptilde_filter_sum_eq_reindex μ
+        (fun x : S₁ => (x, y, z, u))
+        (fun t => t.1) _ (y, z, u)
+        (fun _ => rfl) (fun _ => rfl)
+        (fun ⟨_, _, _, _⟩ h => by
+          simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl, rfl⟩ := h; rfl)]
+  exact sum_ptilde_over_x hX hY hZ hU μ y z u
+
 /-- **Marginal swap.** Every factor appearing in the log-ratio `p̂ / p̃` is a marginal distribution common to `p` and `p̃` -- the full list is `{p(z,u), p(x,z), p(x,u), p(y,z), p(y,u), p(x,z,u), p(y,z,u), p(z), p(u), p(x), p(y)}`. The `p`-weighted sum therefore agrees with the `p̃`-weighted sum on each factor, and the eleven summands recombine to `∑ p̃ · log(p̂ / p̃)`. This is the key observation of [@zhangyeung1997] that converts Shannon-type quantities into the KL-divergence-amenable form. -/
 private lemma sum_joint_eq_sum_ptilde
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
@@ -1270,166 +1507,17 @@ private lemma sum_joint_eq_sum_ptilde
       rw [h_log_eq_L t h_pos]
   rw [Finset.sum_congr rfl (fun t _ => h_pJ_mul t)]
   rw [Finset.sum_congr rfl (fun t _ => h_pt_mul t)]
-  have hEq_xz : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pXZ (t.1, t.2.2.1))
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pXZ (t.1, t.2.2.1)) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2.1)) (by measurability)
-      (fun p => Real.log (pXZ p))
-    rintro ⟨x, z⟩
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun p : S₂ × S₄ => (x, p.1, z, p.2))
-          (fun t => (t.2.1, t.2.2.2)) _ (x, z)
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by
-            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
-        Fintype.sum_prod_type]
-    exact sum_ptilde_over_y_u hX hY hZ hU μ x z
-  have hEq_xu : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pXU (t.1, t.2.2.2))
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pXU (t.1, t.2.2.2)) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2.2)) (by measurability)
-      (fun p => Real.log (pXU p))
-    rintro ⟨x, u⟩
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun p : S₂ × S₃ => (x, p.1, p.2, u))
-          (fun t => (t.2.1, t.2.2.1)) _ (x, u)
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by
-            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
-        Fintype.sum_prod_type]
-    exact sum_ptilde_over_y_z hX hY hZ hU μ x u
-  have hEq_yz : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pYZ (t.2.1, t.2.2.1))
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pYZ (t.2.1, t.2.2.1)) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2.1)) (by measurability)
-      (fun p => Real.log (pYZ p))
-    rintro ⟨y, z⟩
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun p : S₁ × S₄ => (p.1, y, z, p.2))
-          (fun t => (t.1, t.2.2.2)) _ (y, z)
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by
-            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
-        Fintype.sum_prod_type]
-    exact sum_ptilde_over_x_u hX hY hZ hU μ y z
-  have hEq_yu : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pYU (t.2.1, t.2.2.2))
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pYU (t.2.1, t.2.2.2)) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2.2)) (by measurability)
-      (fun p => Real.log (pYU p))
-    rintro ⟨y, u⟩
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun p : S₁ × S₃ => (p.1, y, p.2, u))
-          (fun t => (t.1, t.2.2.1)) _ (y, u)
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by
-            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
-        Fintype.sum_prod_type]
-    exact sum_ptilde_over_x_z hX hY hZ hU μ y u
-  have hEq_zu : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pZU t.2.2)
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pZU t.2.2) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2) (by measurability)
-      (fun p => Real.log (pZU p))
-    rintro ⟨z, u⟩
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun p : S₁ × S₂ => (p.1, p.2, z, u))
-          (fun t => (t.1, t.2.1)) _ (z, u)
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by
-            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl⟩ := h; rfl),
-        Fintype.sum_prod_type]
-    simp only [ptilde]
-    exact ptilde_fibre_sum hX hY hZ hU μ z u
-  have hEq_x : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pX t.1)
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pX t.1) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => t.1) measurable_fst
-      (fun x => Real.log (pX x))
-    intro x
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun p : S₂ × S₃ × S₄ => (x, p.1, p.2.1, p.2.2))
-          (fun t => (t.2.1, t.2.2.1, t.2.2.2)) _ x
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
-    simp_rw [Fintype.sum_prod_type]
-    exact sum_ptilde_over_y_z_u hX hY hZ hU μ x
-  have hEq_y : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pY t.2.1)
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pY t.2.1) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.1) (measurable_fst.comp measurable_snd)
-      (fun y => Real.log (pY y))
-    intro y
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun p : S₁ × S₃ × S₄ => (p.1, y, p.2.1, p.2.2))
-          (fun t => (t.1, t.2.2.1, t.2.2.2)) _ y
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
-    simp_rw [Fintype.sum_prod_type]
-    exact sum_ptilde_over_x_z_u hX hY hZ hU μ y
-  have hEq_z : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pZ t.2.2.1)
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pZ t.2.2.1) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2.1)
-      (measurable_fst.comp (measurable_snd.comp measurable_snd)) (fun z => Real.log (pZ z))
-    intro z
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun p : S₁ × S₂ × S₄ => (p.1, p.2.1, z, p.2.2))
-          (fun t => (t.1, t.2.1, t.2.2.2)) _ z
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
-    simp_rw [Fintype.sum_prod_type]
-    exact sum_ptilde_over_x_y_u hX hY hZ hU μ z
-  have hEq_u : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pU t.2.2.2)
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pU t.2.2.2) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => t.2.2.2)
-      (measurable_snd.comp (measurable_snd.comp measurable_snd)) (fun u => Real.log (pU u))
-    intro u
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun p : S₁ × S₂ × S₃ => (p.1, p.2.1, p.2.2, u))
-          (fun t => (t.1, t.2.1, t.2.2.1)) _ u
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by subst h; rfl)]
-    simp_rw [Fintype.sum_prod_type]
-    exact sum_ptilde_over_x_y_z hX hY hZ hU μ u
-  have hEq_xzu : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pXZU (t.1, t.2.2))
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pXZU (t.1, t.2.2)) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.1, t.2.2)) (by measurability)
-      (fun p => Real.log (pXZU p))
-    rintro ⟨x, z, u⟩
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun y : S₂ => (x, y, z, u))
-          (fun t => t.2.1) _ (x, z, u)
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by
-            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl, rfl⟩ := h; rfl)]
-    exact sum_ptilde_over_y hX hY hZ hU μ x z u
-  have hEq_yzu : ∑ t : S₁ × S₂ × S₃ × S₄,
-        pJoint X Y Z U μ t * Real.log (pYZU (t.2.1, t.2.2))
-      = ∑ t : S₁ × S₂ × S₃ × S₄,
-        ptilde X Y Z U μ t * Real.log (pYZU (t.2.1, t.2.2)) := by
-    apply marg_swap_helper hX hY hZ hU μ (fun t => (t.2.1, t.2.2)) (by measurability)
-      (fun p => Real.log (pYZU p))
-    rintro ⟨y, z, u⟩
-    rw [ptilde_filter_sum_eq_reindex μ
-          (fun x : S₁ => (x, y, z, u))
-          (fun t => t.1) _ (y, z, u)
-          (fun _ => rfl) (fun _ => rfl)
-          (fun ⟨_, _, _, _⟩ h => by
-            simp only [Prod.mk.injEq] at h; obtain ⟨rfl, rfl, rfl⟩ := h; rfl)]
-    exact sum_ptilde_over_x hX hY hZ hU μ y z u
+  have hEq_xz := sum_joint_swap_proj_xz hX hY hZ hU μ
+  have hEq_xu := sum_joint_swap_proj_xu hX hY hZ hU μ
+  have hEq_yz := sum_joint_swap_proj_yz hX hY hZ hU μ
+  have hEq_yu := sum_joint_swap_proj_yu hX hY hZ hU μ
+  have hEq_zu := sum_joint_swap_proj_zu hX hY hZ hU μ
+  have hEq_x := sum_joint_swap_proj_x hX hY hZ hU μ
+  have hEq_y := sum_joint_swap_proj_y hX hY hZ hU μ
+  have hEq_z := sum_joint_swap_proj_z hX hY hZ hU μ
+  have hEq_u := sum_joint_swap_proj_u hX hY hZ hU μ
+  have hEq_xzu := sum_joint_swap_proj_xzu hX hY hZ hU μ
+  have hEq_yzu := sum_joint_swap_proj_yzu hX hY hZ hU μ
   have h_split : ∀ (w : S₁ × S₂ × S₃ × S₄ → ℝ),
       (∑ t : S₁ × S₂ × S₃ × S₄, w t * L t)
         = (∑ t, w t * Real.log (pXZ (t.1, t.2.2.1)))
