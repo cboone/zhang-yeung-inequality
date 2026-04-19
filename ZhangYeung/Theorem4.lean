@@ -198,13 +198,42 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 omit [∀ i, Fintype (S i)] in
 /-- Per-subset bridge lemma at the empty subset: `entropyFn X μ ∅ = 0`. The subtype `{j // j ∈ (∅ : Finset (Fin 4))}` is empty, so the dependent-product codomain `∀ j : ∅, S j.1` is a subsingleton; the joint tuple is constant, and its entropy is zero. -/
 lemma entropyFn_empty : entropyFn X μ ∅ = 0 := by
-  sorry
+  simp only [entropyFn]
+  haveI : IsEmpty {j : Fin 4 // j ∈ (∅ : Finset (Fin 4))} :=
+    ⟨fun ⟨j, hj⟩ => Finset.notMem_empty j hj⟩
+  haveI : Nonempty Ω := nonempty_of_isProbabilityMeasure μ
+  have h_eq : (fun ω : Ω => fun j : (∅ : Finset (Fin 4)) => X j.1 ω)
+      = fun _ =>
+        (fun j : (∅ : Finset (Fin 4)) => X j.1 (Classical.arbitrary Ω)) := by
+    funext ω
+    exact Subsingleton.elim _ _
+  rw [h_eq]
+  exact entropy_const _
 
 omit [IsProbabilityMeasure μ] in
 /-- Per-subset bridge lemma at a singleton subset: `entropyFn X μ {i} = H[X i; μ]`. The joint tuple over the single-element subset `{i}` is, up to a measurable bijection into `S i`, just `X i`. -/
 lemma entropyFn_singleton (hX : ∀ i, Measurable (X i)) (i : Fin 4) :
     entropyFn X μ {i} = H[X i ; μ] := by
-  sorry
+  simp only [entropyFn]
+  -- Projection π : (∀ j : {i}, S j.1) → S i sending g to its value at ⟨i, mem⟩.
+  let π : (∀ j : ({i} : Finset (Fin 4)), S j.1) → S i :=
+    fun g => g ⟨i, Finset.mem_singleton.mpr rfl⟩
+  -- Injectivity: every j : {i} satisfies j.1 = i, so g is determined by its
+  -- value at ⟨i, _⟩.
+  have hπ : Function.Injective π := by
+    intro g₁ g₂ heq
+    funext j
+    obtain ⟨j, hj⟩ := j
+    have hji : j = i := Finset.mem_singleton.mp hj
+    subst hji
+    exact heq
+  -- The joint RV is measurable: each coordinate `X j.1` is measurable.
+  have h_meas : Measurable
+      (fun ω : Ω => fun j : ({i} : Finset (Fin 4)) => X j.1 ω) :=
+    measurable_pi_lambda _ (fun j => hX j.1)
+  -- π ∘ joint = X i definitionally, so the composed entropy collapses.
+  have h_ent := entropy_comp_of_injective μ h_meas π hπ
+  exact h_ent.symm
 
 omit [IsProbabilityMeasure μ] in
 /-- Per-subset bridge lemma at a two-element subset: `entropyFn X μ {i, j} = H[⟨X i, X j⟩; μ]` for `i ≠ j`. The joint tuple over `{i, j}` is measurably bijective with the pair `(X i, X j)`. -/
