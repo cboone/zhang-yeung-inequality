@@ -168,6 +168,8 @@ symm
 tauto
 Tahar
 Taplo
+Tendsto
+tendsto
 Teor
 teorth
 Theor

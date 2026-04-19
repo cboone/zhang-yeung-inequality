@@ -148,4 +148,30 @@ example {Ω : Type*} [MeasurableSpace Ω]
 
 end DownstreamUsage
 
+/-! ### Stretch: closure form pins -/
+
+section ClosureStretch
+
+open scoped Topology
+
+/- Pinned signature: `zhangYeungHolds_of_tendsto` closes the Zhang-Yeung cone
+under pointwise convergence. -/
+example {F_seq : ℕ → Finset (Fin 4) → ℝ} {F : Finset (Fin 4) → ℝ}
+    (h_seq : ∀ k, zhangYeungHolds (F_seq k))
+    (h_lim : ∀ α, Filter.Tendsto (fun k => F_seq k α) Filter.atTop (𝓝 (F α))) :
+    zhangYeungHolds F :=
+  zhangYeungHolds_of_tendsto h_seq h_lim
+
+/- Pinned signature: `theorem4_closure` shows `F_witness` is not even a
+pointwise limit of `tildeΓ_4` members. -/
+example :
+    ∃ F : Finset (Fin 4) → ℝ, shannonCone F ∧
+      ∀ (F_seq : ℕ → Finset (Fin 4) → ℝ),
+        (∀ k, zhangYeungHolds (F_seq k)) →
+        (∀ α, Filter.Tendsto (fun k => F_seq k α) Filter.atTop (𝓝 (F α))) →
+        False :=
+  theorem4_closure
+
+end ClosureStretch
+
 end ZhangYeungTest

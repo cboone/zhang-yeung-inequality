@@ -51,6 +51,7 @@ Shannon entropy, non-Shannon information inequality, Zhang-Yeung, Shannon incomp
 namespace ZhangYeung
 
 open MeasureTheory ProbabilityTheory
+open scoped Topology
 
 universe u
 
@@ -405,5 +406,72 @@ theorem theorem4 :
   apply not_zhangYeungHolds_witness
   rw [heq]
   exact zhangYeungHolds_of_entropy hX μ
+
+/-! ### Optional stretch: closure form
+
+Each of the inequalities `zhangYeungAt F (π 0) (π 1) (π 2) (π 3)` is a finite linear inequality among the `F α` values: both sides are linear combinations of the coordinate evaluations `F α`, hence continuous in the pointwise topology on `Finset (Fin 4) → ℝ`. The Zhang-Yeung cone `tildeΓ_4` is therefore pointwise closed, and `F_witness` is not even the pointwise limit of a sequence of set functions that all lie in `tildeΓ_4`. This strengthens `theorem4` past "F_witness is not any entropy function" to "F_witness is not a pointwise limit of `tildeΓ_4` members"; since every entropy function lies in `tildeΓ_4` by `zhangYeungHolds_of_entropy`, the closure form implies the closure-version separation the paper states ($\bar{\Gamma}^*_4 \ne \Gamma_4$) at $n = 4$ without unwinding $\Gamma^*_4$. -/
+
+/-- `I_F` is jointly continuous in the set-function argument under pointwise convergence. -/
+private lemma I_F_tendsto
+    {F_seq : ℕ → Finset (Fin 4) → ℝ} {F : Finset (Fin 4) → ℝ}
+    (h : ∀ α, Filter.Tendsto (fun k => F_seq k α) Filter.atTop (𝓝 (F α)))
+    (α β : Finset (Fin 4)) :
+    Filter.Tendsto (fun k => I_F (F_seq k) α β) Filter.atTop (𝓝 (I_F F α β)) := by
+  simp only [I_F]
+  exact ((h α).add (h β)).sub (h _)
+
+/-- `condI_F` is jointly continuous in the set-function argument under pointwise convergence. -/
+private lemma condI_F_tendsto
+    {F_seq : ℕ → Finset (Fin 4) → ℝ} {F : Finset (Fin 4) → ℝ}
+    (h : ∀ α, Filter.Tendsto (fun k => F_seq k α) Filter.atTop (𝓝 (F α)))
+    (α β γ : Finset (Fin 4)) :
+    Filter.Tendsto (fun k => condI_F (F_seq k) α β γ) Filter.atTop (𝓝 (condI_F F α β γ)) := by
+  simp only [condI_F]
+  exact (((h _).add (h _)).sub (h _)).sub (h _)
+
+/-- `delta_F` is jointly continuous in the set-function argument under pointwise convergence. -/
+private lemma delta_F_tendsto
+    {F_seq : ℕ → Finset (Fin 4) → ℝ} {F : Finset (Fin 4) → ℝ}
+    (h : ∀ α, Filter.Tendsto (fun k => F_seq k α) Filter.atTop (𝓝 (F α)))
+    (i j k l : Fin 4) :
+    Filter.Tendsto (fun n => delta_F (F_seq n) i j k l) Filter.atTop
+      (𝓝 (delta_F F i j k l)) := by
+  simp only [delta_F]
+  exact ((I_F_tendsto h _ _).sub (condI_F_tendsto h _ _ _)).sub (condI_F_tendsto h _ _ _)
+
+/-- `zhangYeungHolds` is closed under pointwise convergence: if each `F_seq k` lies in `tildeΓ_4` and `F_seq k α → F α` pointwise, then `F` lies in `tildeΓ_4` too. The inequality `zhangYeungAt F` is a finite `≤` between continuous linear combinations of coordinate evaluations, hence preserved under pointwise limits. -/
+lemma zhangYeungHolds_of_tendsto
+    {F_seq : ℕ → Finset (Fin 4) → ℝ} {F : Finset (Fin 4) → ℝ}
+    (h_seq : ∀ k, zhangYeungHolds (F_seq k))
+    (h_lim : ∀ α, Filter.Tendsto (fun k => F_seq k α) Filter.atTop (𝓝 (F α))) :
+    zhangYeungHolds F := by
+  intro π
+  have h_LHS := delta_F_tendsto h_lim (π 0) (π 1) (π 2) (π 3)
+  have h_RHS :
+      Filter.Tendsto
+        (fun k => (1 / 2 : ℝ) * (I_F (F_seq k) {π 2} {π 3}
+              + I_F (F_seq k) {π 2} ({π 0} ∪ {π 1})
+              + condI_F (F_seq k) {π 0} {π 1} {π 2}
+              - condI_F (F_seq k) {π 0} {π 1} {π 3}))
+        Filter.atTop
+        (𝓝 ((1 / 2 : ℝ) * (I_F F {π 2} {π 3}
+            + I_F F {π 2} ({π 0} ∪ {π 1})
+            + condI_F F {π 0} {π 1} {π 2}
+            - condI_F F {π 0} {π 1} {π 3}))) := by
+    refine Filter.Tendsto.const_mul _ ?_
+    exact (((I_F_tendsto h_lim _ _).add (I_F_tendsto h_lim _ _)).add
+      (condI_F_tendsto h_lim _ _ _)).sub (condI_F_tendsto h_lim _ _ _)
+  exact le_of_tendsto_of_tendsto' h_LHS h_RHS (fun k => h_seq k π)
+
+/-- **Theorem 4 (closure form)** at `n = 4`. `F_witness` is not the pointwise limit of any sequence of set functions in `tildeΓ_4` -- a strictly stronger statement than `theorem4`, since every four-variable entropy function lies in `tildeΓ_4` by `zhangYeungHolds_of_entropy`. Combined with the latter, this implies the paper's closure-version separation $\bar{\Gamma}^*_4 \ne \Gamma_4$ at $n = 4$ (modulo the formalization of $\Gamma^*_4$, which is out of scope for M4). Proved by closing `zhangYeungHolds` under pointwise limits via `zhangYeungHolds_of_tendsto`, then contradicting `not_zhangYeungHolds_witness`. -/
+theorem theorem4_closure :
+    ∃ F : Finset (Fin 4) → ℝ, shannonCone F ∧
+      ∀ (F_seq : ℕ → Finset (Fin 4) → ℝ),
+        (∀ k, zhangYeungHolds (F_seq k)) →
+        (∀ α, Filter.Tendsto (fun k => F_seq k α) Filter.atTop (𝓝 (F α))) →
+        False := by
+  refine ⟨F_witness, shannonCone_of_witness, ?_⟩
+  intro F_seq h_seq h_lim
+  exact not_zhangYeungHolds_witness (zhangYeungHolds_of_tendsto h_seq h_lim)
 
 end ZhangYeung
