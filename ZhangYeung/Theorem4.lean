@@ -240,21 +240,93 @@ omit [IsProbabilityMeasure μ] in
 lemma entropyFn_pair (hX : ∀ i, Measurable (X i))
     {i j : Fin 4} (h : i ≠ j) :
     entropyFn X μ {i, j} = H[⟨X i, X j⟩ ; μ] := by
-  sorry
+  simp only [entropyFn]
+  -- Projection π : (∀ k : {i, j}, S k.1) → S i × S j evaluating at both indices.
+  have hi : i ∈ ({i, j} : Finset (Fin 4)) := by simp
+  have hj : j ∈ ({i, j} : Finset (Fin 4)) := by simp
+  let π : (∀ k : ({i, j} : Finset (Fin 4)), S k.1) → S i × S j :=
+    fun g => (g ⟨i, hi⟩, g ⟨j, hj⟩)
+  -- Injectivity: every k : {i, j} satisfies k.1 = i ∨ k.1 = j.
+  have hπ : Function.Injective π := by
+    intro g₁ g₂ heq
+    have h₁ : g₁ ⟨i, hi⟩ = g₂ ⟨i, hi⟩ := (Prod.mk.inj heq).1
+    have h₂ : g₁ ⟨j, hj⟩ = g₂ ⟨j, hj⟩ := (Prod.mk.inj heq).2
+    funext k
+    obtain ⟨k, hk⟩ := k
+    rcases Finset.mem_insert.mp hk with hki | hk'
+    · subst hki; exact h₁
+    · have : k = j := Finset.mem_singleton.mp hk'
+      subst this; exact h₂
+  have h_meas : Measurable
+      (fun ω : Ω => fun k : ({i, j} : Finset (Fin 4)) => X k.1 ω) :=
+    measurable_pi_lambda _ (fun k => hX k.1)
+  -- π ∘ joint = ⟨X i, X j⟩ definitionally.
+  have h_ent := entropy_comp_of_injective μ h_meas π hπ
+  exact h_ent.symm
 
 omit [IsProbabilityMeasure μ] in
 /-- Per-subset bridge lemma at a three-element subset: `entropyFn X μ {i, j, k} = H[⟨X i, ⟨X j, X k⟩⟩; μ]` for pairwise distinct `i, j, k`. The joint tuple over `{i, j, k}` is measurably bijective with the triple `(X i, (X j, X k))`. -/
 lemma entropyFn_triple (hX : ∀ i, Measurable (X i))
     {i j k : Fin 4} (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
     entropyFn X μ {i, j, k} = H[⟨X i, ⟨X j, X k⟩⟩ ; μ] := by
-  sorry
+  simp only [entropyFn]
+  have hi : i ∈ ({i, j, k} : Finset (Fin 4)) := by simp
+  have hj : j ∈ ({i, j, k} : Finset (Fin 4)) := by simp
+  have hk : k ∈ ({i, j, k} : Finset (Fin 4)) := by simp
+  let π : (∀ m : ({i, j, k} : Finset (Fin 4)), S m.1) → S i × (S j × S k) :=
+    fun g => (g ⟨i, hi⟩, (g ⟨j, hj⟩, g ⟨k, hk⟩))
+  have hπ : Function.Injective π := by
+    intro g₁ g₂ heq
+    have h₁ : g₁ ⟨i, hi⟩ = g₂ ⟨i, hi⟩ := (Prod.mk.inj heq).1
+    have h₂ : g₁ ⟨j, hj⟩ = g₂ ⟨j, hj⟩ := (Prod.mk.inj (Prod.mk.inj heq).2).1
+    have h₃ : g₁ ⟨k, hk⟩ = g₂ ⟨k, hk⟩ := (Prod.mk.inj (Prod.mk.inj heq).2).2
+    funext m
+    obtain ⟨m, hm⟩ := m
+    rcases Finset.mem_insert.mp hm with hmi | hm'
+    · subst hmi; exact h₁
+    · rcases Finset.mem_insert.mp hm' with hmj | hmk
+      · subst hmj; exact h₂
+      · have : m = k := Finset.mem_singleton.mp hmk
+        subst this; exact h₃
+  have h_meas : Measurable
+      (fun ω : Ω => fun m : ({i, j, k} : Finset (Fin 4)) => X m.1 ω) :=
+    measurable_pi_lambda _ (fun m => hX m.1)
+  have h_ent := entropy_comp_of_injective μ h_meas π hπ
+  exact h_ent.symm
 
 omit [IsProbabilityMeasure μ] in
 /-- Per-subset bridge lemma at the full four-element subset: `entropyFn X μ {0, 1, 2, 3} = H[⟨X 0, ⟨X 1, ⟨X 2, X 3⟩⟩⟩; μ]`. The joint tuple over the full index set is measurably bijective with the right-associated 4-tuple. -/
 lemma entropyFn_quad (hX : ∀ i, Measurable (X i)) :
     entropyFn X μ ({0, 1, 2, 3} : Finset (Fin 4))
       = H[⟨X 0, ⟨X 1, ⟨X 2, X 3⟩⟩⟩ ; μ] := by
-  sorry
+  simp only [entropyFn]
+  have h0 : (0 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide
+  have h1 : (1 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide
+  have h2 : (2 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide
+  have h3 : (3 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide
+  let π : (∀ m : ({0, 1, 2, 3} : Finset (Fin 4)), S m.1)
+      → S 0 × (S 1 × (S 2 × S 3)) :=
+    fun g => (g ⟨0, h0⟩, (g ⟨1, h1⟩, (g ⟨2, h2⟩, g ⟨3, h3⟩)))
+  have hπ : Function.Injective π := by
+    intro g₁ g₂ heq
+    have e1 : g₁ ⟨0, h0⟩ = g₂ ⟨0, h0⟩ := (Prod.mk.inj heq).1
+    have e2 : g₁ ⟨1, h1⟩ = g₂ ⟨1, h1⟩ := (Prod.mk.inj (Prod.mk.inj heq).2).1
+    have e3 : g₁ ⟨2, h2⟩ = g₂ ⟨2, h2⟩ :=
+      (Prod.mk.inj (Prod.mk.inj (Prod.mk.inj heq).2).2).1
+    have e4 : g₁ ⟨3, h3⟩ = g₂ ⟨3, h3⟩ :=
+      (Prod.mk.inj (Prod.mk.inj (Prod.mk.inj heq).2).2).2
+    funext m
+    obtain ⟨m, hm⟩ := m
+    fin_cases m
+    · exact e1
+    · exact e2
+    · exact e3
+    · exact e4
+  have h_meas : Measurable
+      (fun ω : Ω => fun m : ({0, 1, 2, 3} : Finset (Fin 4)) => X m.1 ω) :=
+    measurable_pi_lambda _ (fun m => hX m.1)
+  have h_ent := entropy_comp_of_injective μ h_meas π hπ
+  exact h_ent.symm
 
 end EntropyFnEvaluation
 
