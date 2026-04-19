@@ -258,6 +258,7 @@ M6 (polish)
   - `theorem zhangYeungHolds_of_entropy` -- every four-variable entropy function lies in `tildeΓ_4` (Part (c), closes over M3).
   - `theorem theorem4 : ∃ F ∈ Γ_4, F is not the entropy function of any four discrete RVs` (Part (d), combines (a) + (b) + (c), still allowing the four codomains to differ).
 - **Stretch within M4:** the closure version `theorem4_closure` (upgrading "not an entropy function" to "not a pointwise limit of entropy functions") and the `n ≥ 4` extension. Either may slip to a follow-up milestone if the core Parts (a)-(d) dominate budget.
+- **Post-M4 exactness follow-up:** if M4 lands only the finite `n = 4` witness theorem, the sequence-level closure surrogate, and the cone-level `n ≥ 4` lift, but not the exact entropic-region closure statement `\bar{\Gamma}_n^* \neq \Gamma_n` as named sets, track the remaining work in `docs/plans/todo/2026-04-19-exact-theorem-4-entropic-region-closure.md` rather than silently treating the surrogate theorems as the final paper-level packaging.
 
 ### M5: Theorem 5 (stretch)
 
