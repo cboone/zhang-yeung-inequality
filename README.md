@@ -87,6 +87,9 @@ See [`AGENTS.md`](AGENTS.md) for the full command reference and [`CONTRIBUTING.m
 Primary sources and transcriptions live in [`references/`](references/). The paper being formalized and the principal background text:
 
 - Zhang and Yeung (1998). _On characterization of entropy function via information inequalities_. IEEE Transactions on Information Theory 44(4). [DOI: 10.1109/18.705560](https://doi.org/10.1109/18.705560). ([`references/papers/zhangyeung1998.pdf`](references/papers/zhangyeung1998.pdf); verified transcription at [`references/transcriptions/zhangyeung1998.md`](references/transcriptions/zhangyeung1998.md).)
+
+Other closely related texts:
+
 - Zhang and Yeung (1997). _A non-Shannon-type conditional inequality of information quantities_. IEEE Transactions on Information Theory 43(6). ([`references/papers/zhangyeung1997.pdf`](references/papers/zhangyeung1997.pdf).) This is the primary reference for the M1.5 Theorem 2 proof via Kullback-Leibler divergence.
 - Yeung (2008). _Information Theory and Network Coding_. Springer. [DOI: 10.1007/978-0-387-79234-7](https://doi.org/10.1007/978-0-387-79234-7). (Cross-reference for Theorem 3 and the copy lemma.)
 
@@ -98,4 +101,6 @@ This formalization is being completed with substantial assistance from Opus 4.6 
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE).
+Research papers in `references/papers/` are copyright their respective authors and publishers.
+
+Everything else is copyright 2026 Christopher Boone. Lean code is licensed under [Apache 2.0](./LICENSES/APACHE-2.0.txt). Prose and mathematical exposition are licensed under [CC BY 4.0](./LICENSES/CC-BY-4.0.txt).
