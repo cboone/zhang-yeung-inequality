@@ -133,7 +133,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
 
-/-- The integer-scaled form of Theorem 3 (paper line 705, the shape the Shannon chase naturally closes at before rescaling):
+/-- The integer-scaled form of Theorem 3 [@zhangyeung1998, §III, lines 700-709] (paper line 705, the shape the Shannon chase naturally closes at before rescaling):
 
   `2·I[Z : U] - 3·I[Z : U | X] - I[Z : U | Y] ≤ I[X : Y] + I[X : ⟨Z, U⟩]`.
 

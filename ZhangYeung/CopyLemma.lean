@@ -99,7 +99,7 @@ end Helpers
 
 /-! ### The main copy construction -/
 
-/-- **The Zhang-Yeung copy lemma** (eq. 44). Given four discrete random variables `X, Y, Z, U` on a probability space `(Ω, μ)`, there exists an extended probability space `(Ω', ν)` carrying six projected random variables `X', Y', X₁, Y₁, Z', U'` such that `(X', Y', Z', U')` and `(X₁, Y₁, Z', U')` each have the original joint law of `(X, Y, Z, U)` under `μ`, and the two pairs `(X', Y')` and `(X₁, Y₁)` are conditionally independent given the shared pair `(Z', U')`. This is a direct wrapper around `ProbabilityTheory.condIndep_copies` applied to `⟨X, Y⟩` conditioned on `⟨Z, U⟩`. -/
+/-- **The Zhang-Yeung copy lemma** [@zhangyeung1998, §III, eq. 44]. Given four discrete random variables `X, Y, Z, U` on a probability space `(Ω, μ)`, there exists an extended probability space `(Ω', ν)` carrying six projected random variables `X', Y', X₁, Y₁, Z', U'` such that `(X', Y', Z', U')` and `(X₁, Y₁, Z', U')` each have the original joint law of `(X, Y, Z, U)` under `μ`, and the two pairs `(X', Y')` and `(X₁, Y₁)` are conditionally independent given the shared pair `(Z', U')`. This is a direct wrapper around `ProbabilityTheory.condIndep_copies` applied to `⟨X, Y⟩` conditioned on `⟨Z, U⟩`. -/
 theorem copyLemma
     {Ω : Type*} [MeasurableSpace Ω]
     {S₁ S₂ S₃ S₄ : Type u}
@@ -318,7 +318,7 @@ private lemma copyLemma_condMI_X_X₁_vanishes
 
 `delta_of_condMI_vanishes_eq` applied to the copy's `(X', Y₁, Z', U')` and `(X', X₁, Z', U')` projections, with the vanishing-CMI hypothesis supplied by the projected conditional-independence facts. -/
 
-/-- **Lemma 2 Form B (primary).** The delta identity of Lemma 2 instantiated at the copy's `(X', Y₁, Z', U')` projections:
+/-- **Lemma 2 Form B (primary)** [@zhangyeung1998, §III, eq. 45]. The delta identity of Lemma 2 instantiated at the copy's `(X', Y₁, Z', U')` projections:
 
   `Δ(Z', U' | X', Y₁) = I[X' : Y₁] - I[X' : Y₁ | Z'] - I[X' : Y₁ | U'] - I[Z' : U' | ⟨X', Y₁⟩]`
 
@@ -336,7 +336,7 @@ theorem copyLemma_delta_identity_Y₁
     (copyLemma_condMI_X_Y₁_vanishes (Y' := Y') hX' hY₁ hCond)
 
 omit [Fintype S₂] [MeasurableSingletonClass S₂] in
-/-- **Lemma 2 Form B (symmetric).** The delta identity of Lemma 2 instantiated at the copy's `(X', X₁, Z', U')` projections, the `X ↔ X₁` swap of `copyLemma_delta_identity_Y₁`:
+/-- **Lemma 2 Form B (symmetric)** [@zhangyeung1998, §III, eq. 45]. The delta identity of Lemma 2 instantiated at the copy's `(X', X₁, Z', U')` projections, the `X ↔ X₁` swap of `copyLemma_delta_identity_Y₁`:
 
   `Δ(Z', U' | X', X₁) = I[X' : X₁] - I[X' : X₁ | Z'] - I[X' : X₁ | U'] - I[Z' : U' | ⟨X', X₁⟩]`
 
@@ -412,7 +412,7 @@ theorem copyLemma_delta_transport_X_to_X₁
   rw [delta_def, delta_def]
   linarith [e1, e2, e3]
 
-/-- **Primary inequality form of Lemma 2.** Combining the Y-to-Y₁ delta transport with Form B and the nonnegativity of the three subtracted conditional mutual informations on the right of eq. (45) gives
+/-- **Primary inequality form of Lemma 2** [@zhangyeung1998, §III, eq. 45]. Combining the Y-to-Y₁ delta transport with Form B and the nonnegativity of the three subtracted conditional mutual informations on the right of eq. (45) gives
 
   `Δ(Z, U | X, Y) μ ≤ I[X' : Y₁ ; ν]`,
 
@@ -437,7 +437,7 @@ theorem copyLemma_delta_le_mutualInfo_Y₁
   linarith
 
 omit [Fintype S₂] [MeasurableSingletonClass S₂] in
-/-- **Symmetric inequality form of Lemma 2.** The `X ↔ X₁` variant,
+/-- **Symmetric inequality form of Lemma 2** [@zhangyeung1998, §III, eq. 45]. The `X ↔ X₁` variant,
 
   `I[Z : U ; μ] - 2·I[Z : U | X ; μ] ≤ I[X' : X₁ ; ν]`,
 

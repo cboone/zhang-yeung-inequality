@@ -55,7 +55,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
 
-/-- The Zhang-Yeung delta `Δ(Z, U | X, Y) := I(Z; U) - I(Z; U | X) - I(Z; U | Y)`. This is the central quantity of Zhang-Yeung (1998); the main inequality of the paper bounds it from above by a Shannon-type expression in the four random variables, but that bound is a non-Shannon information inequality proved via the copy lemma and is not part of this definition. -/
+/-- The Zhang-Yeung delta `Δ(Z, U | X, Y) := I(Z; U) - I(Z; U | X) - I(Z; U | Y)`. This is the central quantity of [@zhangyeung1998, §III, eqs. 20-23]; the main inequality of the paper bounds it from above by a Shannon-type expression in the four random variables, but that bound is a non-Shannon information inequality proved via the copy lemma and is not part of this definition. -/
 noncomputable def delta
     (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄)
     (μ : Measure Ω := by volume_tac) : ℝ :=
@@ -76,7 +76,7 @@ lemma delta_self (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (μ : Mea
     delta Z U X X μ = I[Z : U ; μ] - 2 * I[Z : U | X ; μ] := by
   simp only [delta_def]; ring
 
-/-- Paper eq. (21): the inequality `2·Δ(Z, U | X, Y) ≤ I(X;Y) + I(X;ZU) + I(Z;U|X) - I(Z;U|Y)` is equivalent to the compact form `2·I(Z;U) - 3·I(Z;U|X) - I(Z;U|Y) ≤ I(X;Y) + I(X;ZU)`, which is the shape a copy-lemma proof naturally produces. -/
+/-- Paper eq. (21) of [@zhangyeung1998, §III]: the inequality `2·Δ(Z, U | X, Y) ≤ I(X;Y) + I(X;ZU) + I(Z;U|X) - I(Z;U|Y)` is equivalent to the compact form `2·I(Z;U) - 3·I(Z;U|X) - I(Z;U|Y) ≤ I(X;Y) + I(X;ZU)`, which is the shape a copy-lemma proof naturally produces. -/
 lemma delta_form21_iff
     (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     2 * delta Z U X Y μ
@@ -85,7 +85,7 @@ lemma delta_form21_iff
           ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] := by
   constructor <;> intro h <;> linarith [delta_def Z U X Y μ]
 
-/-- Paper eq. (22): the `X ↔ Y` swap of `delta_form21_iff`. -/
+/-- Paper eq. (22) of [@zhangyeung1998, §III]: the `X ↔ Y` swap of `delta_form21_iff`. -/
 lemma delta_form22_iff
     (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     2 * delta Z U X Y μ
@@ -94,7 +94,7 @@ lemma delta_form22_iff
           ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] := by
   constructor <;> intro h <;> linarith [delta_def Z U X Y μ]
 
-/-- Paper eq. (23), the symmetric form of Theorem 3, follows from eqs. (21) and (22) by averaging. This lemma contains no measure-theoretic content; the inequalities (21) and (22) are the nontrivial inputs and are proved in a later milestone via the copy lemma. -/
+/-- Paper eq. (23) of [@zhangyeung1998, §III], the symmetric form of Theorem 3, follows from eqs. (21) and (22) by averaging. This lemma contains no measure-theoretic content; the inequalities (21) and (22) are the nontrivial inputs and are proved in a later milestone via the copy lemma. -/
 lemma delta_form23_of_form21_form22
     {Z : Ω → S₁} {U : Ω → S₂} {X : Ω → S₃} {Y : Ω → S₄} {μ : Measure Ω}
     (h21 : 2 * delta Z U X Y μ
@@ -105,7 +105,7 @@ lemma delta_form23_of_form21_form22
       ≤ 2 * I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Y : ⟨Z, U⟩ ; μ] := by
   linarith
 
-/-- The integer-scaled conclusion of `delta_form23_of_form21_form22` is equivalent to the paper's `1/2` and `1/4` statement. -/
+/-- The integer-scaled conclusion of `delta_form23_of_form21_form22` is equivalent to the paper's `1/2` and `1/4` statement [@zhangyeung1998, §III, eq. 23]. -/
 lemma delta_form23_iff
     (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
     4 * delta Z U X Y μ
