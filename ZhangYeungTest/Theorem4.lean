@@ -99,4 +99,53 @@ example :
 
 end MainStatements
 
+/-! ### Concrete evaluation of the `ℚ`-valued witness
+
+The witness values at the 16 subsets of `Fin 4`, as a compile-time regression
+against accidental edits to `F_witness_ℚ`. Each value follows the paper's
+table on lines 368-377 at `a = 1`. -/
+
+section WitnessEvaluation
+
+example : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by native_decide
+example : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by native_decide
+example : F_witness_ℚ ({2} : Finset (Fin 4)) = 2 := by native_decide
+example : F_witness_ℚ ({3} : Finset (Fin 4)) = 2 := by native_decide
+example : F_witness_ℚ ({0, 1} : Finset (Fin 4)) = 4 := by native_decide
+example : F_witness_ℚ ({0, 2} : Finset (Fin 4)) = 3 := by native_decide
+example : F_witness_ℚ ({0, 3} : Finset (Fin 4)) = 3 := by native_decide
+example : F_witness_ℚ ({1, 2} : Finset (Fin 4)) = 3 := by native_decide
+example : F_witness_ℚ ({1, 3} : Finset (Fin 4)) = 3 := by native_decide
+example : F_witness_ℚ ({2, 3} : Finset (Fin 4)) = 3 := by native_decide
+example : F_witness_ℚ ({0, 1, 2} : Finset (Fin 4)) = 4 := by native_decide
+example : F_witness_ℚ ({0, 1, 3} : Finset (Fin 4)) = 4 := by native_decide
+example : F_witness_ℚ ({0, 2, 3} : Finset (Fin 4)) = 4 := by native_decide
+example : F_witness_ℚ ({1, 2, 3} : Finset (Fin 4)) = 4 := by native_decide
+example : F_witness_ℚ ({0, 1, 2, 3} : Finset (Fin 4)) = 4 := by native_decide
+
+end WitnessEvaluation
+
+/-! ### Downstream usage
+
+`shannon_incomplete` composes Parts (a) and (b) into a single existential;
+`theorem4` composes (a), (b), and the bridge (c) into the separation
+`Γ_4 ∖ (entropy functions)`. Both are the intended public consequences. -/
+
+section DownstreamUsage
+
+/- Extracting the separating set function from `shannon_incomplete`. -/
+example : ∃ F : Finset (Fin 4) → ℝ, shannonCone F ∧ ¬ zhangYeungHolds F :=
+  shannon_incomplete
+
+/- From `zhangYeungHolds_of_entropy`, every permutation of a four-variable
+entropy family satisfies `zhangYeungAt`. Exercising the composition on the
+identity permutation pins the bridge's downstream shape. -/
+example {Ω : Type*} [MeasurableSpace Ω]
+    {X : ∀ _ : Fin 4, Ω → Fin 2} (hX : ∀ i, Measurable (X i))
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    zhangYeungAt (entropyFn X μ) 0 1 2 3 :=
+  zhangYeungHolds_of_entropy hX μ (Equiv.refl _)
+
+end DownstreamUsage
+
 end ZhangYeungTest
