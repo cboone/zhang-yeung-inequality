@@ -60,6 +60,8 @@ Recommended public names:
 
 `shannonCone` and `shannonCone_n` remain useful predicate-level APIs and should stay public. The new set-level objects are wrappers used by the exact theorem packaging, not replacements.
 
+Keep the set/predicate duality definitional: define `shannonRegion_n n := {F | shannonCone_n F}` and, once the predicate-level `entropyHolds_n` / `almostEntropicHolds_n` analogs exist, define the region sets the same way. This makes membership lemmas like `mem_shannonRegion_n` hold by `Iff.rfl` and guarantees that the predicate and set surfaces cannot drift apart across later edits.
+
 ### 2. Generalize the entropy-function surface from `Fin 4` to `Fin n`
 
 The exact theorem needs a generic notion of an `n`-variable entropy function. Add:
@@ -86,6 +88,8 @@ def entropyRegion_n (n : ℕ) : Set (Finset (Fin n) → ℝ) :=
 
 This is the first point where the repository will literally name `Γ_n^*` rather than reasoning around it.
 
+**Universe discipline.** Quantifying existentially over `(Ω : Type u)` and `(S : Fin n → Type u)` inside a `Set (Finset (Fin n) → ℝ)` raises a predicativity concern: the carrier lives in `Type`, so the existential cannot range over an arbitrary universe without an explicit universe parameter on `entropyRegion_n` itself. Pin `Ω` and each `S i` to `Type` (i.e., universe 0) in the definition. This matches how PFR's entropy API is typically instantiated in this repo -- the random-variable families in `Theorem4.lean` already live in a fixed universe -- so the restriction does not cost anything the paper-level theorem actually needs. If a downstream consumer later requires `Type u`-parameterized regions, introduce a polymorphic variant then; do not carry one up front.
+
 ### 3. Prove the exact `n = 4` theorem through a closed-cone argument
 
 The current `theorem4_closure` works with sequences in `\tilde{\Gamma}_4`. The exact theorem should instead route through an actual closed-set proof.
@@ -101,6 +105,8 @@ Recommended route:
 This yields the exact `n = 4` paper statement without appealing to a sequential-closure surrogate.
 
 The proof of `IsClosed zhangYeungRegion_4` should be topological, not sequential. The cleanest implementation is to express `zhangYeungHolds` as a finite intersection over permutations of preimages of closed `≤`-relations under continuous coordinate-linear maps.
+
+`zhangYeungRegion_4` should stay module-internal (`private def` or just a `let` inside the closure proof) unless a concrete downstream consumer asks for it. The exact theorem only needs the closedness fact and the inclusion from `entropyRegion_n 4`; exposing the set publicly commits the project to a stability promise for a name that is not part of the paper. If the test module needs to pin its closedness, promote it to a public definition in the same commit that adds the pin, not speculatively in advance.
 
 ### 4. Lift from `n = 4` to all `n ≥ 4` by restriction to the first four coordinates
 
@@ -118,10 +124,18 @@ or the equivalent preimage-based form, whichever makes the witness lemmas cleane
 
 Required lemmas:
 
-1. `restrictFirstFour` is continuous.
-2. `restrictFirstFour hn (F_witness_n hn) = F_witness`.
-3. If `F ∈ entropyRegion_n n`, then `restrictFirstFour hn F ∈ entropyRegion_n 4`.
-4. Therefore, if `F ∈ almostEntropicRegion_n n`, then `restrictFirstFour hn F ∈ almostEntropicRegion_n 4`.
+1. `restrictFirstFour` is continuous (finite-product projection on `Finset (Fin n) → ℝ`).
+2. `restrictFirstFour hn (F_witness_n hn) = F_witness` (witness-level transport).
+3. `entropyFn_n_restrict_castLE`: for every joint random variable `X : ∀ i : Fin n, Ω → S i` and measure `μ`, and every `α : Finset (Fin 4)`,
+
+   ```text
+   restrictFirstFour hn (entropyFn_n X μ) α
+     = entropyFn_n (fun i : Fin 4 => X (Fin.castLE hn i)) μ α.
+   ```
+
+   This is the reindexing identity that drives the existential transport: it witnesses that the `Fin 4`-restricted entropy function equals the entropy function of the `Fin 4`-restricted family, up to the `Finset.image`-vs-precompose bookkeeping. Prove it before attempting the region-level transport; it is the only step where Shannon entropy's invariance under random-variable reindexing enters the closure argument.
+4. Region-level transport (from (3)): if `F ∈ entropyRegion_n n`, then `restrictFirstFour hn F ∈ entropyRegion_n 4`.
+5. Closure-level transport (from (1) and (4)): if `F ∈ almostEntropicRegion_n n`, then `restrictFirstFour hn F ∈ almostEntropicRegion_n 4`. This is the one-liner where continuity of `restrictFirstFour` combines with the standard fact that continuous maps send closures into closures of images.
 
 With these in hand, the exact `n ≥ 4` theorem is immediate: if `F_witness_n hn` were almost entropic in dimension `n`, its restriction would make `F_witness` almost entropic in dimension `4`, contradicting the exact `n = 4` theorem.
 
@@ -202,6 +216,7 @@ Suggested commit: `feat(theorem4): lift exact theorem 4 to n-ge-4`
 - Update `ZhangYeungTest/Theorem4.lean` to pin the exact theorem statement and any renamed finite/sequence auxiliaries.
 - Update module docstrings, `README.md`, `AGENTS.md`, and roadmap references so that only the exact closure theorem is described as paper eq. (26).
 - Retain a short note that the finite witness theorem and the sequence-level surrogate remain useful auxiliaries.
+- Record the relationship between `shannon_incomplete_ge_four` and the new `theorem4_ge_four` in the module docstring. `shannon_incomplete_ge_four` asserts `∃ F ∈ Γ_n, F ∉ \tilde{\Gamma}_n` (the Zhang-Yeung outer bound); `theorem4_ge_four` asserts `∃ F ∈ Γ_n, F ∉ \bar{\Gamma}_n^*`. Because `\bar{\Gamma}_n^* ⊆ \tilde{\Gamma}_n`, the cone-level form strictly implies the closure-level form and is therefore logically stronger. Both stay public: `theorem4_ge_four` is retained because it matches the paper's headline statement verbatim, and `shannon_incomplete_ge_four` is retained because it records the stronger separation that actually comes out of the proof.
 
 Suggested commit: `docs(theorem4): align public claims with exact paper theorem`
 
@@ -221,6 +236,7 @@ New or updated tests should cover the public API, not the implementation proofs.
 - exact theorem statement pin for the new paper-level theorem,
 - finite theorem statement pin if `theorem4_finite` becomes the auxiliary name,
 - sequence-level theorem pin if the current `theorem4_closure` remains public,
+- a signature pin for `IsClosed zhangYeungRegion_4` only if `zhangYeungRegion_4` is promoted to a public definition (per Design §3, the default is to keep it internal and omit this pin),
 - one downstream consumer specializing the exact theorem at `n = 4`,
 - one downstream consumer specializing the exact theorem at arbitrary `n ≥ 4`.
 
@@ -243,6 +259,12 @@ Mitigation: decide the naming policy before Commit 3, then update all tests and 
 The dependent codomain family `S : Fin n → Type u` and the subtype-indexed joint variable can produce elaboration noise when generalized away from `n = 4`.
 
 Mitigation: keep `entropyFn_n` definitionally identical to the current `entropyFn` pattern, and prove the transport-to-subfamily lemmas before attempting the closure argument.
+
+### 4. Universe polymorphism of `entropyRegion_n`
+
+The entropic region quantifies existentially over a probability space `Ω` and a codomain family `S : Fin n → Type`. Ranging that existential over an arbitrary universe breaks predicativity relative to the carrier `Set (Finset (Fin n) → ℝ)`, which lives in `Type`.
+
+Mitigation: pin both `Ω` and each `S i` to `Type` (universe 0) in the definition of `entropyRegion_n`, per Design §2. A universe-parameterized variant can land later if a downstream consumer demands it; do not introduce one up front.
 
 ## Verification
 
