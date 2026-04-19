@@ -339,7 +339,43 @@ lemma zhangYeungAt_entropyFn
     {X : ∀ i : Fin 4, Ω → S i} (hX : ∀ i, Measurable (X i))
     (μ : Measure Ω) [IsProbabilityMeasure μ] (π : Equiv.Perm (Fin 4)) :
     zhangYeungAt (entropyFn X μ) (π 0) (π 1) (π 2) (π 3) := by
-  sorry
+  -- Distinctness of the four permuted indices from injectivity of `π`.
+  have h01 : π 0 ≠ π 1 := fun h => absurd (π.injective h) (by decide)
+  have h02 : π 0 ≠ π 2 := fun h => absurd (π.injective h) (by decide)
+  have h03 : π 0 ≠ π 3 := fun h => absurd (π.injective h) (by decide)
+  have h12 : π 1 ≠ π 2 := fun h => absurd (π.injective h) (by decide)
+  have h13 : π 1 ≠ π 3 := fun h => absurd (π.injective h) (by decide)
+  have h23 : π 2 ≠ π 3 := fun h => absurd (π.injective h) (by decide)
+  -- Apply M3 at the labeling `(X_M3, Y_M3, Z_M3, U_M3) = (X (π 2), X (π 3), X (π 0), X (π 1))`.
+  have hM3 := ZhangYeung.zhangYeung (hX (π 2)) (hX (π 3)) (hX (π 0)) (hX (π 1)) μ
+  -- Fully unfold `hM3` into unconditional `H[_ ; μ]` arithmetic, matching the
+  -- shape the set-function bridge produces.
+  rw [delta_def, mutualInfo_def, mutualInfo_def, mutualInfo_def,
+      condMutualInfo_eq (hX (π 0)) (hX (π 1)) (hX (π 2)) μ,
+      condMutualInfo_eq (hX (π 0)) (hX (π 1)) (hX (π 3)) μ,
+      chain_rule'' μ (hX (π 0)) (hX (π 2)),
+      chain_rule'' μ (hX (π 1)) (hX (π 2)),
+      chain_rule'' μ ((hX (π 0)).prodMk (hX (π 1))) (hX (π 2)),
+      chain_rule'' μ (hX (π 0)) (hX (π 3)),
+      chain_rule'' μ (hX (π 1)) (hX (π 3)),
+      chain_rule'' μ ((hX (π 0)).prodMk (hX (π 1))) (hX (π 3)),
+      ← entropy_assoc (hX (π 0)) (hX (π 1)) (hX (π 2)) μ,
+      ← entropy_assoc (hX (π 0)) (hX (π 1)) (hX (π 3)) μ] at hM3
+  -- Unfold the set-function calculus on the goal.
+  unfold zhangYeungAt delta_F I_F condI_F
+  -- Collapse `{x} ∪ s` and `insert a s ∪ t` to canonical `insert`-form so the
+  -- `entropyFn_pair`/`entropyFn_triple` bridges fire without further massage.
+  simp only [Finset.singleton_union, Finset.insert_union]
+  -- Apply the per-subset bridge lemmas.
+  rw [entropyFn_singleton X μ hX (π 0), entropyFn_singleton X μ hX (π 1),
+      entropyFn_singleton X μ hX (π 2), entropyFn_singleton X μ hX (π 3),
+      entropyFn_pair X μ hX h01, entropyFn_pair X μ hX h02,
+      entropyFn_pair X μ hX h03, entropyFn_pair X μ hX h12,
+      entropyFn_pair X μ hX h13, entropyFn_pair X μ hX h23,
+      entropyFn_triple X μ hX h01 h02 h12,
+      entropyFn_triple X μ hX h01 h03 h13,
+      entropyFn_triple X μ hX h02.symm h12.symm h01]
+  linarith
 
 /-- Part (c), the full bridge: the entropy function of any four-variable random-variable family lies in `tildeΓ_4`. One-line wrapper around `zhangYeungAt_entropyFn`. -/
 theorem zhangYeungHolds_of_entropy
