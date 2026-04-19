@@ -118,7 +118,24 @@ lemma F_witness_eq_cast (S : Finset (Fin 4)) :
 
 /-- Part (a) of Theorem 4: the witness satisfies the three Shannon-cone axioms (paper eq. 11). Discharged by `native_decide` on the `ℚ`-valued `F_witness_ℚ` and cast into `ℝ`. -/
 theorem shannonCone_of_witness : shannonCone F_witness := by
-  sorry
+  refine ⟨?_, ?_, ?_⟩
+  · -- `F_witness ∅ = 0`
+    show ((F_witness_ℚ ∅ : ℚ) : ℝ) = 0
+    have h : F_witness_ℚ ∅ = 0 := by native_decide
+    exact_mod_cast h
+  · -- Monotonicity.
+    intro α β hαβ
+    have h : ∀ α β : Finset (Fin 4), α ⊆ β → F_witness_ℚ α ≤ F_witness_ℚ β := by
+      native_decide
+    simp only [F_witness_eq_cast]
+    exact_mod_cast h α β hαβ
+  · -- Submodularity.
+    intro α β
+    have h : ∀ α β : Finset (Fin 4),
+        F_witness_ℚ (α ∪ β) + F_witness_ℚ (α ∩ β) ≤ F_witness_ℚ α + F_witness_ℚ β := by
+      native_decide
+    simp only [F_witness_eq_cast]
+    exact_mod_cast h α β
 
 /-! ### Part (b): the witness violates the Zhang-Yeung inequality -/
 
