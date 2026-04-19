@@ -29,6 +29,7 @@ cooldown
 Csirmaz
 Csirmaz's
 Degenne's
+definitionally
 derivability
 destructures
 Diggavi
@@ -42,6 +43,7 @@ irrefl
 Docstrings
 Dougherty
 dualizations
+elim
 dupuisf
 entropic
 extremal
@@ -51,6 +53,8 @@ fibrewise
 fibring
 finitary
 Finset
+Forall
+funext
 Frobenius
 Fintype
 formalizable
@@ -76,6 +80,8 @@ infotheo
 informations
 Ingleton
 injective
+Injectivity
+injectivity
 ISIT
 ITIP
 Kaced
@@ -154,6 +160,8 @@ subadditivity
 submodular
 subgoals
 submodularity
+Subsingleton
+subsingleton
 summands
 Symp
 symm
