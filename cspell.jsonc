@@ -5,6 +5,7 @@
   "version": "0.2",
   "language": "en",
   "ignorePaths": [
+    "LICENSES/**",
     ".lake/**",
     "references/papers/**",
     "references/papers.bib",

@@ -106,7 +106,7 @@ Use sidecars where inline tags would be disruptive or unsupported:
 - reference PDFs
 - any other file that `reuse lint` still reports after the inline pass
 
-The bias is toward inline SPDX tags for ordinary source and prose files, and toward sidecars only for frontmatter-sensitive, commentless, or binary formats.
+The bias is toward inline SPDX tags for ordinary source and prose files, and toward sidecars only for frontmatter-sensitive, files without safe comment syntax, or binary formats.
 
 ## Bibliography Cleanup Plan
 
