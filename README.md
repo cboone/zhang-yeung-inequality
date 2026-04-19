@@ -101,6 +101,6 @@ This formalization is being completed with substantial assistance from Opus 4.6 
 
 ## License
 
-Research papers in `references/papers/` are copyright their respective authors and publishers.
+Reference materials in `references/papers/` and `references/transcriptions/` are bundled for study and verification context only. They are not covered by the repository's Apache 2.0 or CC BY 4.0 grants; copyright remains with the original authors and publishers. See the per-file SPDX metadata and [the reference-material notice](./LICENSES/LicenseRef-Reference-Material.txt).
 
-Everything else is copyright 2026 Christopher Boone. Lean code is licensed under [Apache 2.0](./LICENSES/APACHE-2.0.txt). Prose and mathematical exposition are licensed under [CC BY 4.0](./LICENSES/CC-BY-4.0.txt).
+Everything else is copyright 2026 Christopher Boone. Project-authored software and configuration files are licensed under [Apache 2.0](./LICENSES/Apache-2.0.txt). Project-authored prose and mathematical exposition are licensed under [CC BY 4.0](./LICENSES/CC-BY-4.0.txt). [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) is adapted from Contributor Covenant and licensed under [CC BY-SA 4.0](./LICENSES/CC-BY-SA-4.0.txt).

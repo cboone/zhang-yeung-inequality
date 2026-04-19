@@ -1,0 +1,11 @@
+This repository contains a mix of project-authored software, project-authored prose, adapted community-policy text, and bundled reference materials.
+
+Project-authored software and configuration files are copyright 2026 Christopher Boone and licensed under the Apache License 2.0; see `LICENSES/Apache-2.0.txt`.
+
+Project-authored prose and mathematical exposition are copyright 2026 Christopher Boone and licensed under Creative Commons Attribution 4.0 International; see `LICENSES/CC-BY-4.0.txt`.
+
+`CODE_OF_CONDUCT.md` is adapted from Contributor Covenant 3.0 and is licensed under Creative Commons Attribution-ShareAlike 4.0 International; see `LICENSES/CC-BY-SA-4.0.txt`.
+
+Reference materials under `references/papers/` and `references/transcriptions/` are bundled for study and verification context only. They are not covered by the repository's Apache 2.0 or CC BY 4.0 grants; see the per-file SPDX metadata and `LICENSES/LicenseRef-Reference-Material.txt`.
+
+Per-file SPDX metadata is authoritative for individual files.
