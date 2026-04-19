@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2026 Christopher Boone
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # References
 
 Source PDF and transcription for the Zhang-Yeung 1998 paper that this repository formalizes.

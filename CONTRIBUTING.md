@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2026 Christopher Boone
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Contributing to zhang-yeung-inequality
 
 Thank you for your interest in contributing to zhang-yeung-inequality.

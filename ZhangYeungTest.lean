@@ -1,3 +1,8 @@
+/-
+SPDX-FileCopyrightText: 2026 Christopher Boone
+SPDX-License-Identifier: Apache-2.0
+-/
+
 /- Test import surface for the Zhang-Yeung formalization. -/
 import ZhangYeungTest.CopyLemma
 import ZhangYeungTest.Delta

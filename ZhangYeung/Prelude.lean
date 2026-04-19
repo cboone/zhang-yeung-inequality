@@ -1,3 +1,8 @@
+/-
+SPDX-FileCopyrightText: 2026 Christopher Boone
+SPDX-License-Identifier: Apache-2.0
+-/
+
 /- Import surface for PFR's Shannon entropy API. Brings entropy notation (H[X], I[X:Y], I[X:Y|Z]) into scope for downstream modules, and hosts generic helpers reusable across the `ZhangYeung` hierarchy. -/
 import PFR.ForMathlib.Entropy.Basic
 

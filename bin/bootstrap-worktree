@@ -1,5 +1,8 @@
 #!/usr/bin/env zsh
 
+# SPDX-FileCopyrightText: 2026 Christopher Boone
+# SPDX-License-Identifier: Apache-2.0
+
 setopt ERR_EXIT NO_UNSET PIPE_FAIL
 
 readonly script_dir="${0:A:h}"

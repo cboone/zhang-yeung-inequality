@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Christopher Boone
+# SPDX-License-Identifier: Apache-2.0
+
 MATHLIB_BUILD_DIR := .lake/packages/mathlib/.lake/build/lib/lean
 
 build: _check-mathlib-cache ## Build the ZhangYeung library
