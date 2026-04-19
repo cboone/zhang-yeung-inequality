@@ -16,7 +16,7 @@ references/
   papers.bib       BibTeX entries keyed by author-year identifiers used across the project.
 ```
 
-Cite entries by their BibTeX key in Lean docstrings via the `[@key]` syntax expected by Mathlib's documentation conventions (the canonical bibliography file for Lean citations is `docs/references.bib`; this project keeps both views in sync).
+Cite entries by their BibTeX key in Lean docstrings via the `[@key]` syntax expected by Mathlib's documentation conventions. The canonical bibliography file for this repository is `references/papers.bib`.
 
 ## Transcription
 
@@ -24,7 +24,7 @@ Cite entries by their BibTeX key in Lean docstrings via the `[@key]` syntax expe
 
 PDF extraction tools, the Mathpix submission script, verification helpers (Pandoc build, projective-plane arithmetic, structural diff), and the multi-phase verification procedure live in the strength-model repository, not here.
 
-## Current entries
+## Core entries
 
 | Key | Paper | Materials |
 | --- | --- | --- |
@@ -32,3 +32,5 @@ PDF extraction tools, the Mathpix submission script, verification helpers (Pando
 | `zhangyeung1997` | Zhang and Yeung, *A Non-Shannon Type Conditional Inequality of Information Quantities*, IEEE TIT 43(6), 1997 | Source PDF at [zhangyeung1997.pdf](papers/zhangyeung1997.pdf); primary reference for the M1.5 Theorem 2 proof via KL divergence |
 | `yeung1997framework` | Yeung, *A Framework for Linear Information Inequalities*, IEEE TIT 43, 1997 | Bibliography only (context for $\Gamma_n$, $\Gamma^*_n$) |
 | `yeung2008` | Yeung, *Information Theory and Network Coding*, Springer, 2008 | Bibliography only (cross-reference for Theorem 3 and the copy lemma) |
+
+Additional bibliography-only entries in `references/papers.bib` cover the downstream papers cited in `docs/research/post-zhang-yeung-extension-survey.md` and `docs/plans/todo/2026-04-17-non-shannon-inequality-discovery-program.md`.

@@ -13,7 +13,7 @@ The central object is the Zhang-Yeung delta,
 Δ(Z, U | X, Y) := I(Z ; U) - I(Z ; U | X) - I(Z ; U | Y),
 ```
 
-and the main theorem (Theorem 3 of [Zhang and Yeung 1998](https://doi.org/10.1109/18.705560)) is the upper bound
+and the main theorem (Theorem 3 of [Zhang and Yeung 1998](https://doi.org/10.1109/18.681320)) is the upper bound
 
 ```text
 Δ(Z, U | X, Y) ≤ (1/2) · I(X ; Y) + (1/4) · (I(X ; Z,U) + I(Y ; Z,U)).
@@ -91,7 +91,7 @@ See [`AGENTS.md`](AGENTS.md) for the full command reference and [`CONTRIBUTING.m
 
 Primary sources and transcriptions live in [`references/`](references/). The paper being formalized and the principal background text:
 
-- Zhang and Yeung (1998). _On characterization of entropy function via information inequalities_. IEEE Transactions on Information Theory 44(4). [DOI: 10.1109/18.705560](https://doi.org/10.1109/18.705560). ([`references/papers/zhangyeung1998.pdf`](references/papers/zhangyeung1998.pdf); verified transcription at [`references/transcriptions/zhangyeung1998.md`](references/transcriptions/zhangyeung1998.md).)
+- Zhang and Yeung (1998). _On characterization of entropy function via information inequalities_. IEEE Transactions on Information Theory 44(4). [DOI: 10.1109/18.681320](https://doi.org/10.1109/18.681320). ([`references/papers/zhangyeung1998.pdf`](references/papers/zhangyeung1998.pdf); verified transcription at [`references/transcriptions/zhangyeung1998.md`](references/transcriptions/zhangyeung1998.md).)
 
 Other closely related texts:
 
