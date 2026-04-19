@@ -174,4 +174,32 @@ example :
 
 end ClosureStretch
 
+/-! ### Stretch: `n ≥ 4` extension pins -/
+
+section NExtensionStretch
+
+/- Pinned signature: `shannon_incomplete_ge_four` states the paper's `n ≥ 4`
+separation in the `Fin n`-indexed cone predicates. -/
+example (n : ℕ) (hn : 4 ≤ n) :
+    ∃ F : Finset (Fin n) → ℝ, shannonCone_n F ∧ ¬ zhangYeungHolds_n F :=
+  shannon_incomplete_ge_four n hn
+
+/- Pinned signature: `F_witness_n` is the lifted witness. -/
+example {n : ℕ} (hn : 4 ≤ n) : shannonCone_n (F_witness_n hn) :=
+  shannonCone_of_witness_n hn
+
+example {n : ℕ} (hn : 4 ≤ n) : ¬ zhangYeungHolds_n (F_witness_n hn) :=
+  not_zhangYeungHolds_witness_n hn
+
+/- Pinned signature: at `n = 4`, the generic predicates coincide with the
+Fin-4 predicates by definition; checked here against `shannonCone` and an
+arbitrary permutation's `zhangYeungAt` form. -/
+example (F : Finset (Fin 4) → ℝ) :
+    shannonCone_n F ↔ shannonCone F := Iff.rfl
+
+example (F : Finset (Fin 4) → ℝ) (i j k l : Fin 4) :
+    zhangYeungAt_n F i j k l ↔ zhangYeungAt F i j k l := Iff.rfl
+
+end NExtensionStretch
+
 end ZhangYeungTest

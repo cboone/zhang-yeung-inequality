@@ -474,4 +474,119 @@ theorem theorem4_closure :
   intro F_seq h_seq h_lim
   exact not_zhangYeungHolds_witness (zhangYeungHolds_of_tendsto h_seq h_lim)
 
+/-! ### Optional stretch: `n ≥ 4` extension
+
+`Fin 4`-generic analogues of the set-function calculus and cone predicates, plus the lift of `F_witness` along the canonical embedding `Fin 4 ↪ Fin n` via `Finset.preimage`. The `n ≥ 4` witness `F_witness_n` satisfies the Shannon cone (each cone axiom transports across `Finset.preimage`) but fails the Zhang-Yeung inequality at the lifted canonical labeling `(Fin.castLE hn 2, Fin.castLE hn 3, Fin.castLE hn 0, Fin.castLE hn 1)`, which after preimage-reduction collapses to the base `n = 4` violation. Together these give the paper's `n ≥ 4` separation `shannon_incomplete_ge_four`. -/
+
+/-- `I_F` generalized to `Finset (Fin n)`. The `n = 4` specialization coincides with `I_F` by definitional unfolding. -/
+def I_F_n {n : ℕ} (F : Finset (Fin n) → ℝ) (α β : Finset (Fin n)) : ℝ :=
+  F α + F β - F (α ∪ β)
+
+/-- `condI_F` generalized to `Finset (Fin n)`. -/
+def condI_F_n {n : ℕ} (F : Finset (Fin n) → ℝ) (α β γ : Finset (Fin n)) : ℝ :=
+  F (α ∪ γ) + F (β ∪ γ) - F (α ∪ β ∪ γ) - F γ
+
+/-- `delta_F` generalized to `Finset (Fin n)`. -/
+def delta_F_n {n : ℕ} (F : Finset (Fin n) → ℝ) (i j k l : Fin n) : ℝ :=
+  I_F_n F {i} {j} - condI_F_n F {i} {j} {k} - condI_F_n F {i} {j} {l}
+
+/-- `Γ_n` (paper eq. 11) as a predicate on `Finset (Fin n) → ℝ`. -/
+def shannonCone_n {n : ℕ} (F : Finset (Fin n) → ℝ) : Prop :=
+  F ∅ = 0 ∧
+  (∀ α β : Finset (Fin n), α ⊆ β → F α ≤ F β) ∧
+  (∀ α β : Finset (Fin n), F (α ∪ β) + F (α ∩ β) ≤ F α + F β)
+
+/-- The Zhang-Yeung inequality at a 4-tuple labeling over `Fin n`. -/
+def zhangYeungAt_n {n : ℕ} (F : Finset (Fin n) → ℝ) (i j k l : Fin n) : Prop :=
+  delta_F_n F i j k l ≤ (1 / 2) * (I_F_n F {k} {l} + I_F_n F {k} ({i} ∪ {j})
+    + condI_F_n F {i} {j} {k} - condI_F_n F {i} {j} {l})
+
+/-- The `Fin n`-indexed Zhang-Yeung cone `tildeΓ_n`: the Zhang-Yeung inequality holds at every ordered 4-tuple of pairwise distinct indices. Equivalent to the card-4 form used in the paper's eq. (25); the pairwise-distinctness presentation is easier to manipulate in proofs. -/
+def zhangYeungHolds_n {n : ℕ} (F : Finset (Fin n) → ℝ) : Prop :=
+  ∀ i j k l : Fin n, i ≠ j → i ≠ k → i ≠ l → j ≠ k → j ≠ l → k ≠ l →
+    zhangYeungAt_n F i j k l
+
+/-- The `n = 4` witness lifted to `Fin n` for `n ≥ 4`: `F_witness_n hn α` evaluates `F_witness` on the preimage of `α` under the canonical embedding `Fin 4 ↪ Fin n`. Equivalent to `F_witness` applied to the intersection of `α` with the initial segment `{0, 1, 2, 3 : Fin n}`. -/
+noncomputable def F_witness_n {n : ℕ} (hn : 4 ≤ n) (α : Finset (Fin n)) : ℝ :=
+  F_witness (α.preimage (Fin.castLE hn) (Fin.castLE_injective hn).injOn)
+
+/-- The lifted witness lies in `Γ_n`: each Shannon-cone axiom transports across `Finset.preimage` via `preimage_empty`, `monotone_preimage`, `preimage_union`, and `preimage_inter`, and then reduces to the base `shannonCone_of_witness`. -/
+theorem shannonCone_of_witness_n {n : ℕ} (hn : 4 ≤ n) :
+    shannonCone_n (F_witness_n hn) := by
+  refine ⟨?_, ?_, ?_⟩
+  · show F_witness _ = 0
+    rw [Finset.preimage_empty]
+    exact shannonCone_of_witness.1
+  · intro α β hαβ
+    exact shannonCone_of_witness.2.1 _ _
+      (Finset.monotone_preimage (Fin.castLE_injective hn) hαβ)
+  · intro α β
+    show F_witness _ + F_witness _ ≤ F_witness _ + F_witness _
+    rw [Finset.preimage_union, Finset.preimage_inter]
+    exact shannonCone_of_witness.2.2 _ _
+
+/-- The preimage of a singleton `{Fin.castLE hn i}` under `Fin.castLE hn` is `{i}`. -/
+private lemma preimage_singleton_castLE {n : ℕ} (hn : 4 ≤ n) (i : Fin 4) :
+    ({Fin.castLE hn i} : Finset (Fin n)).preimage (Fin.castLE hn)
+        (Fin.castLE_injective hn).injOn = ({i} : Finset (Fin 4)) := by
+  ext j
+  simp [Finset.mem_preimage, Finset.mem_singleton,
+    (Fin.castLE_injective hn).eq_iff]
+
+/-- The specific `n = 4` failure from which the lift reads off. Factored out of `not_zhangYeungHolds_witness` so the `Fin n` violation can consume it without re-running the permutation specialization. -/
+private lemma not_zhangYeungAt_witness_canonical :
+    ¬ zhangYeungAt F_witness 2 3 0 1 := by
+  intro h
+  simp only [zhangYeungAt, delta_F, I_F, condI_F, F_witness_eq_cast] at h
+  have h00 : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by native_decide
+  have h11 : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by native_decide
+  have h22 : F_witness_ℚ ({2} : Finset (Fin 4)) = 2 := by native_decide
+  have h33 : F_witness_ℚ ({3} : Finset (Fin 4)) = 2 := by native_decide
+  have h01 : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ {1}) = 4 := by native_decide
+  have h02 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {0}) = 3 := by native_decide
+  have h03 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {0}) = 3 := by native_decide
+  have h12 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {1}) = 3 := by native_decide
+  have h13 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {1}) = 3 := by native_decide
+  have h23 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3}) = 3 := by native_decide
+  have h023 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {0}) = 4 := by native_decide
+  have h123 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {1}) = 4 := by native_decide
+  have h023' : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ (({2} : Finset (Fin 4)) ∪ {3})) = 4 := by
+    native_decide
+  rw [h00, h11, h22, h33, h01, h02, h03, h12, h13, h23, h023, h123, h023'] at h
+  norm_num at h
+
+/-- The Zhang-Yeung inequality at the lifted canonical labeling pulls back to the base labeling: every set-function operation in `zhangYeungAt_n F_witness_n` reduces through `Finset.preimage` to the corresponding `zhangYeungAt F_witness` operation on `Fin 4`. -/
+private lemma zhangYeungAt_n_witness_castLE {n : ℕ} (hn : 4 ≤ n) (i j k l : Fin 4) :
+    zhangYeungAt_n (F_witness_n hn) (Fin.castLE hn i) (Fin.castLE hn j)
+        (Fin.castLE hn k) (Fin.castLE hn l)
+      ↔ zhangYeungAt F_witness i j k l := by
+  unfold zhangYeungAt_n zhangYeungAt delta_F_n delta_F I_F_n I_F condI_F_n condI_F F_witness_n
+  simp only [Finset.preimage_union, preimage_singleton_castLE]
+
+/-- Part (b) lifted to `Fin n`: the lifted witness fails `zhangYeungHolds_n` at the lifted canonical labeling. -/
+theorem not_zhangYeungHolds_witness_n {n : ℕ} (hn : 4 ≤ n) :
+    ¬ zhangYeungHolds_n (F_witness_n hn) := by
+  intro h
+  have inj := Fin.castLE_injective hn
+  have d23 : (Fin.castLE hn 2 : Fin n) ≠ Fin.castLE hn 3 :=
+    fun e => absurd (inj e) (by decide)
+  have d20 : (Fin.castLE hn 2 : Fin n) ≠ Fin.castLE hn 0 :=
+    fun e => absurd (inj e) (by decide)
+  have d21 : (Fin.castLE hn 2 : Fin n) ≠ Fin.castLE hn 1 :=
+    fun e => absurd (inj e) (by decide)
+  have d30 : (Fin.castLE hn 3 : Fin n) ≠ Fin.castLE hn 0 :=
+    fun e => absurd (inj e) (by decide)
+  have d31 : (Fin.castLE hn 3 : Fin n) ≠ Fin.castLE hn 1 :=
+    fun e => absurd (inj e) (by decide)
+  have d01 : (Fin.castLE hn 0 : Fin n) ≠ Fin.castLE hn 1 :=
+    fun e => absurd (inj e) (by decide)
+  have hat := h (Fin.castLE hn 2) (Fin.castLE hn 3) (Fin.castLE hn 0) (Fin.castLE hn 1)
+    d23 d20 d21 d30 d31 d01
+  exact not_zhangYeungAt_witness_canonical ((zhangYeungAt_n_witness_castLE hn 2 3 0 1).mp hat)
+
+/-- **Theorem 4 for `n ≥ 4`** [@zhangyeung1998, §II, eq. 26]. The lifted witness separates `Γ_n` from the `Fin n`-indexed Zhang-Yeung cone: there exists a set function on `Finset (Fin n)` satisfying the three Shannon-cone axioms but violating the Zhang-Yeung inequality at the lifted canonical labeling. -/
+theorem shannon_incomplete_ge_four (n : ℕ) (hn : 4 ≤ n) :
+    ∃ F : Finset (Fin n) → ℝ, shannonCone_n F ∧ ¬ zhangYeungHolds_n F :=
+  ⟨F_witness_n hn, shannonCone_of_witness_n hn, not_zhangYeungHolds_witness_n hn⟩
+
 end ZhangYeung
