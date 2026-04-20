@@ -1,8 +1,3 @@
-<!--
-SPDX-FileCopyrightText: 2026 Christopher Boone
-SPDX-License-Identifier: CC-BY-4.0
--->
-
 ## Branch Review: formalize/2-copy-lemma
 
 Base: main (merge base: 28d2db37)
