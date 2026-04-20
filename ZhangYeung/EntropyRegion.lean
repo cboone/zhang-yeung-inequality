@@ -36,7 +36,7 @@ def zhangYeungAt_n {n : ℕ} (F : Finset (Fin n) → ℝ) (i j k l : Fin n) : Pr
   delta_F_n F i j k l ≤ (1 / 2) * (I_F_n F {k} {l} + I_F_n F {k} ({i} ∪ {j})
     + condI_F_n F {i} {j} {k} - condI_F_n F {i} {j} {l})
 
-/-- The `Fin n`-indexed Zhang-Yeung cone `tildeΓ_n`: the Zhang-Yeung inequality holds at every ordered 4-tuple of pairwise distinct indices. Equivalent to the card-4 form used in the paper's eq. (25); the pairwise-distinctness presentation is easier to manipulate in proofs. -/
+/-- The `Fin n`-indexed Zhang-Yeung cone `tildeΓ_n`: the Zhang-Yeung inequality holds at every ordered 4-tuple of pairwise distinct indices. This "pairwise-distinctness" presentation is extensionally equivalent to the paper's card-4 form (eq. 25) quantified over `Equiv.Perm (Fin n)` — every permutation yields a pairwise-distinct 4-tuple, and every pairwise-distinct 4-tuple extends to a permutation — but it is easier to manipulate in proofs, so the `Fin n` lift uses it in place of the `Equiv.Perm` form that `zhangYeungHolds` uses at `n = 4`. The point-level predicate `zhangYeungAt_n` does agree definitionally with `zhangYeungAt` at `n = 4` (pinned by `Iff.rfl` in the test module); the quantifier shapes of `zhangYeungHolds_n` and `zhangYeungHolds` differ, so their equivalence at `n = 4` is extensional rather than definitional. -/
 def zhangYeungHolds_n {n : ℕ} (F : Finset (Fin n) → ℝ) : Prop :=
   ∀ i j k l : Fin n, i ≠ j → i ≠ k → i ≠ l → j ≠ k → j ≠ l → k ≠ l →
     zhangYeungAt_n F i j k l
