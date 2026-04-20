@@ -1,3 +1,4 @@
+import ZhangYeung.EntropyRegion
 import ZhangYeung.Theorem3
 
 /-!
@@ -8,18 +9,19 @@ Theorem 4 of [@zhangyeung1998, §II, eq. 26] is the scientific payoff of the Zha
 The milestone lands four ingredients:
 
 - **Parts (a), (b)** -- pure set-function arithmetic. The witness `F_witness_ℚ : Finset (Fin 4) → ℚ` satisfies `shannonCone F_witness` and fails `zhangYeungHolds F_witness`. Both are decidable finite checks.
-- **Part (c), the bridge** -- for any four discrete random variables `X : ∀ i : Fin 4, Ω → S i`, possibly with different finite codomains `S : Fin 4 → Type u`, their entropy function `entropyFn X μ : Finset (Fin 4) → ℝ` satisfies `zhangYeungHolds` at every permutation of the four coordinates. This is a direct restatement of M3's `ZhangYeung.zhangYeung` in the set-function language Part (d) consumes.
-- **Part (d), `theorem4`** -- the headline separation. Combining (a)-(c) by contradiction: `F_witness` lies in the Shannon cone, but is not the entropy function of any four discrete random variables.
+- **Part (c), the bridge** -- for any four discrete random variables `X : ∀ i : Fin 4, Ω → S i`, possibly with different finite codomains `S : Fin 4 → Type u`, their entropy function `entropyFn X μ : Finset (Fin 4) → ℝ` satisfies `zhangYeungHolds` at every permutation of the four coordinates. This is a direct restatement of M3's `ZhangYeung.zhangYeung` in the set-function language the closure proof consumes.
+- **Part (d), the exact theorem** -- the headline separation. The public `theorem4` is now the paper's exact `n = 4` closure statement `∃ F ∈ Γ_4, F ∉ closure(Γ_4^*)`, with `theorem4_ge_four` lifting it to all `n ≥ 4`.
 
 ## Main definitions
 
 - `ZhangYeung.I_F`, `ZhangYeung.condI_F`, `ZhangYeung.delta_F`: the set-function information-theoretic calculus (unconditional mutual info, conditional mutual info, and the Zhang-Yeung delta at the set-function level).
 - `ZhangYeung.shannonCone`: the Shannon outer bound `Γ_4` (paper eq. 11) stated as a predicate on `Finset (Fin 4) → ℝ`.
+- `ZhangYeung.shannonRegion_n`, `ZhangYeung.entropyRegion_n`, `ZhangYeung.almostEntropicRegion_n`: the set-level Shannon, entropic, and almost-entropic regions on `Finset (Fin n) → ℝ`.
 - `ZhangYeung.zhangYeungAt`: the Zhang-Yeung inequality (paper eq. 21) at a specific 4-tuple labeling.
 - `ZhangYeung.zhangYeungHolds`: the Zhang-Yeung cone `tildeΓ_4` (paper eq. 25), expressed as `zhangYeungAt` at every permutation of `Fin 4`.
 - `ZhangYeung.F_witness_ℚ`: the paper's `n = 4` counterexample, as a `ℚ`-valued set function with `a = 1`.
 - `ZhangYeung.F_witness`: the `ℝ`-cast of `F_witness_ℚ`.
-- `ZhangYeung.entropyFn`: the set-function view of the joint entropies of a family `X : ∀ i : Fin 4, Ω → S i` of four discrete random variables with possibly different finite codomains.
+- `ZhangYeung.entropyFn`, `ZhangYeung.entropyFn_n`: the four-variable and generic set-function views of joint entropy.
 
 ## Main statements
 
@@ -27,15 +29,19 @@ The milestone lands four ingredients:
 - `ZhangYeung.not_zhangYeungHolds_witness` -- Part (b): `F_witness` fails the Zhang-Yeung inequality at the canonical permutation.
 - `ZhangYeung.shannon_incomplete` -- intermediate form: there exists a set function in `Γ_4` that is not in `tildeΓ_4`.
 - `ZhangYeung.zhangYeungAt_entropyFn`, `ZhangYeung.zhangYeungHolds_of_entropy` -- Part (c), the bridge: every entropy function of four discrete random variables lies in `tildeΓ_4`.
-- `ZhangYeung.theorem4` -- Part (d): the headline separation, `F_witness` is in `Γ_4` but is not the entropy function of any four discrete random variables (even allowing the four variables to have different finite codomains).
+- `ZhangYeung.theorem4_finite` -- the finite auxiliary separation, excluding `F_witness` from the literal entropy region.
+- `ZhangYeung.theorem4` -- the exact paper-level `n = 4` statement `∃ F ∈ Γ_4, F ∉ closure(Γ_4^*)`.
+- `ZhangYeung.theorem4_ge_four` -- the exact paper-level `n ≥ 4` statement `∃ F ∈ Γ_n, F ∉ closure(Γ_n^*)`.
+- `ZhangYeung.theorem4_seqClosure` -- the sequence-level surrogate over `tildeΓ_4` retained as a supporting lemma.
+- `ZhangYeung.shannon_incomplete_ge_four` -- the stronger cone-level corollary `∃ F ∈ Γ_n, F ∉ tildeΓ_n`.
 
 ## Implementation notes
 
-The witness is defined first over `ℚ` so that Parts (a) and (b) close by `Fintype.decidableForallFintype` + `native_decide` on rational arithmetic, then cast to `ℝ` once at the witness boundary. `F_witness` is a plain pointwise cast `fun S => (F_witness_ℚ S : ℝ)`; the companion lemma `F_witness_eq_cast` trivializes downstream `push_cast`/`norm_cast` work. Fixing `a = 1` collapses the paper's parametric family into a single `ℚ`-valued function without losing any content: `theorem4` asserts existence, and the homogeneity the paper uses `a` to exhibit is vacuous at that level.
+The witness is defined first over `ℚ` so that Parts (a) and (b) close by `Fintype.decidableForallFintype` + `native_decide` on rational arithmetic, then cast to `ℝ` once at the witness boundary. `F_witness` is a plain pointwise cast `fun S => (F_witness_ℚ S : ℝ)`; the companion lemma `F_witness_eq_cast` trivializes downstream `push_cast`/`norm_cast` work. Fixing `a = 1` collapses the paper's parametric family into a single `ℚ`-valued function without losing any content: `theorem4` and `theorem4_ge_four` are existential separations, so the homogeneity the paper uses `a` to exhibit is vacuous at that level.
 
 The Zhang-Yeung cone is quantified over `Equiv.Perm (Fin 4)` to match paper eq. (25) literally; the specific violation uses the permutation `Equiv.swap 0 2 * Equiv.swap 1 3` sending `(0, 1, 2, 3) ↦ (2, 3, 0, 1)`, which instantiates `zhangYeungAt F (σ 0) (σ 1) (σ 2) (σ 3)` as `zhangYeungAt F 2 3 0 1` -- exactly the labeling the paper evaluates on lines 378-388. Permutation evaluation `(σ 0, σ 1, σ 2, σ 3)` is discharged by `decide` once and reused.
 
-The bridge binds the four codomains as a heterogeneous family `S : Fin 4 → Type u` at a single universe `u` and consumes M3's `ZhangYeung.zhangYeung` directly. Each per-subset bridge lemma (`entropyFn_empty`, `entropyFn_singleton`, `entropyFn_pair`, `entropyFn_triple`, `entropyFn_quad`) transports across an explicit `Equiv` between a `Finset`-indexed subtype of `Fin 4` and a standard `Fin k`, invoking PFR's `entropy_comp_of_injective` to move `H[·; μ]` under that transport.
+The bridge binds the four codomains as a heterogeneous family `S : Fin 4 → Type u` at a single universe `u` and consumes M3's `ZhangYeung.zhangYeung` directly. Each per-subset bridge lemma (`entropyFn_empty`, `entropyFn_singleton`, `entropyFn_pair`, `entropyFn_triple`, `entropyFn_quad`) transports across an explicit `Equiv` between a `Finset`-indexed subtype of `Fin 4` and a standard `Fin k`, invoking PFR's `entropy_comp_of_injective` to move `H[·; μ]` under that transport. The exact theorem then packages this bridge through `ZhangYeung/EntropyRegion.lean`: `closure (Γ_4^*)` sits inside the closed Zhang-Yeung region, while `F_witness` sits outside it.
 
 ## References
 
@@ -108,7 +114,7 @@ def F_witness_ℚ : Finset (Fin 4) → ℚ := fun S =>
   else if S.card = 2 then 3
   else 4
 
-/-- The `ℝ`-cast of `F_witness_ℚ`, used in the main statements `shannonCone_of_witness`, `not_zhangYeungHolds_witness`, `shannon_incomplete`, and `theorem4`. -/
+/-- The `ℝ`-cast of `F_witness_ℚ`, used in the main statements `shannonCone_of_witness`, `not_zhangYeungHolds_witness`, `shannon_incomplete`, `theorem4_finite`, `theorem4`, and `theorem4_ge_four`. -/
 noncomputable def F_witness : Finset (Fin 4) → ℝ := fun S => (F_witness_ℚ S : ℝ)
 
 /-- Definitional-shape lemma: `F_witness` is the pointwise `ℚ → ℝ` cast of `F_witness_ℚ`. Used to push `F_witness` into `F_witness_ℚ`-shaped goals before closing by `native_decide` over `ℚ`. -/
@@ -171,22 +177,12 @@ theorem not_zhangYeungHolds_witness : ¬ zhangYeungHolds F_witness := by
   rw [h00, h11, h22, h33, h01, h02, h03, h12, h13, h23, h023, h123, h023'] at h
   norm_num at h
 
-/-- Intermediate conclusion (pre-bridge): the Shannon cone strictly contains the Zhang-Yeung cone, `Γ_4 ⊋ tildeΓ_4`. Part (a) and Part (b) combined. This is the original roadmap checkpoint; `theorem4` subsumes it by bridging through M3 to strengthen "not in `tildeΓ_4`" to "not an entropy function". -/
+/-- Intermediate conclusion (pre-bridge): the Shannon cone strictly contains the Zhang-Yeung cone, `Γ_4 ⊋ tildeΓ_4`. Part (a) and Part (b) combined. This remains a useful stronger auxiliary: `theorem4_finite` strengthens it to exclusion from the literal entropy region, while `theorem4` packages the exact closure statement from the paper. -/
 theorem shannon_incomplete :
     ∃ F : Finset (Fin 4) → ℝ, shannonCone F ∧ ¬ zhangYeungHolds F :=
   ⟨F_witness, shannonCone_of_witness, not_zhangYeungHolds_witness⟩
 
 /-! ### Part (c): the bridge from the random-variable form (M3) to the set-function form -/
-
-/-- The entropy function of a four-variable random-variable family `X : ∀ i : Fin 4, Ω → S i`, possibly with different finite codomains `S : Fin 4 → Type u`, expressed as a set function on `Finset (Fin 4)`. For `α : Finset (Fin 4)`, `entropyFn X μ α` is the joint entropy of the tuple indexed by the elements of `α`.
-
-The `Fintype` and `MeasurableSingletonClass` hypotheses on the codomain family are imposed by the downstream bridge lemmas, not by `entropyFn` itself; PFR's `H[_ ; _]` only requires a `MeasurableSpace`. -/
-noncomputable def entropyFn
-    {Ω : Type*} [MeasurableSpace Ω]
-    {S : Fin 4 → Type u}
-    [∀ i, MeasurableSpace (S i)]
-    (X : ∀ i : Fin 4, Ω → S i) (μ : Measure Ω) : Finset (Fin 4) → ℝ :=
-  fun α => H[(fun ω : Ω => fun i : α => X i.1 ω) ; μ]
 
 section EntropyFnEvaluation
 
@@ -199,7 +195,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 omit [∀ i, Fintype (S i)] in
 /-- Per-subset bridge lemma at the empty subset: `entropyFn X μ ∅ = 0`. The subtype `{j // j ∈ (∅ : Finset (Fin 4))}` is empty, so the dependent-product codomain `∀ j : ∅, S j.1` is a subsingleton; the joint tuple is constant, and its entropy is zero. -/
 lemma entropyFn_empty : entropyFn X μ ∅ = 0 := by
-  simp only [entropyFn]
+  simp only [entropyFn, entropyFn_n]
   haveI : IsEmpty {j : Fin 4 // j ∈ (∅ : Finset (Fin 4))} :=
     ⟨fun ⟨j, hj⟩ => Finset.notMem_empty j hj⟩
   haveI : Nonempty Ω := nonempty_of_isProbabilityMeasure μ
@@ -215,7 +211,7 @@ omit [IsProbabilityMeasure μ] in
 /-- Per-subset bridge lemma at a singleton subset: `entropyFn X μ {i} = H[X i; μ]`. The joint tuple over the single-element subset `{i}` is, up to a measurable bijection into `S i`, just `X i`. -/
 lemma entropyFn_singleton (hX : ∀ i, Measurable (X i)) (i : Fin 4) :
     entropyFn X μ {i} = H[X i ; μ] := by
-  simp only [entropyFn]
+  simp only [entropyFn, entropyFn_n]
   -- Projection π : (∀ j : {i}, S j.1) → S i sending g to its value at ⟨i, mem⟩.
   let π : (∀ j : ({i} : Finset (Fin 4)), S j.1) → S i :=
     fun g => g ⟨i, Finset.mem_singleton.mpr rfl⟩
@@ -241,7 +237,7 @@ omit [IsProbabilityMeasure μ] in
 lemma entropyFn_pair (hX : ∀ i, Measurable (X i))
     {i j : Fin 4} (h : i ≠ j) :
     entropyFn X μ {i, j} = H[⟨X i, X j⟩ ; μ] := by
-  simp only [entropyFn]
+  simp only [entropyFn, entropyFn_n]
   -- Projection π : (∀ k : {i, j}, S k.1) → S i × S j evaluating at both indices.
   have hi : i ∈ ({i, j} : Finset (Fin 4)) := by simp
   have hj : j ∈ ({i, j} : Finset (Fin 4)) := by simp
@@ -270,7 +266,7 @@ omit [IsProbabilityMeasure μ] in
 lemma entropyFn_triple (hX : ∀ i, Measurable (X i))
     {i j k : Fin 4} (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
     entropyFn X μ {i, j, k} = H[⟨X i, ⟨X j, X k⟩⟩ ; μ] := by
-  simp only [entropyFn]
+  simp only [entropyFn, entropyFn_n]
   have hi : i ∈ ({i, j, k} : Finset (Fin 4)) := by simp
   have hj : j ∈ ({i, j, k} : Finset (Fin 4)) := by simp
   have hk : k ∈ ({i, j, k} : Finset (Fin 4)) := by simp
@@ -300,7 +296,7 @@ omit [IsProbabilityMeasure μ] in
 lemma entropyFn_quad (hX : ∀ i, Measurable (X i)) :
     entropyFn X μ ({0, 1, 2, 3} : Finset (Fin 4))
       = H[⟨X 0, ⟨X 1, ⟨X 2, X 3⟩⟩⟩ ; μ] := by
-  simp only [entropyFn]
+  simp only [entropyFn, entropyFn_n]
   have h0 : (0 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide
   have h1 : (1 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide
   have h2 : (2 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide
@@ -391,8 +387,8 @@ theorem zhangYeungHolds_of_entropy
 
 /-! ### Part (d): Theorem 4 -/
 
-/-- **Theorem 4 of [@zhangyeung1998, §II, eq. 26]** at `n = 4`. The Shannon outer bound `Γ_4` strictly contains the set of entropy functions of four discrete random variables: there exists a set function in `Γ_4` that is not the entropy function of any four discrete random variables on any probability space, even allowing the four variables to have different finite codomains. Proved by combining `shannonCone_of_witness` (Part (a)), `not_zhangYeungHolds_witness` (Part (b)), and `zhangYeungHolds_of_entropy` (Part (c)) in a two-step contradiction. -/
-theorem theorem4 :
+/-- Finite auxiliary form of Theorem 4 at `n = 4`: the witness lies in `Γ_4` but is not the entropy function of any single four-variable discrete family. The exact paper-level closure statement is the later theorem `theorem4`. -/
+theorem theorem4_finite :
     ∃ F : Finset (Fin 4) → ℝ,
       shannonCone F ∧
       ∀ {Ω : Type u} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ]
@@ -407,9 +403,9 @@ theorem theorem4 :
   rw [heq]
   exact zhangYeungHolds_of_entropy hX μ
 
-/-! ### Optional stretch: closure form
+/-! ### Closure form
 
-Each of the inequalities `zhangYeungAt F (π 0) (π 1) (π 2) (π 3)` is a finite linear inequality among the `F α` values: both sides are linear combinations of the coordinate evaluations `F α`, hence continuous in the pointwise topology on `Finset (Fin 4) → ℝ`. The Zhang-Yeung cone `tildeΓ_4` is therefore pointwise closed, and `F_witness` is not even the pointwise limit of a sequence of set functions that all lie in `tildeΓ_4`. This strengthens `theorem4` past "F_witness is not any entropy function" to "F_witness is not a pointwise limit of `tildeΓ_4` members"; since every entropy function lies in `tildeΓ_4` by `zhangYeungHolds_of_entropy`, the closure form implies the closure-version separation the paper states ($\bar{\Gamma}^*_4 \ne \Gamma_4$) at $n = 4$ without unwinding $\Gamma^*_4$. -/
+Each inequality `zhangYeungAt F (π 0) (π 1) (π 2) (π 3)` is a finite linear inequality among the coordinate evaluations `F α`, hence defines a closed subset of `Finset (Fin 4) → ℝ` in the pointwise topology. Their intersection is the closed Zhang-Yeung region `tildeΓ_4`. Since every four-variable entropy function lies in `tildeΓ_4` by `zhangYeungHolds_of_entropy`, the almost-entropic region `closure (Γ_4^*)` lies there as well, while the explicit witness does not. This yields the exact paper-level theorem `theorem4`. The sequence-level surrogate is retained separately as `theorem4_seqClosure`. -/
 
 /-- `I_F` is jointly continuous in the set-function argument under pointwise convergence. -/
 private lemma I_F_tendsto
@@ -463,8 +459,76 @@ lemma zhangYeungHolds_of_tendsto
       (condI_F_tendsto h_lim _ _ _)).sub (condI_F_tendsto h_lim _ _ _)
   exact le_of_tendsto_of_tendsto' h_LHS h_RHS (fun k => h_seq k π)
 
-/-- **Theorem 4 (closure form)** at `n = 4`. `F_witness` is not the pointwise limit of any sequence of set functions in `tildeΓ_4` -- a strictly stronger statement than `theorem4`, since every four-variable entropy function lies in `tildeΓ_4` by `zhangYeungHolds_of_entropy`. Combined with the latter, this implies the paper's closure-version separation $\bar{\Gamma}^*_4 \ne \Gamma_4$ at $n = 4$ (modulo the formalization of $\Gamma^*_4$, which is out of scope for M4). Proved by closing `zhangYeungHolds` under pointwise limits via `zhangYeungHolds_of_tendsto`, then contradicting `not_zhangYeungHolds_witness`. -/
-theorem theorem4_closure :
+private lemma continuous_I_F (α β : Finset (Fin 4)) :
+    Continuous (fun F : Finset (Fin 4) → ℝ => I_F F α β) := by
+  simpa [I_F] using ((continuous_apply α).add (continuous_apply β)).sub (continuous_apply (α ∪ β))
+
+private lemma continuous_condI_F (α β γ : Finset (Fin 4)) :
+    Continuous (fun F : Finset (Fin 4) → ℝ => condI_F F α β γ) := by
+  simpa [condI_F, Finset.union_assoc] using
+    (((continuous_apply (α ∪ γ)).add (continuous_apply (β ∪ γ))).sub
+      (continuous_apply (α ∪ (β ∪ γ)))).sub (continuous_apply γ)
+
+private lemma continuous_delta_F (i j k l : Fin 4) :
+    Continuous (fun F : Finset (Fin 4) → ℝ => delta_F F i j k l) := by
+  simpa [delta_F] using
+    ((continuous_I_F {i} {j}).sub (continuous_condI_F {i} {j} {k})).sub
+      (continuous_condI_F {i} {j} {l})
+
+private lemma isClosed_zhangYeungAt_set (π : Equiv.Perm (Fin 4)) :
+    IsClosed {F : Finset (Fin 4) → ℝ | zhangYeungAt F (π 0) (π 1) (π 2) (π 3)} := by
+  unfold zhangYeungAt
+  refine isClosed_le (continuous_delta_F _ _ _ _) ?_
+  refine continuous_const.mul ?_
+  exact (((continuous_I_F {π 2} {π 3}).add (continuous_I_F {π 2} ({π 0} ∪ {π 1}))).add
+    (continuous_condI_F {π 0} {π 1} {π 2})).sub (continuous_condI_F {π 0} {π 1} {π 3})
+
+private def zhangYeungRegion_4 : Set (Finset (Fin 4) → ℝ) :=
+  {F | zhangYeungHolds F}
+
+/-- The Zhang-Yeung region on `Finset (Fin 4) → ℝ` is closed in the pointwise topology. -/
+private lemma isClosed_zhangYeungRegion_4 : IsClosed zhangYeungRegion_4 := by
+  classical
+  have h_eq : zhangYeungRegion_4 =
+      ⋂ π : Equiv.Perm (Fin 4), {F : Finset (Fin 4) → ℝ | zhangYeungAt F (π 0) (π 1) (π 2) (π 3)} := by
+    ext F
+    simp [zhangYeungRegion_4, zhangYeungHolds]
+  rw [h_eq]
+  exact isClosed_iInter fun π : Equiv.Perm (Fin 4) => isClosed_zhangYeungAt_set π
+
+/-- Every entropic point in dimension `4` lies in the closed Zhang-Yeung region. -/
+private lemma entropyRegion_four_subset_zhangYeungRegion_4 :
+    entropyRegion_n 4 ⊆ zhangYeungRegion_4 := by
+  intro F hF
+  rcases hF with ⟨Ω, hΩ, μ, hμ, S, hS, hFin, hMSC, X, hX, h_eq⟩
+  letI : MeasurableSpace Ω := hΩ
+  letI : IsProbabilityMeasure μ := hμ
+  letI : ∀ i, MeasurableSpace (S i) := hS
+  letI : ∀ i, Fintype (S i) := hFin
+  letI : ∀ i, MeasurableSingletonClass (S i) := hMSC
+  rw [h_eq]
+  simpa [zhangYeungRegion_4] using zhangYeungHolds_of_entropy hX μ
+
+/-- Every almost-entropic point in dimension `4` lies in the Zhang-Yeung region. -/
+private lemma almostEntropicRegion_four_subset_zhangYeungRegion_4 :
+    almostEntropicRegion_n 4 ⊆ zhangYeungRegion_4 := by
+  simpa [almostEntropicRegion_n] using
+    (closure_minimal entropyRegion_four_subset_zhangYeungRegion_4 isClosed_zhangYeungRegion_4)
+
+/-- The witness is not almost entropic in dimension `4`. -/
+private lemma not_mem_almostEntropicRegion_witness : F_witness ∉ almostEntropicRegion_n 4 := by
+  intro hF
+  exact not_zhangYeungHolds_witness (almostEntropicRegion_four_subset_zhangYeungRegion_4 hF)
+
+/-- **Theorem 4 of [@zhangyeung1998, §II, eq. 26]** at `n = 4`. The Shannon outer bound `Γ_4` strictly contains the closure of the entropic region: there exists a set function in `Γ_4` that is not almost entropic. -/
+theorem theorem4 :
+    ∃ F : Finset (Fin 4) → ℝ, F ∈ shannonRegion_n 4 ∧ F ∉ almostEntropicRegion_n 4 := by
+  refine ⟨F_witness, ?_, not_mem_almostEntropicRegion_witness⟩
+  change shannonCone_n F_witness
+  simpa using shannonCone_of_witness
+
+/-- Sequence-level strengthening of the witness exclusion: `F_witness` is not the pointwise limit of any sequence of set functions in `tildeΓ_4`. This auxiliary is stronger than `theorem4`, but it is phrased in the larger Zhang-Yeung cone rather than in `closure (Γ_4^*)`. -/
+theorem theorem4_seqClosure :
     ∃ F : Finset (Fin 4) → ℝ, shannonCone F ∧
       ∀ (F_seq : ℕ → Finset (Fin 4) → ℝ),
         (∀ k, zhangYeungHolds (F_seq k)) →
@@ -474,27 +538,9 @@ theorem theorem4_closure :
   intro F_seq h_seq h_lim
   exact not_zhangYeungHolds_witness (zhangYeungHolds_of_tendsto h_seq h_lim)
 
-/-! ### Optional stretch: `n ≥ 4` extension
+/-! ### `n ≥ 4` extension
 
-`Fin 4`-generic analogues of the set-function calculus and cone predicates, plus the lift of `F_witness` along the canonical embedding `Fin 4 ↪ Fin n` via `Finset.preimage`. The `n ≥ 4` witness `F_witness_n` satisfies the Shannon cone (each cone axiom transports across `Finset.preimage`) but fails the Zhang-Yeung inequality at the lifted canonical labeling `(Fin.castLE hn 2, Fin.castLE hn 3, Fin.castLE hn 0, Fin.castLE hn 1)`, which after preimage-reduction collapses to the base `n = 4` violation. Together these give the paper's `n ≥ 4` separation `shannon_incomplete_ge_four`. -/
-
-/-- `I_F` generalized to `Finset (Fin n)`. The `n = 4` specialization coincides with `I_F` by definitional unfolding. -/
-def I_F_n {n : ℕ} (F : Finset (Fin n) → ℝ) (α β : Finset (Fin n)) : ℝ :=
-  F α + F β - F (α ∪ β)
-
-/-- `condI_F` generalized to `Finset (Fin n)`. -/
-def condI_F_n {n : ℕ} (F : Finset (Fin n) → ℝ) (α β γ : Finset (Fin n)) : ℝ :=
-  F (α ∪ γ) + F (β ∪ γ) - F (α ∪ β ∪ γ) - F γ
-
-/-- `delta_F` generalized to `Finset (Fin n)`. -/
-def delta_F_n {n : ℕ} (F : Finset (Fin n) → ℝ) (i j k l : Fin n) : ℝ :=
-  I_F_n F {i} {j} - condI_F_n F {i} {j} {k} - condI_F_n F {i} {j} {l}
-
-/-- `Γ_n` (paper eq. 11) as a predicate on `Finset (Fin n) → ℝ`. -/
-def shannonCone_n {n : ℕ} (F : Finset (Fin n) → ℝ) : Prop :=
-  F ∅ = 0 ∧
-  (∀ α β : Finset (Fin n), α ⊆ β → F α ≤ F β) ∧
-  (∀ α β : Finset (Fin n), F (α ∪ β) + F (α ∩ β) ≤ F α + F β)
+The witness `F_witness_n` is the lift of `F_witness` along the canonical embedding `Fin 4 ↪ Fin n` via `Finset.preimage`. It still lies in the Shannon cone and still violates the Zhang-Yeung inequality at the lifted canonical labeling `(Fin.castLE hn 2, Fin.castLE hn 3, Fin.castLE hn 0, Fin.castLE hn 1)`. The exact paper-level `n ≥ 4` theorem then follows by restricting any hypothetical almost-entropic realization back down to the first four coordinates. -/
 
 /-- The Zhang-Yeung inequality at a 4-tuple labeling over `Fin n`. -/
 def zhangYeungAt_n {n : ℕ} (F : Finset (Fin n) → ℝ) (i j k l : Fin n) : Prop :=
@@ -532,6 +578,14 @@ private lemma preimage_singleton_castLE {n : ℕ} (hn : 4 ≤ n) (i : Fin 4) :
   ext j
   simp [Finset.mem_preimage, Finset.mem_singleton,
     (Fin.castLE_injective hn).eq_iff]
+
+/-- Restricting the lifted witness back to the first four coordinates recovers the base witness. -/
+theorem restrictFirstFour_witness_n {n : ℕ} (hn : 4 ≤ n) :
+    restrictFirstFour hn (F_witness_n hn) = F_witness := by
+  ext α
+  unfold restrictFirstFour F_witness_n
+  congr
+  simpa using (Finset.preimage_map (Fin.castLEEmb hn) α)
 
 /-- The specific `n = 4` failure from which the lift reads off. Factored out of `not_zhangYeungHolds_witness` so the `Fin n` violation can consume it without re-running the permutation specialization. -/
 private lemma not_zhangYeungAt_witness_canonical :
@@ -584,9 +638,20 @@ theorem not_zhangYeungHolds_witness_n {n : ℕ} (hn : 4 ≤ n) :
     d23 d20 d21 d30 d31 d01
   exact not_zhangYeungAt_witness_canonical ((zhangYeungAt_n_witness_castLE hn 2 3 0 1).mp hat)
 
-/-- **Theorem 4 for `n ≥ 4`** [@zhangyeung1998, §II, eq. 26]. The lifted witness separates `Γ_n` from the `Fin n`-indexed Zhang-Yeung cone: there exists a set function on `Finset (Fin n)` satisfying the three Shannon-cone axioms but violating the Zhang-Yeung inequality at the lifted canonical labeling. -/
+/-- Stronger cone-level corollary for `n ≥ 4`: the lifted witness separates `Γ_n` from the `Fin n`-indexed Zhang-Yeung cone. Since `closure (Γ_n^*) ⊆ tildeΓ_n`, this strictly strengthens the exact paper-level theorem `theorem4_ge_four`. -/
 theorem shannon_incomplete_ge_four (n : ℕ) (hn : 4 ≤ n) :
     ∃ F : Finset (Fin n) → ℝ, shannonCone_n F ∧ ¬ zhangYeungHolds_n F :=
   ⟨F_witness_n hn, shannonCone_of_witness_n hn, not_zhangYeungHolds_witness_n hn⟩
+
+/-- **Theorem 4 of [@zhangyeung1998, §II, eq. 26]** for all `n ≥ 4`. The Shannon outer bound `Γ_n` strictly contains the closure of the entropic region: there exists a set function in `Γ_n` that is not almost entropic. -/
+theorem theorem4_ge_four (n : ℕ) (hn : 4 ≤ n) :
+    ∃ F : Finset (Fin n) → ℝ, F ∈ shannonRegion_n n ∧ F ∉ almostEntropicRegion_n n := by
+  refine ⟨F_witness_n hn, ?_, ?_⟩
+  · change shannonCone_n (F_witness_n hn)
+    exact shannonCone_of_witness_n hn
+  · intro hF
+    have h_restrict : F_witness ∈ almostEntropicRegion_n 4 := by
+      simpa [restrictFirstFour_witness_n hn] using restrictFirstFour_mem_almostEntropicRegion_n hn hF
+    exact not_mem_almostEntropicRegion_witness h_restrict
 
 end ZhangYeung

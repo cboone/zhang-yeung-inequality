@@ -95,6 +95,11 @@ example :
         [∀ i, MeasurableSingletonClass (S i)]
         (X : ∀ i : Fin 4, Ω → S i) (_ : ∀ i, Measurable (X i)),
         F ≠ entropyFn X μ :=
+  theorem4_finite
+
+example :
+    ∃ F : Finset (Fin 4) → ℝ,
+      F ∈ shannonRegion_n 4 ∧ F ∉ almostEntropicRegion_n 4 :=
   theorem4
 
 end MainStatements
@@ -128,8 +133,8 @@ end WitnessEvaluation
 /-! ### Downstream usage
 
 `shannon_incomplete` composes Parts (a) and (b) into a single existential;
-`theorem4` composes (a), (b), and the bridge (c) into the separation
-`Γ_4 ∖ (entropy functions)`. Both are the intended public consequences. -/
+`theorem4_finite` pins the literal non-entropic witness theorem; `theorem4`
+pins the exact closure statement from the paper. -/
 
 section DownstreamUsage
 
@@ -162,7 +167,7 @@ example {F_seq : ℕ → Finset (Fin 4) → ℝ} {F : Finset (Fin 4) → ℝ}
     zhangYeungHolds F :=
   zhangYeungHolds_of_tendsto h_seq h_lim
 
-/- Pinned signature: `theorem4_closure` shows `F_witness` is not even a
+/- Pinned signature: `theorem4_seqClosure` shows `F_witness` is not even a
 pointwise limit of `tildeΓ_4` members. -/
 example :
     ∃ F : Finset (Fin 4) → ℝ, shannonCone F ∧
@@ -170,7 +175,7 @@ example :
         (∀ k, zhangYeungHolds (F_seq k)) →
         (∀ α, Filter.Tendsto (fun k => F_seq k α) Filter.atTop (𝓝 (F α))) →
         False :=
-  theorem4_closure
+  theorem4_seqClosure
 
 end ClosureStretch
 
@@ -183,6 +188,13 @@ separation in the `Fin n`-indexed cone predicates. -/
 example (n : ℕ) (hn : 4 ≤ n) :
     ∃ F : Finset (Fin n) → ℝ, shannonCone_n F ∧ ¬ zhangYeungHolds_n F :=
   shannon_incomplete_ge_four n hn
+
+/- Pinned signature: `theorem4_ge_four` states the exact paper-level `n ≥ 4`
+closure separation. -/
+example (n : ℕ) (hn : 4 ≤ n) :
+    ∃ F : Finset (Fin n) → ℝ,
+      F ∈ shannonRegion_n n ∧ F ∉ almostEntropicRegion_n n :=
+  theorem4_ge_four n hn
 
 /- Pinned signature: `F_witness_n` is the lifted witness. -/
 example {n : ℕ} (hn : 4 ≤ n) : shannonCone_n (F_witness_n hn) :=
