@@ -4,6 +4,7 @@ aemeasurable
 Affeldt
 antisymm
 bijective
+bijections
 AITIP
 APAP
 Appl
@@ -16,6 +17,7 @@ Borel
 cboone
 checkdecls
 Citip
+closedness
 codomain
 codomains
 comap
@@ -28,6 +30,7 @@ cooldown
 Csirmaz
 Csirmaz's
 Degenne's
+definitionally
 derivability
 destructures
 Diggavi
@@ -41,6 +44,7 @@ irrefl
 Docstrings
 Dougherty
 dualizations
+elim
 dupuisf
 entropic
 extremal
@@ -50,6 +54,8 @@ fibrewise
 fibring
 finitary
 Finset
+Forall
+funext
 Frobenius
 Fintype
 formalizable
@@ -75,6 +81,8 @@ infotheo
 informations
 Ingleton
 injective
+Injectivity
+injectivity
 ISIT
 ITIP
 Kaced
@@ -107,6 +115,7 @@ noncomputable
 nonneg
 nonnegativity
 nonpositive
+nontrivially
 olean
 oleans
 opencode
@@ -114,6 +123,9 @@ Pandoc
 parameterizations
 phat
 pointwise
+Powerset
+predecided
+predicativity
 preimage
 ptilde
 pushforward
@@ -150,14 +162,19 @@ smul
 specialised
 sorries
 subadditivity
+submodular
 subgoals
 submodularity
+Subsingleton
+subsingleton
 summands
 Symp
 symm
 tauto
 Tahar
 Taplo
+Tendsto
+tendsto
 Teor
 teorth
 Theor

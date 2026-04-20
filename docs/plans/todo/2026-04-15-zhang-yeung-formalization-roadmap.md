@@ -188,14 +188,11 @@ M6 (polish)
 
 ### Parallelism analysis
 
-**M4 is partially independent of M3.** Theorem 4's counterexample proof has two halves: (a) proving F satisfies all basic Shannon inequalities (entirely independent of M2/M3, can begin after M1), and (b) proving F violates the Zhang-Yeung inequality (requires M3's theorem statement, but only as a *black box*: the proof is a direct arithmetic check against the inequality). In practice: the `shannonCone` definition and the 15-constraint verification can be written before M3 lands; the final `not (zhangYeungHolds F)` step plugs in M3's result.
+**M4 is partially independent of M3, but substantively needs it.** Theorem 4's full proof has four parts: (a) prove the witness F satisfies the Shannon basic inequalities (independent of M2/M3, pure set-function arithmetic); (b) prove F violates the Zhang-Yeung inequality at a chosen labeling (pure set-function arithmetic); (c) bridge M3 to the set-function level so that every four-variable entropy function is shown to satisfy Zhang-Yeung (this *requires* M3 as more than a black box -- the bridge unwraps M3's conclusion into the set-function `zhangYeungAt` predicate via a family of joint-entropy identities); (d) assemble (a) + (b) + (c) into the headline `theorem4`. Parts (a) and (b) *could* be drafted before M3 lands, but Parts (c) and (d) close over M3 nontrivially. In retrospect the parallelism was marginal.
 
 **M5 depends on M3** (uses the same proof structure plus induction), not on M4.
 
-**Concurrent worktree strategy:** Two worktrees can run productively:
-
-- **Worktree A (main proof):** M0 -> M1 -> M1.5 -> M2 -> M3 -> M5
-- **Worktree B (counterexample):** M4 part (a) (Shannon cone definition and constraint verification), merging with Worktree A once M3 lands to close M4 part (b).
+**Concurrent worktree strategy (historical):** The original plan envisioned Worktree A (M0 → M1 → M1.5 → M2 → M3 → M5) running alongside Worktree B (M4 Parts (a) + (b)) with B waiting for A to finish M3 before proceeding to Parts (c) + (d). In practice M3 has landed on `main` first; M4 now runs as a single follow-on from the M3-ready tip rather than as a parallel track.
 
 ### M0: Project scaffolding
 
@@ -249,13 +246,19 @@ M6 (polish)
 
 ### M4: Theorem 4
 
-- `ZhangYeung/Theorem4.lean`: explicit counterexample.
-- Encode the paper's function F (p. 1443: F(empty)=0, F(X)=F(Y)=F(Z)=F(U)=2a, F(XY)=4a, F(XU)=F(XZ)=F(YU)=F(YZ)=F(ZU)=3a, F(XYZ)=F(XYU)=F(XZU)=F(YZU)=4a, F(XYZU)=4a) as `Finset (Fin 4) -> Real` parametrized by a > 0. F is symmetric on all pairs except (X, Y), which takes 4a rather than 3a.
-- **Part (a), parallelizable:** Define the Shannon cone and prove F satisfies all 15 basic inequality constraints (`norm_num`/`linarith`).
-- **Part (b), requires M3:** Prove F violates the Zhang-Yeung inequality (direct arithmetic).
-- Conclude cl(Gamma*_4) strictly contained in Gamma_4; extend to n >= 4 via embedding.
-- **Testing:** `ZhangYeungTest/Theorem4.lean` should replay the concrete witness arithmetic as proof scripts, separately covering the Shannon-side constraints and the strict Zhang-Yeung violation.
-- **Checkpoint:** `theorem shannon_incomplete : exists F, shannonCone F /\ not (zhangYeungHolds F)`, and the witness test module builds.
+- `ZhangYeung/Theorem4.lean`: explicit counterexample plus the set-function/random-variable bridge that closes the full Theorem 4 statement.
+- Encode the paper's function F (p. 1443: F(empty)=0, F(X)=F(Y)=F(Z)=F(U)=2a, F(XY)=4a, F(XU)=F(XZ)=F(YU)=F(YZ)=F(ZU)=3a, F(XYZ)=F(XYU)=F(XZU)=F(YZU)=4a, F(XYZU)=4a) as `Finset (Fin 4) -> Real` (at `a = 1` for the Lean encoding; the `a > 0` parametrization is vestigial for existence statements). F is symmetric on all pairs except (X, Y), which takes 4a rather than 3a.
+- **Part (a):** Define the Shannon cone and prove F satisfies it (the three conditions of Γ_4 via eq. 11: `F(∅) = 0`, monotone, submodular). Discharged by `decide` over `Finset (Fin 4)` with `F` valued in `ℚ`; fallback to cardinality case-splits + `norm_num` if `decide` is pathologically slow.
+- **Part (b):** Prove F violates the Zhang-Yeung inequality at the canonical (Z, U | X, Y) = (2, 3 | 0, 1) labeling (direct arithmetic; `norm_num` closes it after the six `F` evaluations the inequality mentions).
+- **Part (c), requires M3:** Bridge M3 to the set-function level. Define the set-function entropy `entropyFn X μ : Finset (Fin 4) → ℝ` for a heterogeneous four-variable family `X : ∀ i : Fin 4, Ω → S i`, matching M3's existing theorem surface, then prove `zhangYeungHolds_of_entropy : zhangYeungHolds (entropyFn X μ)`: every four-variable entropy function lies in `tildeΓ_4`. Proof is a per-permutation application of M3's `zhangYeung` plus a single-labeling set-function-to-entropy bridge for each of the twelve `F`-evaluations that appear in `zhangYeungAt`, with the measurable hypotheses carried explicitly. This is M4's measure-theoretic content; Parts (a), (b) are pure set-function arithmetic.
+- **Part (d):** State and prove the headline `theorem4 : ∃ F, shannonCone F ∧ F ≠ entropyFn X μ for any discrete RV family X, μ` -- the closure under M3 of the Parts (a) + (b) + (c) chain, still allowing the four codomains to differ. Optionally (stretch within this milestone, see plan): upgrade to the closure version via a short "zhangYeungHolds is closed under pointwise limits" lemma, and to the `n ≥ 4` version via the embedding `Fin 4 ↪ Fin n`.
+- **Testing:** `ZhangYeungTest/Theorem4.lean` should replay the concrete witness arithmetic separately for Parts (a) and (b), pin the bridge signature from Part (c), and pin the headline `theorem4` statement from Part (d).
+- **Checkpoint (required):**
+  - `theorem shannon_incomplete : ∃ F, shannonCone F ∧ ¬ zhangYeungHolds F` (Parts (a) + (b), no M3 needed).
+  - `theorem zhangYeungHolds_of_entropy` -- every four-variable entropy function lies in `tildeΓ_4` (Part (c), closes over M3).
+  - `theorem theorem4 : ∃ F ∈ Γ_4, F is not the entropy function of any four discrete RVs` (Part (d), combines (a) + (b) + (c), still allowing the four codomains to differ).
+- **Stretch within M4:** the closure version `theorem4_closure` (upgrading "not an entropy function" to "not a pointwise limit of entropy functions") and the `n ≥ 4` extension. Either may slip to a follow-up milestone if the core Parts (a)-(d) dominate budget.
+- **Post-M4 exactness follow-up:** if M4 lands only the finite `n = 4` witness theorem, the sequence-level closure surrogate, and the cone-level `n ≥ 4` lift, but not the exact entropic-region closure statement `\bar{\Gamma}_n^* \neq \Gamma_n` as named sets, track the remaining work in `docs/plans/todo/2026-04-19-exact-theorem-4-entropic-region-closure.md` rather than silently treating the surrogate theorems as the final paper-level packaging.
 
 ### M5: Theorem 5 (stretch)
 
