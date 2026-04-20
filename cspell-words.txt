@@ -17,6 +17,7 @@ Borel
 cboone
 checkdecls
 Citip
+closedness
 codomain
 codomains
 comap
@@ -121,6 +122,7 @@ parameterizations
 phat
 pointwise
 Powerset
+predecided
 preimage
 ptilde
 pushforward
