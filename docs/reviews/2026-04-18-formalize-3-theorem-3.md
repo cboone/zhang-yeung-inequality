@@ -1,8 +1,3 @@
-<!--
-SPDX-FileCopyrightText: 2026 Christopher Boone
-SPDX-License-Identifier: CC-BY-4.0
--->
-
 ## Branch Review: formalize/3-theorem-3
 
 Base: `main` (merge base: `32c1b3f`)

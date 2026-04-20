@@ -1,8 +1,3 @@
-<!--
-SPDX-FileCopyrightText: 2026 Christopher Boone
-SPDX-License-Identifier: CC-BY-4.0
--->
-
 # Post-Zhang-Yeung Extension Survey (2026-04-15)
 
 Survey of potential formalization extensions beyond the Zhang-Yeung (1998) unconditional non-Shannon inequality. Difficulty scale is relative to the core Zhang-Yeung formalization.

@@ -1,8 +1,3 @@
-<!--
-SPDX-FileCopyrightText: 2026 Christopher Boone
-SPDX-License-Identifier: CC-BY-4.0
--->
-
 # The Zhang-Yeung Inequality
 
 A Lean 4 formalization of the Zhang-Yeung conditional information inequality, a non-Shannon-type bound on Shannon entropy that cannot be derived from the Shannon inequalities alone.
@@ -106,6 +101,14 @@ This formalization is being completed with substantial assistance from Opus 4.6 
 
 ## License
 
-Reference materials in `references/papers/` and `references/transcriptions/` are bundled for study and verification context only. They are not covered by the repository's Apache 2.0 or CC BY 4.0 grants; copyright remains with the original authors and publishers. See the per-file SPDX metadata and [the reference-material notice](./LICENSES/LicenseRef-Reference-Material.txt).
+Copyright 2026 Christopher Boone.
 
-Everything else is copyright 2026 Christopher Boone. Project-authored software and configuration files are licensed under [Apache 2.0](./LICENSES/Apache-2.0.txt). Project-authored prose and mathematical exposition are licensed under [CC BY 4.0](./LICENSES/CC-BY-4.0.txt). [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) is adapted from Contributor Covenant and licensed under [CC BY-SA 4.0](./LICENSES/CC-BY-SA-4.0.txt).
+This repository carries REUSE-style mixed-license coverage:
+
+- Lean code, the `bin/bootstrap-worktree` shell script, and hand-authored infrastructure config (Makefile, `lakefile.toml`, YAML, JSONC, dotfiles, `cspell-words.txt`, VS Code editor config) under [Apache 2.0](./LICENSES/Apache-2.0.txt). Lean files and `bin/bootstrap-worktree` carry inline SPDX headers; the remaining infrastructure/config files are covered by the `REUSE.toml` config-group annotation.
+- Project-authored prose (READMEs, agent configs, planning documents, research notes, formalization reviews, this README, the NOTICE) under [CC BY 4.0](./LICENSES/CC-BY-4.0.txt) via the `REUSE.toml` prose-group annotation.
+- [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md), adapted from the Contributor Covenant via the Organization for Ethical Source, under [CC BY-SA 4.0](./LICENSES/CC-BY-SA-4.0.txt) via a dedicated `REUSE.toml` override annotation.
+- Generated artifacts (`lake-manifest.json`, `lean-toolchain`) dedicated to the public domain under [CC0 1.0](./LICENSES/CC0-1.0.txt) via the `REUSE.toml` generated-group annotation.
+- Bundled third-party reference material under `references/papers/**` and `references/transcriptions/**` under [`LicenseRef-Reference-Material`](./LICENSES/LicenseRef-Reference-Material.txt). Copyright remains with the original authors and publishers; per-publication attribution (IEEE, original authors) is preserved via per-file `.license` sidecars rather than a REUSE.toml glob.
+
+See [`NOTICE`](./NOTICE) and the combination of per-file SPDX headers plus root [`REUSE.toml`](./REUSE.toml) annotations for the authoritative coverage. See <https://reuse.software/> for tooling.
