@@ -1,0 +1,66 @@
+version = 1
+
+# Project-authored prose: NOTICE, READMEs, agent configs, planning,
+# research notes, formalization reviews, and bibliographic metadata.
+# CODE_OF_CONDUCT.md is scoped out via a dedicated override below.
+# References material under references/papers/ and
+# references/transcriptions/ retains per-file .license sidecars so
+# that IEEE and author-specific attribution stays legible per work.
+[[annotations]]
+path = [
+  "NOTICE",
+  "README.md",
+  "AGENTS.md",
+  "CLAUDE.md",
+  "CONTRIBUTING.md",
+  ".github/**/*.md",
+  "docs/**/*.md",
+  "references/README.md",
+  "references/papers.bib",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Christopher Boone"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Infrastructure config: Makefile, lakefile.toml, YAML (including CI
+# workflows), JSONC, dotfiles, VS Code editor config, and the cspell
+# word list. Hand-authored or tool-merged, but not substantive source
+# code; one glob replaces per-file sidecars and inline headers.
+[[annotations]]
+path = [
+  "Makefile",
+  "**/*.toml",
+  "**/*.yaml",
+  "**/*.yml",
+  "**/*.jsonc",
+  ".editorconfig",
+  ".gitignore",
+  "cspell-words.txt",
+  "REUSE.toml",
+  ".vscode/extensions.json",
+  ".vscode/settings.json",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Christopher Boone"
+SPDX-License-Identifier = "Apache-2.0"
+
+# Generated artifacts: Lake manifest and pinned Lean toolchain. CC0 is
+# the honest framing for mechanical content the project does not
+# originate.
+[[annotations]]
+path = [
+  "lake-manifest.json",
+  "lean-toolchain",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "NONE"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Code of Conduct: adapted from the Contributor Covenant via the
+# Organization for Ethical Source. Dual copyright preserved
+# verbatim from the upstream phrasing.
+[[annotations]]
+path = ["CODE_OF_CONDUCT.md"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2026 Organization for Ethical Source", "2026 Christopher Boone"]
+SPDX-License-Identifier = "CC-BY-SA-4.0"
