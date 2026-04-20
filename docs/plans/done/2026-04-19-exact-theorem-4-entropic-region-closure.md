@@ -1,15 +1,15 @@
 ---
 title: "M4.5: exact Theorem 4 via entropic-region closure"
 created: 2026-04-19
-status: proposed
+status: done
 branch: formalize/m4-theorem-4
 roadmap: docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md
-depends_on: M4 (`ZhangYeung/Theorem4.lean`), especially `F_witness`, `F_witness_n`, `zhangYeungHolds_of_entropy`, `zhangYeungHolds_of_tendsto`, `theorem4_closure`, and `shannon_incomplete_ge_four`. This follow-up closes the remaining gap between the current M4 implementation and the paper's exact statement `\bar{\Gamma}_n^* \neq \Gamma_n`.
+depends_on: M4 (`ZhangYeung/Theorem4.lean`), especially `F_witness`, `F_witness_n`, `zhangYeungHolds_of_entropy`, `zhangYeungHolds_of_tendsto`, `theorem4_seqClosure`, and `shannon_incomplete_ge_four`. This follow-up closes the remaining gap between the current M4 implementation and the paper's exact statement `\bar{\Gamma}_n^* \neq \Gamma_n`.
 ---
 
 ## Status
 
-Not started. The current branch has the core mathematics of the witness argument, but its exported theorem packaging still stops short of the paper's exact top-level statement.
+Done. The exact closure theorem `theorem4 : ∃ F ∈ shannonRegion_n 4, F ∉ almostEntropicRegion_n 4` and its `n ≥ 4` lift `theorem4_ge_four` landed on `formalize/m4-theorem-4` in the same branch as the main M4 work. The generic entropic-region layer lives in `ZhangYeung/EntropyRegion.lean`; the closure argument and `n ≥ 4` transport live in `ZhangYeung/Theorem4.lean`. The original finite form is retained as `theorem4_finite`; the sequence-level surrogate is retained as `theorem4_seqClosure`.
 
 ## Context
 
