@@ -146,20 +146,11 @@ theorem shannonCone_of_witness : shannonCone F_witness := by
 
 /-! ### Part (b): the witness violates the Zhang-Yeung inequality -/
 
-/-- Part (b) of Theorem 4: the witness fails the Zhang-Yeung inequality at the canonical labeling `(i, j, k, l) = (2, 3, 0, 1)` (paper lines 378-388). The permutation exhibiting the violation is `σ = Equiv.swap 0 2 * Equiv.swap 1 3`; the resulting numerical check reduces to `1 ≤ 1/2`, which is false. -/
-theorem not_zhangYeungHolds_witness : ¬ zhangYeungHolds F_witness := by
+/-- The concrete numerical failure underlying Part (b): at the paper's canonical labeling `(i, j, k, l) = (2, 3, 0, 1)` (paper lines 378-388), the witness fails the Zhang-Yeung inequality; the check reduces to `1 ≤ 1/2`. Kept as a private helper so both the permutation form (`not_zhangYeungHolds_witness`) and the `Fin n` lift (`not_zhangYeungHolds_witness_n`) can consume it without reproducing the 13-line `native_decide` evaluation block. -/
+private lemma not_zhangYeungAt_witness_canonical :
+    ¬ zhangYeungAt F_witness 2 3 0 1 := by
   intro h
-  -- Specialize at the canonical permutation `σ = swap 0 2 * swap 1 3`,
-  -- sending `(0, 1, 2, 3) ↦ (2, 3, 0, 1)`.
-  specialize h (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3)
-  rw [show (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 0 = 2 from by decide,
-      show (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 = 3 from by decide,
-      show (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 2 = 0 from by decide,
-      show (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 3 = 1 from by decide] at h
-  -- Unfold `zhangYeungAt` and the set-function calculus at the `ℝ` layer,
-  -- then pull the cast out to reduce to a `ℚ`-level numeric check.
   simp only [zhangYeungAt, delta_F, I_F, condI_F, F_witness_eq_cast] at h
-  -- Evaluate `F_witness_ℚ` on each concrete subset appearing in `h`.
   have h00 : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by native_decide
   have h11 : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by native_decide
   have h22 : F_witness_ℚ ({2} : Finset (Fin 4)) = 2 := by native_decide
@@ -176,6 +167,16 @@ theorem not_zhangYeungHolds_witness : ¬ zhangYeungHolds F_witness := by
     native_decide
   rw [h00, h11, h22, h33, h01, h02, h03, h12, h13, h23, h023, h123, h023'] at h
   norm_num at h
+
+/-- Part (b) of Theorem 4: the witness fails the Zhang-Yeung inequality at the canonical labeling `(i, j, k, l) = (2, 3, 0, 1)` (paper lines 378-388). The permutation exhibiting the violation is `σ = Equiv.swap 0 2 * Equiv.swap 1 3`; after permutation evaluation the obligation is the canonical failure `not_zhangYeungAt_witness_canonical`. -/
+theorem not_zhangYeungHolds_witness : ¬ zhangYeungHolds F_witness := by
+  intro h
+  specialize h (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3)
+  rw [show (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 0 = 2 from by decide,
+      show (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 = 3 from by decide,
+      show (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 2 = 0 from by decide,
+      show (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 3 = 1 from by decide] at h
+  exact not_zhangYeungAt_witness_canonical h
 
 /-- Intermediate conclusion (pre-bridge): the Shannon cone strictly contains the Zhang-Yeung cone, `Γ_4 ⊋ tildeΓ_4`. Part (a) and Part (b) combined. This remains a useful stronger auxiliary: `theorem4_finite` strengthens it to exclusion from the literal entropy region, while `theorem4` packages the exact closure statement from the paper. -/
 theorem shannon_incomplete :
@@ -586,28 +587,6 @@ theorem restrictFirstFour_witness_n {n : ℕ} (hn : 4 ≤ n) :
   unfold restrictFirstFour F_witness_n
   congr
   simpa using (Finset.preimage_map (Fin.castLEEmb hn) α)
-
-/-- The specific `n = 4` failure from which the lift reads off. Factored out of `not_zhangYeungHolds_witness` so the `Fin n` violation can consume it without re-running the permutation specialization. -/
-private lemma not_zhangYeungAt_witness_canonical :
-    ¬ zhangYeungAt F_witness 2 3 0 1 := by
-  intro h
-  simp only [zhangYeungAt, delta_F, I_F, condI_F, F_witness_eq_cast] at h
-  have h00 : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by native_decide
-  have h11 : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by native_decide
-  have h22 : F_witness_ℚ ({2} : Finset (Fin 4)) = 2 := by native_decide
-  have h33 : F_witness_ℚ ({3} : Finset (Fin 4)) = 2 := by native_decide
-  have h01 : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ {1}) = 4 := by native_decide
-  have h02 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {0}) = 3 := by native_decide
-  have h03 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {0}) = 3 := by native_decide
-  have h12 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {1}) = 3 := by native_decide
-  have h13 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {1}) = 3 := by native_decide
-  have h23 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3}) = 3 := by native_decide
-  have h023 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {0}) = 4 := by native_decide
-  have h123 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {1}) = 4 := by native_decide
-  have h023' : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ (({2} : Finset (Fin 4)) ∪ {3})) = 4 := by
-    native_decide
-  rw [h00, h11, h22, h33, h01, h02, h03, h12, h13, h23, h023, h123, h023'] at h
-  norm_num at h
 
 /-- The Zhang-Yeung inequality at the lifted canonical labeling pulls back to the base labeling: every set-function operation in `zhangYeungAt_n F_witness_n` reduces through `Finset.preimage` to the corresponding `zhangYeungAt F_witness` operation on `Fin 4`. -/
 private lemma zhangYeungAt_n_witness_castLE {n : ℕ} (hn : 4 ≤ n) (i j k l : Fin 4) :
