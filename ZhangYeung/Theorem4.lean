@@ -541,17 +541,7 @@ theorem theorem4_seqClosure :
 
 /-! ### `n ≥ 4` extension
 
-The witness `F_witness_n` is the lift of `F_witness` along the canonical embedding `Fin 4 ↪ Fin n` via `Finset.preimage`. It still lies in the Shannon cone and still violates the Zhang-Yeung inequality at the lifted canonical labeling `(Fin.castLE hn 2, Fin.castLE hn 3, Fin.castLE hn 0, Fin.castLE hn 1)`. The exact paper-level `n ≥ 4` theorem then follows by restricting any hypothetical almost-entropic realization back down to the first four coordinates. -/
-
-/-- The Zhang-Yeung inequality at a 4-tuple labeling over `Fin n`. -/
-def zhangYeungAt_n {n : ℕ} (F : Finset (Fin n) → ℝ) (i j k l : Fin n) : Prop :=
-  delta_F_n F i j k l ≤ (1 / 2) * (I_F_n F {k} {l} + I_F_n F {k} ({i} ∪ {j})
-    + condI_F_n F {i} {j} {k} - condI_F_n F {i} {j} {l})
-
-/-- The `Fin n`-indexed Zhang-Yeung cone `tildeΓ_n`: the Zhang-Yeung inequality holds at every ordered 4-tuple of pairwise distinct indices. Equivalent to the card-4 form used in the paper's eq. (25); the pairwise-distinctness presentation is easier to manipulate in proofs. -/
-def zhangYeungHolds_n {n : ℕ} (F : Finset (Fin n) → ℝ) : Prop :=
-  ∀ i j k l : Fin n, i ≠ j → i ≠ k → i ≠ l → j ≠ k → j ≠ l → k ≠ l →
-    zhangYeungAt_n F i j k l
+The witness `F_witness_n` is the lift of `F_witness` along the canonical embedding `Fin 4 ↪ Fin n` via `Finset.preimage`. It still lies in the Shannon cone and still violates the Zhang-Yeung inequality at the lifted canonical labeling `(Fin.castLE hn 2, Fin.castLE hn 3, Fin.castLE hn 0, Fin.castLE hn 1)`. The exact paper-level `n ≥ 4` theorem then follows by restricting any hypothetical almost-entropic realization back down to the first four coordinates. The generic cone predicates `zhangYeungAt_n` and `zhangYeungHolds_n` consumed below live in `ZhangYeung.EntropyRegion`. -/
 
 /-- The `n = 4` witness lifted to `Fin n` for `n ≥ 4`: `F_witness_n hn α` evaluates `F_witness` on the preimage of `α` under the canonical embedding `Fin 4 ↪ Fin n`. Equivalent to `F_witness` applied to the intersection of `α` with the initial segment `{0, 1, 2, 3 : Fin n}`. -/
 noncomputable def F_witness_n {n : ℕ} (hn : 4 ≤ n) (α : Finset (Fin n)) : ℝ :=

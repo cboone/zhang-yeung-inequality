@@ -3,7 +3,7 @@ import ZhangYeung.Prelude
 /-!
 # Entropy-region infrastructure for Theorem 4
 
-This module packages the generic `Fin n` set-function surface used by the exact entropic-region closure form of Theorem 4: the `n`-ary entropy function `entropyFn_n`, the Shannon and entropic region sets, and the restriction map from `Fin n` down to the first four coordinates.
+This module packages the generic `Fin n` set-function surface used by the exact entropic-region closure form of Theorem 4: the `n`-ary entropy function `entropyFn_n`, the generic cone predicates `zhangYeungAt_n` and `zhangYeungHolds_n`, the Shannon and entropic region sets, and the restriction map from `Fin n` down to the first four coordinates. Witness-specific `Fin n` lemmas (the lifted witness and its cone membership / violation) live in `ZhangYeung.Theorem4`.
 -/
 
 namespace ZhangYeung
@@ -30,6 +30,16 @@ def shannonCone_n {n : ℕ} (F : Finset (Fin n) → ℝ) : Prop :=
   F ∅ = 0 ∧
   (∀ α β : Finset (Fin n), α ⊆ β → F α ≤ F β) ∧
   (∀ α β : Finset (Fin n), F (α ∪ β) + F (α ∩ β) ≤ F α + F β)
+
+/-- The Zhang-Yeung inequality at a 4-tuple labeling over `Fin n`. -/
+def zhangYeungAt_n {n : ℕ} (F : Finset (Fin n) → ℝ) (i j k l : Fin n) : Prop :=
+  delta_F_n F i j k l ≤ (1 / 2) * (I_F_n F {k} {l} + I_F_n F {k} ({i} ∪ {j})
+    + condI_F_n F {i} {j} {k} - condI_F_n F {i} {j} {l})
+
+/-- The `Fin n`-indexed Zhang-Yeung cone `tildeΓ_n`: the Zhang-Yeung inequality holds at every ordered 4-tuple of pairwise distinct indices. Equivalent to the card-4 form used in the paper's eq. (25); the pairwise-distinctness presentation is easier to manipulate in proofs. -/
+def zhangYeungHolds_n {n : ℕ} (F : Finset (Fin n) → ℝ) : Prop :=
+  ∀ i j k l : Fin n, i ≠ j → i ≠ k → i ≠ l → j ≠ k → j ≠ l → k ≠ l →
+    zhangYeungAt_n F i j k l
 
 /-- The entropy function of an `n`-variable random-variable family `X : ∀ i : Fin n, Ω → S i`, expressed as a set function on `Finset (Fin n)`. -/
 noncomputable def entropyFn_n
