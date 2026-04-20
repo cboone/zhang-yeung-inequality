@@ -105,7 +105,7 @@ Copyright 2026 Christopher Boone.
 
 This repository carries REUSE-style mixed-license coverage:
 
-- Lean code, the `bin/bootstrap-worktree` shell script, and hand-authored infrastructure config (Makefile, `lakefile.toml`, YAML, JSONC, dotfiles, `cspell-words.txt`, VS Code editor config) under [Apache 2.0](./LICENSES/Apache-2.0.txt). Lean files carry inline SPDX; everything else is covered by the `REUSE.toml` config-group annotation.
+- Lean code, the `bin/bootstrap-worktree` shell script, and hand-authored infrastructure config (Makefile, `lakefile.toml`, YAML, JSONC, dotfiles, `cspell-words.txt`, VS Code editor config) under [Apache 2.0](./LICENSES/Apache-2.0.txt). Lean files and `bin/bootstrap-worktree` carry inline SPDX headers; the remaining infrastructure/config files are covered by the `REUSE.toml` config-group annotation.
 - Project-authored prose (READMEs, agent configs, planning documents, research notes, formalization reviews, this README, the NOTICE) under [CC BY 4.0](./LICENSES/CC-BY-4.0.txt) via the `REUSE.toml` prose-group annotation.
 - [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md), adapted from the Contributor Covenant via the Organization for Ethical Source, under [CC BY-SA 4.0](./LICENSES/CC-BY-SA-4.0.txt) via a dedicated `REUSE.toml` override annotation.
 - Generated artifacts (`lake-manifest.json`, `lean-toolchain`) dedicated to the public domain under [CC0 1.0](./LICENSES/CC0-1.0.txt) via the `REUSE.toml` generated-group annotation.
