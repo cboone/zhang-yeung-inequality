@@ -123,6 +123,7 @@ phat
 pointwise
 Powerset
 predecided
+predicativity
 preimage
 ptilde
 pushforward
