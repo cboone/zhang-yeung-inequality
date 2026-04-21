@@ -87,11 +87,12 @@ theorem restrictFirstFour_continuous {n : ℕ} (hn : 4 ≤ n) : Continuous (rest
 theorem entropyFn_n_restrictFirstFour
     {Ω : Type*} [MeasurableSpace Ω]
     {n : ℕ} {S : Fin n → Type u}
-    [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+    [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
     [∀ i, MeasurableSingletonClass (S i)]
     {X : ∀ i : Fin n, Ω → S i} (hX : ∀ i, Measurable (X i))
     (μ : Measure Ω) (hn : 4 ≤ n) :
     restrictFirstFour hn (entropyFn_n X μ) = entropyFn_n (fun i : Fin 4 => X (Fin.castLE hn i)) μ := by
+  letI : ∀ i, Fintype (S i) := fun i => Fintype.ofFinite (S i)
   ext α
   let e : Fin 4 ↪ Fin n := Fin.castLEEmb hn
   let π : (∀ j : α.map e, S j.1) → (∀ i : α, S (e i.1)) :=

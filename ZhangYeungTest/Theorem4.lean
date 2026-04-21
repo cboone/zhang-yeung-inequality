@@ -79,7 +79,7 @@ example : ∃ F : Finset (Fin 4) → ℝ, shannonCone F ∧ ¬ zhangYeungHolds F
 example
     {Ω : Type*} [MeasurableSpace Ω]
     {S : Fin 4 → Type u}
-    [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+    [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
     [∀ i, MeasurableSingletonClass (S i)]
     {X : ∀ i : Fin 4, Ω → S i} (hX : ∀ i, Measurable (X i))
     (μ : Measure Ω) [IsProbabilityMeasure μ] :
@@ -91,7 +91,7 @@ example :
       shannonCone F ∧
       ∀ {Ω : Type u} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ]
         {S : Fin 4 → Type u}
-        [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+        [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
         [∀ i, MeasurableSingletonClass (S i)]
         (X : ∀ i : Fin 4, Ω → S i) (_ : ∀ i, Measurable (X i)),
         F ≠ entropyFn X μ :=

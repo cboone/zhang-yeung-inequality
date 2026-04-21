@@ -189,11 +189,13 @@ section EntropyFnEvaluation
 
 variable {Ω : Type*} [MeasurableSpace Ω]
   {S : Fin 4 → Type u}
-  [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+  [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
   [∀ i, MeasurableSingletonClass (S i)]
   (X : ∀ i : Fin 4, Ω → S i) (μ : Measure Ω) [IsProbabilityMeasure μ]
 
-omit [∀ i, Fintype (S i)] in
+noncomputable local instance instFintypeS (i : Fin 4) : Fintype (S i) := Fintype.ofFinite (S i)
+
+omit [∀ i, Finite (S i)] in
 /-- Per-subset bridge lemma at the empty subset: `entropyFn X μ ∅ = 0`. The subtype `{j // j ∈ (∅ : Finset (Fin 4))}` is empty, so the dependent-product codomain `∀ j : ∅, S j.1` is a subsingleton; the joint tuple is constant, and its entropy is zero. -/
 lemma entropyFn_empty : entropyFn X μ ∅ = 0 := by
   simp only [entropyFn, entropyFn_n]
@@ -332,7 +334,7 @@ end EntropyFnEvaluation
 lemma zhangYeungAt_entropyFn
     {Ω : Type*} [MeasurableSpace Ω]
     {S : Fin 4 → Type u}
-    [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+    [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
     [∀ i, MeasurableSingletonClass (S i)]
     {X : ∀ i : Fin 4, Ω → S i} (hX : ∀ i, Measurable (X i))
     (μ : Measure Ω) [IsProbabilityMeasure μ] (π : Equiv.Perm (Fin 4)) :
@@ -379,7 +381,7 @@ lemma zhangYeungAt_entropyFn
 theorem zhangYeungHolds_of_entropy
     {Ω : Type*} [MeasurableSpace Ω]
     {S : Fin 4 → Type u}
-    [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+    [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
     [∀ i, MeasurableSingletonClass (S i)]
     {X : ∀ i : Fin 4, Ω → S i} (hX : ∀ i, Measurable (X i))
     (μ : Measure Ω) [IsProbabilityMeasure μ] :
@@ -394,7 +396,7 @@ theorem theorem4_finite :
       shannonCone F ∧
       ∀ {Ω : Type u} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ]
         {S : Fin 4 → Type u}
-        [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+        [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
         [∀ i, MeasurableSingletonClass (S i)]
         (X : ∀ i : Fin 4, Ω → S i) (_ : ∀ i, Measurable (X i)),
         F ≠ entropyFn X μ := by
