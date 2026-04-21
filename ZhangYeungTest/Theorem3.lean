@@ -18,7 +18,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   {S₁ S₂ S₃ S₄ : Type u}
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
-  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
 
@@ -87,7 +87,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   {S₁ S₂ S₃ S₄ : Type u}
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
-  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
 

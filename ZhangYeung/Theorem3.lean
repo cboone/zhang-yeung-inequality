@@ -64,7 +64,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 Equivalent to a pair of chain-rule applications on `I[X : ⟨Y, Z⟩]`, together with the defining identity `I[Y : Z | X] = I[Y : Z] - I[X : Y : Z]` for the three-way interaction information. Consumed inside `zhangYeung_integer` at step 2 of the chase (paper line 700). -/
 private lemma mutualInfo_add_three_way_identity
     {α β γ : Type*}
-    [Fintype α] [Fintype β] [Fintype γ]
+    [Finite α] [Finite β] [Finite γ]
     [MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ]
     [MeasurableSingletonClass α] [MeasurableSingletonClass β] [MeasurableSingletonClass γ]
     {X : Ω → α} {Y : Ω → β} {Z : Ω → γ}
@@ -84,7 +84,7 @@ private lemma mutualInfo_add_three_way_identity
 /-- Data processing for PFR's random-variable form of `CondIndepFun`: if `X` and `Y` are conditionally independent given `Z`, then `I[X : Y] ≤ I[X : Z]`. Consumed inside `zhangYeung_integer` at step 4 of the chase (paper line 708). -/
 private lemma mutualInfo_le_of_condIndepFun
     {α β γ : Type*}
-    [Fintype α] [Fintype β] [Fintype γ]
+    [Finite α] [Finite β] [Finite γ]
     [MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ]
     [MeasurableSingletonClass α] [MeasurableSingletonClass β] [MeasurableSingletonClass γ]
     {X : Ω → α} {Y : Ω → β} {Z : Ω → γ}
@@ -129,7 +129,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   {S₁ S₂ S₃ S₄ : Type u}
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
-  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
 
