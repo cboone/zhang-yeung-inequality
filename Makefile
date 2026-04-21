@@ -32,6 +32,8 @@ lint-spelling: ## Check spelling with cspell
 
 check: lint lean-lint build test ## Lint, build, and test
 
+all: check ## Run full repository checks
+
 clean: ## Remove Lake build artifacts
 	lake clean
 
@@ -39,4 +41,4 @@ help: ## Show this help
 	@grep -E '^[a-zA-Z0-9_-]+:.*##' $(MAKEFILE_LIST) | \
 		awk -F ':.*## ' '{printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: build bootstrap clean lint lint-markdown lint-spelling lean-lint test check help _check-mathlib-cache
+.PHONY: all build bootstrap clean lint lint-markdown lint-spelling lean-lint test check help _check-mathlib-cache
