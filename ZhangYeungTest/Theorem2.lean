@@ -16,7 +16,7 @@ section Signature
 
 variable {Ω : Type*} [MeasurableSpace Ω]
   {S₁ S₂ S₃ S₄ : Type u}
-  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
@@ -31,7 +31,7 @@ example
     (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h₁ : I[X : Y ; μ] = 0)
-    (h₂ : I[X : Y | Z ; μ] = 0) :
+    (h₂ : I[X : Y|Z;μ] = 0) :
     I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ] :=
   theorem2 hX hY hZ hU μ h₁ h₂
 
@@ -46,8 +46,8 @@ example
     (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h₁ : I[X : Y ; μ] = 0)
-    (h₂ : I[X : Y | Z ; μ] = 0)
-    (h₃ : I[Z : U | ⟨X, Y⟩ ; μ] = 0) :
+    (h₂ : I[X : Y|Z;μ] = 0)
+    (h₃ : I[Z : U|⟨X, Y⟩;μ] = 0) :
     I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[X : Y | U ; μ] := by
   have h := theorem2 hX hY hZ hU μ h₁ h₂
   linarith [h, h₃]
@@ -64,7 +64,7 @@ example
     (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h₁ : I[Y : X ; μ] = 0)
-    (h₂ : I[Y : X | Z ; μ] = 0) :
+    (h₂ : I[Y : X|Z;μ] = 0) :
     I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ] :=
   theorem2 hX hY hZ hU μ ((mutualInfo_comm hY hX μ).symm.trans h₁)
     ((condMutualInfo_comm hY hX Z μ).symm.trans h₂)
@@ -75,7 +75,7 @@ section ConcreteFintype
 
 /- Smoke test: the theorem statement elaborates under concrete `Fin n` codomains
 without any explicit instance-class plumbing. This checks that the default
-`Fintype`/`MeasurableSpace`/`MeasurableSingletonClass` instances on `Fin n` are
+`Finite`/`MeasurableSpace`/`MeasurableSingletonClass` instances on `Fin n` are
 found by instance search in the theorem's hypothesis shape. -/
 example {Ω : Type*} [MeasurableSpace Ω]
     {X : Ω → Fin 2} {Y : Ω → Fin 3} {Z : Ω → Fin 4} {U : Ω → Fin 5}
@@ -83,7 +83,7 @@ example {Ω : Type*} [MeasurableSpace Ω]
     (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h₁ : I[X : Y ; μ] = 0)
-    (h₂ : I[X : Y | Z ; μ] = 0) :
+    (h₂ : I[X : Y|Z;μ] = 0) :
     I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ] :=
   theorem2 hX hY hZ hU μ h₁ h₂
 

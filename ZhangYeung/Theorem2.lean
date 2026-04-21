@@ -49,7 +49,7 @@ The file is organized into the following sections:
 6. Δ-to-log-ratio identities (`delta_eq_sum_log_ratio` and `sum_joint_eq_sum_ptilde` closed).
 7. `theorem2_delta_le_zero` + `theorem2`.
 
-The four codomains `S₁, S₂, S₃, S₄` are specialized to `[Fintype]` + `[MeasurableSingletonClass]` so PFR's `FiniteRange`/`Countable` obligations are discharged uniformly.
+The proof infrastructure is organized around `[Fintype]` + `[MeasurableSingletonClass]` so explicit finite sums and PFR's `FiniteRange`/`Countable` obligations are available where needed. The public theorem surface, however, should expose only the assumptions that materially belong to the statement; local `omit` blocks below keep proof-local `Fintype` structure from leaking into the exported API.
 
 Paper ordering `(X, Y, Z, U)` is followed here because Theorem 2 is a standalone inequality read most naturally in that order; `ZhangYeung/Delta.lean` uses `(Z, U, X, Y)` because the delta quantity is symmetric in its first two arguments. The two modules share no variables, so the naming clash across `S₁..S₄` is harmless, and the `ZhangYeung.delta` identifier appearing in the helpers below takes its arguments in Delta.lean's order: `delta Z U X Y μ`.
 
@@ -78,13 +78,19 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 
 /-! ### Shannon-algebra reduction -/
 
+omit [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄] in
 /-- **Shannon-type reduction for Theorem 2.** The algebraic identity that rewrites `I[X:Y|⟨Z,U⟩] - I[Z:U|⟨X,Y⟩] - I[X:Y|U]` as `Δ(Z, U | X, Y) + I[X:Y|Z] - I[X:Y]`, where `Δ` is `ZhangYeung.delta`. Under the hypotheses of Theorem 2 (eq. 16), the two correction terms are zero and the Theorem 2 target is equivalent to `Δ(Z, U | X, Y) ≤ 0`. The identity is pure Shannon algebra and needs no hypotheses beyond `IsProbabilityMeasure`. -/
 private lemma theorem2_shannon_identity
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ] :
     I[X : Y | ⟨Z, U⟩ ; μ] - I[Z : U | ⟨X, Y⟩ ; μ] - I[X : Y | U ; μ]
       = delta Z U X Y μ + I[X : Y | Z ; μ] - I[X : Y ; μ] := by
+  letI := Fintype.ofFinite S₁
+  letI := Fintype.ofFinite S₂
+  letI := Fintype.ofFinite S₃
+  letI := Fintype.ofFinite S₄
   have hZU : Measurable (fun ω => (Z ω, U ω)) := hZ.prodMk hU
   have hXY : Measurable (fun ω => (X ω, Y ω)) := hX.prodMk hY
   rw [delta_def, condMutualInfo_eq hX hY hZU μ, condMutualInfo_eq hZ hU hXY μ,
@@ -353,11 +359,12 @@ private lemma indepFun_map_pair_real_singleton
 
 /-- **Fibrewise marginal-swap.** If two weight functions `f, g : α → ℝ` agree on every fibre of a projection `proj : α → β` (i.e., share the same `proj`-marginal), then their weighted sums of any `proj`-composed function agree. This is the abstract kernel of the 11-factor marginal-swap argument used in `sum_joint_eq_sum_ptilde`. -/
 private lemma sum_mul_proj_eq_of_marginal_eq
-    {α β : Type*} [Fintype α] [Fintype β] [DecidableEq β]
+    {α β : Type*} [Fintype α] [Finite β] [DecidableEq β]
     (f g : α → ℝ) (proj : α → β) (φ : β → ℝ)
     (h_marg : ∀ b : β, (∑ a ∈ Finset.univ.filter (fun a => proj a = b), f a)
                      = (∑ a ∈ Finset.univ.filter (fun a => proj a = b), g a)) :
     ∑ a : α, f a * φ (proj a) = ∑ a : α, g a * φ (proj a) := by
+  letI := Fintype.ofFinite β
   conv_lhs => rw [← Finset.sum_fiberwise (s := Finset.univ) (g := proj)
     (f := fun a => f a * φ (proj a))]
   conv_rhs => rw [← Finset.sum_fiberwise (s := Finset.univ) (g := proj)
@@ -635,7 +642,7 @@ private lemma condIndepFun_map_triple_real_singleton
     {α β γ : Type*}
     [MeasurableSpace α] [MeasurableSingletonClass α]
     [MeasurableSpace β] [MeasurableSingletonClass β]
-    [Fintype γ] [MeasurableSpace γ] [MeasurableSingletonClass γ]
+    [Finite γ] [MeasurableSpace γ] [MeasurableSingletonClass γ]
     {Ω' : Type*} [MeasurableSpace Ω']
     {f : Ω' → α} {g : Ω' → β} {h : Ω' → γ}
     (hf : Measurable f) (hg : Measurable g) (hh : Measurable h)
@@ -893,7 +900,7 @@ private lemma phat_sum_eq_one
 private lemma entropy_eq_sum_joint
     {α β : Type*}
     [Fintype α] [MeasurableSpace α] [MeasurableSingletonClass α]
-    [Fintype β] [MeasurableSpace β] [MeasurableSingletonClass β] [DecidableEq β]
+    [Finite β] [MeasurableSpace β] [MeasurableSingletonClass β]
     {Ω' : Type*} [MeasurableSpace Ω']
     (F : Ω' → α) (proj : α → β)
     (hF : Measurable F) (hproj : Measurable proj)
@@ -902,13 +909,14 @@ private lemma entropy_eq_sum_joint
       = -∑ t : α, (μ.map F).real {t}
           * Real.log ((μ.map (fun ω => proj (F ω))).real {proj t}) := by
   have hcomp : Measurable (fun ω => proj (F ω)) := hproj.comp hF
+  classical
+  letI := Fintype.ofFinite β
   have hA : (μ.map (fun ω => proj (F ω))) ((Finset.univ : Finset β) : Set β)ᶜ = 0 := by simp
   rw [entropy_eq_sum_finset hA]
   -- Goal: (∑ b : β, negMulLog (p_f b)) = -∑ t : α, p_F(t) * log (p_f (π t))
   simp_rw [Real.negMulLog, neg_mul]
   rw [Finset.sum_neg_distrib]
   congr 1
-  classical
   rw [← Finset.sum_fiberwise (Finset.univ : Finset α) proj
       (fun t => (μ.map F).real {t} * Real.log ((μ.map (fun ω => proj (F ω))).real {proj t}))]
   refine Finset.sum_congr rfl fun b _ => ?_
@@ -1090,7 +1098,7 @@ private lemma delta_eq_sum_log_ratio
 
 /-- **Marginal-swap helper.** Given a measurable projection `proj : S₁ × S₂ × S₃ × S₄ → γ` of the 4-tuple alphabet, and given that `p̃` agrees with the μ-pushforward of `proj ∘ ⟨X, Y, Z, U⟩` on every fibre, the sum of `pJoint · φ(proj ·)` equals the sum of `p̃ · φ(proj ·)` for any `φ`. The pJoint half of the filter-sum identity is automatic from `sum_filter_map_real_eq_map_comp` (since `pJoint` is a pushforward singleton value); the `p̃` half is the `h_pt_marg` hypothesis. This helper factors out the shared bookkeeping of the eleven projection-specific applications in `sum_joint_eq_sum_ptilde`. -/
 private lemma marg_swap_helper
-    {γ : Type*} [Fintype γ] [MeasurableSpace γ] [MeasurableSingletonClass γ] [DecidableEq γ]
+    {γ : Type*} [Finite γ] [MeasurableSpace γ] [MeasurableSingletonClass γ] [DecidableEq γ]
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
@@ -1103,6 +1111,7 @@ private lemma marg_swap_helper
       = ∑ t : S₁ × S₂ × S₃ × S₄, ptilde X Y Z U μ t * φ (proj t) := by
   have hF : Measurable (fun ω => (X ω, Y ω, Z ω, U ω)) :=
     hX.prodMk (hY.prodMk (hZ.prodMk hU))
+  classical
   refine sum_mul_proj_eq_of_marginal_eq (pJoint X Y Z U μ) (ptilde X Y Z U μ) proj φ ?_
   intro b
   have h_pJ : (∑ t ∈ (Finset.univ : Finset (S₁ × S₂ × S₃ × S₄)).filter
@@ -1551,13 +1560,19 @@ private lemma sum_joint_eq_sum_ptilde
 
 /-! ### Main proof -/
 
+omit [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄] in
 /-- **Zhang-Yeung delta is nonpositive under the hypotheses of Theorem 2** ([@zhangyeung1997, Theorem 3]). The direct proof (op. cit.) introduces the auxiliary distributions `ptilde` and `phat` (defined above), expands `Δ` as `∑ p · log(p̂ / p̃)`, reweights via `sum_joint_eq_sum_ptilde` to `∑ p̃ · log(p̂ / p̃) = -KL(p̃ ‖ p̂)`, and closes by the log-sum inequality `Real.sum_mul_log_div_leq` applied to `p̃`, `p̂`. The main proof body here is complete and wires `ptilde_sum_eq_one`, `phat_sum_eq_one`, `delta_eq_sum_log_ratio`, `sum_joint_eq_sum_ptilde`, plus the inline absolute-continuity claim, into the final inequality via `linarith`. -/
 private lemma theorem2_delta_le_zero
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h₁ : I[X : Y ; μ] = 0) (h₂ : I[X : Y|Z;μ] = 0) :
     delta Z U X Y μ ≤ 0 := by
+  letI := Fintype.ofFinite S₁
+  letI := Fintype.ofFinite S₂
+  letI := Fintype.ofFinite S₃
+  letI := Fintype.ofFinite S₄
   set s : Finset (S₁ × S₂ × S₃ × S₄) := Finset.univ
   have h_ptilde_sum : ∑ t ∈ s, ptilde X Y Z U μ t = 1 :=
     ptilde_sum_eq_one hX hY hZ hU μ
@@ -1639,11 +1654,13 @@ private lemma theorem2_delta_le_zero
     ring
   linarith [h_delta_eq, h_swap, h_neg, h_kl_nonneg]
 
+omit [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄] in
 /-- **Zhang-Yeung Theorem 2** ([@zhangyeung1998], eqs. 16-17; proved in [@zhangyeung1997, Theorem 3]). For any four discrete random variables `X, Y, Z, U` on a probability space, if `I[X : Y ; μ] = 0` and `I[X : Y | Z ; μ] = 0`, then `I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ]`.
 
 The proof factors into a Shannon-algebra reduction (`theorem2_shannon_identity`) that isolates the non-Shannon-type core `Δ(Z, U | X, Y) ≤ 0` via the `ZhangYeung.delta` quantity from M1, and the [@zhangyeung1997] KL-divergence argument (`theorem2_delta_le_zero`) that discharges that core. -/
 theorem theorem2
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
+    [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
     (hX : Measurable X) (hY : Measurable Y)
     (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
