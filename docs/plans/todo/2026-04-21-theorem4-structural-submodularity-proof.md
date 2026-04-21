@@ -57,7 +57,7 @@ Remove the last `native_decide` in `ZhangYeung/Theorem4.lean` by replacing the q
 
 1. readable to a reviewer,
 2. robust under minor elaborator changes,
-3. independent of evaluator-specific proof search.
+3. independent of `native_decide`. Small, bounded `decide` checks inside local sublemmas with a conceptually transparent statement (e.g., "the four subsets of `{0,1}` are `∅, {0}, {1}, {0,1}`") remain acceptable; the prohibition is on `native_decide`, not on kernel-reducing decidable instances in general.
 
 The preferred end state is:
 
@@ -70,19 +70,34 @@ The preferred end state is:
 - No change to the mathematical witness itself.
 - No change to the public theorems `theorem4_finite`, `theorem4`, or `theorem4_ge_four` beyond their proof terms.
 - No attempt to remove `decide` from the concrete witness-value tests; the target here is the remaining quantified proof only.
+- No prohibition on `decide` inside local sublemmas. `decide` is an accepted Mathlib-style tactic for small, decidable, bounded finite checks; the policy target is specifically `native_decide`.
 - No heavy new abstraction layer unless the structural proof clearly benefits from it.
 
 ## Design sketch
 
 ### Route A (preferred): decompose the witness into simple set functions
 
-Define the fixed exceptional pair:
+#### Step 0: canonicalization helpers
+
+Before the decomposition proper, pin down a few canonicalizing lemmas for the exceptional pair. These prevent the `{0,1}` vs `insert 0 {1}` vs `insert 1 {0}` normal-form divergence that bit the earlier `fin_cases` attempt listed under §Status.
 
 ```lean
 private def pair01 : Finset (Fin 4) := {0, 1}
+
+private lemma pair01_eq :
+    pair01 = ({0, 1} : Finset (Fin 4)) := by decide
+
+private lemma mem_pair01 :
+    ∀ i : Fin 4, i ∈ pair01 ↔ i = 0 ∨ i = 1 := by decide
+
+private lemma pair01_card : pair01.card = 2 := by decide
 ```
 
-Then decompose `F_witness_ℚ` as a sum of four pieces on `Finset (Fin 4)`:
+Use these as rewrites wherever the literal `{0, 1}` appears in a goal.
+
+#### Decomposition
+
+Decompose `F_witness_ℚ` as a sum of four pieces on `Finset (Fin 4)`:
 
 1. the cardinality term `card(S)`;
 2. a nonempty bonus `1_{S ≠ ∅}`;
@@ -97,9 +112,11 @@ F_witness_ℚ S = (S.card : ℚ) + nonemptyBonus S - fullBonus S + pairBonus S
 
 where:
 
-- `nonemptyBonus S = if S.Nonempty then 1 else 0`
-- `fullBonus S = if S = Finset.univ then 1 else 0`
-- `pairBonus S = if S = pair01 then 1 else 0`
+- `nonemptyBonus S = if S.Nonempty then (1 : ℚ) else 0`
+- `fullBonus S = if S = Finset.univ then (1 : ℚ) else 0`
+- `pairBonus S = if S = pair01 then (1 : ℚ) else 0`
+
+All three indicators are `ℚ`-valued from the start so no coercion noise appears in the decomposition lemma.
 
 This representation is mathematically transparent:
 
@@ -108,7 +125,14 @@ This representation is mathematically transparent:
 
 ### Step 1: prove the base cardinality profile is submodular
 
-Prove the three components separately.
+Let
+
+```lean
+private def baseWitness (S : Finset (Fin 4)) : ℚ :=
+  (S.card : ℚ) + nonemptyBonus S - fullBonus S
+```
+
+(The `(S.card : ℚ)` cast is explicit so no `Nat`-vs-`ℚ` arithmetic leaks into the submodularity goal.) Prove the three components separately.
 
 #### 1a. `card` is modular
 
@@ -134,6 +158,21 @@ This is boolean logic:
 - if `α ∪ β` is nonempty, at least one of `α`, `β` is nonempty.
 
 This should be done by short case splits on `α = ∅` and `β = ∅`, or equivalent `by_cases hα : α.Nonempty`, `by_cases hβ : β.Nonempty`.
+
+Indicative shape (the four leaf goals reduce to `ℚ` arithmetic between `0` and `1` and close by `norm_num`):
+
+```lean
+private lemma nonemptyBonus_submodular (α β : Finset (Fin 4)) :
+    nonemptyBonus (α ∪ β) + nonemptyBonus (α ∩ β)
+      ≤ nonemptyBonus α + nonemptyBonus β := by
+  by_cases hα : α.Nonempty <;> by_cases hβ : β.Nonempty <;>
+    simp [nonemptyBonus, hα, hβ, Finset.union_nonempty,
+          Finset.inter_nonempty, Finset.not_nonempty_iff_eq_empty] <;>
+    -- remaining goals are concrete `ℚ` comparisons like `1 + 0 ≤ 1 + 1`
+    norm_num
+```
+
+Steps 1c and 2 follow the same template: case split on the relevant set predicates, `simp` the indicator definitions through, close numeric residues with `norm_num`.
 
 #### 1c. `- fullBonus` is submodular
 
@@ -211,6 +250,8 @@ Write:
 F_witness_ℚ = baseWitness + pairBonus
 ```
 
+as a small lemma `F_witness_ℚ_eq_base_add_pair`, discharged by `fin_cases S` or equivalently a 16-case `decide` on `S : Finset (Fin 4)` (bounded `decide` per §Non-goals).
+
 Then in the final submodularity proof:
 
 1. expand both sides using the decomposition lemma;
@@ -219,30 +260,56 @@ Then in the final submodularity proof:
 
 The proof should no longer need either `native_decide` or a 256-case brute force split.
 
+#### Alternative phrasing if indicator algebra gets noisy
+
+If the four-indicator decomposition produces unwieldy `simp` sets (e.g., many spurious `ite` residues), collapse to a single definition
+
+```lean
+private def baseWitness' (S : Finset (Fin 4)) : ℚ := F_witness_ℚ S - pairBonus S
+```
+
+and prove `baseWitness'_submodular` directly by whatever combination of case analysis the four-indicator route would have used. The structural argument is the same; only the definitional packaging changes. Use this only if the four-indicator form proves to be heavier in `simp`/rewrite cost than the savings it brings in structural clarity.
+
 ### Route B (fallback): small explicit case table, but only for the exceptional defect
 
-If the classification lemmas in Step 2 become awkward to phrase abstractly, keep the decomposition from Route A but prove only the defect-absorption step by a tiny explicit case split over the handful of configurations where `{0,1}` can appear as `α ∪ β` or `α ∩ β`.
+If the classification lemmas in Step 2 become awkward to phrase abstractly, keep the decomposition from Route A but prove only the defect-absorption step by a tiny explicit case split.
 
-This is still much better than a full brute-force proof, because the cardinality-profile part remains conceptual and only the exceptional configurations are enumerated.
+The enumeration is bounded and known exactly. The pair-bonus defect `pairBonusDefect α β` is strictly positive in only four ordered configurations:
+
+- `α = {0}`, `β = {1}` (case 2a);
+- `α = {1}`, `β = {0}` (case 2a, swap);
+- `α = {0,1,2}`, `β = {0,1,3}` (case 2b);
+- `α = {0,1,3}`, `β = {0,1,2}` (case 2b, swap).
+
+In every other configuration `pairBonusDefect α β ≤ 0`, and the total submodularity defect is bounded by `baseWitnessSubmodular` alone. A Route-B proof therefore reduces to:
+
+- one branch per ordered configuration above (four cases, each an explicit numeric check);
+- one "otherwise" branch, closed by `baseWitnessSubmodular` plus `pairBonusDefect α β ≤ 0`.
+
+Five cases total, not 256. This is still much better than a full brute-force proof, because the cardinality-profile part remains conceptual and only the exceptional configurations are enumerated; the bound "at most four ordered configurations" should be hard-coded into the proof structure so the fallback cannot silently drift back toward enumerating all pairs.
 
 ## Risks
 
-1. **Set-equality normal forms.** `Finset` literals such as `{0,1}` and `insert 0 {1}` do not always normalize to the same syntax automatically. Plan to add a few local `simpa [Finset.ext]` or canonicalizing helper lemmas if needed.
+1. **Set-equality normal forms.** `Finset` literals such as `{0,1}` and `insert 0 {1}` do not always normalize to the same syntax automatically. The canonicalization helpers in §Step 0 (`pair01_eq`, `mem_pair01`, `pair01_card`) are a first-class plan step, not a contingency; expect to reach for them whenever a goal mentions the literal `{0, 1}`.
 2. **Indicator arithmetic overhead.** Expressing the witness as a sum of indicator functions introduces many casts to `ℚ`. Keep the indicator definitions as `ℚ`-valued from the start to avoid repeated coercion noise.
 3. **Overengineering.** The proof should not introduce a large permanent API just to remove one linter warning. Prefer `private` defs and lemmas local to `Theorem4.lean` unless something is clearly reusable.
 4. **Fallback temptation.** If the structural route gets bogged down in `Finset` bookkeeping, it is easy to slide back toward a disguised brute-force proof. Use the route-B fallback only for the exceptional pair configurations, not for all 256 cases.
 
 ## Verification
 
-The work is complete when all of the following hold:
+Mechanical gates. All must pass before the plan is considered done:
 
-1. `ZhangYeung/Theorem4.lean` contains no `native_decide`.
-2. `ZhangYeungTest/Theorem4.lean` may continue to use `decide`, but not `native_decide`.
+1. `ZhangYeung/Theorem4.lean` contains no occurrence of `native_decide` (verifiable by `grep -n 'native_decide' ZhangYeung/Theorem4.lean` returning no matches).
+2. `ZhangYeungTest/Theorem4.lean` still contains no `native_decide` (pre-existing invariant).
 3. `lake build ZhangYeung.Theorem4 ZhangYeungTest.Theorem4` passes.
-4. `lake lint` passes.
+4. `lake lint` passes with no new warnings.
 5. `lake test` passes.
-6. The resulting submodularity proof reads as a structural argument about the witness, not as a brute-force opaque computation.
+6. `make check` passes end-to-end.
 
 ## Exit criteria
 
-Done when the only remaining computation in the witness section is concrete `decide`-based equality checking for explicit finite sets, and the theorem `shannonCone_of_witness` is justified by a proof a reviewer could reasonably describe as “Mathlib-quality”: conceptually decomposed, finite, local, and not evaluator-dependent.
+Conceptual / review-quality bar. In addition to the mechanical gates above, the plan is complete only when:
+
+- the submodularity proof of `shannonCone_of_witness` reads as a structural argument about the witness, not a brute-force opaque computation;
+- any residual `decide` use is bounded and each invocation has a conceptually transparent statement a reviewer can recite in one sentence (e.g., "the four subsets of `{0,1}`" or "the pointwise decomposition over the 16 subsets of `Fin 4`");
+- the section is justified by a proof a reviewer could reasonably describe as "Mathlib-quality": conceptually decomposed, finite, local, and not evaluator-dependent.
