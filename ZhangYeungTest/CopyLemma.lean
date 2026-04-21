@@ -39,9 +39,9 @@ example
       Measurable X₁ ∧ Measurable Y₁ ∧
       Measurable Z' ∧ Measurable U' ∧
       IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
-                   (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ ∧
+                   (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ ∧
       IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-                   (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ ∧
+                   (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ ∧
       CondIndepFun (fun ω' => (X' ω', Y' ω'))
                    (fun ω' => (X₁ ω', Y₁ ω'))
                    (fun ω' => (Z' ω', U' ω')) ν :=
@@ -66,10 +66,10 @@ example
     {A : Ω → α} {B : Ω → β} {C : Ω → γ} {D : Ω → δ}
     (hA : Measurable A) (hB : Measurable B) (hC : Measurable C) (hD : Measurable D)
     (ν : Measure Ω) [IsProbabilityMeasure ν]
-    (hVanish : I[A : D | ⟨B, C⟩ ; ν] = 0) :
+    (hVanish : I[A : D|⟨B, C⟩;ν] = 0) :
     delta B C A D ν
-      = I[A : D ; ν] - I[A : D | B ; ν] - I[A : D | C ; ν]
-        - I[B : C | ⟨A, D⟩ ; ν] :=
+      = I[A : D ; ν] - I[A : D|B;ν] - I[A : D|C;ν]
+        - I[B : C|⟨A, D⟩;ν] :=
   delta_of_condMI_vanishes_eq hA hB hC hD ν hVanish
 
 end LemmaTwoFormA
@@ -99,8 +99,8 @@ example
                           (fun ω' => (X₁ ω', Y₁ ω'))
                           (fun ω' => (Z' ω', U' ω')) ν) :
     delta Z' U' X' Y₁ ν
-      = I[X' : Y₁ ; ν] - I[X' : Y₁ | Z' ; ν] - I[X' : Y₁ | U' ; ν]
-        - I[Z' : U' | ⟨X', Y₁⟩ ; ν] :=
+      = I[X' : Y₁ ; ν] - I[X' : Y₁|Z';ν] - I[X' : Y₁|U';ν]
+        - I[Z' : U'|⟨X', Y₁⟩;ν] :=
   copyLemma_delta_identity_Y₁ hX' hY₁ hZ' hU' hCond
 
 /- Pinned signature: `copyLemma_delta_identity_X_X₁` (Form B, symmetric). -/
@@ -111,8 +111,8 @@ example
                           (fun ω' => (X₁ ω', Y₁ ω'))
                           (fun ω' => (Z' ω', U' ω')) ν) :
     delta Z' U' X' X₁ ν
-      = I[X' : X₁ ; ν] - I[X' : X₁ | Z' ; ν] - I[X' : X₁ | U' ; ν]
-        - I[Z' : U' | ⟨X', X₁⟩ ; ν] :=
+      = I[X' : X₁ ; ν] - I[X' : X₁|Z';ν] - I[X' : X₁|U';ν]
+        - I[Z' : U'|⟨X', X₁⟩;ν] :=
   copyLemma_delta_identity_X_X₁ hX' hX₁ hZ' hU' hCond
 
 /- Pinned signature: `copyLemma_delta_transport_Y_to_Y₁`. -/
@@ -121,9 +121,9 @@ example
     (hX' : Measurable X') (hY₁ : Measurable Y₁)
     (hZ' : Measurable Z') (hU' : Measurable U')
     (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
-                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                           (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
+                            (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ) :
     delta Z U X Y μ = delta Z' U' X' Y₁ ν :=
   copyLemma_delta_transport_Y_to_Y₁ hX hY hZ hU hX' hY₁ hZ' hU' hFirst hSecond
 
@@ -133,9 +133,9 @@ example
     (hX' : Measurable X') (hX₁ : Measurable X₁)
     (hZ' : Measurable Z') (hU' : Measurable U')
     (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
-                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                           (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
+                            (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ) :
     delta Z U X X μ = delta Z' U' X' X₁ ν :=
   copyLemma_delta_transport_X_to_X₁ hX hZ hU hX' hX₁ hZ' hU' hFirst hSecond
 
@@ -145,9 +145,9 @@ example
     (hX' : Measurable X') (hY₁ : Measurable Y₁)
     (hZ' : Measurable Z') (hU' : Measurable U')
     (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
-                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                           (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                            (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hCond : CondIndepFun (fun ω' => (X' ω', Y' ω'))
                           (fun ω' => (X₁ ω', Y₁ ω'))
                           (fun ω' => (Z' ω', U' ω')) ν) :
@@ -160,13 +160,13 @@ example
     (hX' : Measurable X') (hX₁ : Measurable X₁)
     (hZ' : Measurable Z') (hU' : Measurable U')
     (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
-                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                           (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                            (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hCond : CondIndepFun (fun ω' => (X' ω', Y' ω'))
                           (fun ω' => (X₁ ω', Y₁ ω'))
                           (fun ω' => (Z' ω', U' ω')) ν) :
-    I[Z : U ; μ] - 2 * I[Z : U | X ; μ] ≤ I[X' : X₁ ; ν] :=
+    I[Z : U ; μ] - 2 * I[Z : U|X;μ] ≤ I[X' : X₁ ; ν] :=
   copyLemma_delta_le_mutualInfo_X_X₁ hX hZ hU hX' hX₁ hZ' hU' hFirst hSecond hCond
 
 end Consequences
@@ -201,7 +201,7 @@ example {Ω : Type*} [MeasurableSpace Ω]
     (μ : Measure Ω) [IsProbabilityMeasure μ] :
     ∃ (Ω' : Type) (_ : MeasurableSpace Ω') (ν : Measure Ω')
         (X' : Ω' → Fin 2) (X₁ : Ω' → Fin 2) (Y₁ : Ω' → Fin 2),
-      2 * I[Z : U ; μ] - 3 * I[Z : U | X ; μ] - I[Z : U | Y ; μ]
+      2 * I[Z : U ; μ] - 3 * I[Z : U|X;μ] - I[Z : U|Y;μ]
         ≤ I[X' : Y₁ ; ν] + I[X' : X₁ ; ν] := by
   obtain ⟨Ω', _, ν, X', _, X₁, Y₁, Z', U',
       hν, hX', hY', hX₁, hY₁, hZ', hU', hFirst, hSecond, hCond⟩ :=
@@ -209,7 +209,7 @@ example {Ω : Type*} [MeasurableSpace Ω]
   refine ⟨Ω', _, ν, X', X₁, Y₁, ?_⟩
   have h1 : delta Z U X Y μ ≤ I[X' : Y₁ ; ν] :=
     copyLemma_delta_le_mutualInfo_Y₁ hX hY hZ hU hX' hY₁ hZ' hU' hFirst hSecond hCond
-  have h2 : I[Z : U ; μ] - 2 * I[Z : U | X ; μ] ≤ I[X' : X₁ ; ν] :=
+  have h2 : I[Z : U ; μ] - 2 * I[Z : U|X;μ] ≤ I[X' : X₁ ; ν] :=
     copyLemma_delta_le_mutualInfo_X_X₁ hX hZ hU hX' hX₁ hZ' hU' hFirst hSecond hCond
   rw [delta_def] at h1
   linarith
