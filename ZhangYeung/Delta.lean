@@ -98,9 +98,9 @@ lemma delta_form22_iff
 lemma delta_form23_of_form21_form22
     {Z : Ω → S₁} {U : Ω → S₂} {X : Ω → S₃} {Y : Ω → S₄} {μ : Measure Ω}
     (h21 : 2 * delta Z U X Y μ
-        ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U | X ; μ] - I[Z : U | Y ; μ])
+        ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U|X;μ] - I[Z : U|Y;μ])
     (h22 : 2 * delta Z U X Y μ
-        ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U | X ; μ] + I[Z : U | Y ; μ]) :
+        ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U|X;μ] + I[Z : U|Y;μ]) :
     4 * delta Z U X Y μ
       ≤ 2 * I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Y : ⟨Z, U⟩ ; μ] := by
   linarith

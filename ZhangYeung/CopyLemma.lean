@@ -157,7 +157,7 @@ theorem delta_of_condMI_vanishes_eq
     {A : Ω → α} {B : Ω → β} {C : Ω → γ} {D : Ω → δ}
     (hA : Measurable A) (hB : Measurable B) (hC : Measurable C) (hD : Measurable D)
     (ν : Measure Ω) [IsProbabilityMeasure ν]
-    (hVanish : I[A : D | ⟨B, C⟩ ; ν] = 0) :
+    (hVanish : I[A : D|⟨B, C⟩;ν] = 0) :
     delta B C A D ν
       = I[A : D ; ν] - I[A : D | B ; ν] - I[A : D | C ; ν]
         - I[B : C | ⟨A, D⟩ ; ν] := by
@@ -248,8 +248,8 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 private lemma copyLemma_triple_XFirst
     (hFirst : IdentDistrib
         (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
-        (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
-    IdentDistrib (fun ω  => (Z ω,  U ω,  X ω))
+        (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ) :
+    IdentDistrib (fun ω => (Z ω, U ω, X ω))
                  (fun ω' => (Z' ω', U' ω', X' ω')) μ ν :=
   hFirst.symm.comp measurable_projZUA
 
@@ -257,8 +257,8 @@ private lemma copyLemma_triple_XFirst
 private lemma copyLemma_triple_YSecond
     (hSecond : IdentDistrib
         (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-        (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
-    IdentDistrib (fun ω  => (Z ω,  U ω,  Y ω))
+        (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ) :
+    IdentDistrib (fun ω => (Z ω, U ω, Y ω))
                  (fun ω' => (Z' ω', U' ω', Y₁ ω')) μ ν :=
   hSecond.symm.comp measurable_projZUB
 
@@ -266,8 +266,8 @@ private lemma copyLemma_triple_YSecond
 private lemma copyLemma_triple_XSecond
     (hSecond : IdentDistrib
         (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-        (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
-    IdentDistrib (fun ω  => (Z ω,  U ω,  X ω))
+        (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ) :
+    IdentDistrib (fun ω => (Z ω, U ω, X ω))
                  (fun ω' => (Z' ω', U' ω', X₁ ω')) μ ν :=
   hSecond.symm.comp measurable_projZUA
 
@@ -381,9 +381,9 @@ theorem copyLemma_delta_transport_Y_to_Y₁
     (hX' : Measurable X') (hY₁ : Measurable Y₁)
     (hZ' : Measurable Z') (hU' : Measurable U')
     (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
-                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                           (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
+                            (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ) :
     delta Z U X Y μ = delta Z' U' X' Y₁ ν := by
   have hZU : IdentDistrib (fun ω => (Z ω, U ω)) (fun ω' => (Z' ω', U' ω')) μ ν :=
     hFirst.symm.comp measurable_pairZU
@@ -398,9 +398,9 @@ theorem copyLemma_delta_transport_X_to_X₁
     (hX' : Measurable X') (hX₁ : Measurable X₁)
     (hZ' : Measurable Z') (hU' : Measurable U')
     (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
-                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                           (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ) :
+                            (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ) :
     delta Z U X X μ = delta Z' U' X' X₁ ν := by
   have hZU : IdentDistrib (fun ω => (Z ω, U ω)) (fun ω' => (Z' ω', U' ω')) μ ν :=
     hFirst.symm.comp measurable_pairZU
@@ -422,9 +422,9 @@ theorem copyLemma_delta_le_mutualInfo_Y₁
     (hX' : Measurable X') (hY₁ : Measurable Y₁)
     (hZ' : Measurable Z') (hU' : Measurable U')
     (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
-                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                           (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                            (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hCond : CondIndepFun (fun ω' => (X' ω', Y' ω'))
                           (fun ω' => (X₁ ω', Y₁ ω'))
                           (fun ω' => (Z' ω', U' ω')) ν) :
@@ -447,9 +447,9 @@ theorem copyLemma_delta_le_mutualInfo_X_X₁
     (hX' : Measurable X') (hX₁ : Measurable X₁)
     (hZ' : Measurable Z') (hU' : Measurable U')
     (hFirst : IdentDistrib (fun ω' => (X' ω', Y' ω', Z' ω', U' ω'))
-                           (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                           (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hSecond : IdentDistrib (fun ω' => (X₁ ω', Y₁ ω', Z' ω', U' ω'))
-                            (fun ω  => (X ω,  Y ω,  Z ω,  U ω)) ν μ)
+                            (fun ω => (X ω, Y ω, Z ω, U ω)) ν μ)
     (hCond : CondIndepFun (fun ω' => (X' ω', Y' ω'))
                           (fun ω' => (X₁ ω', Y₁ ω'))
                           (fun ω' => (Z' ω', U' ω')) ν) :

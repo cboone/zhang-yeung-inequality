@@ -422,7 +422,7 @@ private lemma ptilde_fibre_sum
   set Fy := fun y : S₂ => (μ.map (fun ω => (Y ω, Z ω, U ω))).real {(y, z, u)}
   have hSumFx : ∑ x, Fx x = c := sum_map_triple_first hX hZ hU μ z u
   have hSumFy : ∑ y, Fy y = c := sum_map_triple_first hY hZ hU μ z u
-  show ∑ x, ∑ y, Fx x * Fy y / c = c
+  change ∑ x, ∑ y, Fx x * Fy y / c = c
   simp_rw [div_eq_mul_inv, ← Finset.sum_mul]
   rw [← Finset.sum_mul_sum, hSumFx, hSumFy]
   by_cases hc : c = 0
@@ -718,7 +718,7 @@ private lemma phat_sum_eq_one
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
-    (h₁ : I[X : Y ; μ] = 0) (h₂ : I[X : Y | Z ; μ] = 0) :
+    (h₁ : I[X : Y ; μ] = 0) (h₂ : I[X : Y|Z;μ] = 0) :
     ∑ t : S₁ × S₂ × S₃ × S₄, phat X Y Z U μ t = 1 := by
   have h_indep : IndepFun X Y μ := (mutualInfo_eq_zero hX hY).mp h₁
   have h_cond : CondIndepFun X Y Z μ := (condMutualInfo_eq_zero hX hY).mp h₂
@@ -864,7 +864,7 @@ private lemma phat_sum_eq_one
       left_inv := fun ⟨_, _, _, _⟩ => rfl
       right_inv := fun ⟨_, _, _, _⟩ => rfl }
   rw [← Equiv.sum_comp e (phat X Y Z U μ)]
-  show ∑ p : S₄ × S₁ × S₂ × S₃, phat X Y Z U μ (p.2.1, p.2.2.1, p.2.2.2, p.1) = 1
+  change ∑ p : S₄ × S₁ × S₂ × S₃, phat X Y Z U μ (p.2.1, p.2.2.1, p.2.2.2, p.1) = 1
   simp_rw [Fintype.sum_prod_type, h_sum_z_eq]
   have h_sum_y : ∀ (x : S₁) (u : S₄),
       (∑ y : S₂, (μ.map (fun ω => (X ω, U ω))).real {(x, u)}
@@ -1007,7 +1007,7 @@ private lemma delta_eq_sum_log_ratio
           Real.log_mul hX_pos.ne' (by positivity),
           Real.log_mul hY_pos.ne' (by positivity),
           Real.log_mul hXZU_pos.ne' hYZU_pos.ne']
-      show _ = L (x, y, z, u)
+      change _ = L (x, y, z, u)
       simp only [L]
       ring
   rw [show (∑ t : S₁ × S₂ × S₃ × S₄,
@@ -1479,7 +1479,7 @@ private lemma sum_joint_eq_sum_ptilde
         Real.log_mul hX_pos.ne' (by positivity),
         Real.log_mul hY_pos.ne' (by positivity),
         Real.log_mul hXZU_pos.ne' hYZU_pos.ne']
-    show _ = L (x, y, z, u)
+    change _ = L (x, y, z, u)
     simp only [hL_def]
     ring
   -- Absolute-continuity claim: the support of `pJoint` is contained in the support of `p̃`. This is what lets us transport the pointwise `h_log_eq_L` from "support of `p̃`" to "support of `pJoint`" in `h_pJ_mul` below. Follows from positivity of each triple marginal on the support.
@@ -1495,7 +1495,7 @@ private lemma sum_joint_eq_sum_ptilde
         (measureReal_map_pair_le_map_snd hX (hY.prodMk (hZ.prodMk hU)) μ x (y, z, u))
     have hZU_pos : 0 < pZU (z, u) :=
       lt_of_lt_of_le hXZU_pos (measureReal_map_pair_le_map_snd hX (hZ.prodMk hU) μ x (z, u))
-    show 0 < pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u)
+    change 0 < pXZU (x, z, u) * pYZU (y, z, u) / pZU (z, u)
     exact div_pos (mul_pos hXZU_pos hYZU_pos) hZU_pos
   -- Lift `h_log_eq_L` to a `pJoint`-weighted pointwise equality. On a zero of `pJoint`, both sides vanish; on the support, `h_supp` lets us invoke `h_log_eq_L`. The same pattern is repeated for `p̃` in `h_pt_mul` below.
   have h_pJ_mul : ∀ t : S₁ × S₂ × S₃ × S₄,
@@ -1556,7 +1556,7 @@ private lemma theorem2_delta_le_zero
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
-    (h₁ : I[X : Y ; μ] = 0) (h₂ : I[X : Y | Z ; μ] = 0) :
+    (h₁ : I[X : Y ; μ] = 0) (h₂ : I[X : Y|Z;μ] = 0) :
     delta Z U X Y μ ≤ 0 := by
   set s : Finset (S₁ × S₂ × S₃ × S₄) := Finset.univ
   have h_ptilde_sum : ∑ t ∈ s, ptilde X Y Z U μ t = 1 :=
@@ -1648,7 +1648,7 @@ theorem theorem2
     (hZ : Measurable Z) (hU : Measurable U)
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (h₁ : I[X : Y ; μ] = 0)
-    (h₂ : I[X : Y | Z ; μ] = 0) :
+    (h₂ : I[X : Y|Z;μ] = 0) :
     I[X : Y | ⟨Z, U⟩ ; μ] ≤ I[Z : U | ⟨X, Y⟩ ; μ] + I[X : Y | U ; μ] := by
   have h_red := theorem2_shannon_identity hX hY hZ hU μ
   have hΔ := theorem2_delta_le_zero hX hY hZ hU μ h₁ h₂

@@ -127,7 +127,7 @@ lemma F_witness_eq_cast (S : Finset (Fin 4)) :
 theorem shannonCone_of_witness : shannonCone F_witness := by
   refine ⟨?_, ?_, ?_⟩
   · -- `F_witness ∅ = 0`
-    show ((F_witness_ℚ ∅ : ℚ) : ℝ) = 0
+    change ((F_witness_ℚ ∅ : ℚ) : ℝ) = 0
     have h : F_witness_ℚ ∅ = 0 := by native_decide
     exact_mod_cast h
   · -- Monotonicity.
@@ -551,16 +551,15 @@ noncomputable def F_witness_n {n : ℕ} (hn : 4 ≤ n) (α : Finset (Fin n)) : �
 theorem shannonCone_of_witness_n {n : ℕ} (hn : 4 ≤ n) :
     shannonCone_n (F_witness_n hn) := by
   refine ⟨?_, ?_, ?_⟩
-  · show F_witness _ = 0
-    rw [Finset.preimage_empty]
-    exact shannonCone_of_witness.1
+  · simpa [F_witness_n] using shannonCone_of_witness.1
   · intro α β hαβ
-    exact shannonCone_of_witness.2.1 _ _
+    simpa [F_witness_n] using shannonCone_of_witness.2.1 _ _
       (Finset.monotone_preimage (Fin.castLE_injective hn) hαβ)
   · intro α β
-    show F_witness _ + F_witness _ ≤ F_witness _ + F_witness _
-    rw [Finset.preimage_union, Finset.preimage_inter]
-    exact shannonCone_of_witness.2.2 _ _
+    simpa [F_witness_n, Finset.preimage_union, Finset.preimage_inter] using
+      shannonCone_of_witness.2.2
+        (α.preimage (Fin.castLE hn) (Fin.castLE_injective hn).injOn)
+        (β.preimage (Fin.castLE hn) (Fin.castLE_injective hn).injOn)
 
 /-- The preimage of a singleton `{Fin.castLE hn i}` under `Fin.castLE hn` is `{i}`. -/
 private lemma preimage_singleton_castLE {n : ℕ} (hn : 4 ≤ n) (i : Fin 4) :
