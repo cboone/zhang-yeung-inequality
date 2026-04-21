@@ -18,7 +18,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   {S₁ S₂ S₃ S₄ : Type u}
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
-  [Fintype S₃] [Fintype S₄]
+  [Finite S₃] [Finite S₄]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
 
 /- Pinned signature: re-state `copyLemma` verbatim, exercising the six
@@ -53,7 +53,7 @@ section LemmaTwoFormA
 
 variable {Ω : Type*} [MeasurableSpace Ω]
   {α β γ δ : Type*}
-  [Fintype α] [Fintype β] [Fintype γ] [Fintype δ]
+  [Finite α] [Finite β] [Finite γ] [Finite δ]
   [MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ] [MeasurableSpace δ]
   [MeasurableSingletonClass α] [MeasurableSingletonClass β]
   [MeasurableSingletonClass γ] [MeasurableSingletonClass δ]
@@ -80,7 +80,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   {S₁ S₂ S₃ S₄ : Type*}
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
-  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
   {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}

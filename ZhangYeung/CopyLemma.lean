@@ -65,7 +65,7 @@ private lemma IdentDistrib.condMutualInfo_eq
     {S T U : Type*}
     [MeasurableSpace S] [MeasurableSpace T] [MeasurableSpace U]
     [MeasurableSingletonClass S] [MeasurableSingletonClass T] [MeasurableSingletonClass U]
-    [Fintype S] [Fintype T] [Fintype U]
+    [Finite S] [Finite T] [Finite U]
     {μ : Measure Ω} {μ' : Measure Ω'}
     [IsProbabilityMeasure μ] [IsProbabilityMeasure μ']
     {X : Ω → S} {Y : Ω → T} {Z : Ω → U}
@@ -105,7 +105,7 @@ theorem copyLemma
     {S₁ S₂ S₃ S₄ : Type u}
     [MeasurableSpace S₁] [MeasurableSpace S₂]
     [MeasurableSpace S₃] [MeasurableSpace S₄]
-    [Fintype S₃] [Fintype S₄]
+    [Finite S₃] [Finite S₄]
     [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     (hX : Measurable X) (hY : Measurable Y)
@@ -150,7 +150,7 @@ This is the paper's eq. (45) abstracted away from the copy construction: the ide
 theorem delta_of_condMI_vanishes_eq
     {Ω : Type*} [MeasurableSpace Ω]
     {α β γ δ : Type*}
-    [Fintype α] [Fintype β] [Fintype γ] [Fintype δ]
+    [Finite α] [Finite β] [Finite γ] [Finite δ]
     [MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ] [MeasurableSpace δ]
     [MeasurableSingletonClass α] [MeasurableSingletonClass β]
     [MeasurableSingletonClass γ] [MeasurableSingletonClass δ]
@@ -282,7 +282,7 @@ section Finite
 variable {S₁ S₂ S₃ S₄ : Type*}
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
-  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
   {Ω' : Type*} [MeasurableSpace Ω']
@@ -302,7 +302,7 @@ private lemma copyLemma_condMI_X_Y₁_vanishes
     (ZhangYeung.condIndepFun_comp (φ := Prod.fst) (ψ := Prod.snd)
       measurable_fst measurable_snd hCond)
 
-omit [Fintype S₂] [MeasurableSingletonClass S₂] in
+omit [Finite S₂] [MeasurableSingletonClass S₂] in
 /-- `I[X' : X₁ | ⟨Z', U'⟩ ; ν] = 0`: the symmetric companion to `copyLemma_condMI_X_Y₁_vanishes` used by the `X ↔ X₁` variant of Lemma 2. Derived by projecting each measured pair to its first coordinate. -/
 private lemma copyLemma_condMI_X_X₁_vanishes
     (hX' : Measurable X') (hX₁ : Measurable X₁)
@@ -335,7 +335,7 @@ theorem copyLemma_delta_identity_Y₁
   delta_of_condMI_vanishes_eq hX' hZ' hU' hY₁ ν
     (copyLemma_condMI_X_Y₁_vanishes (Y' := Y') hX' hY₁ hCond)
 
-omit [Fintype S₂] [MeasurableSingletonClass S₂] in
+omit [Finite S₂] [MeasurableSingletonClass S₂] in
 /-- **Lemma 2 Form B (symmetric)** [@zhangyeung1998, §III, eq. 45]. The delta identity of Lemma 2 instantiated at the copy's `(X', X₁, Z', U')` projections, the `X ↔ X₁` swap of `copyLemma_delta_identity_Y₁`:
 
   `Δ(Z', U' | X', X₁) = I[X' : X₁] - I[X' : X₁ | Z'] - I[X' : X₁ | U'] - I[Z' : U' | ⟨X', X₁⟩]`
@@ -364,7 +364,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   {S₁ S₂ S₃ S₄ : Type*}
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
-  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
   {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
@@ -391,7 +391,7 @@ theorem copyLemma_delta_transport_Y_to_Y₁
       IdentDistrib.condMutualInfo_eq hZ hU hX hZ' hU' hX' (copyLemma_triple_XFirst hFirst),
       IdentDistrib.condMutualInfo_eq hZ hU hY hZ' hU' hY₁ (copyLemma_triple_YSecond hSecond)]
 
-omit [Fintype S₂] [MeasurableSingletonClass S₂] in
+omit [Finite S₂] [MeasurableSingletonClass S₂] in
 /-- Symmetric bridge identity: `Δ(Z, U | X, X) μ = Δ(Z', U' | X', X₁) ν`. Transports both conditional-MI terms via `copyLemma_triple_XFirst` and `copyLemma_triple_XSecond`. The μ-side has `X` in both conditioner slots, so the two transports target the same pattern syntactically; closing by `linarith` over the two transport equalities sidesteps the ambiguity `rw` would otherwise face. -/
 theorem copyLemma_delta_transport_X_to_X₁
     (hX : Measurable X) (hZ : Measurable Z) (hU : Measurable U)
@@ -436,7 +436,7 @@ theorem copyLemma_delta_le_mutualInfo_Y₁
   have h3 : 0 ≤ I[Z' : U' | ⟨X', Y₁⟩ ; ν] := condMutualInfo_nonneg hZ' hU'
   linarith
 
-omit [Fintype S₂] [MeasurableSingletonClass S₂] in
+omit [Finite S₂] [MeasurableSingletonClass S₂] in
 /-- **Symmetric inequality form of Lemma 2** [@zhangyeung1998, §III, eq. 45]. The `X ↔ X₁` variant,
 
   `I[Z : U ; μ] - 2·I[Z : U | X ; μ] ≤ I[X' : X₁ ; ν]`,

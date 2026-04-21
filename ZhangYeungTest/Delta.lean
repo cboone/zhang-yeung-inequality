@@ -52,7 +52,7 @@ section FiniteAlphabet
 
 variable {Ω : Type*} [MeasurableSpace Ω]
   {S₁ S₂ S₃ S₄ : Type*}
-  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
