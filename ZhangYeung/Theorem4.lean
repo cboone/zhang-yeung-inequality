@@ -128,12 +128,12 @@ theorem shannonCone_of_witness : shannonCone F_witness := by
   refine ⟨?_, ?_, ?_⟩
   · -- `F_witness ∅ = 0`
     change ((F_witness_ℚ ∅ : ℚ) : ℝ) = 0
-    have h : F_witness_ℚ ∅ = 0 := by native_decide
+    have h : F_witness_ℚ ∅ = 0 := by decide
     exact_mod_cast h
   · -- Monotonicity.
     intro α β hαβ
     have h : ∀ α β : Finset (Fin 4), α ⊆ β → F_witness_ℚ α ≤ F_witness_ℚ β := by
-      native_decide
+      decide
     simp only [F_witness_eq_cast]
     exact_mod_cast h α β hαβ
   · -- Submodularity.
@@ -151,20 +151,20 @@ private lemma not_zhangYeungAt_witness_canonical :
     ¬ zhangYeungAt F_witness 2 3 0 1 := by
   intro h
   simp only [zhangYeungAt, delta_F, I_F, condI_F, F_witness_eq_cast] at h
-  have h00 : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by native_decide
-  have h11 : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by native_decide
-  have h22 : F_witness_ℚ ({2} : Finset (Fin 4)) = 2 := by native_decide
-  have h33 : F_witness_ℚ ({3} : Finset (Fin 4)) = 2 := by native_decide
-  have h01 : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ {1}) = 4 := by native_decide
-  have h02 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {0}) = 3 := by native_decide
-  have h03 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {0}) = 3 := by native_decide
-  have h12 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {1}) = 3 := by native_decide
-  have h13 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {1}) = 3 := by native_decide
-  have h23 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3}) = 3 := by native_decide
-  have h023 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {0}) = 4 := by native_decide
-  have h123 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {1}) = 4 := by native_decide
+  have h00 : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by decide
+  have h11 : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by decide
+  have h22 : F_witness_ℚ ({2} : Finset (Fin 4)) = 2 := by decide
+  have h33 : F_witness_ℚ ({3} : Finset (Fin 4)) = 2 := by decide
+  have h01 : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ {1}) = 4 := by decide
+  have h02 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {0}) = 3 := by decide
+  have h03 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {0}) = 3 := by decide
+  have h12 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {1}) = 3 := by decide
+  have h13 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {1}) = 3 := by decide
+  have h23 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3}) = 3 := by decide
+  have h023 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {0}) = 4 := by decide
+  have h123 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {1}) = 4 := by decide
   have h023' : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ (({2} : Finset (Fin 4)) ∪ {3})) = 4 := by
-    native_decide
+    decide
   rw [h00, h11, h22, h33, h01, h02, h03, h12, h13, h23, h023, h123, h023'] at h
   norm_num at h
 
@@ -193,8 +193,6 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   [∀ i, MeasurableSingletonClass (S i)]
   (X : ∀ i : Fin 4, Ω → S i) (μ : Measure Ω) [IsProbabilityMeasure μ]
 
-noncomputable local instance instFintypeS (i : Fin 4) : Fintype (S i) := Fintype.ofFinite (S i)
-
 omit [∀ i, Finite (S i)] in
 /-- Per-subset bridge lemma at the empty subset: `entropyFn X μ ∅ = 0`. The subtype `{j // j ∈ (∅ : Finset (Fin 4))}` is empty, so the dependent-product codomain `∀ j : ∅, S j.1` is a subsingleton; the joint tuple is constant, and its entropy is zero. -/
 lemma entropyFn_empty : entropyFn X μ ∅ = 0 := by
@@ -214,6 +212,7 @@ omit [IsProbabilityMeasure μ] in
 /-- Per-subset bridge lemma at a singleton subset: `entropyFn X μ {i} = H[X i; μ]`. The joint tuple over the single-element subset `{i}` is, up to a measurable bijection into `S i`, just `X i`. -/
 lemma entropyFn_singleton (hX : ∀ i, Measurable (X i)) (i : Fin 4) :
     entropyFn X μ {i} = H[X i ; μ] := by
+  letI : ∀ i, Fintype (S i) := fun i => Fintype.ofFinite (S i)
   simp only [entropyFn, entropyFn_n]
   -- Projection π : (∀ j : {i}, S j.1) → S i sending g to its value at ⟨i, mem⟩.
   let π : (∀ j : ({i} : Finset (Fin 4)), S j.1) → S i :=
@@ -240,6 +239,7 @@ omit [IsProbabilityMeasure μ] in
 lemma entropyFn_pair (hX : ∀ i, Measurable (X i))
     {i j : Fin 4} (h : i ≠ j) :
     entropyFn X μ {i, j} = H[⟨X i, X j⟩ ; μ] := by
+  letI : ∀ i, Fintype (S i) := fun i => Fintype.ofFinite (S i)
   simp only [entropyFn, entropyFn_n]
   -- Projection π : (∀ k : {i, j}, S k.1) → S i × S j evaluating at both indices.
   have hi : i ∈ ({i, j} : Finset (Fin 4)) := by simp
@@ -269,6 +269,7 @@ omit [IsProbabilityMeasure μ] in
 lemma entropyFn_triple (hX : ∀ i, Measurable (X i))
     {i j k : Fin 4} (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
     entropyFn X μ {i, j, k} = H[⟨X i, ⟨X j, X k⟩⟩ ; μ] := by
+  letI : ∀ i, Fintype (S i) := fun i => Fintype.ofFinite (S i)
   simp only [entropyFn, entropyFn_n]
   have hi : i ∈ ({i, j, k} : Finset (Fin 4)) := by simp
   have hj : j ∈ ({i, j, k} : Finset (Fin 4)) := by simp
@@ -299,6 +300,7 @@ omit [IsProbabilityMeasure μ] in
 lemma entropyFn_quad (hX : ∀ i, Measurable (X i)) :
     entropyFn X μ ({0, 1, 2, 3} : Finset (Fin 4))
       = H[⟨X 0, ⟨X 1, ⟨X 2, X 3⟩⟩⟩ ; μ] := by
+  letI : ∀ i, Fintype (S i) := fun i => Fintype.ofFinite (S i)
   simp only [entropyFn, entropyFn_n]
   have h0 : (0 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide
   have h1 : (1 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide

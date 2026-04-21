@@ -112,21 +112,21 @@ table on lines 368-377 at `a = 1`. -/
 
 section WitnessEvaluation
 
-example : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by native_decide
-example : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by native_decide
-example : F_witness_ℚ ({2} : Finset (Fin 4)) = 2 := by native_decide
-example : F_witness_ℚ ({3} : Finset (Fin 4)) = 2 := by native_decide
-example : F_witness_ℚ ({0, 1} : Finset (Fin 4)) = 4 := by native_decide
-example : F_witness_ℚ ({0, 2} : Finset (Fin 4)) = 3 := by native_decide
-example : F_witness_ℚ ({0, 3} : Finset (Fin 4)) = 3 := by native_decide
-example : F_witness_ℚ ({1, 2} : Finset (Fin 4)) = 3 := by native_decide
-example : F_witness_ℚ ({1, 3} : Finset (Fin 4)) = 3 := by native_decide
-example : F_witness_ℚ ({2, 3} : Finset (Fin 4)) = 3 := by native_decide
-example : F_witness_ℚ ({0, 1, 2} : Finset (Fin 4)) = 4 := by native_decide
-example : F_witness_ℚ ({0, 1, 3} : Finset (Fin 4)) = 4 := by native_decide
-example : F_witness_ℚ ({0, 2, 3} : Finset (Fin 4)) = 4 := by native_decide
-example : F_witness_ℚ ({1, 2, 3} : Finset (Fin 4)) = 4 := by native_decide
-example : F_witness_ℚ ({0, 1, 2, 3} : Finset (Fin 4)) = 4 := by native_decide
+example : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by decide
+example : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by decide
+example : F_witness_ℚ ({2} : Finset (Fin 4)) = 2 := by decide
+example : F_witness_ℚ ({3} : Finset (Fin 4)) = 2 := by decide
+example : F_witness_ℚ ({0, 1} : Finset (Fin 4)) = 4 := by decide
+example : F_witness_ℚ ({0, 2} : Finset (Fin 4)) = 3 := by decide
+example : F_witness_ℚ ({0, 3} : Finset (Fin 4)) = 3 := by decide
+example : F_witness_ℚ ({1, 2} : Finset (Fin 4)) = 3 := by decide
+example : F_witness_ℚ ({1, 3} : Finset (Fin 4)) = 3 := by decide
+example : F_witness_ℚ ({2, 3} : Finset (Fin 4)) = 3 := by decide
+example : F_witness_ℚ ({0, 1, 2} : Finset (Fin 4)) = 4 := by decide
+example : F_witness_ℚ ({0, 1, 3} : Finset (Fin 4)) = 4 := by decide
+example : F_witness_ℚ ({0, 2, 3} : Finset (Fin 4)) = 4 := by decide
+example : F_witness_ℚ ({1, 2, 3} : Finset (Fin 4)) = 4 := by decide
+example : F_witness_ℚ ({0, 1, 2, 3} : Finset (Fin 4)) = 4 := by decide
 
 end WitnessEvaluation
 
