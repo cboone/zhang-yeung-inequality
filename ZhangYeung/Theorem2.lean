@@ -26,7 +26,7 @@ This module formalizes the implication (16) ⇒ (17) on finite-alphabet random v
 
 ## Implementation notes
 
-The proof has two structurally distinct layers. The first is a Shannon-type algebraic identity (`theorem2_shannon_identity`) that rewrites `I[X:Y|⟨Z,U⟩] - I[Z:U|⟨X,Y⟩] - I[X:Y|U]` as `Δ(Z, U | X, Y) + I[X:Y|Z] - I[X:Y]`, where `Δ` is `ZhangYeung.delta` from the M1 module. Under (16) the two correction terms `I[X:Y|Z]` and `I[X:Y]` vanish, so Theorem 2 reduces to `Δ(Z, U | X, Y) ≤ 0`. The identity is pure Shannon algebra and needs no hypotheses beyond `IsProbabilityMeasure`.
+The proof has two structurally distinct layers. The first is a Shannon-type algebraic identity (`theorem2_shannon_identity`) that rewrites `I[X:Y|⟨Z,U⟩] - I[Z:U|⟨X,Y⟩] - I[X:Y|U]` as `Δ(Z, U | X, Y) + I[X:Y|Z] - I[X:Y]`, where `Δ` is `ZhangYeung.delta` from the M1 module. Under (16) the two correction terms `I[X:Y|Z]` and `I[X:Y]` vanish, so Theorem 2 reduces to `Δ(Z, U | X, Y) ≤ 0`. The identity is pure Shannon algebra: beyond `IsProbabilityMeasure μ`, it needs only finiteness of the four codomains (`[Finite S₁] … [Finite S₄]`, used to discharge PFR's finite-range obligations on `chain_rule''` and `condMutualInfo_eq`) and measurability of `X, Y, Z, U`.
 
 The second layer (`theorem2_delta_le_zero`) discharges the reduced inequality via the [@zhangyeung1997] argument: construct two auxiliary *probability distributions* on `S₁ × S₂ × S₃ × S₄`,
 
@@ -79,7 +79,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 /-! ### Shannon-algebra reduction -/
 
 omit [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄] in
-/-- **Shannon-type reduction for Theorem 2.** The algebraic identity that rewrites `I[X:Y|⟨Z,U⟩] - I[Z:U|⟨X,Y⟩] - I[X:Y|U]` as `Δ(Z, U | X, Y) + I[X:Y|Z] - I[X:Y]`, where `Δ` is `ZhangYeung.delta`. Under the hypotheses of Theorem 2 (eq. 16), the two correction terms are zero and the Theorem 2 target is equivalent to `Δ(Z, U | X, Y) ≤ 0`. The identity is pure Shannon algebra and needs no hypotheses beyond `IsProbabilityMeasure`. -/
+/-- **Shannon-type reduction for Theorem 2.** The algebraic identity that rewrites `I[X:Y|⟨Z,U⟩] - I[Z:U|⟨X,Y⟩] - I[X:Y|U]` as `Δ(Z, U | X, Y) + I[X:Y|Z] - I[X:Y]`, where `Δ` is `ZhangYeung.delta`. Under the hypotheses of Theorem 2 (eq. 16), the two correction terms are zero and the Theorem 2 target is equivalent to `Δ(Z, U | X, Y) ≤ 0`. The identity is pure Shannon algebra: beyond `IsProbabilityMeasure μ` and measurability of `X, Y, Z, U`, the only assumptions are `[Finite S₁] … [Finite S₄]`, needed to discharge the finite-range obligations on PFR's `chain_rule''` and `condMutualInfo_eq` (the `Fintype` instances on `S₁..S₄` in the surrounding `variable` block are `omit`-ed and reintroduced locally via `Fintype.ofFinite`). -/
 private lemma theorem2_shannon_identity
     {X : Ω → S₁} {Y : Ω → S₂} {Z : Ω → S₃} {U : Ω → S₄}
     [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
