@@ -179,7 +179,7 @@ example
   sorry
 ```
 
-The point of this example is to exercise that the M5 statement at $n = 2$ recovers the integer form of Theorem 3 (the form `delta_form21_iff` converts between). No new theorem; it is a compile-time check that `theorem5` specializes cleanly.
+The code block above is illustrative; the `sorry` stands in for the proof closure that sequencing step 9 lands in `ZhangYeungTest/Theorem5.lean` (a `linarith` over the M5 conclusion plus the pi-to-prod entropy rewrite). The point of this example is to exercise that the M5 statement at $n = 2$ recovers the integer form of Theorem 3 (the form `delta_form21_iff` converts between). No new theorem; it is a compile-time check that `theorem5` specializes cleanly.
 
 ## Proof sketch: the Shannon chase for `theorem5`
 
@@ -278,11 +278,11 @@ theorem theorem5 ... := by
   sorry
 ```
 
-Replace each `sorry` with its body during sequencing steps 5-11 below.
+Replace each `sorry` with its body during sequencing steps 4-7 below (the projection helpers in step 4, the tuple-pair `CondIndepFun` projection in step 5, the n-ary chain-rule helper in step 6, and the chase body itself in step 7).
 
 ### Size and structure
 
-The body of `theorem5` will end up roughly the size of `zhangYeung_integer` (~35 lines) **plus** the helper definitions for the $n$-ary chain-rule MI domination and the pairwise projection of the tuple-level `CondIndepFun` (~40 lines combined). Total new code in `ZhangYeung/Theorem5.lean`: ~200-250 lines including docstrings, matching M3's scale. If the body exceeds 400 lines, halt and reconsider: either factor more of the chase into private helper lemmas, or (more likely) split the $n$-ary chain-rule identity into its own module.
+The body of `theorem5` will track M3's Shannon chase (~45 lines in `zhangYeung_integer`) scaled by the `Fin n` bookkeeping overhead of the summed pairwise-delta and transport families. Total new code in `ZhangYeung/Theorem5.lean`: budget ~400-500 lines including docstrings. The in-tree precedent is bimodal (`ZhangYeung/Theorem3.lean` at 245 lines, `ZhangYeung/CopyLemma.lean` at 469 lines, `ZhangYeung/Theorem2.lean` at 1674 lines), so a ~500-line ceiling is a realistic upper bound and not a signal of reconstruction failure. If the body exceeds 600 lines, halt and reconsider: either factor more of the chase into private helper lemmas, or split the $n$-ary chain-rule identity into its own module. If `mutualInfo_add_n_way_inequality` itself exceeds ~80 lines, pre-emptively split it into its own module (`ZhangYeung/ChainRuleN.lean` or similar); the helper is generic (no Zhang-Yeung-specific content) and is a natural separate module regardless of size.
 
 ## File layout
 
@@ -320,8 +320,7 @@ AGENTS.md (aka CLAUDE.md)   # add two Module Layout entries; note the three help
 │     - `tuple_condIndepFun_pairProj` : project `CondIndepFun Xprime Xstar VZU ν` to a pair (§6.4.2)
 │     - `mutualInfo_add_n_way_inequality` : n-ary chain-rule MI domination / iterated cond. subadditivity (§6.4.3)
 ├── section MainTheorems
-│     - private theorem `theorem5_integer` : the integer-scaled form the chase naturally produces
-│     - theorem `theorem5` : paper eq. (27)
+│     - theorem `theorem5` : paper eq. (27), proved by the Shannon chase in `(Z, U)` order internally with `mutualInfo_comm` / `condMutualInfo_comm` rewrites at the public boundary (no separate `theorem5_integer` stepping-stone -- eq. 27 has no `(1/2)` rescale so the chase closes directly at the paper form, unlike M3)
 │     - theorem `theorem5_averaged` : paper eq. (28)
 └── end ZhangYeung
 ```
@@ -330,7 +329,7 @@ AGENTS.md (aka CLAUDE.md)   # add two Module Layout entries; note the three help
 
 Each commit maintains a green build + lint + test. Each commit is a conventional-commit-styled small unit.
 
-1. **Bootstrap + pre-flight checks.** In the `m5-theorem-5` worktree: `bin/bootstrap-worktree`; confirm `make check` is green with M0-M4 on `main`. Run two pre-flight experiments in a scratch `.lean` file (delete after):
+1. **Bootstrap + pre-flight checks.** In the `m5-theorem-5` worktree: `bin/bootstrap-worktree`; confirm `make check` is green with M0-M4 on `main`. Run two pre-flight experiments in a scratch `.lean` file at `scratch/m5-preflight.lean` (local-only; ensure the path is covered by the worktree's local `.gitignore`, and delete the file before the bootstrap commit). Record the elaborator outcomes (the concrete shape of the copy existential under the tuple specialization, and the resolved namespace for the summation lemmas, or any observed failure mode) in the bootstrap commit's message so the audit leaves a trace even after the scratch file is gone:
 
     1. **PFR primitives grep.** Confirm `condIndep_copies` still exists at `.lake/packages/PFR/PFR/ForMathlib/ConditionalIndependence.lean:135` and its codomain-polymorphic signature still accepts `α := ∀ j : Fin n, S j`. Audit the actual side conditions on the conditioned variable `fun ω => (Z ω, U ω) : Ω → S_Z × S_U`: `[Countable (S_Z × S_U)]`, `[MeasurableSingletonClass (S_Z × S_U)]`, and `[FiniteRange (fun ω => (Z ω, U ω))]` (the last one should be automatic from finite codomain).
     1. **`Finset` summation rehearsal.** Confirm `∑ j : Fin n, H[X j ; μ]` elaborates cleanly with `Finset.univ_sum_le_sum` and `Finset.sum_le_sum` available; confirm `Finset.sum_div` or equivalent is available to close `theorem5_averaged`.
@@ -363,11 +362,9 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
             - H[(fun ω => fun k : Fin n => B k ω) ; μ]
     ```
 
-    Proof plan: rewrite the inequality as `H[⟨B 0, ..., B (n-1)⟩ | A ; μ] ≤ ∑ k, H[B k | A ; μ]` (iterated conditional subadditivity), then prove by induction on `n`. The base case `n = 0` is `H[0 | A ; μ] = 0 ≤ 0`; the base case `n = 1` is reflexive; the inductive step uses `entropy_triple_add_entropy_le` once. The bootstrapped dependency audit did not reveal a ready-made `n`-ary `pi` / `Finset` entropy bound, so this local induction is the primary plan, not a fallback. Budget ~40 lines, split across ~3 private helper lemmas if the induction proof proves fragile (follow the split-before-bump guideline). Commit: `feat(theorem5): prove n-ary MI chain-rule domination`.
+    Proof plan: rewrite the inequality as `H[⟨B 0, ..., B (n-1)⟩ | A ; μ] ≤ ∑ k, H[B k | A ; μ]` (iterated conditional subadditivity), then induct on `n : ℕ` with the `Fin n`-indexed family `B : ∀ k : Fin n, Ω → β k` abstracted at each step. The base case `n = 0` is `H[(⟨⟩ : ∀ k : Fin 0, _) | A ; μ] = 0 ≤ 0`; the base case `n = 1` is reflexive; the inductive step pairs a new coordinate `B_new` with the `Fin n`-subtuple and invokes `entropy_triple_add_entropy_le` once on the triple `(A, ⟨Fin n-subtuple⟩, B_new)`. The likely friction point is the `Fin n` + dependent pi-type abstraction fighting the inductive hypothesis (the family `B` and the codomain family `β` both shrink in lockstep, and `measurable_pi_apply` does not commute cleanly with the shrinking); if that happens on first attempt, fall back early to the `List`-indexed version in §7.4 (`List.rec` sidesteps the pi-type-shrinking issue and converts via `List.ofFn` at the use site). The bootstrapped dependency audit did not reveal a ready-made `n`-ary `pi` / `Finset` entropy bound, so this local induction is the primary plan, not a fallback. Budget ~40 lines, split across ~3 private helper lemmas if the induction proof proves fragile (follow the split-before-bump guideline). Commit: `feat(theorem5): prove n-ary MI chain-rule domination`.
 
-1. **Land `theorem5_integer` as a private theorem.** The main Shannon chase, stated in the natural internal `(Z, U)` order that matches `delta` and the copy-lemma transport steps. Follow the six-step body sketched in §6 above. All helper lemmas already in place; this file is linear. Budget ~60 tactic lines. Commit: `feat(theorem5): prove integer form of Theorem 5 via n-fold copy-lemma chase`.
-
-1. **Land `theorem5` as a public theorem.** Thin wrapper rescaling the integer form and rewriting back to the paper's `I[U : Z]` order via `mutualInfo_comm` / `condMutualInfo_comm`. ≤ 10 lines. Commit: `feat(theorem5): state Theorem 5 in the paper form (eq. 27)`.
+1. **Land `theorem5` as the public theorem.** Run the main Shannon chase in the natural internal `(Z, U)` order that matches `delta` and the copy-lemma transport steps, following the six-step body sketched in §6 above; close with `mutualInfo_comm` / `condMutualInfo_comm` rewrites on the LHS so the public statement reads in the paper's `I[U : Z]` order. All helper lemmas already in place; this file is linear. Budget ~60 tactic lines. Eq. 27 has no `(1/2)` rescale, so the chase closes directly at the paper form and no separate `theorem5_integer` stepping-stone is warranted (unlike M3, where `delta_form21_iff` mediated the rescale boundary). Commit: `feat(theorem5): prove Theorem 5 via n-fold copy-lemma chase`.
 
 1. **Land `theorem5_averaged` as a public theorem.** Average `theorem5` over `i : Fin n` via `Finset.sum_le_sum`. ≤ 20 lines. Commit: `feat(theorem5): derive the averaged symmetric form (eq. 28)`.
 
@@ -384,7 +381,7 @@ Each commit maintains a green build + lint + test. Each commit is a conventional
 
 1. **Open the PR.** Title: `feat: prove Theorem 5, the n+2-variable Zhang-Yeung generalization`. Body links this plan and the roadmap, summarizes `theorem5` and `theorem5_averaged`, and calls out the prerequisite helper promotions (`mutualInfo_add_three_way_identity`, `mutualInfo_le_of_condIndepFun`, `IdentDistrib.condMutualInfo_eq`). Note the base-case compatibility `example` as the core correctness check.
 
-If `theorem5_integer`'s body (step 7) sprawls past 100 lines without closing, halt and reconsider: either split the chase into per-step sub-lemmas (one for "pairwise delta inequality over the copy law", one for "marginal-equality transports", one for "n-ary MI chain-rule step + data processing"), or rescope `mutualInfo_add_n_way_inequality` to take a weaker hypothesis signature that matches what the chase actually supplies. Recap the precedent: M3's `zhangYeung_integer` landed at 45 lines; M5's chase has $O(n)$ more bookkeeping but the same fundamental structure.
+If `theorem5`'s chase body sprawls past 150 lines without closing, halt and reconsider: either split the chase into per-step sub-lemmas (one for "pairwise delta inequality over the copy law", one for "marginal-equality transports", one for "n-ary MI chain-rule step + data processing"), or rescope `mutualInfo_add_n_way_inequality` to take a weaker hypothesis signature that matches what the chase actually supplies. Recap the precedent: M3's `zhangYeung_integer` landed at 45 lines; M5's chase carries an additional $O(n)$ bookkeeping cost in the summed pairwise inequalities and the tuple-level transport, but the same fundamental Shannon-chase structure.
 
 ## Open questions and known risks
 
@@ -412,7 +409,7 @@ The paper omits Theorem 5's proof. The chase above (§6) is a reconstruction via
 
 ### 7.4 Iterated conditional subadditivity (moderate)
 
-The $n$-ary chain-rule identity at step 6 of the chase reduces to
+The $n$-ary chain-rule identity at step 4 of the chase reduces to
 
 $$
 H(\langle B_{1}, \ldots, B_{n}\rangle \mid A) \le \sum_{k=1}^{n} H(B_{k} \mid A).
@@ -459,7 +456,7 @@ The paper requires $n \ge 2$. For $n = 0$ the statement is vacuous (empty sums, 
 
 **Option B:** drop `hn`. The chase proves the statement for all $n ≥ 0$ as long as the copy-lemma invocation does not have an implicit nonnegativity assumption. Quick check: `condIndep_copies` is fine at `n = 0` (the tuple `∀ k : Fin 0, S k` is the unit type), and the `Finset.sum` over `Fin 0` is zero. So the chase should go through. **Caveat:** the averaged form (28) divides by `n`, which is zero at `n = 0` and 1 at `n = 1`; the `n = 0` averaged form needs a separate `if 0 < n` guard.
 
-**Decision:** go with Option A (keep `hn`). Simpler, matches the paper, avoids the averaged-form division-by-zero question.
+**Decision:** go with Option A (keep `hn`). Simpler, matches the paper, avoids the averaged-form division-by-zero question. To be precise: the `theorem5` chase itself goes through for all `n ≥ 0` (empty `Fin 0` sums are `0`; the tuple codomain `∀ k : Fin 0, S k` is the unit type with entropy `0`), so for the point form the `hn` hypothesis is aesthetic and citation-fidelity rather than technical. The averaged form (28) is the one genuine technical reason to retain it -- the `(1/n)` coefficient is ill-defined at `n = 0`.
 
 **Mitigation:** if a downstream milestone needs `theorem5` at `n = 1`, prove a thin wrapper there; do not lift M5's statement.
 
@@ -480,7 +477,7 @@ Operationally:
 - `lake lint` passes.
 - `make check` passes in full.
 
-**Test module contents** (`ZhangYeungTest/Theorem5.lean`, established incrementally in sequencing steps 3 and 10):
+**Test module contents** (`ZhangYeungTest/Theorem5.lean`, established incrementally in sequencing steps 3 and 9):
 
 1. Signature-pinning `example` for each of the two public theorems (`theorem5`, `theorem5_averaged`). Three `example`s total (including the base-case compatibility one).
 1. Base-case compatibility `example` per §5 above: Theorem 5 at `n = 2, i = 0` recovers the integer form of Theorem 3 (the shape `delta_form21_iff` converts between), after the expected `mutualInfo_comm` / `condMutualInfo_comm` rewrites. This is a cross-check that the headline statement specializes cleanly.
@@ -489,7 +486,7 @@ Operationally:
 
 Each `example` lives inside `namespace ZhangYeungTest` with `open ZhangYeung`, following `ZhangYeungTest/Delta.lean`, `ZhangYeungTest/Theorem2.lean`, `ZhangYeungTest/CopyLemma.lean`, `ZhangYeungTest/Theorem3.lean`, and `ZhangYeungTest/Theorem4.lean`.
 
-Land these in the same commits as the corresponding public surface (signatures in step 3, integer form in step 7, public theorems in steps 8-9, smoke + base-case + averaged-form tests in step 10, same branch), so `lake test` exercises the public API continuously through the milestone.
+Land these in the same commits as the corresponding public surface (signatures in step 3, public theorems in steps 7-8, smoke + base-case + averaged-form tests in step 9, same branch), so `lake test` exercises the public API continuously through the milestone.
 
 **Out-of-scope for M5** (documented here so follow-up milestones can pick them up):
 
