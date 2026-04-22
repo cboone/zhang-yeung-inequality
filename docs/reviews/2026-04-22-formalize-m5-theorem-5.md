@@ -1,9 +1,9 @@
 ## Branch Review: formalize/m5-theorem-5
 
 Base: main (merge base: db7483d8)
-Commits: 5
+Commits: 5 (reviewed) + follow-up cleanups
 Files changed: 11 (3 added, 8 modified, 0 deleted, 0 renamed)
-Reviewed through: e322f64
+Reviewed through: e322f64 (both Code Quality issues resolved in follow-up commits; see §Issues to address)
 
 ### Summary
 
@@ -25,9 +25,9 @@ The two donor modules drop the helpers and rely on the public Prelude versions (
 
 **Module wiring.** `ZhangYeung.lean` and `ZhangYeungTest.lean` each gain one `import` line for the new modules.
 
-**Documentation.** `AGENTS.md` (`CLAUDE.md`) gets a new Module Layout entry for `ZhangYeung/Theorem5.lean` and `ZhangYeungTest/Theorem5.lean`, and the existing `ZhangYeung/Prelude.lean` entry is updated to reflect the three new public helpers. The roadmap entry for M5 is tightened to describe the actual proof strategy (single tuple copy + pairwise Lemma 2 + internal induction) instead of the earlier "one auxiliary copy per X_j" phrasing. The full M5 plan lives at `docs/plans/todo/2026-04-22-theorem-5-n-plus-two-variables.md`.
+**Documentation.** `AGENTS.md` (`CLAUDE.md`) gets a new Module Layout entry for `ZhangYeung/Theorem5.lean` and `ZhangYeungTest/Theorem5.lean`, and the existing `ZhangYeung/Prelude.lean` entry is updated to reflect the three new public helpers. The roadmap entry for M5 is tightened to describe the actual proof strategy (single tuple copy + pairwise Lemma 2 + internal induction) instead of the earlier "one auxiliary copy per X_j" phrasing. The full M5 plan lives at `docs/plans/done/2026-04-22-theorem-5-n-plus-two-variables.md`.
 
-**Tooling.** `cspell-words.txt` gains 18 new identifiers / fragments introduced in docstrings and proof bodies (`Binit`, `Btuple`, `castSucc`, `Xprime`, `Xstar`, `Xtuple`, `nlinarith`, `nomatch`, `nsmul`, `succ`, helper-name fragments `hpack`, `hsum`, `htail`, `htuple`, `hdiv`, `hfinal`, `hconst`, plus a duplicate `cboone` entry — see Code Quality below).
+**Tooling.** `cspell-words.txt` gains new identifiers / fragments introduced in docstrings and proof bodies (`Binit`, `Btuple`, `castSucc`, `Xprime`, `Xstar`, `Xtuple`, `nlinarith`, `nomatch`, `nsmul`, `succ`, helper-name fragments `hpack`, `hsum`, `htail`, `htuple`, `hdiv`, `hfinal`, `hconst`).
 
 ### File Inventory
 
@@ -35,7 +35,7 @@ The two donor modules drop the helpers and rely on the public Prelude versions (
 
 - `ZhangYeung/Theorem5.lean`
 - `ZhangYeungTest/Theorem5.lean`
-- `docs/plans/todo/2026-04-22-theorem-5-n-plus-two-variables.md`
+- `docs/plans/done/2026-04-22-theorem-5-n-plus-two-variables.md`
 
 **Modified files (8):**
 
@@ -116,16 +116,10 @@ The implementation matches the plan's intent. Specifically:
 
 #### Issues to address
 
-1. **`(_ : 2 ≤ n)` + `match ‹2 ≤ n› with | _ => …` wrapper in `theorem5`** (`ZhangYeung/Theorem5.lean:218`, `:223-228`).
-   The hypothesis is anonymous, then the conclusion is wrapped in `match ‹2 ≤ n› with | _ => …`. This evaluates to its single arm, so the wrapper is semantically a no-op; its only purpose appears to be consuming the hypothesis to suppress an unused-argument warning. The docstring at `:216` is honest about it ("the proof term itself does not need it"), but the syntax is unidiomatic and obscures the conclusion type when reading the signature.
-   **Fix options, in increasing order of intrusiveness:**
-   - Rename to `(hn : 2 ≤ n)` and accept the unused-variable warning (the lint output should be a one-line warning for one declaration, easy to read past).
-   - Rename to `(_hn : 2 ≤ n)` (underscore-prefixed names suppress the warning while remaining visible to readers).
-   - Drop the hypothesis entirely. The chase goes through at `n = 0, 1` (the plan's §7.7 confirms this for the point form), and the averaged form already carries `hn` for the `(1/n)` division. If the goal is paper fidelity, an `_hn` is the better signal.
-   `theorem5_averaged` already uses the conventional `(hn : 2 ≤ n)` (Theorem5.lean:357) where it is genuinely consumed, so the inconsistency is jarring inside one module.
+1. **`(_ : 2 ≤ n)` + `match ‹2 ≤ n› with | _ => …` wrapper in `theorem5`** (`ZhangYeung/Theorem5.lean:218`, `:223-228`). ✅ Resolved in `0570a91` (rename to `(_hn : 2 ≤ n)`, drop the match wrapper) and the Copilot-feedback follow-up that re-dropped the match wrapper while keeping `@[nolint unusedArguments]` + `_hn` for lint suppression. `theorem5` now matches `theorem5_averaged`'s style.
+   The hypothesis was anonymous, then the conclusion wrapped in `match ‹2 ≤ n› with | _ => …`. This evaluates to its single arm, so the wrapper was semantically a no-op; its only purpose was consuming the hypothesis to suppress an unused-argument warning. The docstring at `:216` is honest about it ("the proof term itself does not need it"), but the syntax was unidiomatic and obscured the conclusion type when reading the signature. `theorem5_averaged` already used the conventional `(hn : 2 ≤ n)` (Theorem5.lean:357) where it is genuinely consumed, so the inconsistency was jarring inside one module.
 
-2. **Duplicate `cboone` entry in `cspell-words.txt`** (lines 19 and 21).
-   The diff inserts `cboone` between `Btuple` and `castSucc` while leaving the existing `cboone` at line 21 untouched. Easy fix: delete one of the two. `make lint` (`markdownlint-cli2 + cspell`) likely tolerates duplicate dictionary entries, but `cspell` explicitly warns about them in some configurations.
+2. **Duplicate `cboone` entry in `cspell-words.txt`** (lines 19 and 21). ✅ Resolved in `e43b9f1` (drop the duplicate that was inserted between `Btuple` and `castSucc`; the pre-existing alphabetized entry stays).
 
 #### Suggestions
 
