@@ -88,7 +88,7 @@ def entropyRegion_n (n : ℕ) : Set (Finset (Fin n) → ℝ) :=
 
 This is the first point where the repository will literally name `Γ_n^*` rather than reasoning around it.
 
-**Universe discipline.** Quantifying existentially over `(Ω : Type u)` and `(S : Fin n → Type u)` inside a `Set (Finset (Fin n) → ℝ)` raises a predicativity concern: the carrier lives in `Type`, so the existential cannot range over an arbitrary universe without an explicit universe parameter on `entropyRegion_n` itself. Pin `Ω` and each `S i` to `Type` (i.e., universe 0) in the definition. This matches how PFR's entropy API is typically instantiated in this repo -- the random-variable families in `Theorem4.lean` already live in a fixed universe -- so the restriction does not cost anything the paper-level theorem actually needs. If a downstream consumer later requires `Type u`-parameterized regions, introduce a polymorphic variant then; do not carry one up front.
+**Universe discipline.** The initial M4.5 landing pinned the `entropyRegion_n` existential to `Type` (universe 0) out of caution about predicativity. That restriction was later removed by the follow-up plan `2026-04-20-entropy-region-universe-polymorphism.md`: `entropyRegion_n` and `almostEntropicRegion_n` now quantify over the ambient universe `u`, so a `Type u` entropy realization is literally a member of the named region sets. The exact theorem layer (`theorem4`, `theorem4_ge_four`) remains unchanged except for inheriting that polymorphic surface.
 
 ### 3. Prove the exact `n = 4` theorem through a closed-cone argument
 
@@ -262,9 +262,9 @@ Mitigation: keep `entropyFn_n` definitionally identical to the current `entropyF
 
 ### 4. Universe polymorphism of `entropyRegion_n`
 
-The entropic region quantifies existentially over a probability space `Ω` and a codomain family `S : Fin n → Type`. Ranging that existential over an arbitrary universe breaks predicativity relative to the carrier `Set (Finset (Fin n) → ℝ)`, which lives in `Type`.
+This risk did materialize as an API follow-up rather than as a blocker for the exact theorem itself: the initial `Type`-pinned region surface left `theorem4_finite` more polymorphic than membership in `entropyRegion_n` and `almostEntropicRegion_n`.
 
-Mitigation: pin both `Ω` and each `S i` to `Type` (universe 0) in the definition of `entropyRegion_n`, per Design §2. A universe-parameterized variant can land later if a downstream consumer demands it; do not introduce one up front.
+Resolution: the follow-up plan `2026-04-20-entropy-region-universe-polymorphism.md` generalized `entropyRegion_n` and `almostEntropicRegion_n` to the ambient universe `u`, and the surrounding transport lemmas and exact-theorem statements were updated to use that shared universe explicitly.
 
 ## Verification
 

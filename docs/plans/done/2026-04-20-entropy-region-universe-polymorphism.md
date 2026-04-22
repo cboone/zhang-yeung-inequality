@@ -1,15 +1,15 @@
 ---
 title: "Universe-polymorphic `entropyRegion_n` for exact Theorem 4"
 created: 2026-04-20
-status: proposed
-branch: TBD
+status: done
+branch: refactor/entropy-region-universe-polymorphism
 roadmap: docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md
 depends_on: M4 / M4.5 (`ZhangYeung/EntropyRegion.lean`, `ZhangYeung/Theorem4.lean`) -- in particular `entropyRegion_n`, `almostEntropicRegion_n`, `restrictFirstFour`, `zhangYeungHolds_of_entropy`, `theorem4`, and `theorem4_ge_four`.
 ---
 
 ## Status
 
-Proposed. Follow-up to the M4.5 exact-closure work that landed on `formalize/m4-theorem-4` (PR #11). Suggested by a Copilot PR review on `ZhangYeung/EntropyRegion.lean:68`. With the Finite/Fintype alignment (`docs/plans/done/2026-04-21-finite-fintype-pfr-alignment-and-native-decide-removal.md`) and the structural-submodularity proof (`docs/plans/done/2026-04-21-theorem4-structural-submodularity-proof.md`) now complete, this is the last open follow-up on the M4 / M4.5 track.
+Done. Route 1 landed. `entropyRegion_n` now quantifies over `(Ω : Type u)` and `(S : Fin n → Type u)`, `almostEntropicRegion_n` closes over that same universe-polymorphic surface, and the immediate consumers (`restrictFirstFour_mem_entropyRegion_n`, `restrictFirstFour_mem_almostEntropicRegion_n`, `theorem4`, `theorem4_ge_four`) now thread the shared universe explicitly. The Lean API tests also pin the direct-membership use case `entropyFn_n X μ ∈ entropyRegion_n.{u} n`, so a `Type u` entropy realization is literally a member of the public region set.
 
 ## Context
 
