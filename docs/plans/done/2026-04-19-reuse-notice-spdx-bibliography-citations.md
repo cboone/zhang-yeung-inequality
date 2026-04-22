@@ -1,14 +1,15 @@
 ---
 title: "REUSE compliance, NOTICE, SPDX coverage, bibliography cleanup, and citation pass"
 created: 2026-04-19
-status: in_progress
+status: done
+branch: main
 scope: bounded repository-maintenance pass covering licensing metadata, bibliography normalization, and mathematical provenance citations.
 depends_on: README.md and LICENSES/ license split updated on 2026-04-19 (`2569cb2 docs: update README and licenses`).
 ---
 
 ## Status
 
-In progress. This plan drives a single implementation pass that (1) brings the repository into REUSE compliance, (2) adds a root `NOTICE` file matching the newly-updated license story, (3) normalizes `references/papers.bib` as the project's canonical bibliography, and (4) fills the remaining high-value mathematical citations in Lean docstrings.
+Done. The repository now has a root `NOTICE`, a root `REUSE.toml`, normalized SPDX license texts under `LICENSES/`, an expanded canonical bibliography at `references/papers.bib`, and the planned provenance citations in the public Lean exposition. The final missing step was adding Apache-2.0 SPDX headers to `ZhangYeung/EntropyRegion.lean`, `ZhangYeung/Theorem4.lean`, `ZhangYeungTest/EntropyRegion.lean`, and `ZhangYeungTest/Theorem4.lean`; with those in place, `reuse lint`, `make lint`, `lake build ZhangYeung`, and `lake test` all pass.
 
 ## Goals
 

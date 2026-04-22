@@ -1,20 +1,15 @@
 ---
 title: "Align `Finite`/`Fintype` usage with PFR and remove `native_decide` from `Theorem4`"
 created: 2026-04-21
-status: proposed
-branch: TBD
+status: done
+branch: main
 roadmap: docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md
 depends_on: Current lint configuration on `main` (`weak.linter.mathlibStandardSet = true` with `weak.linter.style.longLine = false`), plus the post-M4 / M4.5 public surfaces in `ZhangYeung/Delta.lean`, `ZhangYeung/CopyLemma.lean`, `ZhangYeung/Theorem2.lean`, `ZhangYeung/Theorem3.lean`, `ZhangYeung/Theorem4.lean`, and `ZhangYeung/EntropyRegion.lean`.
 ---
 
 ## Status
 
-Proposed follow-up after enabling Mathlib's standard linter set in the root `lakefile.toml`. The immediate style noise (`longLine`, whitespace, goal-changing `show`) has already been handled; the remaining warnings are now concentrated in two policy-relevant buckets:
-
-- `linter.unusedFintypeInType`
-- `linter.style.nativeDecide`
-
-The purpose of this plan is to resolve those warnings by bringing the project's public theorem surface into closer alignment with PFR's actual style, rather than by disabling both lints globally.
+Done. The public theorem surface is now aligned with the intended PFR-style `[Finite]` / proof-local `Fintype` split across `ZhangYeung/Delta.lean`, `ZhangYeung/CopyLemma.lean`, `ZhangYeung/Theorem2.lean`, `ZhangYeung/Theorem3.lean`, `ZhangYeung/EntropyRegion.lean`, and `ZhangYeung/Theorem4.lean`. The remaining `native_decide` use in `Theorem4` was eliminated by the structural witness proof tracked in the sibling follow-up plan. Current verification on `main`: `lake lint`, `lake build ZhangYeung`, and `lake test` all pass, and no `native_decide` occurrences remain in the repository.
 
 ## Context
 

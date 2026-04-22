@@ -1,30 +1,15 @@
 ---
 title: "Replace `native_decide` in `shannonCone_of_witness` with a structural submodularity proof"
 created: 2026-04-21
-status: proposed
-branch: TBD
+status: done
+branch: main
 roadmap: docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md
-depends_on: `docs/plans/todo/2026-04-21-finite-fintype-pfr-alignment-and-native-decide-removal.md`; current `main` with `Delta`, `CopyLemma`, `Theorem2`, `Theorem3`, `EntropyRegion`, and the entropy-function bridge in `Theorem4` already aligned to PFR-style `[Finite]` assumptions.
+depends_on: `docs/plans/done/2026-04-21-finite-fintype-pfr-alignment-and-native-decide-removal.md`; current `main` with `Delta`, `CopyLemma`, `Theorem2`, `Theorem3`, `EntropyRegion`, and the entropy-function bridge in `Theorem4` already aligned to PFR-style `[Finite]` assumptions.
 ---
 
 ## Status
 
-Proposed focused follow-up for the single remaining library-side `native_decide` use in `ZhangYeung/Theorem4.lean`.
-
-Current empirical state:
-
-- `decide` already works for the empty-set witness check in `shannonCone_of_witness`.
-- `decide` already works for the quantified monotonicity branch of `shannonCone_of_witness`.
-- `decide` already works for the concrete witness-value checks used in `not_zhangYeungAt_witness_canonical` and in `ZhangYeungTest/Theorem4.lean`.
-- Only the quantified submodularity branch of `shannonCone_of_witness` still needs `native_decide`.
-
-Failed intermediate attempts already explored:
-
-1. Replace the quantified submodularity proof with `decide` directly.
-2. Rewrite `F_witness_ℚ` into a more automation-friendly cardinality match and retry `decide`.
-3. Split the universal check into explicit `fin_cases` over all `α, β : Finset (Fin 4)`.
-
-All three failed for proof-engineering reasons rather than mathematical ones: rational inequalities such as `4 + 2 ≤ 2 + 4` do not always reduce through Lean's `Decidable` instances in these contexts, and the naive 256-case proof either times out or produces brittle `Finset` representation mismatches.
+Done. `ZhangYeung/Theorem4.lean` now proves witness submodularity structurally, not via `native_decide`. The landed proof follows the plan's preferred route: it decomposes `F_witness_ℚ` into `baseWitness + pairBonus`, proves submodularity for the cardinality-based base piece, isolates the exceptional-pair behavior through local helper lemmas, and reassembles the full witness proof in `F_witness_ℚ_submodular` before feeding that into `shannonCone_of_witness`. Only bounded `decide` checks remain in local canonicalization lemmas and in the concrete witness-evaluation tests.
 
 ## Context
 
