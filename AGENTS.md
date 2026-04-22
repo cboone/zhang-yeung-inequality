@@ -38,14 +38,15 @@ The `make build` target also guards against this: it checks for Mathlib artifact
 
 ## Module Layout
 
-- `ZhangYeung.lean`: project entrypoint (re-exports `ZhangYeung.CopyLemma`, `ZhangYeung.Delta`, `ZhangYeung.EntropyRegion`, `ZhangYeung.Prelude`, `ZhangYeung.Theorem2`, `ZhangYeung.Theorem3`, and `ZhangYeung.Theorem4`)
-- `ZhangYeung/Prelude.lean`: import surface for PFR's entropy API, plus the generic `ZhangYeung.condIndepFun_comp` helper (post-composition of PFR's random-variable-form `CondIndepFun` by measurable codomain functions, promoted from `ZhangYeung/CopyLemma.lean` in M3)
+- `ZhangYeung.lean`: project entrypoint (re-exports `ZhangYeung.CopyLemma`, `ZhangYeung.Delta`, `ZhangYeung.EntropyRegion`, `ZhangYeung.Prelude`, `ZhangYeung.Theorem2`, `ZhangYeung.Theorem3`, `ZhangYeung.Theorem4`, and `ZhangYeung.Theorem5`)
+- `ZhangYeung/Prelude.lean`: import surface for PFR's entropy API, plus the generic helpers `ZhangYeung.condIndepFun_comp`, `IdentDistrib.condMutualInfo_eq`, `ZhangYeung.mutualInfo_add_three_way_identity`, and `ZhangYeung.mutualInfo_le_of_condIndepFun` (promoted from `ZhangYeung/CopyLemma.lean` and `ZhangYeung/Theorem3.lean` in M3/M5)
 - `ZhangYeung/Delta.lean`: M1 delta quantity and equational lemmas
 - `ZhangYeung/EntropyRegion.lean`: generic entropic-region infrastructure for Theorem 4 -- `entropyFn_n`, the set-level regions `shannonRegion_n` / `entropyRegion_n` / `almostEntropicRegion_n`, and the first-four restriction map `restrictFirstFour` with its transport lemmas
 - `ZhangYeung/Theorem2.lean`: M1.5 Zhang-Yeung conditional information inequality (Theorem 2 of the 1998 paper, via a KL-divergence argument on auxiliary `p̃`/`p̂` PMFs)
 - `ZhangYeung/CopyLemma.lean`: M2 Zhang-Yeung copy lemma (§III eqs. 44-45 of the 1998 paper) -- `copyLemma` existential, abstract Lemma 2 `delta_of_condMI_vanishes_eq`, and the six copy-projection corollaries (two transports, two identities, two inequalities)
 - `ZhangYeung/Theorem3.lean`: M3 Zhang-Yeung inequality (Theorem 3 of the 1998 paper, §III eqs. 21-23) -- `zhangYeung` (eq. 21), `zhangYeung_dual` (eq. 22), and `zhangYeung_averaged` (eq. 23), proved by the Shannon chase on the copy joint and routed through the M1 form-conversion lemmas
 - `ZhangYeung/Theorem4.lean`: M4 Shannon incompleteness at `n = 4` and `n ≥ 4` (Theorem 4 of the 1998 paper, §II eq. 26) -- the set-function calculus (`I_F`, `condI_F`, `delta_F`), the cone predicates (`shannonCone`, `zhangYeungAt`, `zhangYeungHolds`), the paper's rational-valued counterexample witness (`F_witness_ℚ`, `F_witness`), the finite auxiliary `theorem4_finite`, the exact closure theorems `theorem4` and `theorem4_ge_four`, the sequence-level auxiliary `theorem4_seqClosure`, and the stronger cone-level corollary `shannon_incomplete_ge_four`
+- `ZhangYeung/Theorem5.lean`: M5 Theorem 5, the `n + 2`-variable Zhang-Yeung generalization (1998, §III eqs. 27-28) -- the tuple-copy projection helpers, the private `mutualInfo_add_n_way_inequality` chain-rule bound, and the public theorems `theorem5` and `theorem5_averaged`
 - `ZhangYeungTest.lean`: top-level re-export for Lean API tests
 - `ZhangYeungTest/Delta.lean`: compile-time API regression tests for the delta module
 - `ZhangYeungTest/EntropyRegion.lean`: compile-time API regression tests for the generic entropy-region module
@@ -53,6 +54,7 @@ The `make build` target also guards against this: it checks for Mathlib artifact
 - `ZhangYeungTest/CopyLemma.lean`: compile-time API regression tests for the copy lemma module
 - `ZhangYeungTest/Theorem3.lean`: compile-time API regression tests for the Theorem 3 module
 - `ZhangYeungTest/Theorem4.lean`: compile-time API regression tests for the Theorem 4 module
+- `ZhangYeungTest/Theorem5.lean`: compile-time API regression tests for the Theorem 5 module
 
 ## Namespace Convention
 
