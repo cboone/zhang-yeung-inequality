@@ -13,6 +13,8 @@
 - **Blueprint:** No. Lean-only.
 - **Mathlib intent:** Copy lemma yes (designed for upstream). Rest of proof stays local.
 
+**Current status:** M0 through M5 are complete on `main`. The remaining open milestone is M6, which now covers documentation sync, release polish, and packaging follow-up on top of the fully landed formalization through Theorem 5.
+
 ## 1. Context
 
 The Zhang-Yeung inequality is the first known *non-Shannon-type* information inequality. Its discovery proved that the Shannon "basic" inequalities (nonnegativity of entropy, conditional entropy, and conditional mutual information) do not fully characterize the set of entropic functions for n >= 4 discrete random variables. The paper contains four main results:
@@ -115,11 +117,11 @@ The copy lemma needs to take a 4-variable joint, form a conditional distribution
 
 Depend on PFR via `lakefile.toml` at a pinned rev. Import only `PFR.ForMathlib.Entropy.{Basic,MutualInfo}` and kernel variants. Ignore Ruzsa distance, group theory, fibring lemma, etc. PFR stays as a permanent dependency; there is no plan to extract or replace it with a local entropy layer. Upgrades to the PFR pin are deliberate work scheduled alongside feature milestones.
 
-## 4. Scope (resolved: S2 + Theorem 5 stretch)
+## 4. Scope (resolved: S2 + Theorem 5)
 
 ### What we are building
 
-**Core (S2):**
+**Core (S2, complete):**
 
 - **Theorem 2 (warm-up; Zhang-Yeung 1997 conditional inequality, restated from [39] as Theorem 2 of the paper):** Under I(X; Y) = I(X; Y | Z) = 0, I(X; Y | Z, U) <= I(Z; U | X, Y) + I(X; Y | U). Uses a single auxiliary copy (a degenerate form of the M2 construction); serves as a warm-up that exercises the construction machinery before the two-copy argument.
 - **Lemma 2 / copy construction (copy lemma):** The highest-leverage artifact. Standalone, reusable, Mathlib-ready. Bundles the auxiliary distribution of eq. (44) and the Delta-identity of Lemma 2 (eq. 45).
@@ -128,9 +130,9 @@ Depend on PFR via `lakefile.toml` at a pinned rev. Import only `PFR.ForMathlib.E
   together with the dual (22) (via X <-> Y swap) and the averaged corollary (23).
 - **Theorem 4 (Shannon is incomplete):** Explicit witness function F in Gamma_4 \ tilde{Gamma}_4, proving cl(Gamma*_n) != Gamma_n for n >= 4.
 
-**Stretch (Theorem 5):**
+**Delivered extension (complete):**
 
-- n+2-variable generalization. Same copy-lemma strategy with induction on n.
+- **Theorem 5.** The `n + 2`-variable Zhang-Yeung generalization now lands on `main` as `ZhangYeung.theorem5` and `ZhangYeung.theorem5_averaged`. The implementation uses a single tuple-valued copy of `(X_1, ..., X_n)` over `(Z, U)`, pairwise Lemma 2 projections, and an internal induction proving the `n`-ary chain-rule domination step.
 
 ## 5. File Layout
 
@@ -141,21 +143,23 @@ zhang-yeung-inequality/
   ZhangYeung.lean             # top-level re-export
   ZhangYeungTest.lean         # top-level re-export for Lean API tests
   ZhangYeung/
-    Prelude.lean              # notation, import surface, namespace setup
+    Prelude.lean              # import surface plus reusable generic Shannon helpers
     Delta.lean                # Delta(Z,U|X,Y), equational lemmas
+    EntropyRegion.lean        # generic entropic-region layer for Theorem 4
     Theorem2.lean             # conditional warm-up (single copy)
     CopyLemma.lean            # Lemma 2, generalized and standalone (Mathlib-ready)
     Theorem3.lean             # the main Zhang-Yeung inequality
-    Theorem4.lean             # cl(Gamma*_n) != Gamma_n, explicit witness
-    Theorem5.lean             # (stretch) n+2-variable generalization
+    Theorem4.lean             # exact entropic-region closure separation at n = 4 and n >= 4
+    Theorem5.lean             # n+2-variable generalization
   ZhangYeungTest/
     Delta.lean                # compile-time API regression tests for Delta
+    EntropyRegion.lean        # entropic-region API regression tests
     Theorem2.lean             # Theorem 2 API and usage tests
     CopyLemma.lean            # copy-lemma API and usage tests
     Theorem3.lean             # theorem-level smoke tests
     Theorem4.lean             # witness arithmetic checks
-    Theorem5.lean             # small-n specialization checks
-  .github/workflows/ci.yml    # CI: lake build + lint
+    Theorem5.lean             # small-n specialization and theorem-application checks
+  .github/workflows/ci.yml    # CI: Lean build plus explicit lint and test steps
 ```
 
 ## 6. Milestone-by-Milestone Plan
@@ -180,7 +184,7 @@ M2 (copy lemma)
 M3 (Thm 3)   M4 (Thm 4, partially parallel -- see note)
  |
  v
-M5 (Thm 5, stretch)
+M5 (Thm 5)
  |
  v
 M6 (polish)
@@ -190,7 +194,7 @@ M6 (polish)
 
 **M4 is partially independent of M3, but substantively needs it.** Theorem 4's full proof has four parts: (a) prove the witness F satisfies the Shannon basic inequalities (independent of M2/M3, pure set-function arithmetic); (b) prove F violates the Zhang-Yeung inequality at a chosen labeling (pure set-function arithmetic); (c) bridge M3 to the set-function level so that every four-variable entropy function is shown to satisfy Zhang-Yeung (this *requires* M3 as more than a black box -- the bridge unwraps M3's conclusion into the set-function `zhangYeungAt` predicate via a family of joint-entropy identities); (d) assemble (a) + (b) + (c) into the headline `theorem4`. Parts (a) and (b) *could* be drafted before M3 lands, but Parts (c) and (d) close over M3 nontrivially. In retrospect the parallelism was marginal.
 
-**M5 depends on M3** (uses the same proof structure plus induction), not on M4.
+**M5 depends on M3** as a proof-level prerequisite and reuses M4's `entropyFn_n` / `Fin n` family conventions at the statement layer.
 
 **Concurrent worktree strategy (historical):** The original plan envisioned Worktree A (M0 → M1 → M1.5 → M2 → M3 → M5) running alongside Worktree B (M4 Parts (a) + (b)) with B waiting for A to finish M3 before proceeding to Parts (c) + (d). In practice M3 has landed on `main` first; M4 now runs as a single follow-on from the M3-ready tip rather than as a parallel track.
 
@@ -198,12 +202,12 @@ M6 (polish)
 
 - Initialize `lakefile.toml` with PFR as a direct dep (pin PFR at a specific rev and defer Mathlib resolution transitively).
 - `lean-toolchain` set by the compatibility check in the root-package layout test.
-- `.github/workflows/ci.yml` running `lake build` and `lake lint`.
-- Ensure a sibling `ZhangYeungTest` library exists and is built by default. If the harness is still missing at M0 time, add it here before proceeding to proof milestones.
+- `.github/workflows/ci.yml` running the Lean build together with explicit `lake lint` and `lake test` steps.
+- Ensure a sibling `ZhangYeungTest` library exists and is wired through `testDriver`. Keep `defaultTargets = ["ZhangYeung"]` so `lake build` and `lake test` stay semantically distinct.
 - Skeleton `ZhangYeung.lean` importing PFR entropy notation; verify it builds.
 - Apply `write-lean-code` skill guidance from the first commit.
-- **Testing:** `lake build` must build both the proof library and the test library, with at least one smoke-test module already wired into `ZhangYeungTest/`.
-- **Deliverable:** green CI build importing PFR entropy notation and building the test harness.
+- **Testing:** `lake build` must build the proof library, `lake test` must build the test library, and at least one smoke-test module must already be wired into `ZhangYeungTest/`.
+- **Deliverable:** green CI build importing PFR entropy notation, with a working test harness invoked by `lake test`.
 
 ### M1: Delta equational lemmas
 
@@ -260,21 +264,21 @@ M6 (polish)
 - **Stretch within M4:** the closure version `theorem4_closure` (upgrading "not an entropy function" to "not a pointwise limit of entropy functions") and the `n ≥ 4` extension. Either may slip to a follow-up milestone if the core Parts (a)-(d) dominate budget.
 - **Post-M4 exactness follow-up:** if M4 lands only the finite `n = 4` witness theorem, the sequence-level closure surrogate, and the cone-level `n ≥ 4` lift, but not the exact entropic-region closure statement `\bar{\Gamma}_n^* \neq \Gamma_n` as named sets, track the remaining work in `docs/plans/todo/2026-04-19-exact-theorem-4-entropic-region-closure.md` rather than silently treating the surrogate theorems as the final paper-level packaging.
 
-### M5: Theorem 5 (stretch)
+### M5: Theorem 5 (complete)
 
-- `ZhangYeung/Theorem5.lean`: n+2-variable generalization.
+- `ZhangYeung/Theorem5.lean`: n+2-variable generalization, now landed as `theorem5` and `theorem5_averaged`.
 - For n+2 RVs U, Z, X_1, ..., X_n and any i in {1,...,n}:
   nI(U; Z) - sum_j I(U; Z | X_j) - nI(U; Z | X_i) <= I(X_i; U, Z) + sum_j H(X_j) - H(X_1, ..., X_n)
-- **Note:** the paper omits the proof ("it can be proved using exactly the same idea used in the proof of Theorem 3 and an inductive argument", p. 1443). M5 therefore requires reconstructing the argument via a single tuple-valued copy of `(X_1, ..., X_n)` over `(Z, U)`, pairwise projections feeding Lemma 2, and an internal induction proving the iterated conditional-subadditivity step. The outer theorem statement itself need not be proved by induction on `n`. Budget accordingly.
-- **Testing:** `ZhangYeungTest/Theorem5.lean` should cover at least one small-`n` specialization and one API-level example showing the theorem rewrites to the expected bound in a concrete index regime.
-- **Checkpoint:** statement over `Fin n -> Omega -> S` with the correct bound; averaged variant (eq. 28) as corollary, and the small-`n` theorem tests build.
+- **Implementation:** the paper omits the proof ("it can be proved using exactly the same idea used in the proof of Theorem 3 and an inductive argument", p. 1443). The landed formalization reconstructs that argument via a single tuple-valued copy of `(X_1, ..., X_n)` over `(Z, U)`, pairwise projections feeding Lemma 2, and an internal induction proving the iterated conditional-subadditivity step. The outer theorem statement itself is not proved by induction on `n`.
+- **Testing:** `ZhangYeungTest/Theorem5.lean` now covers signature pinning, a small-`n` specialization, base-case compatibility with Theorem 3, and an averaged-from-point-form derivation.
+- **Checkpoint:** complete on `main`. See `docs/plans/done/2026-04-22-theorem-5-n-plus-two-variables.md` for the milestone record.
 
 ### M6: Polish and release
 
 - README with theorem statement, install instructions, citation.
 - `write-math`/`write-lean-code`/`lint-and-fix` audit.
-- Audit that every public module added in M1-M5 has a matching `ZhangYeungTest/` module, and make CI fail if `lake build` no longer includes the tests by default.
-- Tag v0.1 once M0-M4 land; v0.2 once M5 lands.
+- Audit that every public module added in M1-M5 has a matching `ZhangYeungTest/` module, and keep `testDriver = "ZhangYeungTest"` paired with `defaultTargets = ["ZhangYeung"]` so `lake build` and `lake test` remain semantically distinct.
+- Finalize release tagging and packaging for the full M0-M5 formalization already merged on `main`.
 
 ## 7. Key Risks and Unknowns
 
@@ -309,7 +313,7 @@ Mathlib's canonical `mutualInfo` namespace is in flux. **Mitigation:** design th
 ## 8. Verification Plan
 
 - **Milestone rule:** every public module added or changed in M0-M5 must land with a matching `ZhangYeungTest/` module that imports only the public surface and proves API-level `example`s against it.
-- **Build gate:** `lake build` must build both `ZhangYeung` and `ZhangYeungTest` by default, and `lake lint` must pass on both libraries.
+- **Build gate:** `lake build` / `make build` build `ZhangYeung`; `lake test` / `make test` build and run `ZhangYeungTest`; `lake lint` must pass on `ZhangYeung`; `make check` remains the repo-wide gate.
 - **API regression tests:** use `ZhangYeungTest/` to catch signature drift, missing re-exports, over-specialized hypotheses, and broken downstream proof scripts.
 - **Small-model checks where practical:** when a milestone has a natural concrete witness or arithmetic sanity check, add it to the matching test module instead of leaving it as prose.
 - **Paper cross-check:** confirm key intermediate identities (for example, the six-variable expansion on p. 1446) match the published derivation when the relevant milestone lands.
@@ -320,7 +324,7 @@ Mathlib's canonical `mutualInfo` namespace is in flux. **Mitigation:** design th
   - M3: `ZhangYeungTest/Theorem3.lean` covering the independent-variable smoke test and the averaged-form (23) derivation.
   - M4: `ZhangYeungTest/Theorem4.lean` covering the witness arithmetic and strict violation.
   - M5: `ZhangYeungTest/Theorem5.lean` covering a small-`n` specialization.
-- **CI:** GitHub Actions should keep using `lake build` and `lake lint`, with the confidence coming from the default targets including the tests.
+- **CI:** GitHub Actions should keep using the Lean build plus explicit `lake lint` and `lake test` steps. Default targets remain the proof library only; the test suite is exercised through `testDriver`.
 
 ## 9. Extensions (future work, post-release)
 
