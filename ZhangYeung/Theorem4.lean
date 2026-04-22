@@ -749,7 +749,7 @@ private lemma not_mem_almostEntropicRegion_witness : F_witness ∉ almostEntropi
   intro hF
   exact not_zhangYeungHolds_witness (almostEntropicRegion_four_subset_zhangYeungRegion_4 hF)
 
-/-- **Theorem 4 of [@zhangyeung1998, §II, eq. 26]** at `n = 4`. The Shannon outer bound `Γ_4` strictly contains the closure of the entropic region: there exists a set function in `Γ_4` that is not almost entropic. -/
+/-- **Theorem 4 of [@zhangyeung1998, §II, eq. 26]** at `n = 4`. The Shannon outer bound `Γ_4` strictly contains the closure of the entropic region: there exists a set function in `Γ_4` that is not almost entropic. The non-membership claim is universe-polymorphic: for every universe `u`, `F_witness ∉ almostEntropicRegion_n.{u} 4`, since the closedness argument in `zhangYeungRegion_4` lives entirely at the level of `Finset (Fin 4) → ℝ`. -/
 theorem theorem4 :
     ∃ F : Finset (Fin 4) → ℝ, F ∈ shannonRegion_n 4 ∧ F ∉ almostEntropicRegion_n.{u} 4 := by
   refine ⟨F_witness, ?_, not_mem_almostEntropicRegion_witness⟩
@@ -839,7 +839,7 @@ theorem shannon_incomplete_ge_four (n : ℕ) (hn : 4 ≤ n) :
     ∃ F : Finset (Fin n) → ℝ, shannonCone_n F ∧ ¬ zhangYeungHolds_n F :=
   ⟨F_witness_n hn, shannonCone_of_witness_n hn, not_zhangYeungHolds_witness_n hn⟩
 
-/-- **Theorem 4 of [@zhangyeung1998, §II, eq. 26]** for all `n ≥ 4`. The Shannon outer bound `Γ_n` strictly contains the closure of the entropic region: there exists a set function in `Γ_n` that is not almost entropic. -/
+/-- **Theorem 4 of [@zhangyeung1998, §II, eq. 26]** for all `n ≥ 4`. The Shannon outer bound `Γ_n` strictly contains the closure of the entropic region: there exists a set function in `Γ_n` that is not almost entropic. The non-membership claim is universe-polymorphic: for every universe `u`, `F_witness_n hn ∉ almostEntropicRegion_n.{u} n`, by restricting any hypothetical almost-entropic realization back down to the first four coordinates and applying the `n = 4` exclusion. -/
 theorem theorem4_ge_four (n : ℕ) (hn : 4 ≤ n) :
     ∃ F : Finset (Fin n) → ℝ, F ∈ shannonRegion_n n ∧ F ∉ almostEntropicRegion_n.{u} n := by
   refine ⟨F_witness_n hn, ?_, ?_⟩

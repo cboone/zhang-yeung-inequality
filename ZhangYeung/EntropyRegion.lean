@@ -74,7 +74,7 @@ def entropyRegion_n (n : ℕ) : Set (Finset (Fin n) → ℝ) :=
       (X : ∀ i : Fin n, Ω → S i),
       (∀ i, Measurable (X i)) ∧ F = entropyFn_n X μ}
 
-/-- The almost-entropic region `closure (Γ_n^*)`. -/
+/-- The almost-entropic region `closure (Γ_n^*)`. Inherits the universe parameter from `entropyRegion_n`: the closure is taken in the same ambient universe `u`, so a point witnessed by a `Type u` entropy function (or a limit of such) is literally a member of the set. -/
 def almostEntropicRegion_n (n : ℕ) : Set (Finset (Fin n) → ℝ) :=
   closure (entropyRegion_n.{u} n)
 
