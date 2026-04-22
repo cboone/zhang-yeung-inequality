@@ -66,17 +66,17 @@ noncomputable abbrev entropyFn
 def shannonRegion_n (n : ℕ) : Set (Finset (Fin n) → ℝ) :=
   {F | shannonCone_n F}
 
-/-- The entropic region `Γ_n^*`, packaged as the set of actual entropy functions of `n` discrete random variables. The quantified probability space and codomain family are pinned to `Type` to keep the carrier in `Type`. -/
+/-- The entropic region `Γ_n^*`, packaged as the set of actual entropy functions of `n` discrete random variables. The quantified probability space and codomain family range over the ambient universe `u`, so a `Type u` realization is literally a member of the set. -/
 def entropyRegion_n (n : ℕ) : Set (Finset (Fin n) → ℝ) :=
-  {F | ∃ (Ω : Type) (_ : MeasurableSpace Ω) (μ : Measure Ω) (_ : IsProbabilityMeasure μ)
-      (S : Fin n → Type) (_ : ∀ i, MeasurableSpace (S i)) (_ : ∀ i, Fintype (S i))
+  {F | ∃ (Ω : Type u) (_ : MeasurableSpace Ω) (μ : Measure Ω) (_ : IsProbabilityMeasure μ)
+      (S : Fin n → Type u) (_ : ∀ i, MeasurableSpace (S i)) (_ : ∀ i, Fintype (S i))
       (_ : ∀ i, MeasurableSingletonClass (S i))
       (X : ∀ i : Fin n, Ω → S i),
       (∀ i, Measurable (X i)) ∧ F = entropyFn_n X μ}
 
-/-- The almost-entropic region `closure (Γ_n^*)`. -/
+/-- The almost-entropic region `closure (Γ_n^*)`. Inherits the universe parameter from `entropyRegion_n`: the closure is taken in the same ambient universe `u`, so a point witnessed by a `Type u` entropy function (or a limit of such) is literally a member of the set. -/
 def almostEntropicRegion_n (n : ℕ) : Set (Finset (Fin n) → ℝ) :=
-  closure (entropyRegion_n n)
+  closure (entropyRegion_n.{u} n)
 
 /-- Restrict a set function on `Fin n` to its first four coordinates. -/
 def restrictFirstFour {n : ℕ} (hn : 4 ≤ n) :
@@ -122,8 +122,8 @@ theorem entropyFn_n_restrictFirstFour
 /-- Entropic points remain entropic after restriction to the first four coordinates. -/
 theorem restrictFirstFour_mem_entropyRegion_n
     {n : ℕ} (hn : 4 ≤ n) {F : Finset (Fin n) → ℝ}
-    (hF : F ∈ entropyRegion_n n) :
-    restrictFirstFour hn F ∈ entropyRegion_n 4 := by
+    (hF : F ∈ entropyRegion_n.{u} n) :
+    restrictFirstFour hn F ∈ entropyRegion_n.{u} 4 := by
   rcases hF with ⟨Ω, hΩ, μ, hμ, S, hS, hFin, hMSC, X, hX, rfl⟩
   letI : MeasurableSpace Ω := hΩ
   letI : IsProbabilityMeasure μ := hμ
@@ -139,9 +139,9 @@ theorem restrictFirstFour_mem_entropyRegion_n
 /-- Almost-entropic points remain almost entropic after restriction to the first four coordinates. -/
 theorem restrictFirstFour_mem_almostEntropicRegion_n
     {n : ℕ} (hn : 4 ≤ n) {F : Finset (Fin n) → ℝ}
-    (hF : F ∈ almostEntropicRegion_n n) :
-    restrictFirstFour hn F ∈ almostEntropicRegion_n 4 := by
-  have h_map : Set.MapsTo (restrictFirstFour hn) (entropyRegion_n n) (entropyRegion_n 4) :=
+    (hF : F ∈ almostEntropicRegion_n.{u} n) :
+    restrictFirstFour hn F ∈ almostEntropicRegion_n.{u} 4 := by
+  have h_map : Set.MapsTo (restrictFirstFour hn) (entropyRegion_n.{u} n) (entropyRegion_n.{u} 4) :=
     fun _ h_mem => restrictFirstFour_mem_entropyRegion_n hn h_mem
   simpa [almostEntropicRegion_n] using h_map.closure (restrictFirstFour_continuous hn) hF
 

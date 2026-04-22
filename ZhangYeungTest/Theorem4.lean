@@ -104,8 +104,8 @@ example :
 
 example :
     ∃ F : Finset (Fin 4) → ℝ,
-      F ∈ shannonRegion_n 4 ∧ F ∉ almostEntropicRegion_n 4 :=
-  theorem4
+      F ∈ shannonRegion_n 4 ∧ F ∉ almostEntropicRegion_n.{u} 4 :=
+  theorem4.{u}
 
 end MainStatements
 
@@ -198,8 +198,8 @@ example (n : ℕ) (hn : 4 ≤ n) :
 closure separation. -/
 example (n : ℕ) (hn : 4 ≤ n) :
     ∃ F : Finset (Fin n) → ℝ,
-      F ∈ shannonRegion_n n ∧ F ∉ almostEntropicRegion_n n :=
-  theorem4_ge_four n hn
+      F ∈ shannonRegion_n n ∧ F ∉ almostEntropicRegion_n.{u} n :=
+  theorem4_ge_four.{u} n hn
 
 /- Pinned signature: `F_witness_n` is the lifted witness. -/
 example {n : ℕ} (hn : 4 ≤ n) : shannonCone_n (F_witness_n hn) :=
