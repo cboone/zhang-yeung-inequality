@@ -34,11 +34,21 @@ example (n : ℕ) : shannonRegion_n n = {F | shannonCone_n F} :=
   rfl
 
 example (n : ℕ) : Set (Finset (Fin n) → ℝ) :=
-  entropyRegion_n n
+  entropyRegion_n.{u} n
 
 example (n : ℕ) :
-    almostEntropicRegion_n n = closure (entropyRegion_n n) :=
+    almostEntropicRegion_n.{u} n = closure (entropyRegion_n.{u} n) :=
   rfl
+
+example
+    {Ω : Type u} [MeasurableSpace Ω]
+    {n : ℕ} {S : Fin n → Type u}
+    [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+    [∀ i, MeasurableSingletonClass (S i)]
+    (X : ∀ i : Fin n, Ω → S i) (hX : ∀ i, Measurable (X i))
+    (μ : Measure Ω) [IsProbabilityMeasure μ] :
+    entropyFn_n X μ ∈ entropyRegion_n.{u} n := by
+  exact ⟨Ω, inferInstance, μ, inferInstance, S, inferInstance, inferInstance, inferInstance, X, hX, rfl⟩
 
 example {n : ℕ} (hn : 4 ≤ n) :
     restrictFirstFour hn = fun F α => F (α.map (Fin.castLEEmb hn)) :=

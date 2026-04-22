@@ -727,7 +727,7 @@ private lemma isClosed_zhangYeungRegion_4 : IsClosed zhangYeungRegion_4 := by
 
 /-- Every entropic point in dimension `4` lies in the closed Zhang-Yeung region. -/
 private lemma entropyRegion_four_subset_zhangYeungRegion_4 :
-    entropyRegion_n 4 ⊆ zhangYeungRegion_4 := by
+    entropyRegion_n.{u} 4 ⊆ zhangYeungRegion_4 := by
   intro F hF
   rcases hF with ⟨Ω, hΩ, μ, hμ, S, hS, hFin, hMSC, X, hX, h_eq⟩
   letI : MeasurableSpace Ω := hΩ
@@ -740,18 +740,18 @@ private lemma entropyRegion_four_subset_zhangYeungRegion_4 :
 
 /-- Every almost-entropic point in dimension `4` lies in the Zhang-Yeung region. -/
 private lemma almostEntropicRegion_four_subset_zhangYeungRegion_4 :
-    almostEntropicRegion_n 4 ⊆ zhangYeungRegion_4 := by
+    almostEntropicRegion_n.{u} 4 ⊆ zhangYeungRegion_4 := by
   simpa [almostEntropicRegion_n] using
     (closure_minimal entropyRegion_four_subset_zhangYeungRegion_4 isClosed_zhangYeungRegion_4)
 
 /-- The witness is not almost entropic in dimension `4`. -/
-private lemma not_mem_almostEntropicRegion_witness : F_witness ∉ almostEntropicRegion_n 4 := by
+private lemma not_mem_almostEntropicRegion_witness : F_witness ∉ almostEntropicRegion_n.{u} 4 := by
   intro hF
   exact not_zhangYeungHolds_witness (almostEntropicRegion_four_subset_zhangYeungRegion_4 hF)
 
 /-- **Theorem 4 of [@zhangyeung1998, §II, eq. 26]** at `n = 4`. The Shannon outer bound `Γ_4` strictly contains the closure of the entropic region: there exists a set function in `Γ_4` that is not almost entropic. -/
 theorem theorem4 :
-    ∃ F : Finset (Fin 4) → ℝ, F ∈ shannonRegion_n 4 ∧ F ∉ almostEntropicRegion_n 4 := by
+    ∃ F : Finset (Fin 4) → ℝ, F ∈ shannonRegion_n 4 ∧ F ∉ almostEntropicRegion_n.{u} 4 := by
   refine ⟨F_witness, ?_, not_mem_almostEntropicRegion_witness⟩
   change shannonCone_n F_witness
   simpa using shannonCone_of_witness
@@ -841,12 +841,12 @@ theorem shannon_incomplete_ge_four (n : ℕ) (hn : 4 ≤ n) :
 
 /-- **Theorem 4 of [@zhangyeung1998, §II, eq. 26]** for all `n ≥ 4`. The Shannon outer bound `Γ_n` strictly contains the closure of the entropic region: there exists a set function in `Γ_n` that is not almost entropic. -/
 theorem theorem4_ge_four (n : ℕ) (hn : 4 ≤ n) :
-    ∃ F : Finset (Fin n) → ℝ, F ∈ shannonRegion_n n ∧ F ∉ almostEntropicRegion_n n := by
+    ∃ F : Finset (Fin n) → ℝ, F ∈ shannonRegion_n n ∧ F ∉ almostEntropicRegion_n.{u} n := by
   refine ⟨F_witness_n hn, ?_, ?_⟩
   · change shannonCone_n (F_witness_n hn)
     exact shannonCone_of_witness_n hn
   · intro hF
-    have h_restrict : F_witness ∈ almostEntropicRegion_n 4 := by
+    have h_restrict : F_witness ∈ almostEntropicRegion_n.{u} 4 := by
       simpa [restrictFirstFour_witness_n hn] using restrictFirstFour_mem_almostEntropicRegion_n hn hF
     exact not_mem_almostEntropicRegion_witness h_restrict
 
