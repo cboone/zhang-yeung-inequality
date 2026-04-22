@@ -265,7 +265,7 @@ M6 (polish)
 - `ZhangYeung/Theorem5.lean`: n+2-variable generalization.
 - For n+2 RVs U, Z, X_1, ..., X_n and any i in {1,...,n}:
   nI(U; Z) - sum_j I(U; Z | X_j) - nI(U; Z | X_i) <= I(X_i; U, Z) + sum_j H(X_j) - H(X_1, ..., X_n)
-- **Note:** the paper omits the proof ("it can be proved using exactly the same idea used in the proof of Theorem 3 and an inductive argument", p. 1443). M5 therefore requires reconstructing the argument: one auxiliary copy per X_j, induction on n, and reassembly via the same marginal-equality + data-processing combination as M3. Budget accordingly.
+- **Note:** the paper omits the proof ("it can be proved using exactly the same idea used in the proof of Theorem 3 and an inductive argument", p. 1443). M5 therefore requires reconstructing the argument via a single tuple-valued copy of `(X_1, ..., X_n)` over `(Z, U)`, pairwise projections feeding Lemma 2, and an internal induction proving the iterated conditional-subadditivity step. The outer theorem statement itself need not be proved by induction on `n`. Budget accordingly.
 - **Testing:** `ZhangYeungTest/Theorem5.lean` should cover at least one small-`n` specialization and one API-level example showing the theorem rewrites to the expected bound in a concrete index regime.
 - **Checkpoint:** statement over `Fin n -> Omega -> S` with the correct bound; averaged variant (eq. 28) as corollary, and the small-`n` theorem tests build.
 

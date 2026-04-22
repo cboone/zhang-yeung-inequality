@@ -10,3 +10,4 @@ import ZhangYeungTest.EntropyRegion
 import ZhangYeungTest.Theorem2
 import ZhangYeungTest.Theorem3
 import ZhangYeungTest.Theorem4
+import ZhangYeungTest.Theorem5

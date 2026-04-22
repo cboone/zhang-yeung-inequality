@@ -28,7 +28,7 @@ Its `X ↔ Y` symmetric partner (eq. 22) and their average (eq. 23) follow by me
 
 The cleanest proof produces the integer-scaled form first (because the chase naturally closes at `2·I[Z:U] - 3·I[Z:U|X] - I[Z:U|Y] ≤ I[X:Y] + I[X:⟨Z, U⟩]`) and converts to the paper's `(1/2)`-scaled form at the end via the M1 `delta_form21_iff` lemma. A private theorem `zhangYeung_integer` captures this intermediate shape, and the three public theorems are thin wrappers that route through the form-conversion lemmas of `ZhangYeung/Delta.lean`.
 
-Two generic Shannon helpers land `private` at the top of the module: `mutualInfo_add_three_way_identity` (the "peeling chain rule twice" identity `I[X:Y] + I[X:Z] = I[X:⟨Y,Z⟩] + I[Y:Z] - I[Y:Z|X]`), and `mutualInfo_le_of_condIndepFun` (the data-processing inequality `CondIndepFun X Y Z μ → I[X:Y] ≤ I[X:Z]`). Neither references the copy construction; both are candidates for later promotion to `ZhangYeung/Prelude.lean` or upstreaming to PFR if a subsequent milestone uses them.
+The two generic Shannon helpers the chase needs now live in `ZhangYeung/Prelude.lean`: `mutualInfo_add_three_way_identity` (the "peeling chain rule twice" identity `I[X:Y] + I[X:Z] = I[X:⟨Y,Z⟩] + I[Y:Z] - I[Y:Z|X]`) and `mutualInfo_le_of_condIndepFun` (the data-processing inequality `CondIndepFun X Y Z μ → I[X:Y] ≤ I[X:Z]`). M3 remains their first consumer; M5 becomes the second.
 
 Two measurable projection helpers (`measurable_pairXZU`, `measurable_pairXY`) package the specific 4-tuple projections the main chase invokes through `IdentDistrib.comp` to extract the pair-level `IdentDistrib`s consumed by `IdentDistrib.mutualInfo_eq`. They are `private` and local to this file; their specific shapes are tied to the chase.
 
@@ -49,59 +49,13 @@ open MeasureTheory ProbabilityTheory
 
 universe u
 
-/-! ### Generic Shannon helpers
+/-! ### Helper projections
 
-Two pure-Shannon-algebra identities (no reference to the copy construction) and two projection-measurability facts local to the Theorem 3 chase. Promoted to `ZhangYeung/Prelude.lean` only if a later milestone needs them. -/
+Two projection-measurability facts local to the Theorem 3 chase. The pure-Shannon helpers consumed below now live in `ZhangYeung/Prelude.lean`. -/
 
 section Helpers
 
 variable {Ω : Type*} [MeasurableSpace Ω]
-
-/-- The three-way interaction identity
-
-  `I[X : Y] + I[X : Z] = I[X : ⟨Y, Z⟩] + I[Y : Z] - I[Y : Z | X]`.
-
-Equivalent to a pair of chain-rule applications on `I[X : ⟨Y, Z⟩]`, together with the defining identity `I[Y : Z | X] = I[Y : Z] - I[X : Y : Z]` for the three-way interaction information. Consumed inside `zhangYeung_integer` at step 2 of the chase (paper line 700). -/
-private lemma mutualInfo_add_three_way_identity
-    {α β γ : Type*}
-    [Finite α] [Finite β] [Finite γ]
-    [MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ]
-    [MeasurableSingletonClass α] [MeasurableSingletonClass β] [MeasurableSingletonClass γ]
-    {X : Ω → α} {Y : Ω → β} {Z : Ω → γ}
-    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z)
-    (μ : Measure Ω) [IsProbabilityMeasure μ] :
-    I[X : Y ; μ] + I[X : Z ; μ]
-      = I[X : ⟨Y, Z⟩ ; μ] + I[Y : Z ; μ] - I[Y : Z | X ; μ] := by
-  have hYZ : Measurable (fun ω => (Y ω, Z ω)) := hY.prodMk hZ
-  simp only [mutualInfo_def]
-  rw [condMutualInfo_eq hY hZ hX μ,
-      chain_rule'' μ hY hX, chain_rule'' μ hZ hX, chain_rule'' μ hYZ hX]
-  have e_XY : H[⟨X, Y⟩ ; μ] = H[⟨Y, X⟩ ; μ] := entropy_comm hX hY μ
-  have e_XZ : H[⟨X, Z⟩ ; μ] = H[⟨Z, X⟩ ; μ] := entropy_comm hX hZ μ
-  have e_X_YZ : H[⟨X, ⟨Y, Z⟩⟩ ; μ] = H[⟨⟨Y, Z⟩, X⟩ ; μ] := entropy_comm hX hYZ μ
-  linarith [e_XY, e_XZ, e_X_YZ]
-
-/-- Data processing for PFR's random-variable form of `CondIndepFun`: if `X` and `Y` are conditionally independent given `Z`, then `I[X : Y] ≤ I[X : Z]`. Consumed inside `zhangYeung_integer` at step 4 of the chase (paper line 708). -/
-private lemma mutualInfo_le_of_condIndepFun
-    {α β γ : Type*}
-    [Finite α] [Finite β] [Finite γ]
-    [MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ]
-    [MeasurableSingletonClass α] [MeasurableSingletonClass β] [MeasurableSingletonClass γ]
-    {X : Ω → α} {Y : Ω → β} {Z : Ω → γ}
-    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z)
-    (μ : Measure Ω) [IsProbabilityMeasure μ]
-    (h : CondIndepFun X Y Z μ) :
-    I[X : Y ; μ] ≤ I[X : Z ; μ] := by
-  have h_ent : H[⟨X, ⟨Y, Z⟩⟩ ; μ] = H[⟨X, Z⟩ ; μ] + H[⟨Y, Z⟩ ; μ] - H[Z ; μ] :=
-    ent_of_cond_indep μ hX hY hZ h
-  have h_sub : H[⟨X, ⟨Z, Y⟩⟩ ; μ] + H[Y ; μ] ≤ H[⟨X, Y⟩ ; μ] + H[⟨Z, Y⟩ ; μ] :=
-    entropy_triple_add_entropy_le μ hX hZ hY
-  have e_inner : H[⟨X, ⟨Z, Y⟩⟩ ; μ] = H[⟨X, ⟨Y, Z⟩⟩ ; μ] := by
-    rw [chain_rule' μ hX (hZ.prodMk hY), chain_rule' μ hX (hY.prodMk hZ),
-        condEntropy_comm hZ hY]
-  have e_ZY : H[⟨Z, Y⟩ ; μ] = H[⟨Y, Z⟩ ; μ] := entropy_comm hZ hY μ
-  simp only [mutualInfo_def]
-  linarith [h_ent, h_sub, e_inner, e_ZY]
 
 /-- Measurability of the `(a, b, c, d) ↦ (a, (c, d))` projection, extracting the `(X, ⟨Z, U⟩)` pair from a right-associated 4-tuple. Consumed by `zhangYeung_integer` for the first marginal-equality transport. -/
 private lemma measurable_pairXZU

@@ -36,7 +36,7 @@ The four codomains `S₁, S₂, S₃, S₄` are bound at a common universe `u` b
 
 The derived corollaries (delta transports, delta identities, delta ≤ mutualInfo) live in their own `section Consequences` with a shared `variable` block packaging the eight relevant hypotheses (six measurabilities, two `IdentDistrib`s, one `CondIndepFun`). A caller of `copyLemma` produces these eight hypotheses with one `obtain`, then applies the corollaries as black-box Shannon identities.
 
-`ZhangYeung.condIndepFun_comp` (post-composition of `CondIndepFun` on its two measured coordinates) was promoted to `ZhangYeung/Prelude.lean` when M3 became its second consumer. `IdentDistrib.condMutualInfo_eq` (conditional-mutual-information transport under a three-variable `IdentDistrib`) is still `private` here; M3 does not need it, but a later milestone that transports a conditional mutual information across the copy law could motivate promotion.
+`ZhangYeung.condIndepFun_comp` (post-composition of `CondIndepFun` on its two measured coordinates) was promoted to `ZhangYeung/Prelude.lean` when M3 became its second consumer. `IdentDistrib.condMutualInfo_eq` now lives there as well, promoted for M5's tuple-level delta transports.
 
 ## References
 
@@ -52,50 +52,6 @@ namespace ZhangYeung
 open MeasureTheory ProbabilityTheory
 
 universe u
-
-/-! ### Generic helpers
-
-One primitive the main construction depends on: a conditional-mutual-information transport lemma under a three-variable `IdentDistrib` (PFR exposes `IdentDistrib.mutualInfo_eq` and `IdentDistrib.condEntropy_eq` but not this conditional variant). It is `private` here; if a later milestone needs it, promote to `ZhangYeung/Prelude.lean`. The companion helper `ZhangYeung.condIndepFun_comp` (post-composition of `CondIndepFun` on its two measured coordinates) lives in `ZhangYeung/Prelude.lean`: it was promoted there when M3 became its second consumer. -/
-
-section Helpers
-
-/-- Substituting variables for identically-distributed ones leaves the conditional mutual information unchanged. PFR's `IdentDistrib.condEntropy_eq` and `IdentDistrib.mutualInfo_eq` cover the `condEntropy` and `mutualInfo` cases respectively; this lemma combines the two to transport `condMutualInfo` under a three-variable `IdentDistrib` on the packed triple `⟨X, Y, Z⟩`. The three sub-`IdentDistrib`s for `⟨X, Z⟩`, `⟨Y, Z⟩`, and `⟨⟨X, Y⟩, Z⟩` are extracted from the triple by one `IdentDistrib.comp` with a measurable projection each. -/
-private lemma IdentDistrib.condMutualInfo_eq
-    {Ω Ω' : Type*} [MeasurableSpace Ω] [MeasurableSpace Ω']
-    {S T U : Type*}
-    [MeasurableSpace S] [MeasurableSpace T] [MeasurableSpace U]
-    [MeasurableSingletonClass S] [MeasurableSingletonClass T] [MeasurableSingletonClass U]
-    [Finite S] [Finite T] [Finite U]
-    {μ : Measure Ω} {μ' : Measure Ω'}
-    [IsProbabilityMeasure μ] [IsProbabilityMeasure μ']
-    {X : Ω → S} {Y : Ω → T} {Z : Ω → U}
-    {X' : Ω' → S} {Y' : Ω' → T} {Z' : Ω' → U}
-    (hX : Measurable X) (hY : Measurable Y) (hZ : Measurable Z)
-    (hX' : Measurable X') (hY' : Measurable Y') (hZ' : Measurable Z')
-    (h : IdentDistrib (fun ω => (X ω, Y ω, Z ω))
-                      (fun ω' => (X' ω', Y' ω', Z' ω')) μ μ') :
-    I[X : Y | Z ; μ] = I[X' : Y' | Z' ; μ'] := by
-  have hXZ : IdentDistrib (fun ω => (X ω, Z ω)) (fun ω' => (X' ω', Z' ω')) μ μ' :=
-    h.comp (measurable_fst.prodMk (measurable_snd.comp measurable_snd))
-  have hYZ : IdentDistrib (fun ω => (Y ω, Z ω)) (fun ω' => (Y' ω', Z' ω')) μ μ' :=
-    h.comp ((measurable_fst.comp measurable_snd).prodMk (measurable_snd.comp measurable_snd))
-  have hXYZ : IdentDistrib (fun ω => ((X ω, Y ω), Z ω))
-      (fun ω' => ((X' ω', Y' ω'), Z' ω')) μ μ' :=
-    h.comp ((measurable_fst.prodMk (measurable_fst.comp measurable_snd)).prodMk
-      (measurable_snd.comp measurable_snd))
-  have eHX : H[X | Z ; μ] = H[X' | Z' ; μ'] :=
-    IdentDistrib.condEntropy_eq hX hZ hX' hZ' hXZ
-  have eHY : H[Y | Z ; μ] = H[Y' | Z' ; μ'] :=
-    IdentDistrib.condEntropy_eq hY hZ hY' hZ' hYZ
-  have eHXY : H[⟨X, Y⟩ | Z ; μ] = H[⟨X', Y'⟩ | Z' ; μ'] :=
-    IdentDistrib.condEntropy_eq (hX.prodMk hY) hZ (hX'.prodMk hY') hZ' hXYZ
-  calc I[X : Y | Z ; μ]
-      = H[X | Z ; μ] + H[Y | Z ; μ] - H[⟨X, Y⟩ | Z ; μ] :=
-        ProbabilityTheory.condMutualInfo_eq hX hY hZ μ
-    _ = H[X' | Z' ; μ'] + H[Y' | Z' ; μ'] - H[⟨X', Y'⟩ | Z' ; μ'] := by rw [eHX, eHY, eHXY]
-    _ = I[X' : Y' | Z' ; μ'] := (ProbabilityTheory.condMutualInfo_eq hX' hY' hZ' μ').symm
-
-end Helpers
 
 /-! ### The main copy construction -/
 
