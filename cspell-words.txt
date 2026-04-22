@@ -16,7 +16,6 @@ bibtex
 Boege
 Borel
 Btuple
-cboone
 castSucc
 cboone
 checkdecls
