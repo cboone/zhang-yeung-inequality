@@ -215,17 +215,15 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 
 /-- **Theorem 5 of [@zhangyeung1998, §III, eq. 27]** -- the `n + 2`-variable Zhang-Yeung inequality, indexed by a distinguished coordinate `i : Fin n`. The explicit `2 ≤ n` hypothesis matches the paper statement even though the proof term itself does not need it. -/
 theorem theorem5
-    (_ : 2 ≤ n)
+    (_hn : 2 ≤ n)
     {U : Ω → S_U} {Z : Ω → S_Z} {X : ∀ i : Fin n, Ω → S i}
     (hU : Measurable U) (hZ : Measurable Z) (hX : ∀ i, Measurable (X i))
     (μ : Measure Ω) [IsProbabilityMeasure μ]
     (i : Fin n) :
-    match ‹2 ≤ n› with
-    | _ =>
-        n * I[U : Z ; μ] - ∑ j, I[U : Z | X j ; μ] - n * I[U : Z | X i ; μ]
-          ≤ I[X i : ⟨U, Z⟩ ; μ]
-            + ∑ j, H[X j ; μ]
-            - H[(fun ω : Ω => fun j : Fin n => X j ω) ; μ] := by
+    n * I[U : Z ; μ] - ∑ j, I[U : Z | X j ; μ] - n * I[U : Z | X i ; μ]
+      ≤ I[X i : ⟨U, Z⟩ ; μ]
+        + ∑ j, H[X j ; μ]
+        - H[(fun ω : Ω => fun j : Fin n => X j ω) ; μ] := by
   let Xtuple : Ω → (∀ j : Fin n, S j) := fun ω j => X j ω
   let ZU : Ω → S_Z × S_U := fun ω => (Z ω, U ω)
   have hXtuple : Measurable Xtuple := measurable_pi_lambda _ hX
