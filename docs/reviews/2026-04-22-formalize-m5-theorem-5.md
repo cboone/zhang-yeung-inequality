@@ -16,6 +16,7 @@ This branch lands milestone M5 of the Zhang-Yeung formalization roadmap: the n+2
 **Test surface (new module).** `ZhangYeungTest/Theorem5.lean` (188 lines, new). Two signature-pinning `example`s, one `n = 2` base-case-compatibility `example` that recovers the Theorem 3 integer form, one assumption-level smoke test at `n = 3`, and one averaged-from-point-form derivation at `n = 3`.
 
 **Generic-helper promotion.** Three previously `private` helpers are moved to `ZhangYeung/Prelude.lean`:
+
 - `IdentDistrib.condMutualInfo_eq` (from `ZhangYeung/CopyLemma.lean`).
 - `mutualInfo_add_three_way_identity` (from `ZhangYeung/Theorem3.lean`).
 - `mutualInfo_le_of_condIndepFun` (from `ZhangYeung/Theorem3.lean`).
@@ -31,11 +32,13 @@ The two donor modules drop the helpers and rely on the public Prelude versions (
 ### File Inventory
 
 **New files (3):**
+
 - `ZhangYeung/Theorem5.lean`
 - `ZhangYeungTest/Theorem5.lean`
 - `docs/plans/todo/2026-04-22-theorem-5-n-plus-two-variables.md`
 
 **Modified files (8):**
+
 - `AGENTS.md`
 - `ZhangYeung.lean`
 - `ZhangYeung/CopyLemma.lean`
@@ -91,6 +94,7 @@ None.
 #### Fidelity concerns
 
 The implementation matches the plan's intent. Specifically:
+
 - The chase runs in `(Z, U)` order internally and rewrites at the boundary, exactly as §6.4 stipulates.
 - `mutualInfo_add_n_way_inequality` is built locally from `entropy_triple_add_entropy_le` via `Nat.rec`, exactly as §7.4 anticipated, and the predicted fallback to `List`-indexed induction was not needed.
 - The plan's risk-7.1 (tuple-codomain `condIndep_copies`) materialized cleanly: the elaboration cost is one `let Xtuple := fun ω j => X j ω` plus `measurable_pi_lambda` (`Theorem5.lean:271`), with no awkward casting.

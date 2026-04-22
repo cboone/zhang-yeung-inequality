@@ -123,6 +123,7 @@ nbij
 Motzkin
 nilpotent
 nomatch
+nolint
 noncomputable
 nsmul
 nonneg
