@@ -225,117 +225,115 @@ theorem theorem5
       ≤ I[X i : ⟨U, Z⟩ ; μ]
         + ∑ j, H[X j ; μ]
         - H[(fun ω : Ω => fun j : Fin n => X j ω) ; μ] := by
-  match _hn with
-  | _ =>
-      let Xtuple : Ω → (∀ j : Fin n, S j) := fun ω j => X j ω
-      let ZU : Ω → S_Z × S_U := fun ω => (Z ω, U ω)
-      have hXtuple : Measurable Xtuple := measurable_pi_lambda _ hX
-      have hZU : Measurable ZU := hZ.prodMk hU
-      obtain ⟨Ω', mΩ', Xprime, Xstar, V, ν, hν, hXprime, hXstar, hV, hCond, hFirst, hSecond⟩ :=
-        condIndep_copies Xtuple ZU hXtuple hZU μ
-      letI : MeasurableSpace Ω' := mΩ'
-      letI : IsProbabilityMeasure ν := hν
-      let Z' : Ω' → S_Z := fun ω => (V ω).1
-      let U' : Ω' → S_U := fun ω => (V ω).2
-      let X' : ∀ j : Fin n, Ω' → S j := fun j ω => Xprime ω j
-      let XstarCoord : ∀ j : Fin n, Ω' → S j := fun j ω => Xstar ω j
-      have hZ' : Measurable Z' := measurable_fst.comp hV
-      have hU' : Measurable U' := measurable_snd.comp hV
-      have hX' : ∀ j, Measurable (X' j) := fun j => (measurable_pi_apply j).comp hXprime
-      have hXstarCoord : ∀ j, Measurable (XstarCoord j) := fun j => (measurable_pi_apply j).comp hXstar
-      have hPair : ∀ k : Fin n, delta Z' U' (X' i) (XstarCoord k) ν ≤ I[X' i : XstarCoord k ; ν] := by
-        intro k
-        have hVanish : I[X' i : XstarCoord k | (fun ω' => (Z' ω', U' ω')) ; ν] = 0 := by
-          simpa [Z', U'] using (condMutualInfo_eq_zero (hX' i) (hXstarCoord k)).mpr
-            (tuple_condIndepFun_pairProj i k hCond)
-        rw [delta_of_condMI_vanishes_eq (hX' i) hZ' hU' (hXstarCoord k) ν hVanish]
-        have h1 : 0 ≤ I[X' i : XstarCoord k | Z' ; ν] := condMutualInfo_nonneg (hX' i) (hXstarCoord k)
-        have h2 : 0 ≤ I[X' i : XstarCoord k | U' ; ν] := condMutualInfo_nonneg (hX' i) (hXstarCoord k)
-        have h3 : 0 ≤ I[Z' : U' | ⟨X' i, XstarCoord k⟩ ; ν] := condMutualInfo_nonneg hZ' hU'
-        linarith
-      have hTransport : ∀ k : Fin n, delta Z U (X i) (X k) μ = delta Z' U' (X' i) (XstarCoord k) ν := by
-        intro k
-        have hPairZU : IdentDistrib (fun ω => (Z ω, U ω)) (fun ω' => (Z' ω', U' ω')) μ ν :=
-          hFirst.symm.comp measurable_pairZU
-        have hTripleFirst :
-            IdentDistrib (fun ω => (Z ω, U ω, X i ω)) (fun ω' => (Z' ω', U' ω', X' i ω')) μ ν :=
-          hFirst.symm.comp (measurable_projZUX i)
-        have hTripleSecond :
-            IdentDistrib (fun ω => (Z ω, U ω, X k ω)) (fun ω' => (Z' ω', U' ω', XstarCoord k ω')) μ ν :=
-          hSecond.symm.comp (measurable_projZUX k)
-        rw [delta_def, delta_def, hPairZU.mutualInfo_eq,
-          IdentDistrib.condMutualInfo_eq hZ hU (hX i) hZ' hU' (hX' i) hTripleFirst,
-          IdentDistrib.condMutualInfo_eq hZ hU (hX k) hZ' hU' (hXstarCoord k) hTripleSecond]
-      have hDeltaSum :
-          ∑ k : Fin n, delta Z U (X i) (X k) μ
-            = n * I[Z : U ; μ] - n * I[Z : U | X i ; μ] - ∑ k : Fin n, I[Z : U | X k ; μ] := by
-        simp_rw [delta_def]
-        rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib, Finset.sum_const, Finset.sum_const]
-        simp [nsmul_eq_mul, Fintype.card_fin]
-      have hSum :
-          n * I[Z : U ; μ] - n * I[Z : U | X i ; μ] - ∑ k : Fin n, I[Z : U | X k ; μ]
-            ≤ ∑ k : Fin n, I[X' i : XstarCoord k ; ν] := by
-        calc
-          n * I[Z : U ; μ] - n * I[Z : U | X i ; μ] - ∑ k : Fin n, I[Z : U | X k ; μ]
-            = ∑ k : Fin n, delta Z U (X i) (X k) μ := hDeltaSum.symm
-          _ = ∑ k : Fin n, delta Z' U' (X' i) (XstarCoord k) ν := by
-            refine Finset.sum_congr rfl ?_
-            intro k _
-            exact hTransport k
-          _ ≤ ∑ k : Fin n, I[X' i : XstarCoord k ; ν] := Finset.sum_le_sum fun k _ => hPair k
-      have hChain := mutualInfo_add_n_way_inequality (A := X' i) (B := XstarCoord) (hX' i) hXstarCoord ν
-      have hCondProj :
-          CondIndepFun (X' i) (fun ω' => fun k : Fin n => XstarCoord k ω') (fun ω' => (Z' ω', U' ω')) ν := by
-        simpa [X', XstarCoord, Z', U'] using
-          (ZhangYeung.condIndepFun_comp (φ := fun x => x i) (ψ := id)
-            (measurable_pi_apply i) measurable_id hCond)
-      have hDP :
-          I[X' i : (fun ω' => fun k : Fin n => XstarCoord k ω') ; ν]
-            ≤ I[X' i : (fun ω' => (Z' ω', U' ω')) ; ν] :=
-        mutualInfo_le_of_condIndepFun (hX' i) hXstar (hZ'.prodMk hU') ν hCondProj
-      have hMargXZU :
-          I[X' i : (fun ω' => (Z' ω', U' ω')) ; ν]
-            = I[X i : (fun ω => (Z ω, U ω)) ; μ] := by
-        have hPairXZU :
-            IdentDistrib (fun ω => (X i ω, (Z ω, U ω)))
-              (fun ω' => (X' i ω', (Z' ω', U' ω'))) μ ν :=
-          hFirst.symm.comp (measurable_pairXZU i)
-        exact hPairXZU.mutualInfo_eq.symm
-      have hTupleSecond :
-          IdentDistrib (fun ω' => fun k : Fin n => XstarCoord k ω') (fun ω => fun k : Fin n => X k ω) ν μ := by
-        simpa [Xtuple, XstarCoord] using (hSecond.comp measurable_fst)
-      have hMargJoint :
-          H[(fun ω' => fun k : Fin n => XstarCoord k ω') ; ν] = H[(fun ω : Ω => fun k : Fin n => X k ω) ; μ] :=
-        hTupleSecond.entropy_congr
-      have hMargSingle : ∀ k : Fin n, H[XstarCoord k ; ν] = H[X k ; μ] := by
-        intro k
-        have hCoord : IdentDistrib (XstarCoord k) (X k) ν μ := by
-          simpa [Xtuple, XstarCoord] using (hTupleSecond.comp (measurable_pi_apply k))
-        exact hCoord.entropy_congr
-      have hMargSingles : ∑ k : Fin n, H[XstarCoord k ; ν] = ∑ k : Fin n, H[X k ; μ] := by
+  let Xtuple : Ω → (∀ j : Fin n, S j) := fun ω j => X j ω
+  let ZU : Ω → S_Z × S_U := fun ω => (Z ω, U ω)
+  have hXtuple : Measurable Xtuple := measurable_pi_lambda _ hX
+  have hZU : Measurable ZU := hZ.prodMk hU
+  obtain ⟨Ω', mΩ', Xprime, Xstar, V, ν, hν, hXprime, hXstar, hV, hCond, hFirst, hSecond⟩ :=
+    condIndep_copies Xtuple ZU hXtuple hZU μ
+  letI : MeasurableSpace Ω' := mΩ'
+  letI : IsProbabilityMeasure ν := hν
+  let Z' : Ω' → S_Z := fun ω => (V ω).1
+  let U' : Ω' → S_U := fun ω => (V ω).2
+  let X' : ∀ j : Fin n, Ω' → S j := fun j ω => Xprime ω j
+  let XstarCoord : ∀ j : Fin n, Ω' → S j := fun j ω => Xstar ω j
+  have hZ' : Measurable Z' := measurable_fst.comp hV
+  have hU' : Measurable U' := measurable_snd.comp hV
+  have hX' : ∀ j, Measurable (X' j) := fun j => (measurable_pi_apply j).comp hXprime
+  have hXstarCoord : ∀ j, Measurable (XstarCoord j) := fun j => (measurable_pi_apply j).comp hXstar
+  have hPair : ∀ k : Fin n, delta Z' U' (X' i) (XstarCoord k) ν ≤ I[X' i : XstarCoord k ; ν] := by
+    intro k
+    have hVanish : I[X' i : XstarCoord k | (fun ω' => (Z' ω', U' ω')) ; ν] = 0 := by
+      simpa [Z', U'] using (condMutualInfo_eq_zero (hX' i) (hXstarCoord k)).mpr
+        (tuple_condIndepFun_pairProj i k hCond)
+    rw [delta_of_condMI_vanishes_eq (hX' i) hZ' hU' (hXstarCoord k) ν hVanish]
+    have h1 : 0 ≤ I[X' i : XstarCoord k | Z' ; ν] := condMutualInfo_nonneg (hX' i) (hXstarCoord k)
+    have h2 : 0 ≤ I[X' i : XstarCoord k | U' ; ν] := condMutualInfo_nonneg (hX' i) (hXstarCoord k)
+    have h3 : 0 ≤ I[Z' : U' | ⟨X' i, XstarCoord k⟩ ; ν] := condMutualInfo_nonneg hZ' hU'
+    linarith
+  have hTransport : ∀ k : Fin n, delta Z U (X i) (X k) μ = delta Z' U' (X' i) (XstarCoord k) ν := by
+    intro k
+    have hPairZU : IdentDistrib (fun ω => (Z ω, U ω)) (fun ω' => (Z' ω', U' ω')) μ ν :=
+      hFirst.symm.comp measurable_pairZU
+    have hTripleFirst :
+        IdentDistrib (fun ω => (Z ω, U ω, X i ω)) (fun ω' => (Z' ω', U' ω', X' i ω')) μ ν :=
+      hFirst.symm.comp (measurable_projZUX i)
+    have hTripleSecond :
+        IdentDistrib (fun ω => (Z ω, U ω, X k ω)) (fun ω' => (Z' ω', U' ω', XstarCoord k ω')) μ ν :=
+      hSecond.symm.comp (measurable_projZUX k)
+    rw [delta_def, delta_def, hPairZU.mutualInfo_eq,
+      IdentDistrib.condMutualInfo_eq hZ hU (hX i) hZ' hU' (hX' i) hTripleFirst,
+      IdentDistrib.condMutualInfo_eq hZ hU (hX k) hZ' hU' (hXstarCoord k) hTripleSecond]
+  have hDeltaSum :
+      ∑ k : Fin n, delta Z U (X i) (X k) μ
+        = n * I[Z : U ; μ] - n * I[Z : U | X i ; μ] - ∑ k : Fin n, I[Z : U | X k ; μ] := by
+    simp_rw [delta_def]
+    rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib, Finset.sum_const, Finset.sum_const]
+    simp [nsmul_eq_mul, Fintype.card_fin]
+  have hSum :
+      n * I[Z : U ; μ] - n * I[Z : U | X i ; μ] - ∑ k : Fin n, I[Z : U | X k ; μ]
+        ≤ ∑ k : Fin n, I[X' i : XstarCoord k ; ν] := by
+    calc
+      n * I[Z : U ; μ] - n * I[Z : U | X i ; μ] - ∑ k : Fin n, I[Z : U | X k ; μ]
+        = ∑ k : Fin n, delta Z U (X i) (X k) μ := hDeltaSum.symm
+      _ = ∑ k : Fin n, delta Z' U' (X' i) (XstarCoord k) ν := by
         refine Finset.sum_congr rfl ?_
         intro k _
-        exact hMargSingle k
-      have hInternal :
-          n * I[Z : U ; μ] - ∑ j, I[Z : U | X j ; μ] - n * I[Z : U | X i ; μ]
-            ≤ I[X i : (fun ω => (Z ω, U ω)) ; μ]
-              + ∑ j, H[X j ; μ]
-              - H[(fun ω : Ω => fun j : Fin n => X j ω) ; μ] := by
-        linarith [hSum, hChain, hDP, hMargXZU, hMargJoint, hMargSingles]
-      have hCondComm : (fun j : Fin n => I[Z : U | X j ; μ]) = fun j : Fin n => I[U : Z | X j ; μ] := by
-        funext j
-        exact condMutualInfo_comm hZ hU (X j) μ
-      have hSwapRhs :
-          I[X i : (fun ω => (Z ω, U ω)) ; μ] = I[X i : ⟨U, Z⟩ ; μ] := by
-        simpa using mutualInfo_pair_swap_right (hX i) hZ hU μ
-      have hPaperOrder :
-          n * I[U : Z ; μ] - ∑ j, I[U : Z | X j ; μ] - n * I[U : Z | X i ; μ]
-            ≤ I[X i : (fun ω => (Z ω, U ω)) ; μ]
-              + ∑ j, H[X j ; μ]
-              - H[(fun ω : Ω => fun j : Fin n => X j ω) ; μ] := by
-        have hCondI : I[Z : U | X i ; μ] = I[U : Z | X i ; μ] := condMutualInfo_comm hZ hU (X i) μ
-        simpa [hCondComm, hCondI, mutualInfo_comm hZ hU μ] using hInternal
-      simpa [hSwapRhs] using hPaperOrder
+        exact hTransport k
+      _ ≤ ∑ k : Fin n, I[X' i : XstarCoord k ; ν] := Finset.sum_le_sum fun k _ => hPair k
+  have hChain := mutualInfo_add_n_way_inequality (A := X' i) (B := XstarCoord) (hX' i) hXstarCoord ν
+  have hCondProj :
+      CondIndepFun (X' i) (fun ω' => fun k : Fin n => XstarCoord k ω') (fun ω' => (Z' ω', U' ω')) ν := by
+    simpa [X', XstarCoord, Z', U'] using
+      (ZhangYeung.condIndepFun_comp (φ := fun x => x i) (ψ := id)
+        (measurable_pi_apply i) measurable_id hCond)
+  have hDP :
+      I[X' i : (fun ω' => fun k : Fin n => XstarCoord k ω') ; ν]
+        ≤ I[X' i : (fun ω' => (Z' ω', U' ω')) ; ν] :=
+    mutualInfo_le_of_condIndepFun (hX' i) hXstar (hZ'.prodMk hU') ν hCondProj
+  have hMargXZU :
+      I[X' i : (fun ω' => (Z' ω', U' ω')) ; ν]
+        = I[X i : (fun ω => (Z ω, U ω)) ; μ] := by
+    have hPairXZU :
+        IdentDistrib (fun ω => (X i ω, (Z ω, U ω)))
+          (fun ω' => (X' i ω', (Z' ω', U' ω'))) μ ν :=
+      hFirst.symm.comp (measurable_pairXZU i)
+    exact hPairXZU.mutualInfo_eq.symm
+  have hTupleSecond :
+      IdentDistrib (fun ω' => fun k : Fin n => XstarCoord k ω') (fun ω => fun k : Fin n => X k ω) ν μ := by
+    simpa [Xtuple, XstarCoord] using (hSecond.comp measurable_fst)
+  have hMargJoint :
+      H[(fun ω' => fun k : Fin n => XstarCoord k ω') ; ν] = H[(fun ω : Ω => fun k : Fin n => X k ω) ; μ] :=
+    hTupleSecond.entropy_congr
+  have hMargSingle : ∀ k : Fin n, H[XstarCoord k ; ν] = H[X k ; μ] := by
+    intro k
+    have hCoord : IdentDistrib (XstarCoord k) (X k) ν μ := by
+      simpa [Xtuple, XstarCoord] using (hTupleSecond.comp (measurable_pi_apply k))
+    exact hCoord.entropy_congr
+  have hMargSingles : ∑ k : Fin n, H[XstarCoord k ; ν] = ∑ k : Fin n, H[X k ; μ] := by
+    refine Finset.sum_congr rfl ?_
+    intro k _
+    exact hMargSingle k
+  have hInternal :
+      n * I[Z : U ; μ] - ∑ j, I[Z : U | X j ; μ] - n * I[Z : U | X i ; μ]
+        ≤ I[X i : (fun ω => (Z ω, U ω)) ; μ]
+          + ∑ j, H[X j ; μ]
+          - H[(fun ω : Ω => fun j : Fin n => X j ω) ; μ] := by
+    linarith [hSum, hChain, hDP, hMargXZU, hMargJoint, hMargSingles]
+  have hCondComm : (fun j : Fin n => I[Z : U | X j ; μ]) = fun j : Fin n => I[U : Z | X j ; μ] := by
+    funext j
+    exact condMutualInfo_comm hZ hU (X j) μ
+  have hSwapRhs :
+      I[X i : (fun ω => (Z ω, U ω)) ; μ] = I[X i : ⟨U, Z⟩ ; μ] := by
+    simpa using mutualInfo_pair_swap_right (hX i) hZ hU μ
+  have hPaperOrder :
+      n * I[U : Z ; μ] - ∑ j, I[U : Z | X j ; μ] - n * I[U : Z | X i ; μ]
+        ≤ I[X i : (fun ω => (Z ω, U ω)) ; μ]
+          + ∑ j, H[X j ; μ]
+          - H[(fun ω : Ω => fun j : Fin n => X j ω) ; μ] := by
+    have hCondI : I[Z : U | X i ; μ] = I[U : Z | X i ; μ] := condMutualInfo_comm hZ hU (X i) μ
+    simpa [hCondComm, hCondI, mutualInfo_comm hZ hU μ] using hInternal
+  simpa [hSwapRhs] using hPaperOrder
 
 /-- **Theorem 5 of [@zhangyeung1998, §III, eq. 28]** -- the averaged symmetric form of the `n + 2`-variable Zhang-Yeung inequality. -/
 theorem theorem5_averaged
