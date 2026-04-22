@@ -116,7 +116,7 @@ lemma delta_form23_iff
 
 /-! ### Lemmas requiring finite-alphabet structure
 
-The remaining lemmas rely on PFR's commutativity and entropy-expansion results, which are stated under discrete/countable hypotheses on the codomains of the measured random variables. An outer section fixes `[Fintype Sᵢ]` and `[MeasurableSingletonClass Sᵢ]` on the measured pair `S₁, S₂` for the symmetry and bounding lemmas; a nested inner section extends the same fixtures to the conditioning codomains `S₃, S₄` for the entropy-expansion lemma. Each fixture supplies the relevant `FiniteRange` obligations via the instance `{Ω G : Type*} (X : Ω → G) [Finite G] : FiniteRange X`. -/
+The remaining lemmas rely on PFR's commutativity and entropy-expansion results, which are stated under discrete/countable hypotheses on the codomains of the measured random variables. An outer section fixes `[Finite Sᵢ]` and `[MeasurableSingletonClass Sᵢ]` on the measured pair `S₁, S₂` for the symmetry and bounding lemmas; a nested inner section extends the same fixtures to the conditioning codomains `S₃, S₄` for the entropy-expansion lemma. Each fixture supplies the relevant `FiniteRange` obligations via the instance `{Ω G : Type*} (X : Ω → G) [Finite G] : FiniteRange X`. -/
 
 section MeasuredFinite
 
