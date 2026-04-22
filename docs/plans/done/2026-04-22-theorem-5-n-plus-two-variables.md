@@ -1,11 +1,16 @@
 ---
 title: "M5: Theorem 5, the n+2-variable Zhang-Yeung generalization (1998, §III, eqs. 27-28)"
 created: 2026-04-22
+status: done
 branch: formalize/m5-theorem-5
 roadmap: docs/plans/todo/2026-04-15-zhang-yeung-formalization-roadmap.md
 milestone: M5
 depends_on: M1 (`ZhangYeung/Delta.lean`), M2 (`ZhangYeung/CopyLemma.lean`), M3 (`ZhangYeung/Theorem3.lean`), and M4 (`ZhangYeung/{EntropyRegion,Theorem4}.lean`), all merged into `main`. M4 is not a proof-level prerequisite for M5, but its `entropyFn_n` infrastructure and `Fin n`-family conventions (heterogeneous codomains `S : Fin n → Type u`, dependent products `∀ i, Ω → S i`) are reused at the statement level. The `m5-theorem-5` worktree starts from the tip of `main` after PR #13 (entropy-region universe polymorphism) and PR #12 (the M4 exact closure theorems) have landed.
 ---
+
+## Status
+
+Done. `ZhangYeung/Theorem5.lean` and `ZhangYeungTest/Theorem5.lean` landed on the `formalize/m5-theorem-5` branch in commit `e322f64`, with follow-up style / lint / documentation commits (`0570a91`, `e43b9f1`, `9aed810`, `75cbce3`, and the Copilot-feedback resolution). Both public theorems (`theorem5`, `theorem5_averaged`) match the paper statements (eqs. 27 and 28) and `lake build` + `lake lint` + `lake test` are green. The branch review at `docs/reviews/2026-04-22-formalize-m5-theorem-5.md` records the point-in-time assessment and the resolved Code Quality items.
 
 ## Context
 
