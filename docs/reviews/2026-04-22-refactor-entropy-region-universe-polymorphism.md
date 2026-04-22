@@ -25,7 +25,7 @@ The M4.5 plan `2026-04-19-exact-theorem-4-entropic-region-closure.md` has its Un
 
 ### File Inventory
 
-**Modified (5)**
+#### Modified (5)
 
 - `ZhangYeung/EntropyRegion.lean`
 - `ZhangYeung/Theorem4.lean`
@@ -33,7 +33,7 @@ The M4.5 plan `2026-04-19-exact-theorem-4-entropic-region-closure.md` has its Un
 - `ZhangYeungTest/Theorem4.lean`
 - `docs/plans/done/2026-04-19-exact-theorem-4-entropic-region-closure.md`
 
-**Renamed (1)**
+#### Renamed (1)
 
 - `docs/plans/todo/2026-04-20-entropy-region-universe-polymorphism.md` → `docs/plans/done/2026-04-20-entropy-region-universe-polymorphism.md` (59% similarity; content also edited during the move to flip `status: proposed` → `status: done`, record the branch, rewrite Status and Goal to reflect the landed route-1 choice, add the "retain Fintype" and "single-universe convention" key decisions, expand Risks §1's downstream-surface enumeration, and note that `universe u` is already declared).
 
@@ -85,7 +85,7 @@ The implementation matches the plan's intent down to the stylistic choices — p
 - *Direct-membership test is exactly the right shape.* The new `example` at `ZhangYeungTest/EntropyRegion.lean:43-51` is the closest thing to a regression test for the stated goal: a `Type u` entropy function is now literally a member of the region set. It is proved by a single `⟨…⟩` with `inferInstance`, which is the cleanest possible witness that typeclass inference is intact and the membership is definitional.
 - *Private helpers in `Theorem4.lean` were not overlooked.* The plan flagged that the destructuring pattern matches had to be updated. They are, correctly; the `letI`-heavy preamble in `entropyRegion_four_subset_zhangYeungRegion_4` (`Theorem4.lean:732-737`) continues to work because the shared universe makes typeclass transport trivial.
 - *Documentation trail is good.* Both the originating M4.5 plan and the follow-up plan are updated in the same commit series. A future reader looking at either plan gets a consistent story; the M4.5 plan's Risks §4 "Resolution" paragraph even names the follow-up plan file.
-- *Docstring on `entropyRegion_n` is updated to describe the new behaviour.* The phrasing "a `Type u` realization is literally a member of the set" is the clearest possible framing of what changed.
+- *Docstring on `entropyRegion_n` is updated to describe the new behavior.* The phrasing "a `Type u` realization is literally a member of the set" is the clearest possible framing of what changed.
 
 **Issues to address: none blocking.**
 
