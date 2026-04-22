@@ -37,7 +37,7 @@ The milestone lands four ingredients:
 
 ## Implementation notes
 
-The witness is defined first over `ℚ` so that Parts (a) and (b) close by `Fintype.decidableForallFintype` + `native_decide` on rational arithmetic, then cast to `ℝ` once at the witness boundary. `F_witness` is a plain pointwise cast `fun S => (F_witness_ℚ S : ℝ)`; the companion lemma `F_witness_eq_cast` trivializes downstream `push_cast`/`norm_cast` work. Fixing `a = 1` collapses the paper's parametric family into a single `ℚ`-valued function without losing any content: `theorem4` and `theorem4_ge_four` are existential separations, so the homogeneity the paper uses `a` to exhibit is vacuous at that level.
+The witness is defined first over `ℚ` so that Parts (a) and (b) reduce to finite rational arithmetic before casting to `ℝ` at the witness boundary. `F_witness` is a plain pointwise cast `fun S => (F_witness_ℚ S : ℝ)`; the companion lemma `F_witness_eq_cast` trivializes downstream `push_cast`/`norm_cast` work. Fixing `a = 1` collapses the paper's parametric family into a single `ℚ`-valued function without losing any content: `theorem4` and `theorem4_ge_four` are existential separations, so the homogeneity the paper uses `a` to exhibit is vacuous at that level.
 
 The Zhang-Yeung cone is quantified over `Equiv.Perm (Fin 4)` to match paper eq. (25) literally; the specific violation uses the permutation `Equiv.swap 0 2 * Equiv.swap 1 3` sending `(0, 1, 2, 3) ↦ (2, 3, 0, 1)`, which instantiates `zhangYeungAt F (σ 0) (σ 1) (σ 2) (σ 3)` as `zhangYeungAt F 2 3 0 1` -- exactly the labeling the paper evaluates on lines 378-388. Permutation evaluation `(σ 0, σ 1, σ 2, σ 3)` is discharged by `decide` once and reused.
 
@@ -100,13 +100,13 @@ def zhangYeungHolds (F : Finset (Fin 4) → ℝ) : Prop :=
 
 /-! ### The paper's `n = 4` counterexample witness
 
-The witness `F_witness_ℚ` is the `a = 1` specialization of the parametric witness on paper lines 368-377: zero on the empty set, `2` on singletons, `4` on `{0, 1}`, `3` on the other five pairs, and `4` on all triples and the 4-set. Implemented as a cascade of `if-then-else` on cardinality (plus a special case for `{0, 1}`) so that `native_decide` reduces through the branches uniformly on all 16 subsets of `Fin 4`. -/
+The witness `F_witness_ℚ` is the `a = 1` specialization of the parametric witness on paper lines 368-377: zero on the empty set, `2` on singletons, `4` on `{0, 1}`, `3` on the other five pairs, and `4` on all triples and the 4-set. It is implemented as a cascade of `if-then-else` on cardinality, with a special case for `{0, 1}`, so the finite witness checks stay explicit and reducible on all 16 subsets of `Fin 4`. -/
 
 /-- The `ℚ`-valued Zhang-Yeung counterexample witness (paper lines 368-377, specialized to `a = 1`):
 
   `F_witness_ℚ ∅ = 0`, `F_witness_ℚ {i} = 2`, `F_witness_ℚ {0, 1} = 4`, `F_witness_ℚ {i, j} = 3` for other pairs, `F_witness_ℚ S = 4` for triples and the 4-set.
 
-Living over `ℚ` so Parts (a) and (b) close by `native_decide`. -/
+Living over `ℚ` so the witness arithmetic stays exact before the final cast to `ℝ`. -/
 def F_witness_ℚ : Finset (Fin 4) → ℚ := fun S =>
   if S.card = 0 then 0
   else if S.card = 1 then 2
@@ -117,54 +117,273 @@ def F_witness_ℚ : Finset (Fin 4) → ℚ := fun S =>
 /-- The `ℝ`-cast of `F_witness_ℚ`, used in the main statements `shannonCone_of_witness`, `not_zhangYeungHolds_witness`, `shannon_incomplete`, `theorem4_finite`, `theorem4`, and `theorem4_ge_four`. -/
 noncomputable def F_witness : Finset (Fin 4) → ℝ := fun S => (F_witness_ℚ S : ℝ)
 
-/-- Definitional-shape lemma: `F_witness` is the pointwise `ℚ → ℝ` cast of `F_witness_ℚ`. Used to push `F_witness` into `F_witness_ℚ`-shaped goals before closing by `native_decide` over `ℚ`. -/
+/-- Definitional-shape lemma: `F_witness` is the pointwise `ℚ → ℝ` cast of `F_witness_ℚ`. Used to push `F_witness` into `F_witness_ℚ`-shaped goals before closing them over `ℚ`. -/
 lemma F_witness_eq_cast (S : Finset (Fin 4)) :
     F_witness S = (F_witness_ℚ S : ℝ) := rfl
 
+private def pair01 : Finset (Fin 4) := {0, 1}
+
+private def nonemptyBonus (S : Finset (Fin 4)) : ℚ := if S.Nonempty then 1 else 0
+
+private def fullBonus (S : Finset (Fin 4)) : ℚ := if S = Finset.univ then 1 else 0
+
+private def pairBonus (S : Finset (Fin 4)) : ℚ := if S = pair01 then 1 else 0
+
+private def baseWitness (S : Finset (Fin 4)) : ℚ := (S.card : ℚ) + nonemptyBonus S - fullBonus S
+
+private lemma fullBonus_nonneg (S : Finset (Fin 4)) : 0 ≤ fullBonus S := by
+  by_cases h : S = Finset.univ <;> simp [fullBonus, h]
+
+private lemma pairBonus_nonneg (S : Finset (Fin 4)) : 0 ≤ pairBonus S := by
+  by_cases h : S = pair01 <;> simp [pairBonus, h]
+
+private lemma F_witness_ℚ_eq_base_add_pair :
+    ∀ S : Finset (Fin 4), F_witness_ℚ S = baseWitness S + pairBonus S := by
+  intro S
+  by_cases h0 : S.card = 0
+  · have hEmpty : S = ∅ := Finset.card_eq_zero.mp h0
+    subst hEmpty
+    have hFull : (∅ : Finset (Fin 4)) ≠ Finset.univ := by decide
+    have hPairLit : (∅ : Finset (Fin 4)) ≠ ({0, 1} : Finset (Fin 4)) := by decide
+    simp [F_witness_ℚ, baseWitness, nonemptyBonus, fullBonus, pairBonus, pair01, hFull, hPairLit]
+  · by_cases h1 : S.card = 1
+    · have hPair : S ≠ pair01 := by
+        intro h
+        rw [h, pair01] at h1
+        norm_num at h1
+      have hFull : S ≠ Finset.univ := by
+        intro h
+        rw [h] at h1
+        norm_num at h1
+      have hNonempty : S.Nonempty := Finset.card_pos.mp (Nat.pos_of_ne_zero h0)
+      simp [F_witness_ℚ, baseWitness, nonemptyBonus, fullBonus, pairBonus, h1, hPair, hFull, hNonempty]
+      norm_num
+    · by_cases hPair : S = pair01
+      · subst hPair
+        have hFullLit : ({0, 1} : Finset (Fin 4)) ≠ Finset.univ := by decide
+        simp [F_witness_ℚ, baseWitness, nonemptyBonus, fullBonus, pairBonus, pair01, hFullLit]
+        norm_num
+      · by_cases h2 : S.card = 2
+        · have hFull : S ≠ Finset.univ := by
+            intro h
+            rw [h] at h2
+            norm_num at h2
+          have hNonempty : S.Nonempty := Finset.card_pos.mp (Nat.pos_of_ne_zero h0)
+          have hPairLit : S ≠ ({0, 1} : Finset (Fin 4)) := by simpa [pair01] using hPair
+          simp [F_witness_ℚ, baseWitness, nonemptyBonus, fullBonus, pairBonus, h2, hPair, hPairLit, hFull, hNonempty]
+          norm_num
+        · have hCardLe : S.card ≤ 4 := by simpa using Finset.card_le_univ S
+          have h34 : S.card = 3 ∨ S.card = 4 := by omega
+          cases h34 with
+          | inl h3 =>
+              have hFull : S ≠ Finset.univ := by
+                intro h
+                rw [h] at h3
+                norm_num at h3
+              have hNonempty : S.Nonempty := Finset.card_pos.mp (Nat.pos_of_ne_zero h0)
+              have hPairLit : S ≠ ({0, 1} : Finset (Fin 4)) := by simpa [pair01] using hPair
+              simp [F_witness_ℚ, baseWitness, nonemptyBonus, fullBonus, pairBonus, h3, hPair, hPairLit, hFull, hNonempty]
+              norm_num
+          | inr h4 =>
+              have hFull : S = Finset.univ := by
+                exact S.card_eq_iff_eq_univ.mp (by simpa using h4)
+              have hPairUniv : (Finset.univ : Finset (Fin 4)) ≠ pair01 := by decide
+              have hPairUnivLit : (Finset.univ : Finset (Fin 4)) ≠ ({0, 1} : Finset (Fin 4)) := by decide
+              have hNonempty : S.Nonempty := Finset.card_pos.mp (Nat.pos_of_ne_zero h0)
+              simp [F_witness_ℚ, baseWitness, nonemptyBonus, fullBonus, pairBonus, hFull, hPairUniv, hPairUnivLit]
+
+private lemma card_modular (α β : Finset (Fin 4)) :
+    ((α ∪ β).card : ℚ) + (α ∩ β).card = (α.card : ℚ) + β.card := by
+  exact_mod_cast Finset.card_union_add_card_inter α β
+
+private lemma nonemptyBonus_submodular (α β : Finset (Fin 4)) :
+    nonemptyBonus (α ∪ β) + nonemptyBonus (α ∩ β) ≤ nonemptyBonus α + nonemptyBonus β := by
+  by_cases hα : α.Nonempty
+  · by_cases hβ : β.Nonempty
+    · have hUnion : (α ∪ β).Nonempty := Finset.union_nonempty.2 (Or.inl hα)
+      by_cases hInter : (α ∩ β).Nonempty
+      · simp [nonemptyBonus, hα, hβ, hUnion, hInter]
+      · simp [nonemptyBonus, hα, hβ, hUnion, hInter]
+    · have hβ' : β = ∅ := Finset.not_nonempty_iff_eq_empty.mp hβ
+      rw [hβ']
+      simp [nonemptyBonus, hα]
+  · have hα' : α = ∅ := Finset.not_nonempty_iff_eq_empty.mp hα
+    rw [hα']
+    simp [nonemptyBonus]
+
+private lemma fullBonus_supermodular (α β : Finset (Fin 4)) :
+    fullBonus α + fullBonus β ≤ fullBonus (α ∪ β) + fullBonus (α ∩ β) := by
+  by_cases hα : α = Finset.univ
+  · subst hα
+    by_cases hβ : β = Finset.univ
+    · subst hβ
+      simp [fullBonus]
+    · simp [fullBonus, hβ]
+  · by_cases hβ : β = Finset.univ
+    · subst hβ
+      simp [fullBonus, hα]
+    · have hUnion : 0 ≤ fullBonus (α ∪ β) := fullBonus_nonneg _
+      have hInter : 0 ≤ fullBonus (α ∩ β) := fullBonus_nonneg _
+      have hSum : 0 ≤ fullBonus (α ∪ β) + fullBonus (α ∩ β) := by
+        linarith
+      simpa [fullBonus, hα, hβ] using hSum
+
+private lemma baseWitness_submodular (α β : Finset (Fin 4)) :
+    baseWitness (α ∪ β) + baseWitness (α ∩ β) ≤ baseWitness α + baseWitness β := by
+  have hCard := card_modular α β
+  have hNonempty := nonemptyBonus_submodular α β
+  have hFull := fullBonus_supermodular α β
+  unfold baseWitness
+  linarith
+
+private abbrev PairBonusExceptional (α β : Finset (Fin 4)) : Prop :=
+  (α = ({0} : Finset (Fin 4)) ∧ β = ({1} : Finset (Fin 4))) ∨
+    (α = ({1} : Finset (Fin 4)) ∧ β = ({0} : Finset (Fin 4))) ∨
+    (α = ({0, 1, 2} : Finset (Fin 4)) ∧ β = ({0, 1, 3} : Finset (Fin 4))) ∨
+    (α = ({0, 1, 3} : Finset (Fin 4)) ∧ β = ({0, 1, 2} : Finset (Fin 4)))
+
+private lemma exceptional_of_union_pair :
+    ∀ α β : Finset (Fin 4), α ∪ β = pair01 → α ≠ pair01 → β ≠ pair01 → PairBonusExceptional α β := by
+  decide
+
+private lemma exceptional_of_inter_pair :
+    ∀ α β : Finset (Fin 4), α ∩ β = pair01 → α ≠ pair01 → β ≠ pair01 → PairBonusExceptional α β := by
+  decide
+
+private lemma pairBonus_submodular_left_pair (β : Finset (Fin 4)) :
+    pairBonus (pair01 ∪ β) + pairBonus (pair01 ∩ β) ≤ pairBonus pair01 + pairBonus β := by
+  by_cases hSub : β ⊆ pair01
+  · by_cases hSup : pair01 ⊆ β
+    · have hβ : β = pair01 := Finset.Subset.antisymm hSub hSup
+      subst hβ
+      simp [pairBonus]
+    · have hβ : β ≠ pair01 := by
+        intro h
+        have hEqSub : pair01 ⊆ β := by simp [h]
+        exact hSup hEqSub
+      have hUnion : pair01 ∪ β = pair01 := Finset.union_eq_left.mpr hSub
+      have hInter : pair01 ∩ β ≠ pair01 := by
+        intro h
+        exact hSup (Finset.inter_eq_left.mp h)
+      simp [pairBonus, hUnion, hInter, hβ]
+  · by_cases hSup : pair01 ⊆ β
+    · have hβ : β ≠ pair01 := by
+        intro h
+        have hEqSub : β ⊆ pair01 := by simp [h]
+        exact hSub hEqSub
+      have hUnion : pair01 ∪ β ≠ pair01 := by
+        intro h
+        exact hSub (Finset.union_eq_left.mp h)
+      have hInter : pair01 ∩ β = pair01 := Finset.inter_eq_left.mpr hSup
+      simp [pairBonus, hUnion, hInter, hβ]
+    · have hβ : β ≠ pair01 := by
+        intro h
+        have hEqSub : β ⊆ pair01 := by simp [h]
+        exact hSub hEqSub
+      have hUnion : pair01 ∪ β ≠ pair01 := by
+        intro h
+        exact hSub (Finset.union_eq_left.mp h)
+      have hInter : pair01 ∩ β ≠ pair01 := by
+        intro h
+        exact hSup (Finset.inter_eq_left.mp h)
+      simp [pairBonus, hUnion, hInter, hβ]
+
+private lemma pairBonus_submodular_outside_exceptional :
+    ∀ α β : Finset (Fin 4), ¬ PairBonusExceptional α β →
+      pairBonus (α ∪ β) + pairBonus (α ∩ β) ≤ pairBonus α + pairBonus β := by
+  intro α β hExceptional
+  by_cases hα : α = pair01
+  · subst hα
+    simpa [pairBonus] using pairBonus_submodular_left_pair β
+  · by_cases hβ : β = pair01
+    · subst hβ
+      simpa [Finset.union_comm, Finset.inter_comm, pairBonus, add_comm, add_left_comm, add_assoc] using
+        pairBonus_submodular_left_pair α
+    · by_cases hUnion : α ∪ β = pair01
+      · exact False.elim (hExceptional (exceptional_of_union_pair α β hUnion hα hβ))
+      · by_cases hInter : α ∩ β = pair01
+        · exact False.elim (hExceptional (exceptional_of_inter_pair α β hInter hα hβ))
+        · simp [pairBonus, hα, hβ, hUnion, hInter]
+
+private lemma F_witness_ℚ_submodular :
+    ∀ α β : Finset (Fin 4),
+      F_witness_ℚ (α ∪ β) + F_witness_ℚ (α ∩ β) ≤ F_witness_ℚ α + F_witness_ℚ β := by
+  intro α β
+  by_cases hExceptional : PairBonusExceptional α β
+  · rcases hExceptional with h01 | h10 | h012013 | h013012
+    · rcases h01 with ⟨rfl, rfl⟩
+      have hUnion : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ {1}) = 4 := by decide
+      have hInter : F_witness_ℚ (({0} : Finset (Fin 4)) ∩ {1}) = 0 := by decide
+      have h0 : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by decide
+      have h1 : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by decide
+      rw [hUnion, hInter, h0, h1]
+      norm_num
+    · rcases h10 with ⟨rfl, rfl⟩
+      have hUnion : F_witness_ℚ (({1} : Finset (Fin 4)) ∪ {0}) = 4 := by decide
+      have hInter : F_witness_ℚ (({1} : Finset (Fin 4)) ∩ {0}) = 0 := by decide
+      have h1 : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by decide
+      have h0 : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by decide
+      rw [hUnion, hInter, h1, h0]
+      norm_num
+    · rcases h012013 with ⟨rfl, rfl⟩
+      have hUnion : F_witness_ℚ (({0, 1, 2} : Finset (Fin 4)) ∪ {0, 1, 3}) = 4 := by decide
+      have hInter : F_witness_ℚ (({0, 1, 2} : Finset (Fin 4)) ∩ {0, 1, 3}) = 4 := by decide
+      have h012 : F_witness_ℚ ({0, 1, 2} : Finset (Fin 4)) = 4 := by decide
+      have h013 : F_witness_ℚ ({0, 1, 3} : Finset (Fin 4)) = 4 := by decide
+      rw [hUnion, hInter, h012, h013]
+    · rcases h013012 with ⟨rfl, rfl⟩
+      have hUnion : F_witness_ℚ (({0, 1, 3} : Finset (Fin 4)) ∪ {0, 1, 2}) = 4 := by decide
+      have hInter : F_witness_ℚ (({0, 1, 3} : Finset (Fin 4)) ∩ {0, 1, 2}) = 4 := by decide
+      have h013 : F_witness_ℚ ({0, 1, 3} : Finset (Fin 4)) = 4 := by decide
+      have h012 : F_witness_ℚ ({0, 1, 2} : Finset (Fin 4)) = 4 := by decide
+      rw [hUnion, hInter, h013, h012]
+  · rw [F_witness_ℚ_eq_base_add_pair (α ∪ β), F_witness_ℚ_eq_base_add_pair (α ∩ β),
+      F_witness_ℚ_eq_base_add_pair α, F_witness_ℚ_eq_base_add_pair β]
+    have hBase := baseWitness_submodular α β
+    have hPair := pairBonus_submodular_outside_exceptional α β hExceptional
+    linarith
+
 /-! ### Part (a): the witness lies in the Shannon cone -/
 
-/-- Part (a) of Theorem 4: the witness satisfies the three Shannon-cone axioms (paper eq. 11). Discharged by `native_decide` on the `ℚ`-valued `F_witness_ℚ` and cast into `ℝ`. -/
+/-- Part (a) of Theorem 4: the witness satisfies the three Shannon-cone axioms (paper eq. 11). The empty-set and monotonicity checks close by finite `decide` over the `ℚ`-valued witness, while submodularity is proved structurally by decomposing the witness into a cardinality profile plus one exceptional pair bonus. -/
 theorem shannonCone_of_witness : shannonCone F_witness := by
   refine ⟨?_, ?_, ?_⟩
   · -- `F_witness ∅ = 0`
-    show ((F_witness_ℚ ∅ : ℚ) : ℝ) = 0
-    have h : F_witness_ℚ ∅ = 0 := by native_decide
+    change ((F_witness_ℚ ∅ : ℚ) : ℝ) = 0
+    have h : F_witness_ℚ ∅ = 0 := by decide
     exact_mod_cast h
   · -- Monotonicity.
     intro α β hαβ
     have h : ∀ α β : Finset (Fin 4), α ⊆ β → F_witness_ℚ α ≤ F_witness_ℚ β := by
-      native_decide
+      decide
     simp only [F_witness_eq_cast]
     exact_mod_cast h α β hαβ
   · -- Submodularity.
     intro α β
-    have h : ∀ α β : Finset (Fin 4),
-        F_witness_ℚ (α ∪ β) + F_witness_ℚ (α ∩ β) ≤ F_witness_ℚ α + F_witness_ℚ β := by
-      native_decide
     simp only [F_witness_eq_cast]
-    exact_mod_cast h α β
+    exact_mod_cast F_witness_ℚ_submodular α β
 
 /-! ### Part (b): the witness violates the Zhang-Yeung inequality -/
 
-/-- The concrete numerical failure underlying Part (b): at the paper's canonical labeling `(i, j, k, l) = (2, 3, 0, 1)` (paper lines 378-388), the witness fails the Zhang-Yeung inequality; the check reduces to `1 ≤ 1/2`. Kept as a private helper so both the permutation form (`not_zhangYeungHolds_witness`) and the `Fin n` lift (`not_zhangYeungHolds_witness_n`) can consume it without reproducing the 13-line `native_decide` evaluation block. -/
+/-- The concrete numerical failure underlying Part (b): at the paper's canonical labeling `(i, j, k, l) = (2, 3, 0, 1)` (paper lines 378-388), the witness fails the Zhang-Yeung inequality; the check reduces to `1 ≤ 1/2`. Kept as a private helper so both the permutation form (`not_zhangYeungHolds_witness`) and the `Fin n` lift (`not_zhangYeungHolds_witness_n`) can consume it without reproducing the concrete witness evaluation block. -/
 private lemma not_zhangYeungAt_witness_canonical :
     ¬ zhangYeungAt F_witness 2 3 0 1 := by
   intro h
   simp only [zhangYeungAt, delta_F, I_F, condI_F, F_witness_eq_cast] at h
-  have h00 : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by native_decide
-  have h11 : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by native_decide
-  have h22 : F_witness_ℚ ({2} : Finset (Fin 4)) = 2 := by native_decide
-  have h33 : F_witness_ℚ ({3} : Finset (Fin 4)) = 2 := by native_decide
-  have h01 : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ {1}) = 4 := by native_decide
-  have h02 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {0}) = 3 := by native_decide
-  have h03 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {0}) = 3 := by native_decide
-  have h12 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {1}) = 3 := by native_decide
-  have h13 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {1}) = 3 := by native_decide
-  have h23 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3}) = 3 := by native_decide
-  have h023 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {0}) = 4 := by native_decide
-  have h123 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {1}) = 4 := by native_decide
+  have h00 : F_witness_ℚ ({0} : Finset (Fin 4)) = 2 := by decide
+  have h11 : F_witness_ℚ ({1} : Finset (Fin 4)) = 2 := by decide
+  have h22 : F_witness_ℚ ({2} : Finset (Fin 4)) = 2 := by decide
+  have h33 : F_witness_ℚ ({3} : Finset (Fin 4)) = 2 := by decide
+  have h01 : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ {1}) = 4 := by decide
+  have h02 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {0}) = 3 := by decide
+  have h03 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {0}) = 3 := by decide
+  have h12 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {1}) = 3 := by decide
+  have h13 : F_witness_ℚ (({3} : Finset (Fin 4)) ∪ {1}) = 3 := by decide
+  have h23 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3}) = 3 := by decide
+  have h023 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {0}) = 4 := by decide
+  have h123 : F_witness_ℚ (({2} : Finset (Fin 4)) ∪ {3} ∪ {1}) = 4 := by decide
   have h023' : F_witness_ℚ (({0} : Finset (Fin 4)) ∪ (({2} : Finset (Fin 4)) ∪ {3})) = 4 := by
-    native_decide
+    decide
   rw [h00, h11, h22, h33, h01, h02, h03, h12, h13, h23, h023, h123, h023'] at h
   norm_num at h
 
@@ -189,11 +408,11 @@ section EntropyFnEvaluation
 
 variable {Ω : Type*} [MeasurableSpace Ω]
   {S : Fin 4 → Type u}
-  [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+  [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
   [∀ i, MeasurableSingletonClass (S i)]
   (X : ∀ i : Fin 4, Ω → S i) (μ : Measure Ω) [IsProbabilityMeasure μ]
 
-omit [∀ i, Fintype (S i)] in
+omit [∀ i, Finite (S i)] in
 /-- Per-subset bridge lemma at the empty subset: `entropyFn X μ ∅ = 0`. The subtype `{j // j ∈ (∅ : Finset (Fin 4))}` is empty, so the dependent-product codomain `∀ j : ∅, S j.1` is a subsingleton; the joint tuple is constant, and its entropy is zero. -/
 lemma entropyFn_empty : entropyFn X μ ∅ = 0 := by
   simp only [entropyFn, entropyFn_n]
@@ -212,6 +431,7 @@ omit [IsProbabilityMeasure μ] in
 /-- Per-subset bridge lemma at a singleton subset: `entropyFn X μ {i} = H[X i; μ]`. The joint tuple over the single-element subset `{i}` is, up to a measurable bijection into `S i`, just `X i`. -/
 lemma entropyFn_singleton (hX : ∀ i, Measurable (X i)) (i : Fin 4) :
     entropyFn X μ {i} = H[X i ; μ] := by
+  letI : ∀ i, Fintype (S i) := fun i => Fintype.ofFinite (S i)
   simp only [entropyFn, entropyFn_n]
   -- Projection π : (∀ j : {i}, S j.1) → S i sending g to its value at ⟨i, mem⟩.
   let π : (∀ j : ({i} : Finset (Fin 4)), S j.1) → S i :=
@@ -238,6 +458,7 @@ omit [IsProbabilityMeasure μ] in
 lemma entropyFn_pair (hX : ∀ i, Measurable (X i))
     {i j : Fin 4} (h : i ≠ j) :
     entropyFn X μ {i, j} = H[⟨X i, X j⟩ ; μ] := by
+  letI : ∀ i, Fintype (S i) := fun i => Fintype.ofFinite (S i)
   simp only [entropyFn, entropyFn_n]
   -- Projection π : (∀ k : {i, j}, S k.1) → S i × S j evaluating at both indices.
   have hi : i ∈ ({i, j} : Finset (Fin 4)) := by simp
@@ -267,6 +488,7 @@ omit [IsProbabilityMeasure μ] in
 lemma entropyFn_triple (hX : ∀ i, Measurable (X i))
     {i j k : Fin 4} (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
     entropyFn X μ {i, j, k} = H[⟨X i, ⟨X j, X k⟩⟩ ; μ] := by
+  letI : ∀ i, Fintype (S i) := fun i => Fintype.ofFinite (S i)
   simp only [entropyFn, entropyFn_n]
   have hi : i ∈ ({i, j, k} : Finset (Fin 4)) := by simp
   have hj : j ∈ ({i, j, k} : Finset (Fin 4)) := by simp
@@ -297,6 +519,7 @@ omit [IsProbabilityMeasure μ] in
 lemma entropyFn_quad (hX : ∀ i, Measurable (X i)) :
     entropyFn X μ ({0, 1, 2, 3} : Finset (Fin 4))
       = H[⟨X 0, ⟨X 1, ⟨X 2, X 3⟩⟩⟩ ; μ] := by
+  letI : ∀ i, Fintype (S i) := fun i => Fintype.ofFinite (S i)
   simp only [entropyFn, entropyFn_n]
   have h0 : (0 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide
   have h1 : (1 : Fin 4) ∈ ({0, 1, 2, 3} : Finset (Fin 4)) := by decide
@@ -332,7 +555,7 @@ end EntropyFnEvaluation
 lemma zhangYeungAt_entropyFn
     {Ω : Type*} [MeasurableSpace Ω]
     {S : Fin 4 → Type u}
-    [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+    [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
     [∀ i, MeasurableSingletonClass (S i)]
     {X : ∀ i : Fin 4, Ω → S i} (hX : ∀ i, Measurable (X i))
     (μ : Measure Ω) [IsProbabilityMeasure μ] (π : Equiv.Perm (Fin 4)) :
@@ -379,7 +602,7 @@ lemma zhangYeungAt_entropyFn
 theorem zhangYeungHolds_of_entropy
     {Ω : Type*} [MeasurableSpace Ω]
     {S : Fin 4 → Type u}
-    [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+    [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
     [∀ i, MeasurableSingletonClass (S i)]
     {X : ∀ i : Fin 4, Ω → S i} (hX : ∀ i, Measurable (X i))
     (μ : Measure Ω) [IsProbabilityMeasure μ] :
@@ -394,7 +617,7 @@ theorem theorem4_finite :
       shannonCone F ∧
       ∀ {Ω : Type u} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ]
         {S : Fin 4 → Type u}
-        [∀ i, MeasurableSpace (S i)] [∀ i, Fintype (S i)]
+        [∀ i, MeasurableSpace (S i)] [∀ i, Finite (S i)]
         [∀ i, MeasurableSingletonClass (S i)]
         (X : ∀ i : Fin 4, Ω → S i) (_ : ∀ i, Measurable (X i)),
         F ≠ entropyFn X μ := by
@@ -551,16 +774,15 @@ noncomputable def F_witness_n {n : ℕ} (hn : 4 ≤ n) (α : Finset (Fin n)) : �
 theorem shannonCone_of_witness_n {n : ℕ} (hn : 4 ≤ n) :
     shannonCone_n (F_witness_n hn) := by
   refine ⟨?_, ?_, ?_⟩
-  · show F_witness _ = 0
-    rw [Finset.preimage_empty]
-    exact shannonCone_of_witness.1
+  · simpa [F_witness_n] using shannonCone_of_witness.1
   · intro α β hαβ
-    exact shannonCone_of_witness.2.1 _ _
+    simpa [F_witness_n] using shannonCone_of_witness.2.1 _ _
       (Finset.monotone_preimage (Fin.castLE_injective hn) hαβ)
   · intro α β
-    show F_witness _ + F_witness _ ≤ F_witness _ + F_witness _
-    rw [Finset.preimage_union, Finset.preimage_inter]
-    exact shannonCone_of_witness.2.2 _ _
+    simpa [F_witness_n, Finset.preimage_union, Finset.preimage_inter] using
+      shannonCone_of_witness.2.2
+        (α.preimage (Fin.castLE hn) (Fin.castLE_injective hn).injOn)
+        (β.preimage (Fin.castLE hn) (Fin.castLE_injective hn).injOn)
 
 /-- The preimage of a singleton `{Fin.castLE hn i}` under `Fin.castLE hn` is `{i}`. -/
 private lemma preimage_singleton_castLE {n : ℕ} (hn : 4 ≤ n) (i : Fin 4) :

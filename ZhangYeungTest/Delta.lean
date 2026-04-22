@@ -18,7 +18,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
 
 example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
-    delta Z U X Y μ = I[Z : U ; μ] - I[Z : U | X ; μ] - I[Z : U | Y ; μ] := by
+    delta Z U X Y μ = I[Z : U ; μ] - I[Z : U|X;μ] - I[Z : U|Y;μ] := by
   simpa using delta_def Z U X Y μ
 
 example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
@@ -26,22 +26,22 @@ example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) 
   simpa using delta_comm_cond Z U X Y μ
 
 example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (μ : Measure Ω) :
-    delta Z U X X μ = I[Z : U ; μ] - 2 * I[Z : U | X ; μ] := by
+    delta Z U X X μ = I[Z : U ; μ] - 2 * I[Z : U|X;μ] := by
   simpa using delta_self Z U X μ
 
 example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
-    (2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U | X ; μ] - I[Z : U | Y ; μ]) ↔
-      (2 * I[Z : U ; μ] - 3 * I[Z : U | X ; μ] - I[Z : U | Y ; μ] ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ]) := by
+    (2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U|X;μ] - I[Z : U|Y;μ]) ↔
+      (2 * I[Z : U ; μ] - 3 * I[Z : U|X;μ] - I[Z : U|Y;μ] ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ]) := by
   simpa using delta_form21_iff Z U X Y μ
 
 example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω) :
-    (2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U | X ; μ] + I[Z : U | Y ; μ]) ↔
-      (2 * I[Z : U ; μ] - I[Z : U | X ; μ] - 3 * I[Z : U | Y ; μ] ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ]) := by
+    (2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U|X;μ] + I[Z : U|Y;μ]) ↔
+      (2 * I[Z : U ; μ] - I[Z : U|X;μ] - 3 * I[Z : U|Y;μ] ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ]) := by
   simpa using delta_form22_iff Z U X Y μ
 
 example (Z : Ω → S₁) (U : Ω → S₂) (X : Ω → S₃) (Y : Ω → S₄) (μ : Measure Ω)
-    (h21 : 2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U | X ; μ] - I[Z : U | Y ; μ])
-    (h22 : 2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U | X ; μ] + I[Z : U | Y ; μ]) :
+    (h21 : 2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U|X;μ] - I[Z : U|Y;μ])
+    (h22 : 2 * delta Z U X Y μ ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U|X;μ] + I[Z : U|Y;μ]) :
     delta Z U X Y μ ≤ (1 / 2) * I[X : Y ; μ] + (1 / 4) * (I[X : ⟨Z, U⟩ ; μ] + I[Y : ⟨Z, U⟩ ; μ]) := by
   apply (delta_form23_iff Z U X Y μ).mp
   exact delta_form23_of_form21_form22 h21 h22
@@ -52,7 +52,7 @@ section FiniteAlphabet
 
 variable {Ω : Type*} [MeasurableSpace Ω]
   {S₁ S₂ S₃ S₄ : Type*}
-  [Fintype S₁] [Fintype S₂] [Fintype S₃] [Fintype S₄]
+  [Finite S₁] [Finite S₂] [Finite S₃] [Finite S₄]
   [MeasurableSpace S₁] [MeasurableSpace S₂]
   [MeasurableSpace S₃] [MeasurableSpace S₄]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]

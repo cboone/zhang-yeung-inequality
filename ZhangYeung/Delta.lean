@@ -31,7 +31,7 @@ is the central quantity of the Zhang-Yeung conditional information inequality [@
 
 ## Implementation notes
 
-The four codomains `S₁ S₂ S₃ S₄` of the random variables live under finite-alphabet specializations `[Fintype Sᵢ]` + `[MeasurableSingletonClass Sᵢ]`. Those specializations discharge PFR's discrete/countable side conditions uniformly (via `Fintype → Finite → Countable`) and supply the `FiniteRange` obligations PFR's commutativity and entropy-expansion lemmas impose on the measured and conditioning variables. The `variable` blocks are staged: the definition and the purely algebraic lemmas only need `[MeasurableSpace Sᵢ]`; downstream lemmas live inside two nested `section`s, an outer one adding the fixture on the measured codomains `S₁, S₂` for the symmetry and bounding lemmas, and a nested inner one extending it to the conditioning codomains `S₃, S₄` for the entropy-expansion lemma.
+The four codomains `S₁ S₂ S₃ S₄` of the random variables live under finite-alphabet specializations `[Finite Sᵢ]` + `[MeasurableSingletonClass Sᵢ]`. This matches PFR's downstream style more closely: the public theorem statements expose only finiteness, while proofs recover concrete enumerations through typeclass search when PFR's entropy lemmas need them. The `variable` blocks are staged: the definition and the purely algebraic lemmas only need `[MeasurableSpace Sᵢ]`; downstream lemmas live inside two nested `section`s, an outer one adding the fixture on the measured codomains `S₁, S₂` for the symmetry and bounding lemmas, and a nested inner one extending it to the conditioning codomains `S₃, S₄` for the entropy-expansion lemma.
 
 No notation `Δ[Z : U | X, Y ; μ]` is introduced; plain function application `delta Z U X Y μ` suffices for the uses anticipated in the current milestone. The decision to introduce notation is deferred until a later milestone whose proofs exercise `delta` heavily enough to warrant it.
 
@@ -98,9 +98,9 @@ lemma delta_form22_iff
 lemma delta_form23_of_form21_form22
     {Z : Ω → S₁} {U : Ω → S₂} {X : Ω → S₃} {Y : Ω → S₄} {μ : Measure Ω}
     (h21 : 2 * delta Z U X Y μ
-        ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U | X ; μ] - I[Z : U | Y ; μ])
+        ≤ I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Z : U|X;μ] - I[Z : U|Y;μ])
     (h22 : 2 * delta Z U X Y μ
-        ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U | X ; μ] + I[Z : U | Y ; μ]) :
+        ≤ I[X : Y ; μ] + I[Y : ⟨Z, U⟩ ; μ] - I[Z : U|X;μ] + I[Z : U|Y;μ]) :
     4 * delta Z U X Y μ
       ≤ 2 * I[X : Y ; μ] + I[X : ⟨Z, U⟩ ; μ] + I[Y : ⟨Z, U⟩ ; μ] := by
   linarith
@@ -116,11 +116,11 @@ lemma delta_form23_iff
 
 /-! ### Lemmas requiring finite-alphabet structure
 
-The remaining lemmas rely on PFR's commutativity and entropy-expansion results, which are stated under discrete/countable hypotheses on the codomains of the measured random variables. An outer section fixes `[Fintype Sᵢ]` and `[MeasurableSingletonClass Sᵢ]` on the measured pair `S₁, S₂` for the symmetry and bounding lemmas; a nested inner section extends the same fixtures to the conditioning codomains `S₃, S₄` for the entropy-expansion lemma. Each fixture supplies the relevant `FiniteRange` obligations via the instance `{Ω G : Type*} (X : Ω → G) [Finite G] : FiniteRange X`. -/
+The remaining lemmas rely on PFR's commutativity and entropy-expansion results, which are stated under discrete/countable hypotheses on the codomains of the measured random variables. An outer section fixes `[Finite Sᵢ]` and `[MeasurableSingletonClass Sᵢ]` on the measured pair `S₁, S₂` for the symmetry and bounding lemmas; a nested inner section extends the same fixtures to the conditioning codomains `S₃, S₄` for the entropy-expansion lemma. Each fixture supplies the relevant `FiniteRange` obligations via the instance `{Ω G : Type*} (X : Ω → G) [Finite G] : FiniteRange X`. -/
 
 section MeasuredFinite
 
-variable [Fintype S₁] [Fintype S₂]
+variable [Finite S₁] [Finite S₂]
   [MeasurableSingletonClass S₁] [MeasurableSingletonClass S₂]
 
 /-- Swapping the two measured arguments leaves `delta` unchanged, via `mutualInfo_comm` and `condMutualInfo_comm`. -/
@@ -141,7 +141,7 @@ lemma delta_le_mutualInfo
 
 section AllFinite
 
-variable [Fintype S₃] [Fintype S₄]
+variable [Finite S₃] [Finite S₄]
   [MeasurableSingletonClass S₃] [MeasurableSingletonClass S₄]
 
 /-- Expand `delta` all the way down to raw entropy terms, using `mutualInfo_def` and `condMutualInfo_eq`. This is the bridge to any reasoning at the entropy layer directly (for example, evaluating `delta` on a concrete four-variable distribution when checking bounds or building counterexamples). -/
