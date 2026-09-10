@@ -91,7 +91,7 @@ See `lean-toolchain` (currently v4.28.0-rc1, matching PFR's Mathlib dependency).
 Two workflows under `.github/workflows/`:
 
 - `ci.yml`: Lean job (build + lint + test via `leanprover/lean-action@v1` plus a dedicated `lake test` step). `paths-ignore` keeps it from running on docs-only changes.
-- `text-lint.yml`: markdown + cspell via `cboone/gh-actions/.github/workflows/text-lint.yml`. Runs on every push/PR.
+- `text-lint.yml`: markdown + cspell via `cboone/gh-actions/.github/workflows/text-lint.yml`. Runs on every push/PR. This is deliberately still the pre-v3 path and pin, and it is the only `cboone/gh-actions` reference here that did not move to v3.1.0. Its v3 replacement, `lint-text.yml`, reads `github.job_workflow_sha`, which arrives empty for callers like this one and fails the job before any linter runs ([cboone/gh-actions#83](https://github.com/cboone/gh-actions/issues/83), open at v3.1.0). Do not "fix" this reference to `lint-text.yml` while that issue is open; it would break a job that currently works. Tracked in #15.
 
 ## Key Files
 
