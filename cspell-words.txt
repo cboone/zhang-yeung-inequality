@@ -18,6 +18,7 @@ Borel
 Btuple
 castSucc
 cboone
+cffconvert
 checkdecls
 Citip
 closedness
@@ -133,6 +134,7 @@ nontrivially
 olean
 oleans
 opencode
+ORCID
 Overengineering
 Pandoc
 parameterizations
@@ -212,6 +214,7 @@ Xinv
 XYZU
 Yeung
 Zeger
+Zenodo
 Zhang
 zhangyeung
 Zhen
